@@ -169,7 +169,7 @@ class ClientTTV {
         });
 
         this.STV = new SevenTVEmoteUpdater.EmoteUpdater("ilotterytea", "7tv");
-        this.emotes = undefined;
+        this.emotes = null;
     }
 
     async enable() {
@@ -196,12 +196,12 @@ class ClientTTV {
         this.client.on("message", (target, user, msg, self) => {
             if (self) return;
 
-            emotes = this.STV.getEmotes;
+            this.emotes = this.STV.getEmotes;
             const args = msg.trim().split(' ');
 
-            for (let i = 0; i < Object.keys(emotes).length; i++) {
-                if (msg.includes(Object.keys(emotes)[i])) {
-                    emotes[Object.keys(emotes)[i]] = emotes[Object.keys(emotes)[i]] += 1
+            for (let i = 0; i < Object.keys(this.emotes).length; i++) {
+                if (msg.includes(Object.keys(this.emotes)[i])) {
+                    this.emotes[Object.keys(this.emotes)[i]] = this.emotes[Object.keys(this.emotes)[i]] += 1
                 }
             }
             // Supibot:
@@ -214,11 +214,11 @@ class ClientTTV {
                 return;
             }
 
-            if (args[0] == (`${process.env.TTV_PREFIX}help`)) {
+            if (args[0] == (`${process.env.tv_options_prefix}help`)) {
                 const help = existsSync(`./src/apollo/commands/${args[1].toLowerCase()}.js`) ? require(`./commands/${args[1].toLowerCase()}.js`).help : null;
 
                 if (help == null) {
-                    this.client.say(target, `@${user.username}, i du not know anythink about the ${process.env.TTV_PREFIX}${args[1].toLowerCase()} comand ❓❓ Okayeg ❓❓❓ `);
+                    this.client.say(target, `@${user.username}, i du not know anythink about the ${process.env.tv_options_prefix}${args[1].toLowerCase()} comand ❓❓ Okayeg ❓❓❓ `);
                     return;
                 }
 
@@ -227,10 +227,10 @@ class ClientTTV {
                 return;
             }
 
-            if (msg.startsWith(process.env.TTV_PREFIX)) {
-                if (existsSync(`./src/apollo/commands/${args[0].split(process.env.TTV_PREFIX)[1].toLowerCase()}.js`)) {
-                    require(`./commands/${args[0].split(process.env.TTV_PREFIX)[1].toLowerCase()}.js`).run(this.client, target, user, msg, {
-                        emote_data: emotes,
+            if (msg.startsWith(process.env.tv_options_prefix)) {
+                if (existsSync(`./src/apollo/commands/${args[0].split(process.env.tv_options_prefix)[1].toLowerCase()}.js`)) {
+                    require(`./commands/${args[0].split(process.env.tv_options_prefix)[1].toLowerCase()}.js`).run(this.client, target, user, msg, {
+                        emote_data: this.emotes,
                         emote_updater: this.STV
                     });
                 }
@@ -240,14 +240,14 @@ class ClientTTV {
         });
 
         setInterval(() => {
-            writeFileSync(`./saved/emote_data.json`, JSON.stringify(emotes, null, 2), {
+            writeFileSync(`./saved/emote_data.json`, JSON.stringify(this.emotes, null, 2), {
                 encoding: "utf-8"
             });
             console.log("* Emote file saved!");
         }, 90000);
         
         process.on("SIGTERM", (listener) => {
-            writeFileSync(`./saved/emote_data.json`, JSON.stringify(emotes, null, 2), {
+            writeFileSync(`./saved/emote_data.json`, JSON.stringify(this.emotes, null, 2), {
                 encoding: "utf-8"
             });
             console.log("* Emote file saved!");

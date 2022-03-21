@@ -41,7 +41,7 @@ module.exports.help = {
     const emotes = JSON.parse(readFileSync(`./saved/emote_data.json`, {encoding: "utf-8"}));
 
     let items = Object.keys(emotes).map((key) => {
-        return [key, dict[key]]
+        return [key, emotes[key]]
     });
 
     items.sort((f, s) => {
@@ -51,6 +51,6 @@ module.exports.help = {
     let top_emotes = items.slice(0, 5);
 
     client.ping().then((ms) => {
-        client.say(target, `@${user.username}, Pong! Session uptime: ${timeformat(process.uptime())}! ${process.env.tv_options.joinasanonymous.split(',').length} channels are tracked in anonymous mode, landed in ${process.env.tv_options_joinasclient.split(',').length} channels. The most used 7TV emote: ${top_emotes[0][0]} (${top_emotes[0][1]})! Latency to TMI: ${ms}ms forsenLevel`);
+        client.say(target, `@${user.username}, Pong! Session uptime: ${timeformat(process.uptime())}! ${process.env.tv_options_joinasanonymous.split(',').length} channels are tracked in anonymous mode, landed in ${process.env.tv_options_joinasclient.split(',').length} channels. The most used 7TV emote: ${top_emotes[0][0]} (${top_emotes[0][1]})! Latency to TMI: ${ms}ms forsenLevel`);
     });
 };
