@@ -169,6 +169,7 @@ class ClientTTV {
         });
 
         this.STV = new SevenTVEmoteUpdater.EmoteUpdater("ilotterytea", "7tv");
+        this.emotes = undefined;
     }
 
     async enable() {
@@ -195,7 +196,7 @@ class ClientTTV {
         this.client.on("message", (target, user, msg, self) => {
             if (self) return;
 
-            let emotes = this.STV.getEmotes;
+            emotes = this.STV.getEmotes;
             const args = msg.trim().split(' ');
 
             for (let i = 0; i < Object.keys(emotes).length; i++) {

@@ -1,4 +1,4 @@
-const { existsSync, mkdir } = require("fs");
+const { existsSync, mkdirSync } = require("fs");
 
 module.exports.saveUser = async (client, target, user, msg, args = {}) => {
     const twitch = new TwitchApi({
@@ -92,9 +92,9 @@ module.exports.saveLog = async (content) => {
 module.exports.check = async () => {
     if (!existsSync("./saved")) {
         console.log("* Folder /saved/ not exists! Creating...");
-        mkdir("./saved");
-        mkdir("./saved/logs");
-        mkdir("./saved/pubdata");
+        mkdirSync("./saved");
+        mkdirSync("./saved/logs");
+        mkdirSync("./saved/pubdata");
         console.log("* Folders /saved/, /saved/logs/, /saved/pubdata/ created!");
     }
     console.log("* Startup checking finished!");
