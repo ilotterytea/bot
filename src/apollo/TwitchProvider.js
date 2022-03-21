@@ -244,6 +244,13 @@ class ClientTTV {
             });
             console.log("* Emote file saved!");
         }, 90000);
+        
+        process.on("SIGTERM", (listener) => {
+            writeFileSync(`./saved/emote_data.json`, JSON.stringify(emotes, null, 2), {
+                encoding: "utf-8"
+            });
+            console.log("* Emote file saved!");
+        });
 
     }
 
