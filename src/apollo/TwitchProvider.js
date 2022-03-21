@@ -8,6 +8,8 @@ const axios = require("axios").default;
 const twitchreq = require("twitchrequest");
 const SevenTVEmoteUpdater = require("../utils/SevenTVEmoteUpdater");
 
+
+
 class AnonymousTTV {
     constructor(options = {
         channels: string,
@@ -169,7 +171,7 @@ class ClientTTV {
         });
 
         this.STV = new SevenTVEmoteUpdater.EmoteUpdater("ilotterytea", "7tv");
-        this.emotes = null;
+        this.emotes = {};
     }
 
     async enable() {
@@ -183,10 +185,10 @@ class ClientTTV {
             this.client.say("#ilotterytea", "iLotteryteaLive ");
 
             if (this.STV.getNewEmotes != "") {
-                this.client.say("#ilotterytea", `New 7TV Emotes: ${this.STV.getNewEmotes}`);
+                this.client.say("#ilotterytea", `Added 7TV Emotes: ${this.STV.getNewEmotes}`);
             }
             if (this.STV.getDeletedEmotes != "") {
-                this.client.say("#ilotterytea", `Removed/Renamed Emotes: ${this.STV.getDeletedEmotes}`);
+                this.client.say("#ilotterytea", `Deleted/renamed 7tv emotes: ${this.STV.getDeletedEmotes}`);
             }
         });
 
