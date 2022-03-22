@@ -128,5 +128,8 @@ app.get("/request", (req, res) => {
     
 });
 
+app.get("/e", (req, res) => {
+    res.send('lule')
+});
 app.use(express.static(`${__dirname}/public`)); // Load "assets" folder.
-app.listen(3000, () => console.log(`App listening on port 3000!`)); // Launch the web app.
+app.listen(process.env.PORT || 3000, () => console.log(`App listening on port 3000!`)); // Launch the web app.

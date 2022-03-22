@@ -25,51 +25,47 @@ const { check } = require("./src/utils/Filesystem");
 require("dotenv").config({path: "./default.env"});
 
 // Launch the bot:
-async function run() {
-    // Check for the required system folders (/saved/):
-    check();
+class ClientInitialize {
+    constructor (options) {
+        this.options = JSON.parse(readFileSync("./options.json", {encoding: "utf-8"})) || options;
 
-    // Enable the Telegram bot client:
-    const msgClient = new MessengerProvider(process.env.ms_credentials_password);
-    msgClient.enable();
+        this.msgClient = new MessengerProvider(this.options.credentials.telegram_oauth);
+        
+        this.client = new ClientTTV({
+            username: this.options.credentials.twitch.username[0],
+            password: this.options.credentials.twitch.password[0],
+            channels: this.options.join.as_client,
+            prefix: this.options.prefix,
+            users: this.options.users
+        });
+        this.anonymous = new AnonymousTTV({
+            channels: this.options.join.as_anonymous,
+            online_client: this.client,
+            ping_reply: {
+                messenger_client: this.msgClient
+            },
+            telegram_supa_id: this.options.users.ms_supa_user_ids
+        });
+    }
 
-    // Bot Twitch client:
-    const client = new ClientTTV({
-        username: process.env.tv_credentials_username.split(',')[0],
-        password: process.env.tv_credentials_password.split(',')[0],
-        channels: process.env.tv_options_joinasclient.split(',')
-    });
-    client.enable();
+    async run() {
+        check();
 
-    // Anonymous client:
-    const anonymous = new AnonymousTTV({
-        channels: process.env.tv_options_joinasanonymous.split(','),
-        online_client: client,
-        ping_reply: {
-            match: process.env.tv_options_pinghim,
-            messenger_client: msgClient
-        }
-    });
+        this.msgClient.enable();
+        this.client.enable();
+        this.anonymous.enableAnonymous();
+        this.anonymous.enableRequests(
+            this.options.credentials.twitch.client_id, 
+            this.options.credentials.twitch.client_secret, 
+            ["ilotterytea"], 
+            this.options.alerts.msg, 
+            this.options.alerts.sub
+            );
 
-    anonymous.enableAnonymous();
-
-    anonymous.enableRequests({
-        client_id: process.env.tv_credentials_clientid,
-        client_secret: process.env.tv_credentials_clientsec,
-        channels: process.env.tv_options_joinasperson.split(',').push("ilotterytea"),
-        alerts: {
-            msg: process.env.tv_options_alerts_msg.split(','),
-            subs: process.env.tv_options_alerts_sub
-        }
-    });
-
-    /*
-    anonymous.enableResponse({
-        username: process.env.tv_credentials_username.split(',')[1],
-        password: process.env.tv_credentials_password.split(',')[1],
-        channels: ["ilotterytea"]
-    });*/
-
+        this.anonymous.enableResponse(this.options.credentials.twitch.username[1], this.options.credentials.twitch.password[1], this.options.join.as_person);
+    }
 }
 
-run();
+new ClientInitialize(JSON.parse(readFileSync(`./options.json`, {encoding: "utf-8"}))).run();
+
+module.exports = {ClientInitialize};

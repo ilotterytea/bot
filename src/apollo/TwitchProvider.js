@@ -21,25 +21,26 @@ const {
     readFileSync
 } = require("fs");
 const tmi = require("tmi.js");
-const axios = require("axios").default;
 const twitchreq = require("twitchrequest");
 const SevenTVEmoteUpdater = require("../utils/SevenTVEmoteUpdater");
 
 class AnonymousTTV {
     constructor(options = {
-        channels: string,
+        channels: any,
         online_client: any,
         ping_reply: {
             match: string,
             messenger_client: any
-        }
+        },
+        telegram_supa_id: any
     }) {
         this.options = options;
         this.match = new RegExp(options.ping_reply.match);
         this.online_client = this.options.online_client;
         this.messenger_client = this.options.ping_reply.messenger_client;
+        this.telegram_supa_id = this.options.telegram_supa_id;
 
-        this.client = new tmi.client({
+        this.client = new tmi.Client({
             connection: {
                 reconnect: true,
                 secure: true
@@ -72,8 +73,8 @@ class AnonymousTTV {
                 }
             }
 
-            if (msg.includes("ilotte") || msg.includes("лот")) {
-                this.messenger_client.sendMessage(`🔔 ${getStringOfMonth()} ${(date.getUTCDate().toString().length == 1) ? `0${date.getUTCDate()}` : `${date.getUTCDate()}`}, ${date.getUTCFullYear()} ${target} (${user["room-id"]}) ${user["display-name"]} (${user["username"]}-${user["room-id"]}): ${msg.trim()}`, process.env.ms_options_supauserids);
+            if (msg.toLowerCase().includes("ilotte") || msg.toLowerCase().includes("лот")) {
+                this.messenger_client.sendMessage(`🔔 ${getStringOfMonth()} ${(date.getUTCDate().toString().length == 1) ? `0${date.getUTCDate()}` : `${date.getUTCDate()}`}, ${date.getUTCFullYear()} ${target} (${user["room-id"]}) ${user["display-name"]} (${user["username"]}-${user["room-id"]}): ${msg.trim()}`, this.telegram_supa_id);
             }
 
             //require("../utils/Filesystem").saveMsg(target, user, msg);
@@ -90,22 +91,19 @@ class AnonymousTTV {
         });*/
     }
 
-    async enableResponse(options = {
-        username: string,
-        password: string,
-        channels: string
-    }) {
-        this.response_client = new tmi.client({
+    async enableResponse(username, password, channels) {
+        this.response_client = new tmi.Client({
             connection: {
                 reconnect: true,
                 secure: true
             },
             identity: {
-                username: options.username,
-                password: options.password
+                username: username,
+                password: password
             },
-            channels: options.channels
+            channels: channels
         });
+        
 
         this.response_client.connect();
 
@@ -114,6 +112,7 @@ class AnonymousTTV {
 
         this.response_client.on("reconnect", () => console.log(`* Client (Person): Reconnecting...`));
         this.response_client.on("disconnected", (reason) => console.log(`* Client (Person): Disconnected: ${reason}!`));
+        
 
         this.response_client.on("message", (target, user, msg, self) => {
             if (self) return;
@@ -124,37 +123,29 @@ class AnonymousTTV {
                 this.response_client.say("#pwgood", "/me PepeS 🚨 ПИЗДЕЦ! ");
             }
 
-            // Supibot is pinged me:
+            // Supibot pinged me:
             if (msg.includes("ilotterytea") && user["user-id"] == "68136884") {
                 this.response_client.say(target, `/me FeelsOkayMan 👉 🚪 🔥 `);
             }
         });
     }
 
-    async enableRequests(options = {
-        client_id: string,
-        client_secret: string,
-        channels: string,
-        alerts: {
-            msg: string,
-            subs: string
-        }
-    }) {
+    async enableRequests(client_id, client_secret, channels, alert_msgs, alert_subs) {
         this.request_client = new twitchreq.Client({
-            channels: options.channels,
-            client_id: options.client_id,
-            client_secret: options.client_secret,
+            channels: channels,
+            client_id: client_id,
+            client_secret: client_secret,
             interval: 3
         });
 
         this.request_client.on("ready", () => console.log("* Requests are ready!"));
 
         this.request_client.on("live", (stream) => {
-            this.online_client.say("#ilotterytea", `${options.alerts.msg[0].replace("{name}", stream.title).replace("{category}", stream.game)}${options.alerts.subs}`);
+            this.online_client.say("#ilotterytea", `${alert_msgs[0].replace("{name}", stream.title).replace("{category}", stream.game)}${alert_subs}`);
         });
 
         this.request_client.on("unlive", (stream) => {
-            this.online_client.say("#ilotterytea", `${options.alerts.msg[1]}`);
+            this.online_client.say("#ilotterytea", `${alert_msgs[1]}`);
         });
 
         this.request_client.on("follow", (user, stream) => {
@@ -167,7 +158,9 @@ class ClientTTV {
     constructor(options = {
         username: string,
         password: string,
-        channels: string
+        channels: string,
+        prefix: string,
+        users: Array
     }) {
         this.channels = options.channels;
 
@@ -182,7 +175,8 @@ class ClientTTV {
                 password: options.password
             }
         });
-
+        this.prefix = options.prefix;
+        this.users = options.users;
         this.STV = new SevenTVEmoteUpdater.EmoteUpdater("ilotterytea", "7tv");
         this.emotes = {};
     }
@@ -229,11 +223,11 @@ class ClientTTV {
                 return;
             }
 
-            if (args[0] == (`${process.env.tv_options_prefix}help`)) {
+            if (args[0] == (`${this.prefix}help`)) {
                 const help = existsSync(`./src/apollo/commands/${args[1].toLowerCase()}.js`) ? require(`./commands/${args[1].toLowerCase()}.js`).help : null;
 
                 if (help == null) {
-                    this.client.say(target, `@${user.username}, i du not know anythink about the ${process.env.tv_options_prefix}${args[1].toLowerCase()} comand ❓❓ Okayeg ❓❓❓ `);
+                    this.client.say(target, `@${user.username}, i du not know anythink about the ${this.prefix}${args[1].toLowerCase()} comand ❓❓ Okayeg ❓❓❓ `);
                     return;
                 }
 
@@ -242,11 +236,12 @@ class ClientTTV {
                 return;
             }
 
-            if (msg.startsWith(process.env.tv_options_prefix)) {
-                if (existsSync(`./src/apollo/commands/${args[0].split(process.env.tv_options_prefix)[1].toLowerCase()}.js`)) {
-                    require(`./commands/${args[0].split(process.env.tv_options_prefix)[1].toLowerCase()}.js`).run(this.client, target, user, msg, {
+            if (msg.startsWith(this.prefix)) {
+                if (existsSync(`./src/apollo/commands/${args[0].split(this.prefix)[1].toLowerCase()}.js`)) {
+                    require(`./commands/${args[0].split(this.prefix)[1].toLowerCase()}.js`).run(this.client, target, user, msg, {
                         emote_data: this.emotes,
-                        emote_updater: this.STV
+                        emote_updater: this.STV,
+                        join: JSON.parse(readFileSync(`./options.json`, {encoding: "utf-8"}))["join"]
                     });
                 }
                 return;

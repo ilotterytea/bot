@@ -162,4 +162,6 @@ dist
 saved
 saved/*
 test.js
-default.env
+.env
+.sql
+options.json

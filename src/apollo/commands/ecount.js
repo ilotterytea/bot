@@ -49,12 +49,12 @@ exports.run = async (client, target, user, msg, args = {
     if (mArgs.length == 1) {
         client.say(target, `@${user.username}, provide an emote.`);
         return;
-    }
-
+    };
+    
     if (mArgs[1] in args.emote_data) {
-        client.say(target, `${mArgs[1]} has been used ${args.emote_data[mArgs[1]]} times.`);
+        client.say(target, `${mArgs[1]} has been used ${args.emote_data[mArgs[1]].toLocaleString()} times.`);
         return;
     } else {
-        client.say(target, `@${user.username}, I don't know what this ${mArgs[1]} emote is. Probably this emote was added recently and you need to use ${process.env.tv_options_prefix}eupdate to update the emote database.`);
+        client.say(target, `@${user.username}, WHAT THE HELL IS ${mArgs[1]} ? YEAHBUT7TV 💢 `);
     }
 };

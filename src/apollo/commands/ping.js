@@ -44,7 +44,7 @@ module.exports.help = {
 }) => {
     function timeformat(seconds){
         function pad(s){
-            return (s < 10 ? '' : '') + s;
+            return (s < 10 ? '0' : '') + s;
         }
         var days = Math.floor(seconds / (60*60*24))
         var hours = Math.floor(seconds / (60 * 60) % 24);
@@ -52,7 +52,7 @@ module.exports.help = {
         var sec = Math.floor(seconds % 60); 
     
         
-        return `${pad(days)}d. ${pad(hours)}:${pad(minutes)}:${pad(sec)}`;
+        return `${days}d. ${pad(hours)}:${pad(minutes)}:${pad(sec)}`;
     }
 
     const emotes = JSON.parse(readFileSync(`./saved/emote_data.json`, {encoding: "utf-8"}));
@@ -68,6 +68,6 @@ module.exports.help = {
     let top_emotes = items.slice(0, 5);
 
     client.ping().then((ms) => {
-        client.say(target, `@${user.username}, Pong! Session uptime: ${timeformat(process.uptime())}! ${process.env.tv_options_joinasanonymous.split(',').length} channels are tracked in anonymous mode, landed in ${process.env.tv_options_joinasclient.split(',').length} channels. The most used 7TV emote: ${top_emotes[0][0]} (${top_emotes[0][1]})! Latency to TMI: ${ms}ms forsenLevel`);
+        client.say(target, `@${user.username}, Pong! Session uptime: ${timeformat(process.uptime())}! ${args.join.as_anonymous.length} channels are tracked in anonymous mode, landed in ${args.join.as_client.length} channels. Latency to TMI: ${ms}s forsenLevel`);
     });
 };

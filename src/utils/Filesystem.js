@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with iLotteryteaLive.  If not, see <http://www.gnu.org/licenses/>.
 
-const { existsSync, mkdirSync } = require("fs");
+const { existsSync, mkdirSync, writeFileSync } = require("fs");
 
 module.exports.saveUser = async (client, target, user, msg, args = {}) => {
     const twitch = new TwitchApi({
@@ -114,5 +114,31 @@ module.exports.check = async () => {
         mkdirSync("./saved/pubdata");
         console.log("* Folders /saved/, /saved/logs/, /saved/pubdata/ created!");
     }
+    if (!existsSync("./options.json")) writeFileSync("./options.json", JSON.stringify({
+        "credentials": {
+            "twitch": {
+                "username": ["", ""],
+                "password": ["",""],
+                "client_id": "",
+                "client_secret": ""
+            },
+            "telegram_oauth": ""
+        },
+        "join": {
+            "as_client": [],
+            "as_anonymous": [],
+            "as_person": []
+        },
+        "prefix": "",
+        "alerts": {
+            "msg": [],
+            "sub": []
+        },
+        "users": {
+            "permabanned_ids": [],
+            "supa_user_ids": [""],
+            "ms_supa_user_ids": ""
+        }
+    }, null, 2))
     console.log("* Startup checking finished!");
 };

@@ -1,10 +1,12 @@
 {
-    "name": "iLotteryBot2",
-    "description": "A little utility bot that has been actively tracking your messages on Twitch chats.",
-    "homepage": "http://bot.hmmtodayiwill.ru/",
-    "author": "iLotterytea",
-    "main": "index.js",
-    "version": "1.0.0",
+    "name": "iLotteryteaLive",
+    "description": "A lidl utility bot.",
+    "homepage": "http://hmmtodayiwill.ru/",
+    "version": "2.1.1",
+    "author": "iLotterytea <hatesociety@pm.me>",
+    "scripts": {
+        "release": "node Initialize.js"
+    },
     "dependencies": {
         "7tv": "^0.0.4",
         "axios": "^0.26.1",
@@ -13,7 +15,7 @@
         "fs": "^0.0.1-security",
         "http": "^0.0.1-security",
         "node-telegram-bot-api": "^0.56.0",
-        "node-twitch": "^0.4.5",
+        "pg": "^8.7.3",
         "tmi.js": "^1.8.5",
         "twitchrequest": "^1.4.9"
     }
