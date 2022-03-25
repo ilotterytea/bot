@@ -28,7 +28,7 @@ exports.help = {
     name: "Emote Count!",
     author: "ilotterytea",
     description: "Shows how much of the specified emote has been used.",
-    cooldownMs: 0,
+    cooldownMs: 1500,
     superUserOnly: false
 }
 
@@ -40,21 +40,25 @@ exports.help = {
  * @param {*} msg Message.
  * @param {*} args Arguments.
  */
-exports.run = async (client, target, user, msg, args = {
-    emote_data: any,
-    emote_updater: any
-}) => {
-    const mArgs = msg.split(' ');
+exports.run = async (client, target, user, msg, args) => {
+    if (!inCooldown.includes(user.username)) {
+        const mArgs = msg.split(' ');
 
-    if (mArgs.length == 1) {
-        client.say(target, `@${user.username}, provide an emote.`);
-        return;
-    };
-    
-    if (mArgs[1] in args.emote_data) {
-        client.say(target, `${mArgs[1]} has been used ${args.emote_data[mArgs[1]].toLocaleString()} times.`);
-        return;
-    } else {
-        client.say(target, `@${user.username}, WHAT THE HELL IS ${mArgs[1]} ? YEAHBUT7TV 💢 `);
+        if (mArgs.length == 1) {
+            client.say(target, `@${user.username}, provide an emote.`);
+            return;
+        };
+        
+        if (mArgs[1] in args.emote_data) {
+            client.say(target, `${mArgs[1]} has been used ${args.emote_data[mArgs[1]].toLocaleString()} times.`);
+            return;
+        } else {
+            client.say(target, `@${user.username}, WHAT THE HELL IS ${mArgs[1]} ? YEAHBUT7TV 💢 `);
+        }
+
+        inCooldown.push(user.username);
+        setTimeout(() => inCooldown = inCooldown.filter(u => u !== user.username), this.help.cooldownMs);
     }
 };
+
+let inCooldown = [];

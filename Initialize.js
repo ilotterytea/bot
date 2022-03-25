@@ -31,13 +31,7 @@ class ClientInitialize {
 
         this.msgClient = new MessengerProvider(this.options.credentials.telegram_oauth);
         
-        this.client = new ClientTTV({
-            username: this.options.credentials.twitch.username[0],
-            password: this.options.credentials.twitch.password[0],
-            channels: this.options.join.as_client,
-            prefix: this.options.prefix,
-            users: this.options.users
-        });
+        this.client = new ClientTTV(this.options);
         this.anonymous = new AnonymousTTV({
             channels: this.options.join.as_anonymous,
             online_client: this.client,
@@ -54,15 +48,15 @@ class ClientInitialize {
         this.msgClient.enable();
         this.client.enable();
         this.anonymous.enableAnonymous();
-        this.anonymous.enableRequests(
+        /*this.anonymous.enableRequests(
             this.options.credentials.twitch.client_id, 
             this.options.credentials.twitch.client_secret, 
             ["ilotterytea"], 
             this.options.alerts.msg, 
             this.options.alerts.sub
-            );
+            );*/
 
-        this.anonymous.enableResponse(this.options.credentials.twitch.username[1], this.options.credentials.twitch.password[1], this.options.join.as_person);
+        //this.anonymous.enableResponse(this.options.credentials.twitch.username[1], this.options.credentials.twitch.password[1], this.options.join.as_person);
     }
 }
 

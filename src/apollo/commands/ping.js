@@ -26,7 +26,7 @@ module.exports.help = {
     name: "Ping!",
     author: "ilotterytea",
     description: "Checking if it's alive, and a bunch of other data.",
-    cooldownMs: 0,
+    cooldownMs: 5000,
     superUserOnly: false
 }
 
@@ -38,10 +38,7 @@ module.exports.help = {
  * @param {*} msg Message.
  * @param {*} args Arguments.
  */
- exports.run = async (client, target, user, msg, args = {
-    emote_data: any,
-    emote_updater: any
-}) => {
+exports.run = async (client, target, user, msg, args) => {
     function timeformat(seconds){
         function pad(s){
             return (s < 10 ? '0' : '') + s;
@@ -55,19 +52,15 @@ module.exports.help = {
         return `${days}d. ${pad(hours)}:${pad(minutes)}:${pad(sec)}`;
     }
 
-    const emotes = JSON.parse(readFileSync(`./saved/emote_data.json`, {encoding: "utf-8"}));
+    if (!inCooldown.includes(user.username)) {
+        client.ping().then((ms) => {
+            client.say(target, `@${user.username}, Pong! Session uptime: ${timeformat(process.uptime())}! ${args.join.as_anonymous.length} channels are tracked in anonymous mode, landed in ${args.join.as_client.length} channels. Latency to TMI: ${Math.floor(Math.round(ms * 1000))}ms DANKMAN `);
+        });
 
-    let items = Object.keys(emotes).map((key) => {
-        return [key, emotes[key]]
-    });
-
-    items.sort((f, s) => {
-        return s[1] - f[1]
-    });
-
-    let top_emotes = items.slice(0, 5);
-
-    client.ping().then((ms) => {
-        client.say(target, `@${user.username}, Pong! Session uptime: ${timeformat(process.uptime())}! ${args.join.as_anonymous.length} channels are tracked in anonymous mode, landed in ${args.join.as_client.length} channels. Latency to TMI: ${ms}s forsenLevel`);
-    });
+        inCooldown.push(user.username);
+        setTimeout(() => inCooldown = inCooldown.filter(u => u !== user.username), this.help.cooldownMs);
+    }
+    
 };
+
+let inCooldown = [];

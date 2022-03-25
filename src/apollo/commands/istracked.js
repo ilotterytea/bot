@@ -42,9 +42,9 @@ const tmi = require("tmi.js");
 exports.help = {
     name: "Is tracked that user?",
     author: "ilotterytea",
-    description: "Check the user in anonymous or client.",
-    cooldownMs: 0,
-    superUserOnly: true
+    description: "Check how the user is tracked.",
+    cooldownMs: 5000,
+    superUserOnly: false
 }
 
 /**
@@ -56,21 +56,27 @@ exports.help = {
  * @param {*} args Arguments.
  */
 exports.run = async (client, target, user, msg, args) => {
-    const msg_args = msg.trim().split(' ');
-    let message = ``
+    if (!inCooldown.includes(user.username)) {
+        const msg_args = msg.trim().split(' ');
+        let message = ``
 
-    if (args.join.as_anonymous.includes(msg_args[1].toLowerCase())) {
-        message = message += `by anonymous client`;
-    }
-    if (args.join.as_client.includes(msg_args[1].toLowerCase())) {
-        message = message += (message != ``) ? `, bot client` : `by bot client`;
-    }
+        if (args.join.as_anonymous.includes(msg_args[1].toLowerCase())) {
+            message = message += `by anonymous client`;
+        }
+        if (args.join.as_client.includes(msg_args[1].toLowerCase())) {
+            message = message += (message != ``) ? `, bot client` : `by bot client`;
+        }
 
-    if (message == ``) {
-        client.say(target, `@${user.username}, User ${msg_args[1]} isn't tracked.`);
-        return;
-    }
+        if (message == ``) {
+            client.say(target, `@${user.username}, User ${msg_args[1]} isn't tracked.`);
+            return;
+        }
 
-    client.say(target, `@${user.username}, User ${msg_args[1]} is tracked ${message}`);
-    return;
+        client.say(target, `@${user.username}, User ${msg_args[1]} is tracked ${message}`);
+        
+        inCooldown.push(user.username);
+        setTimeout(() => inCooldown = inCooldown.filter(u => u !== user.username), this.help.cooldownMs);
+    }
 };
+
+let inCooldown = [];

@@ -119,8 +119,8 @@ class AnonymousTTV {
 
             // "pajaS 🚨 ALERT ":
             if (target == "#pajlada" && user["user-id"] == "82008718" && msg.trim() == "pajaS 🚨 ALERT ") {
-                this.response_client.say("#pajlada", "/me dankS 🚨 ALERT! ");
-                this.response_client.say("#pwgood", "/me PepeS 🚨 ПИЗДЕЦ! ");
+                this.response_client.action("#pajlada", "dankS 🚨 ALERT! ");
+                this.response_client.action("#pwgood", "xqcA 🚨 ИНОПЛАНЕТЯНЕ НАСТУПАЮТ! ");
             }
 
             // Supibot pinged me:
@@ -155,47 +155,45 @@ class AnonymousTTV {
     }
 }
 class ClientTTV {
-    constructor(options = {
-        username: string,
-        password: string,
-        channels: string,
-        prefix: string,
-        users: Array
-    }) {
-        this.channels = options.channels;
+    constructor(options) {
+        this.options = options;
 
         this.client = new tmi.Client({
             connection: {
                 reconnect: true,
                 secure: true
             },
-            channels: this.channels,
+            channels: this.options.join.as_client,
             identity: {
-                username: options.username,
-                password: options.password
+                username: this.options.credentials.twitch.username[0],
+                password: this.options.credentials.twitch.password[0]
             }
         });
-        this.prefix = options.prefix;
-        this.users = options.users;
+        this.prefix = this.options.prefix;
+        this.users = this.options.users;
         this.STV = new SevenTVEmoteUpdater.EmoteUpdater("ilotterytea", "7tv");
         this.emotes = {};
+        this.images = JSON.parse(readFileSync("./saved/images.json", {encoding: "utf-8"}));
+        this.firstTimeConnected = false;
     }
 
     async enable() {
-        this.STV.updateEmotes();
-
         this.client.connect();
+        this.STV.updateEmotes();
 
         this.client.on("connecting", (address, port) => console.log(`* Client: Connecting to ${address}:${port}...`));
         this.client.on("connected", (address, port) => {
             console.log(`* Client: Connected to ${address}:${port}!`);
-            this.client.say("#ilotterytea", "iLotteryteaLive ");
+            if (!this.firstTimeConnected) {
+                this.client.say("#ilotterytea", "iLotteryteaLive ");
+                this.firstTimeConnected = true;
+            };
 
             if (this.STV.getNewEmotes != "") {
-                this.client.say("#ilotterytea", `Added 7TV Emotes: ${this.STV.getNewEmotes}`);
+                this.client.say("#ilotterytea", `Added 7TV channel emotes: ${this.STV.getNewEmotes}`);
             }
             if (this.STV.getDeletedEmotes != "") {
-                this.client.say("#ilotterytea", `Deleted/renamed 7tv emotes: ${this.STV.getDeletedEmotes}`);
+                this.client.say("#ilotterytea", `Deleted/renamed 7TV channel emotes: ${this.STV.getDeletedEmotes}`);
             }
         });
 
@@ -206,14 +204,22 @@ class ClientTTV {
             if (self) return;
 
             this.emotes = this.STV.getEmotes;
+
+            const cmd_args = {
+                emote_data: this.emotes,
+                join: JSON.parse(readFileSync(`./options.json`, {encoding: "utf-8"}))["join"],
+                images: this.images
+            };
+
             const args = msg.trim().split(' ');
 
             for (let i = 0; i < Object.keys(this.emotes).length; i++) {
-                if (msg.includes(Object.keys(this.emotes)[i])) {
+                if (args.includes(Object.keys(this.emotes)[i])) {
                     this.emotes[Object.keys(this.emotes)[i]] = this.emotes[Object.keys(this.emotes)[i]] += 1
                 }
             }
-            // Supibot:
+
+            // Respond to Supibot messages (when someone uses $afk):
             if (user["user-id"] == "68136884") {
                 if (msg.includes("is now sleeping:") || msg.includes("is now AFK:")) {
                     const args = msg.trim().split(' ');
@@ -223,30 +229,79 @@ class ClientTTV {
                 return;
             }
 
-            if (args[0] == (`${this.prefix}help`)) {
-                const help = existsSync(`./src/apollo/commands/${args[1].toLowerCase()}.js`) ? require(`./commands/${args[1].toLowerCase()}.js`).help : null;
 
-                if (help == null) {
-                    this.client.say(target, `@${user.username}, i du not know anythink about the ${this.prefix}${args[1].toLowerCase()} comand ❓❓ Okayeg ❓❓❓ `);
+            if (msg.startsWith(this.prefix)) {
+                const cmd = args[0].split(this.prefix)[1].toLowerCase();
+
+                if (cmd == "help") {
+                    if (args.length == 1) {
+                        this.client.say(target, `@${user.username}, List of my available commands: https://github.com/NotDankEnough/notdankenough/blob/master/md/iLotteryteaLive.md#twitch-commands FeelsOkayMan `);
+                        return;
+                    }
+
+                    const help = existsSync(`./src/apollo/commands/${args[1].toLowerCase()}.js`) ? require(`./commands/${args[1].toLowerCase()}.js`).help : null;
+    
+                    if (help == null) {
+                        this.client.say(target, `@${user.username}, i du not know anythink about the ${this.prefix}${args[1].toLowerCase()} comand ❓❓ Okayeg ❓❓❓ `);
+                        return;
+                    }
+    
+                    this.client.say(target, `FeelsDankMan 📖 ${help.name} ${help.description} Cooldown: ${help.cooldownMs / 1000} sec. ${(help.superUserOnly) ? "Only for Supa Users!" : ""}`);
                     return;
                 }
 
-                this.client.say(target, `${help.name} ${help.description} ${(help.superUserOnly) ? "Only for Supa Users!" : ""}`);
+                if (existsSync(`./src/apollo/commands/${cmd}.js`)) {
+                    const help = require(`./commands/${cmd}.js`).help;
 
-                return;
-            }
+                    // If the command is for super-users, check if the sender is a super-user:
+                    if (help.superUserOnly) {
+                        if (this.users.supa_user_ids.includes(user["user-id"])) {
+                            require(`./commands/${cmd}.js`).run(this.client, target, user, msg, cmd_args);
+                        } else {
+                            this.client.say(target, `@${user.username}, u du not hav permision tu du that! Sadeg `);
+                        }
+                        return;
+                    }
 
-            if (msg.startsWith(this.prefix)) {
-                if (existsSync(`./src/apollo/commands/${args[0].split(this.prefix)[1].toLowerCase()}.js`)) {
-                    require(`./commands/${args[0].split(this.prefix)[1].toLowerCase()}.js`).run(this.client, target, user, msg, {
-                        emote_data: this.emotes,
-                        emote_updater: this.STV,
-                        join: JSON.parse(readFileSync(`./options.json`, {encoding: "utf-8"}))["join"]
-                    });
+                    require(`./commands/${cmd}.js`).run(this.client, target, user, msg, cmd_args);
                 }
                 return;
             }
+        });
 
+        // Subscriptions, cheer events:
+        this.client.on("cheer", async (target, user, msg) => (target == "#ilotterytea") ? this.client.say(target, `heCrazy @${user.username} just cheered Bits ${user.bits} `) : "");
+        this.client.on("subscription", async (target, username, methods, msg, user) => (target == "#ilotterytea") ? this.client.say(target, `PepeHands @${username} accidentally subscribed to iLotterytea!`) : "");
+        this.client.on("resub", async (target, username, streakMonths, msg, user, methods) => (target == "#ilotterytea") ? this.client.say(target, `heCrazy @${username} has been subscribed to iLotterytea for ${user["msg-param-cumulative-months"]} months!`) : "");
+        this.client.on("subgift", async (target, username, streakMonths, recipient, methods, user) => (target == "#ilotterytea") ? this.client.say(target, `heCrazy heCrazy heCrazy @${username} has gifted a subscription to @${recipient}! heCrazy heCrazy heCrazy `) : "");
+        this.client.on("raided", (target, username, viewers) => (target == "#ilotterytea") ? this.client.say(target, `doctorDance TombRaid @${username} has raided the channel with ${(viewers == 1) ? `${viewers} viewer` : `${viewers} viewers`}`) : "");
+
+        // Ban, clearchat, timeout events:
+        this.client.on("clearchat", async (target) => (target == "#ilotterytea") ? this.client.say(target, "NothingHappened ") : "");
+        this.client.on("ban", async (target, username, reason) => (target == "#ilotterytea") ? this.client.say(target, `monkaLaugh 👍 I LOVE ${target.slice(1, target.length).toUpperCase()}! `) : "");
+
+        // Notice:
+        this.client.on("notice", async (target, msgid, msg) => {
+            switch (msgid) {
+                case "msg_banned":
+                    this.options.suspended.push(target.slice(1, target.length));
+                    this.options.join.as_client = this.options.join.as_client.filter(u => u !== target.slice(1, target.length));
+                    writeFileSync("./options.json", JSON.stringify(this.options, null, 2), {encoding: "utf-8"});
+                    break;
+                case "msg_channel_suspended":
+                    this.options.suspended.push(target.slice(1, target.length));
+                    this.options.join.as_client = this.options.join.as_client.filter(u => u !== target.slice(1, target.length));
+                    writeFileSync("./options.json", JSON.stringify(this.options, null, 2), {encoding: "utf-8"});
+                    break;
+                case "tos_ban":
+                    this.options.suspended.push(target.slice(1, target.length));
+                    this.options.join.as_client = this.options.join.as_client.filter(u => u !== target.slice(1, target.length));
+                    writeFileSync("./options.json", JSON.stringify(this.options, null, 2), {encoding: "utf-8"});
+                    break;
+                default:
+                    console.log(`${target} - ${msgid} - ${msg}`);
+                    break;
+            }
         });
 
         setInterval(() => {
@@ -255,6 +310,16 @@ class ClientTTV {
             });
             console.log("* Emote file saved!");
         }, 90000);
+
+        // Reconnects to Twitch servers to update 7TV channel emotes (I couldn't do it any other way):
+        setInterval(() => {
+            this.STV.updateEmotes();
+            this.client.disconnect();
+            setTimeout(() => {
+                this.client.connect();
+            }, 1000);
+            console.log("* 7TV channel emotes has been updated!");
+        }, 43200000);
         
         process.on("SIGTERM", (listener) => {
             writeFileSync(`./saved/emote_data.json`, JSON.stringify(this.emotes, null, 2), {
@@ -262,9 +327,7 @@ class ClientTTV {
             });
             console.log("* Emote file saved!");
         });
-
     }
-
 }
 
 module.exports = {

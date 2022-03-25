@@ -87,7 +87,7 @@ class EmoteUpdater {
             this.emotes = old_emotes;
             writeFileSync(`./saved/emote_data.json`, JSON.stringify(old_emotes,null,2), {encoding: "utf-8"});
 
-            console.log("* 7tv emotes were loaded.");
+            console.log("* 7TV channel emotes were loaded.");
             return old_emotes;
         }
 

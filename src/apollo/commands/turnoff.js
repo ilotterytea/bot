@@ -15,3 +15,32 @@
 // You should have received a copy of the GNU General Public License
 // along with iLotteryteaLive.  If not, see <http://www.gnu.org/licenses/>.
 
+// Libraries.
+const { readFileSync } = require("fs");
+const tmi = require("tmi.js");
+
+/**
+ * Help.
+ */
+module.exports.help = {
+    name: "Turn off the bot!",
+    author: "ilotterytea",
+    description: "Turn off the bot with a command. Used during the bot test on the local computer.",
+    cooldownMs: 0,
+    superUserOnly: true
+}
+
+/**
+ * Run the command.
+ * @param {*} client Client.
+ * @param {*} target Target.
+ * @param {*} user User.
+ * @param {*} msg Message.
+ * @param {*} args Arguments.
+ */
+exports.run = async (client, target, user, msg, args) => {
+    client.say(target, `peepoLeave `);
+    console.log(`* !!! ${user.username} shut the bot down!`);
+    client.disconnect();
+    process.exit(0);
+};

@@ -25,8 +25,8 @@ const tmi = require("tmi.js");
 module.exports.help = {
     name: "Emote top!",
     author: "ilotterytea",
-    description: "",
-    cooldownMs: 0,
+    description: "Top 5 most used 7TV channel emotes.",
+    cooldownMs: 5000,
     superUserOnly: false
 }
 
@@ -38,21 +38,23 @@ module.exports.help = {
  * @param {*} msg Message.
  * @param {*} args Arguments.
  */
- exports.run = async (client, target, user, msg, args = {
-    emote_data: any,
-    emote_updater: any
-}) => {
-    const emotes = JSON.parse(readFileSync(`./saved/emote_data.json`, {encoding: "utf-8"}));
+exports.run = async (client, target, user, msg, args) => {
+    if (!inCooldown.includes(user.username)) {
+        let items = Object.keys(args.emote_data).map((key) => {
+            return [key, args.emote_data[key]]
+        });
 
-    let items = Object.keys(emotes).map((key) => {
-        return [key, emotes[key]]
-    });
+        items.sort((f, s) => {
+            return s[1] - f[1]
+        });
 
-    items.sort((f, s) => {
-        return s[1] - f[1]
-    });
+        let top_emotes = items.slice(0, 5);
 
-    let top_emotes = items.slice(0, 5);
-
-    client.say(target, `Top 5 emotes by the total count of used times: ${top_emotes[0][0]} (${top_emotes[0][1]}), ${top_emotes[1][0]} (${top_emotes[1][1]}), ${top_emotes[2][0]} (${top_emotes[2][1]}), ${top_emotes[3][0]} (${top_emotes[3][1]}), ${top_emotes[4][0]} (${top_emotes[4][1]})`);
+        client.say(target, `Top 5 emotes by the total count of used times: ${top_emotes[0][0]} (${top_emotes[0][1]}), ${top_emotes[1][0]} (${top_emotes[1][1]}), ${top_emotes[2][0]} (${top_emotes[2][1]}), ${top_emotes[3][0]} (${top_emotes[3][1]}), ${top_emotes[4][0]} (${top_emotes[4][1]})`);
+        
+        inCooldown.push(user.username);
+        setTimeout(() => inCooldown = inCooldown.filter(u => u !== user.username), this.help.cooldownMs);
+    }
 };
+
+let inCooldown = [];
