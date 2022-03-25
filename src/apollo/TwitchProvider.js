@@ -173,7 +173,6 @@ class ClientTTV {
         this.users = this.options.users;
         this.STV = new SevenTVEmoteUpdater.EmoteUpdater("ilotterytea", "7tv");
         this.emotes = {};
-        this.images = JSON.parse(readFileSync("./saved/images.json", {encoding: "utf-8"}));
         this.firstTimeConnected = false;
     }
 
