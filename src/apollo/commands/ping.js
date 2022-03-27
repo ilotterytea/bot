@@ -54,13 +54,12 @@ exports.run = async (client, target, user, msg, args) => {
 
     if (!inCooldown.includes(user.username)) {
         client.ping().then((ms) => {
-            client.say(target, `@${user.username}, Pong! Session uptime: ${timeformat(process.uptime())}! ${args.join.as_anonymous.length} channels are tracked in anonymous mode, landed in ${args.join.as_client.length} channels. Latency to TMI: ${Math.floor(Math.round(ms * 1000))}ms DANKMAN `);
+            client.say(target, `@${user.username}, Pong! Session uptime: ${timeformat(process.uptime())}! ${args.join.as_anonymous.length} channels are tracked in anonymous mode, landed in ${args.join.as_client.length} channels. Latency to TMI: ${Math.floor(Math.round(ms * 1000))}ms catDankSpin `);
         });
 
         inCooldown.push(user.username);
         setTimeout(() => inCooldown = inCooldown.filter(u => u !== user.username), this.help.cooldownMs);
     }
-    
 };
 
 let inCooldown = [];
