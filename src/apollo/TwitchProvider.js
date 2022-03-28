@@ -73,8 +73,8 @@ class AnonymousTTV {
                 }
             }
 
-            if (msg.toLowerCase().includes("ilotte") || msg.toLowerCase().includes("лот")) {
-                this.messenger_client.sendMessage(`🔔 ${getStringOfMonth()} ${(date.getUTCDate().toString().length == 1) ? `0${date.getUTCDate()}` : `${date.getUTCDate()}`}, ${date.getUTCFullYear()} ${target} (${user["room-id"]}) ${user["display-name"]} (${user["username"]}-${user["room-id"]}): ${msg.trim()}`, this.telegram_supa_id);
+            if (msg.match(new RegExp(/(ilotte?)/)) || msg.match(new RegExp(/лот/))) {
+                this.messenger_client.sendMessage(`🔔 You've got a new ping!\nSender: ${user["username"]} (${user["user-id"]}\nIn channel: ${target} (${user["room-id"]})\nMessage: ${msg.trim()}\nDate: ${getStringOfMonth()} ${(date.getUTCDate().toString().length == 1) ? `0${date.getUTCDate()}` : `${date.getUTCDate()}`}, ${date.getUTCFullYear()}`, this.telegram_supa_id);
             }
 
             //require("../utils/Filesystem").saveMsg(target, user, msg);
@@ -209,9 +209,11 @@ class ClientTTV {
 
             const args = msg.trim().split(' ');
 
-            for (let i = 0; i < Object.keys(this.emotes).length; i++) {
-                if (args.includes(Object.keys(this.emotes)[i])) {
-                    this.emotes[Object.keys(this.emotes)[i]] = this.emotes[Object.keys(this.emotes)[i]] += 1
+            for (let i = 0; i < args.length; i++) {
+                for (let j = 0; j < Object.keys(this.emotes).length; j++) {
+                    if (args[i] == Object.keys(this.emotes)[j]) {
+                        this.emotes[Object.keys(this.emotes)[j]] = this.emotes[Object.keys(this.emotes)[j]] += 1
+                    }
                 }
             }
 
@@ -272,9 +274,7 @@ class ClientTTV {
         this.client.on("subgift", async (target, username, streakMonths, recipient, methods, user) => (target == "#ilotterytea") ? this.client.say(target, `heCrazy heCrazy heCrazy @${username} has gifted a subscription to @${recipient}! heCrazy heCrazy heCrazy `) : "");
         this.client.on("raided", (target, username, viewers) => (target == "#ilotterytea") ? this.client.say(target, `doctorDance TombRaid @${username} has raided the channel with ${(viewers == 1) ? `${viewers} viewer` : `${viewers} viewers`}`) : "");
 
-        // Ban, clearchat, timeout events:
         this.client.on("clearchat", async (target) => (target == "#ilotterytea") ? this.client.say(target, "NothingHappened ") : "");
-        this.client.on("ban", async (target, username, reason) => (target == "#ilotterytea") ? this.client.say(target, `monkaLaugh 👍 I LOVE ${target.slice(1, target.length).toUpperCase()}! `) : "");
 
         // Notice:
         this.client.on("notice", async (target, msgid, msg) => {
