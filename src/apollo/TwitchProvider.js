@@ -183,10 +183,7 @@ class ClientTTV {
         this.client.on("connecting", (address, port) => console.log(`* Client: Connecting to ${address}:${port}...`));
         this.client.on("connected", (address, port) => {
             console.log(`* Client: Connected to ${address}:${port}!`);
-            if (!this.firstTimeConnected) {
-                this.client.say("#ilotterytea", "iLotteryteaLive ");
-                this.firstTimeConnected = true;
-            };
+            this.client.say("#ilotterytea", "iLotteryteaLive ");
 
             if (this.STV.getNewEmotes != "") {
                 this.client.say("#ilotterytea", `Added 7TV channel emotes: ${this.STV.getNewEmotes}`);
@@ -303,29 +300,27 @@ class ClientTTV {
             }
         });
 
+        // Updates 7tv channel emotes every 45 minutes:
         setInterval(() => {
             writeFileSync(`./saved/emote_data.json`, JSON.stringify(this.emotes, null, 2), {
                 encoding: "utf-8"
             });
             console.log("* Emote file saved!");
-        }, 90000);
 
-        // Reconnects to Twitch servers to update 7TV channel emotes (I couldn't do it any other way):
-        setInterval(() => {
-            this.STV.updateEmotes();
-            this.client.disconnect();
             setTimeout(() => {
-                this.client.connect();
+                this.STV.updateEmotes();
             }, 1000);
+            
+            setTimeout(() => {
+                if (this.STV.getNewEmotes != "") {
+                    this.client.say("#ilotterytea", `Added 7TV channel emotes: ${this.STV.getNewEmotes}`);
+                }
+                if (this.STV.getDeletedEmotes != "") {
+                    this.client.say("#ilotterytea", `Deleted/renamed 7TV channel emotes: ${this.STV.getDeletedEmotes}`);
+                }
+            }, 2500);
             console.log("* 7TV channel emotes has been updated!");
-        }, 43200000);
-        
-        process.on("SIGTERM", (listener) => {
-            writeFileSync(`./saved/emote_data.json`, JSON.stringify(this.emotes, null, 2), {
-                encoding: "utf-8"
-            });
-            console.log("* Emote file saved!");
-        });
+        }, 2700000);
     }
 }
 
