@@ -83,7 +83,6 @@ class EmoteUpdater {
                     this.deleted_emotes[value] = this.deleted_emotes[value] += `${Object.keys(file_emotes[value]["stv"][i])} `;
                 }
             }
-            console.log(this.deleted_emotes[value])
             // Remove deleted emotes from file_emotes:
             for (let i = 0; i < this.deleted_emotes[value].split(' '); i++) {
                 delete file_emotes[value]["stv"][this.deleted_emotes.split(' ')[i]];
@@ -92,8 +91,6 @@ class EmoteUpdater {
             count++;
             if (count == array.length) {
                 this.emotes = file_emotes;
-                console.log(this.emotes);
-                console.log(this.getNewEmotes)
                 writeFileSync("./saved/emotes.json", JSON.stringify(file_emotes, null, 2), {encoding: "utf-8"});
                 console.log(`* 7TV channel emotes were updated!`);
             }

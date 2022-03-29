@@ -330,7 +330,7 @@ class ClientTTV {
                 });
             }, 3500);
             console.log("* 7TV channel emotes has been updated!");
-        }, 10000);
+        }, 90000);
     }
 }
 
