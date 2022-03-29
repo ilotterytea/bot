@@ -194,11 +194,14 @@ class ClientTTV {
             this.options.join.as_client.forEach((value, index, array) => {
                 if (value == "#ilotterytea") this.client.say(value, "iLotteryteaLive ");
 
-                if (this.STV.getNewEmotes[value.slice(1, value.length)] != "") {
-                    this.client.say(value, `Added 7TV channel emotes: ${this.STV.getNewEmotes[value.slice(1, value.length)]}`);
+                var new_emotes = this.STV.getNewEmotes;
+                var del_emotes = this.STV.getDeletedEmotes;
+
+                if (new_emotes[value.slice(1, value.length)] != "") {
+                    this.client.say(value, `Added 7TV channel emotes: ${new_emotes[value.slice(1, value.length)]}`);
                 }
-                if (this.STV.getDeletedEmotes[value.slice(1, value.length)] != "") {
-                    this.client.say(value, `Deleted/renamed 7TV channel emotes: ${this.STV.getDeletedEmotes[value.slice(1, value.length)]}`);
+                if (del_emotes[value.slice(1, value.length)] != "") {
+                    this.client.say(value, `Deleted/renamed 7TV channel emotes: ${del_emotes[value.slice(1, value.length)]}`);
                 }
             });
         });
@@ -320,12 +323,15 @@ class ClientTTV {
             }, 1500);
             
             setTimeout(() => {
+                var new_emotes = this.STV.getNewEmotes;
+                var del_emotes = this.STV.getDeletedEmotes;
+
                 this.options.join.as_client.forEach((value, index, array) => {
-                    if (this.STV.getNewEmotes[value.slice(1, value.length)] != "") {
-                        this.client.say(value, `Added 7TV channel emotes: ${this.STV.getNewEmotes[value.slice(1, value.length)]}`);
+                    if (new_emotes[value.slice(1, value.length)] != "") {
+                        this.client.say(value, `Added 7TV channel emotes: ${new_emotes[value.slice(1, value.length)]}`);
                     }
-                    if (this.STV.getDeletedEmotes[value.slice(1, value.length)] != "") {
-                        this.client.say(value, `Deleted/renamed 7TV channel emotes: ${this.STV.getDeletedEmotes[value.slice(1, value.length)]}`);
+                    if (del_emotes[value.slice(1, value.length)] != "") {
+                        this.client.say(value, `Deleted/renamed 7TV channel emotes: ${del_emotes[value.slice(1, value.length)]}`);
                     }
                 });
             }, 3500);

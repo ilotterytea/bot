@@ -54,13 +54,13 @@ class EmoteUpdater {
 
         this.usernames.forEach(async (value, index, array) => {
             const api_emotes = await this.api.fetchUserEmotes(value); // Fetch user's 7tv channel emotes.
-            let formatted_emotes = [];
+            let formatted_emotes = {};
             this.deleted_emotes[value] = "";
             this.new_emotes[value] = "";
 
             // Add the api_emotes names to the array:
             for (let i = 0; i < api_emotes.length; i++) {
-                formatted_emotes.push(api_emotes[i].name);
+                formatted_emotes[api_emotes[i].name] = 0;
             }
 
             // Create a dictionary for new users:
@@ -78,14 +78,15 @@ class EmoteUpdater {
             }
 
             // Check the deleted emotes:
-            for (let i = 0; i < Object.keys(file_emotes[value]["stv"]); i++) {
-                if (!(formatted_emotes.includes(Object.keys(file_emotes[value]["stv"][i])))) {
-                    this.deleted_emotes[value] = this.deleted_emotes[value] += `${Object.keys(file_emotes[value]["stv"][i])} `;
+            for (let i = 0; i < Object.keys(file_emotes[value]["stv"]).length; i++) {
+                if (eval(`!("${Object.keys(file_emotes[value]["stv"])[i]}" in formatted_emotes)`)) {
+                    this.deleted_emotes[value] = this.deleted_emotes[value] += `${Object.keys(file_emotes[value]["stv"])[i]} `;
                 }
             }
+            
             // Remove deleted emotes from file_emotes:
-            for (let i = 0; i < this.deleted_emotes[value].split(' '); i++) {
-                delete file_emotes[value]["stv"][this.deleted_emotes.split(' ')[i]];
+            for (let i = 0; i < this.deleted_emotes[value].split(' ').length; i++) {
+                delete file_emotes[value]["stv"][this.deleted_emotes[value].split(' ')[i]];
             }
 
             count++;
