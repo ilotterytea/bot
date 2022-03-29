@@ -15,19 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with iLotteryteaLive.  If not, see <http://www.gnu.org/licenses/>.
 
-// Libraries.
-const { readFileSync } = require("fs");
-const { stringify } = require("querystring");
-const tmiJs = require("tmi.js");
-
 /**
  * Help.
  */
 exports.help = {
     value: true,
-    name: "Emote Count!",
+    name: "7TV channel emote count!",
     author: "ilotterytea",
-    description: "Shows how much of the specified emote has been used.",
+    description: "Shows how much of the specified 7TV channel emote has been used. Updates the emote database every 90 seconds.",
     cooldownMs: 1500,
     superUserOnly: false
 }
@@ -53,7 +48,7 @@ exports.run = async (client, target, user, msg, args) => {
             client.say(target, `${mArgs[1]} has been used ${args.emote_data[mArgs[1]].toLocaleString()} times.`);
             return;
         } else {
-            client.say(target, `@${user.username}, WHAT THE HELL IS ${mArgs[1]} ? YEAHBUT7TV 💢 `);
+            client.say(target, `@${user.username}, I know nothing about ${mArgs[1]} ¯\\_ FeelsDankMan _/¯ (Advice: use !help ecount for more info haHAA )`);
         }
 
         inCooldown.push(user.username);

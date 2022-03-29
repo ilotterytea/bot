@@ -15,8 +15,10 @@
         "fs": "^0.0.1-security",
         "http": "^0.0.1-security",
         "node-telegram-bot-api": "^0.56.0",
+        "os-utils": "^0.0.14",
         "pg": "^8.7.3",
         "tmi.js": "^1.8.5",
+        "twitch": "^4.6.7",
         "twitchrequest": "^1.4.9"
     }
 }

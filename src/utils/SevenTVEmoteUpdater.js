@@ -23,13 +23,12 @@ const SevenTV = require("7tv");
  * @param {*} username Username.
  */
 class EmoteUpdater {
-    constructor (username, emotes) {
-        this.username = username;
-        this.emote_mode = (emotes == undefined) ? "7tv" : emotes;
-        this.emotes = undefined;
-        this.deleted_emotes = "";
-        this.new_emotes = "";
+    constructor (usernames) {
         this.api = SevenTV();
+        this.usernames = usernames;
+        this.emotes = {};
+        this.deleted_emotes = {};
+        this.new_emotes = {};
     }
 
     get getDeletedEmotes() {
@@ -45,64 +44,61 @@ class EmoteUpdater {
     }
 
     async updateEmotes() {
-        const emotes = await this.api.fetchUserEmotes(this.username); // Fetch user 7tv emotes.
-        let formatted_emotes = {};
-        this.deleted_emotes = "";
-        this.new_emotes = "";
-        this.emotes = {};
-        let old_emotes = {};
+        let file_emotes = JSON.parse(readFileSync("./saved/emotes.json", {encoding: "utf-8"}));
+        var count = 0;
 
-        // A file of emote data exists:
-        if (existsSync("./saved/emote_data.json")) {
-            old_emotes = JSON.parse(readFileSync("./saved/emote_data.json", {encoding:"utf-8"})); // Old emotes.
+        // Reset the values
+        this.new_emotes = {};
+        this.deleted_emotes = {};
+        this.emotes = {}; 
 
-            for (let i = 0; i < emotes.length; i++) {
-                formatted_emotes[(emotes[i].name).toString()] = 0;
+        this.usernames.forEach(async (value, index, array) => {
+            const api_emotes = await this.api.fetchUserEmotes(value); // Fetch user's 7tv channel emotes.
+            let formatted_emotes = [];
+            this.deleted_emotes[value] = "";
+            this.new_emotes[value] = "";
+
+            // Add the api_emotes names to the array:
+            for (let i = 0; i < api_emotes.length; i++) {
+                formatted_emotes.push(api_emotes[i].name);
             }
 
-            // Check for deleted emotes:
-            for (let i = 0; i < Object.keys(old_emotes).length; i++) {
-                if (eval(`"${Object.keys(old_emotes)[i]}" in formatted_emotes`)) {
-                    continue;
-                } else {
-                    this.deleted_emotes = this.deleted_emotes + `${Object.keys(old_emotes)[i]} `;
-                }
+            // Create a dictionary for new users:
+            if (eval(`!("${value}" in file_emotes)`)) {
+                file_emotes[value] = {}
+                file_emotes[value]["stv"] = {}
             }
 
-            for (let i = 0; i < this.deleted_emotes.split(' ').length; i++) {
-                console.log(old_emotes[this.deleted_emotes.split(' ')[i]])
-                delete old_emotes[this.deleted_emotes.split(' ')[i]];
-            }
-            
             // Check for new emotes:
-            for (let i = 0; i < emotes.length; i++) {
-                if (eval(`"${emotes[i].name}" in old_emotes`)) {
-                    continue;
-                } else {
-                    old_emotes[(emotes[i].name).toString()] = 0;
-                    this.new_emotes = this.new_emotes + `${emotes[i].name} `
+            for (let i = 0; i < api_emotes.length; i++) {
+                if (eval(`!("${api_emotes[i].name}" in file_emotes["${value}"].stv)`)) {
+                    file_emotes[value].stv[api_emotes[i].name] = 0;
+                    this.new_emotes[value] = this.new_emotes[value] += `${api_emotes[i].name} `;
                 }
             }
 
-            this.emotes = old_emotes;
-            writeFileSync(`./saved/emote_data.json`, JSON.stringify(old_emotes,null,2), {encoding: "utf-8"});
+            // Check the deleted emotes:
+            for (let i = 0; i < Object.keys(file_emotes[value]["stv"]); i++) {
+                if (!(formatted_emotes.includes(Object.keys(file_emotes[value]["stv"][i])))) {
+                    this.deleted_emotes[value] = this.deleted_emotes[value] += `${Object.keys(file_emotes[value]["stv"][i])} `;
+                }
+            }
+            console.log(this.deleted_emotes[value])
+            // Remove deleted emotes from file_emotes:
+            for (let i = 0; i < this.deleted_emotes[value].split(' '); i++) {
+                delete file_emotes[value]["stv"][this.deleted_emotes.split(' ')[i]];
+            }
 
-            console.log("* 7TV channel emotes were loaded.");
-            return old_emotes;
-        }
-
-        // Filling the json_emotes:
-        for (let i = 0; i < emotes.length; i++) {
-            formatted_emotes[emotes[i].name] = 0;
-        }
-        
-        // Saving 7tv emotes with json_emotes:
-        writeFileSync(`./saved/emote_data.json`, JSON.stringify(formatted_emotes, null, 2), {encoding: "utf-8"});
-        
-        console.log("* The 7tv emote file has been created and filled out!");
+            count++;
+            if (count == array.length) {
+                this.emotes = file_emotes;
+                console.log(this.emotes);
+                console.log(this.getNewEmotes)
+                writeFileSync("./saved/emotes.json", JSON.stringify(file_emotes, null, 2), {encoding: "utf-8"});
+                console.log(`* 7TV channel emotes were updated!`);
+            }
+        });
     }
-
-
 }
 
 module.exports = {EmoteUpdater};

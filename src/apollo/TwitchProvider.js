@@ -171,48 +171,56 @@ class ClientTTV {
         });
         this.prefix = this.options.prefix;
         this.users = this.options.users;
-        this.STV = new SevenTVEmoteUpdater.EmoteUpdater("ilotterytea", "7tv");
-        this.emotes = {};
-        this.firstTimeConnected = false;
+        function usernameFix(userlist) {
+            let usernames = [];
+            userlist.forEach((value, index, array) => {
+                usernames.push(value.slice(1, value.length));
+            });
+            return usernames;
+        
+        }
+        this.STV = new SevenTVEmoteUpdater.EmoteUpdater(usernameFix(this.options.join.as_client));
     }
 
+
     async enable() {
-        this.client.connect();
         this.STV.updateEmotes();
+        this.client.connect();
 
         this.client.on("connecting", (address, port) => console.log(`* Client: Connecting to ${address}:${port}...`));
         this.client.on("connected", (address, port) => {
             console.log(`* Client: Connected to ${address}:${port}!`);
-            this.client.say("#ilotterytea", "iLotteryteaLive ");
 
-            if (this.STV.getNewEmotes != "") {
-                this.client.say("#ilotterytea", `Added 7TV channel emotes: ${this.STV.getNewEmotes}`);
-            }
-            if (this.STV.getDeletedEmotes != "") {
-                this.client.say("#ilotterytea", `Deleted/renamed 7TV channel emotes: ${this.STV.getDeletedEmotes}`);
-            }
+            this.options.join.as_client.forEach((value, index, array) => {
+                if (value == "#ilotterytea") this.client.say(value, "iLotteryteaLive ");
+
+                if (this.STV.getNewEmotes[value.slice(1, value.length)] != "") {
+                    this.client.say(value, `Added 7TV channel emotes: ${this.STV.getNewEmotes[value.slice(1, value.length)]}`);
+                }
+                if (this.STV.getDeletedEmotes[value.slice(1, value.length)] != "") {
+                    this.client.say(value, `Deleted/renamed 7TV channel emotes: ${this.STV.getDeletedEmotes[value.slice(1, value.length)]}`);
+                }
+            });
         });
 
         this.client.on("reconnect", () => console.log(`* Client: Reconnecting...`));
         this.client.on("disconnected", (reason) => console.log(`* Client: Disconnected: ${reason}!`));
 
         this.client.on("message", (target, user, msg, self) => {
+            this.emotes = this.STV.getEmotes;
             if (self) return;
 
-            this.emotes = this.STV.getEmotes;
-
             const cmd_args = {
-                emote_data: this.emotes,
-                join: JSON.parse(readFileSync(`./options.json`, {encoding: "utf-8"}))["join"],
-                images: this.images
+                emote_data: eval(`this.emotes["${target.slice(1, target.length)}"]["stv"]`),
+                join: JSON.parse(readFileSync(`./options.json`, {encoding: "utf-8"}))["join"]
             };
 
             const args = msg.trim().split(' ');
 
             for (let i = 0; i < args.length; i++) {
-                for (let j = 0; j < Object.keys(this.emotes).length; j++) {
-                    if (args[i] == Object.keys(this.emotes)[j]) {
-                        this.emotes[Object.keys(this.emotes)[j]] = this.emotes[Object.keys(this.emotes)[j]] += 1
+                for (let j = 0; j < Object.keys(eval(`this.emotes["${target.slice(1, target.length)}"]["stv"]`)).length; j++) {
+                    if (args[i] == Object.keys(eval(`this.emotes["${target.slice(1, target.length)}"]["stv"]`))[j]) {
+                        eval(`this.emotes["${target.slice(1, target.length)}"]["stv"][Object.keys(this.emotes["${target.slice(1, target.length)}"]["stv"])[j]] = this.emotes["${target.slice(1, target.length)}"]["stv"][Object.keys(this.emotes["${target.slice(1, target.length)}"]["stv"])[j]] += 1`);
                     }
                 }
             }
@@ -233,7 +241,7 @@ class ClientTTV {
 
                 if (cmd == "help") {
                     if (args.length == 1) {
-                        this.client.say(target, `@${user.username}, List of my available commands: https://github.com/NotDankEnough/notdankenough/blob/master/md/iLotteryteaLive.md#twitch-commands FeelsOkayMan `);
+                        this.client.say(target, `@${user.username}, List of my available commands: https://github.com/NotDankEnough/notdankenough/blob/master/md/iLotteryteaLive.md#twitch-commands FeelsDankMan 🔎 📖 `);
                         return;
                     }
 
@@ -253,7 +261,7 @@ class ClientTTV {
 
                     // If the command is for super-users, check if the sender is a super-user:
                     if (help.superUserOnly) {
-                        if (this.users.supa_user_ids.includes(user["user-id"])) {
+                        if (this.users.supa_user_ids[target.slice(1, target.length)].includes(user["user-id"])) {
                             require(`./commands/${cmd}.js`).run(this.client, target, user, msg, cmd_args);
                         } else {
                             this.client.say(target, `@${user.username}, u du not hav permision tu du that! Sadeg `);
@@ -302,25 +310,27 @@ class ClientTTV {
 
         // Updates 7tv channel emotes every 45 minutes:
         setInterval(() => {
-            writeFileSync(`./saved/emote_data.json`, JSON.stringify(this.emotes, null, 2), {
+            writeFileSync(`./saved/emotes.json`, JSON.stringify(this.emotes, null, 2), {
                 encoding: "utf-8"
             });
             console.log("* Emote file saved!");
 
             setTimeout(() => {
                 this.STV.updateEmotes();
-            }, 1000);
+            }, 1500);
             
             setTimeout(() => {
-                if (this.STV.getNewEmotes != "") {
-                    this.client.say("#ilotterytea", `Added 7TV channel emotes: ${this.STV.getNewEmotes}`);
-                }
-                if (this.STV.getDeletedEmotes != "") {
-                    this.client.say("#ilotterytea", `Deleted/renamed 7TV channel emotes: ${this.STV.getDeletedEmotes}`);
-                }
-            }, 2500);
+                this.options.join.as_client.forEach((value, index, array) => {
+                    if (this.STV.getNewEmotes[value.slice(1, value.length)] != "") {
+                        this.client.say(value, `Added 7TV channel emotes: ${this.STV.getNewEmotes[value.slice(1, value.length)]}`);
+                    }
+                    if (this.STV.getDeletedEmotes[value.slice(1, value.length)] != "") {
+                        this.client.say(value, `Deleted/renamed 7TV channel emotes: ${this.STV.getDeletedEmotes[value.slice(1, value.length)]}`);
+                    }
+                });
+            }, 3500);
             console.log("* 7TV channel emotes has been updated!");
-        }, 2700000);
+        }, 10000);
     }
 }
 
