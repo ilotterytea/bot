@@ -43,8 +43,15 @@ class EmoteUpdater {
         return this.emotes;
     }
 
-    async updateEmotes() {
-        let file_emotes = JSON.parse(readFileSync("./saved/emotes.json", {encoding: "utf-8"}));
+    async updateEmotes(emote_dictionary = null) {
+        let file_emotes = undefined;
+
+        if (emote_dictionary == null) {
+            file_emotes = JSON.parse(readFileSync("./saved/emotes.json", {encoding: "utf-8"}));
+        } else {
+            file_emotes = emote_dictionary;
+        }
+        
         var count = 0;
 
         // Reset the values
@@ -92,7 +99,6 @@ class EmoteUpdater {
             count++;
             if (count == array.length) {
                 this.emotes = file_emotes;
-                writeFileSync("./saved/emotes.json", JSON.stringify(file_emotes, null, 2), {encoding: "utf-8"});
                 console.log(`* 7TV channel emotes were updated!`);
             }
         });

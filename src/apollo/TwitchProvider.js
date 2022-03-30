@@ -319,7 +319,7 @@ class ClientTTV {
             console.log("* Emote file saved!");
 
             setTimeout(() => {
-                this.STV.updateEmotes();
+                this.STV.updateEmotes(this.emotes);
             }, 1500);
             
             setTimeout(() => {
