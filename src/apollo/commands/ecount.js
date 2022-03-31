@@ -24,7 +24,8 @@ exports.help = {
     author: "ilotterytea",
     description: "Shows how much of the specified 7TV channel emote has been used. Updates the emote database every 90 seconds.",
     cooldownMs: 1500,
-    superUserOnly: false
+    superUserOnly: false,
+    authorOnly: false
 }
 
 /**
@@ -38,14 +39,15 @@ exports.help = {
 exports.run = async (client, target, user, msg, args) => {
     if (!inCooldown.includes(user.username)) {
         const mArgs = msg.split(' ');
+        //const username = (msg.split(' ').length > 2 && msg.includes("-e:")) ? ... : null
 
         if (mArgs.length == 1) {
             client.say(target, `@${user.username}, provide an emote.`);
             return;
         };
         
-        if (mArgs[1] in args.emote_data) {
-            client.say(target, `${mArgs[1]} has been used ${args.emote_data[mArgs[1]].toLocaleString()} times.`);
+        if (mArgs[1] in args.emote_data[target.slice(1, target.length)]["stv"]) {
+            client.say(target, `${mArgs[1]} has been used ${args.emote_data[target.slice(1, target.length)]["stv"][mArgs[1]].toLocaleString()} times.`);
             return;
         } else {
             client.say(target, `@${user.username}, I know nothing about ${mArgs[1]} ¯\\_ FeelsDankMan _/¯ (Advice: use !help ecount for more info haHAA )`);

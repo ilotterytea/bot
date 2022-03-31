@@ -27,7 +27,8 @@ module.exports.help = {
     author: "ilotterytea",
     description: "Checking if it's alive, and a bunch of other data.",
     cooldownMs: 5000,
-    superUserOnly: false
+    superUserOnly: false,
+    authorOnly: false
 }
 
 /**

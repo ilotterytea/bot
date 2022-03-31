@@ -53,29 +53,6 @@ class AnonymousTTV {
         this.client.connect();
 
         this.client.on("message", (target, user, msg, self) => {
-            const date = new Date();
-
-            function getStringOfMonth() {
-                switch (date.getUTCMonth() + 1) {
-                    case 1:return "January"
-                    case 2:return "February"
-                    case 3:return "March"
-                    case 4:return "April"
-                    case 5:return "May"
-                    case 6:return "June"
-                    case 7:return "July"
-                    case 8:return "August"
-                    case 9:return "September"
-                    case 10:return "October"
-                    case 11:return "November"
-                    case 12:return "December"
-                    default:return "January"
-                }
-            }
-
-            if (msg.match(new RegExp(/(ilotte?)/)) || msg.match(new RegExp(/лот/))) {
-                this.messenger_client.sendMessage(`🔔 You've got a new ping!\nSender: ${user["username"]} (${user["user-id"]}\nIn channel: ${target} (${user["room-id"]})\nMessage: ${msg.trim()}\nDate: ${getStringOfMonth()} ${(date.getUTCDate().toString().length == 1) ? `0${date.getUTCDate()}` : `${date.getUTCDate()}`}, ${date.getUTCFullYear()}`, this.telegram_supa_id);
-            }
 
             //require("../utils/Filesystem").saveMsg(target, user, msg);
             //require("../utils/Filesystem").saveUser(null, target, user, msg);
@@ -184,7 +161,7 @@ class ClientTTV {
 
 
     async enable() {
-        this.STV.updateEmotes();
+        await this.STV.updateEmotes(JSON.parse(readFileSync("./saved/emotes.json", {encoding: "utf-8"})));
         this.client.connect();
 
         this.client.on("connecting", (address, port) => console.log(`* Client: Connecting to ${address}:${port}...`));
@@ -214,7 +191,7 @@ class ClientTTV {
             if (self) return;
 
             const cmd_args = {
-                emote_data: eval(`this.emotes["${target.slice(1, target.length)}"]["stv"]`),
+                emote_data: this.emotes,
                 join: JSON.parse(readFileSync(`./options.json`, {encoding: "utf-8"}))["join"]
             };
 
@@ -255,7 +232,7 @@ class ClientTTV {
                         return;
                     }
     
-                    this.client.say(target, `FeelsDankMan 📖 ${help.name} ${help.description} Cooldown: ${help.cooldownMs / 1000} sec. ${(help.superUserOnly) ? "Only for Supa Users!" : ""}`);
+                    this.client.say(target, `FeelsDankMan 📖 ${help.name} ${help.description} Cooldown: ${help.cooldownMs / 1000} sec. ${(help.superUserOnly) ? "Only for Supa Users!" : ""}${(help.authorOnly) ? "Only for bot creator!" : ""}`);
                     return;
                 }
 
@@ -268,6 +245,14 @@ class ClientTTV {
                             require(`./commands/${cmd}.js`).run(this.client, target, user, msg, cmd_args);
                         } else {
                             this.client.say(target, `@${user.username}, u du not hav permision tu du that! Sadeg `);
+                        }
+                        return;
+                    }
+
+                    if (help.authorOnly) {
+                        if (user["user-id"] == "191400264") {
+                            require(`./commands/${cmd}.js`).run(this.client, target, user, msg, cmd_args);
+                            return;
                         }
                         return;
                     }
@@ -312,14 +297,9 @@ class ClientTTV {
         });
 
         // Updates 7tv channel emotes every 45 minutes:
-        setInterval(() => {
-            writeFileSync(`./saved/emotes.json`, JSON.stringify(this.emotes, null, 2), {
-                encoding: "utf-8"
-            });
-            console.log("* Emote file saved!");
-
-            setTimeout(() => {
-                this.STV.updateEmotes(this.emotes);
+        setInterval(async () => {
+            setTimeout(async () => {
+                await this.STV.updateEmotes(this.emotes);
             }, 1500);
             
             setTimeout(() => {
@@ -335,7 +315,6 @@ class ClientTTV {
                     }
                 });
             }, 3500);
-            console.log("* 7TV channel emotes has been updated!");
         }, 90000);
     }
 }

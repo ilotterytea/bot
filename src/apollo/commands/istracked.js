@@ -44,7 +44,8 @@ exports.help = {
     author: "ilotterytea",
     description: "Check how the user is tracked.",
     cooldownMs: 5000,
-    superUserOnly: false
+    superUserOnly: false,
+    authorOnly: false
 }
 
 /**

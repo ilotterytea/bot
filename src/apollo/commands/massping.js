@@ -30,7 +30,8 @@ module.exports.help = {
     author: "ilotterytea",
     description: "",
     cooldownMs: 15000,
-    superUserOnly: true
+    superUserOnly: true,
+    authorOnly: false
 }
 
 /**

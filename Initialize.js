@@ -28,8 +28,6 @@ require("dotenv").config({path: "./default.env"});
 class ClientInitialize {
     constructor (options) {
         this.options = JSON.parse(readFileSync("./options.json", {encoding: "utf-8"})) || options;
-
-        this.msgClient = new MessengerProvider(this.options.credentials.telegram_oauth);
         
         this.client = new ClientTTV(this.options);
         this.anonymous = new AnonymousTTV({
@@ -45,7 +43,6 @@ class ClientInitialize {
     async run() {
         check();
 
-        this.msgClient.enable();
         this.client.enable();
         this.anonymous.enableAnonymous();
         /*this.anonymous.enableRequests(
