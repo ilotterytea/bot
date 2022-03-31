@@ -41,8 +41,8 @@ module.exports.help = {
  */
 exports.run = async (client, target, user, msg, args) => {
     if (!inCooldown.includes(user.username)) {
-        let items = Object.keys(args.emote_data).map((key) => {
-            return [key, args.emote_data[key]]
+        let items = Object.keys(args.emote_data[target.slice(1, target.length)]["stv"]).map((key) => {
+            return [key, args.emote_data[target.slice(1, target.length)]["stv"][key]]
         });
 
         items.sort((f, s) => {
