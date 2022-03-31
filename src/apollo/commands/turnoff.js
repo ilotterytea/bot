@@ -44,7 +44,7 @@ exports.run = async (client, target, user, msg, args) => {
     writeFileSync("./saved/emotes.json", JSON.stringify(args.emote_data, null, 2), {encoding: "utf-8"});
     console.log(`* Emote file saved!`);
     client.disconnect();
-    console.log(`!!! ${user.username} has shut down the bot`);
+    console.log(`!!! ${user.username} turned off the bot!`);
 };
 
 let inCooldown = [];
