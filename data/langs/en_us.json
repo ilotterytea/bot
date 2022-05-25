@@ -1,0 +1,48 @@
+{
+    "test": "test %0% successfully completed!",
+    "testnuts": "NUTS %0% successfully completed!",
+    "error": "@%user%, an unexpected error occurred during the execution of the command - a report about this has been sent. :/",
+    "cmd": {
+        "help": {
+            "help": "@%user%, List of my available commands: https://github.com/NotDankEnough/notdankenough/blob/master/md/iLotteryteaLive.md#twitch-commands FeelsDankMan 🔎 📖",
+            "lol": "lol"
+        },
+        "etop": {
+            "name": "Emote top!",
+            "desc": "Top 5 most used 7TV channel emotes.",
+            "execute": {
+                "success": "Top 5 emotes by the total count of used times:",
+                "notenoughemotes": "This channel has less than 5 7TV channel emotes."
+            }
+        },
+        "ecount": {
+            "name": "7TV channel emote count!",
+            "desc": "Shows how much of the specified 7TV channel emote has been used. Updates the emote database every 90 seconds.",
+            "execute": {
+                "notfull": "@%user%, provide an emote!",
+                "success": "%0% has been used %1% times."
+            }
+        },
+        "massping": {
+            "name": "Ping em, Fors! LUL 💪 ",
+            "desc": ""
+        },
+        "ping": {
+            "name": "Ping!",
+            "desc": "Checking if it's alive, and a bunch of other data.",
+            "execute": {
+                "success": "FeelsDankMan 🏓 Pong! Session uptime: %uptime%. Landed in %logonchannels% channels. Latency to TMI: %tmi%ms"
+            }
+        }
+    },
+    "emoteupdater": {
+        "stv": {
+            "new_emotes": "[7TV] Added channel emotes: %0%",
+            "deleted_emotes": "[7TV] Deleted/removed channel emotes: %0%"
+        }
+    },
+    "roles": {
+        "notenoughpermissions": "@%user%, sori u dunt hev permisions to du that! Okayeg",
+        "yourenotabroadcaster": "@%user%, wait u nut a bratcaster! Okayeg"
+    }
+}

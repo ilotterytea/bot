@@ -159,9 +159,8 @@ dist
 
 # Support for Project snippet scope
 
-saved
-saved/*
+storage
+storage/*
 test.js
-.env
-.sql
-options.json
+*.env
+*.sql

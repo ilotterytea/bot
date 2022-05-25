@@ -1,4 +1,4 @@
-// Copyright (C) 2022 NotDankEnough (iLotterytea)
+// Copyright (C) 2022 ilotterytea
 // 
 // This file is part of iLotteryteaLive.
 // 
@@ -15,47 +15,46 @@
 // You should have received a copy of the GNU General Public License
 // along with iLotteryteaLive.  If not, see <http://www.gnu.org/licenses/>.
 
-// Libraries.
-const { readFileSync } = require("fs");
-const tmi = require("tmi.js");
-
-/**
- * Help.
- */
-module.exports.help = {
-    name: "Emote top!",
-    author: "ilotterytea",
-    description: "Top 5 most used 7TV channel emotes.",
+module.exports = {
     cooldownMs: 5000,
-    superUserOnly: false,
-    authorOnly: false
-}
-
-/**
- * Run the command.
- * @param {*} client Client.
- * @param {*} target Target.
- * @param {*} user User.
- * @param {*} msg Message.
- * @param {*} args Arguments.
- */
-exports.run = async (client, target, user, msg, args) => {
-    if (!inCooldown.includes(user.username)) {
-        let items = Object.keys(args.emote_data[target.slice(1, target.length)]["stv"]).map((key) => {
-            return [key, args.emote_data[target.slice(1, target.length)]["stv"][key]]
-        });
-
-        items.sort((f, s) => {
-            return s[1] - f[1]
-        });
-
-        let top_emotes = items.slice(0, 5);
-
-        client.say(target, `Top 5 emotes by the total count of used times: ${top_emotes[0][0]} (${top_emotes[0][1]}), ${top_emotes[1][0]} (${top_emotes[1][1]}), ${top_emotes[2][0]} (${top_emotes[2][1]}), ${top_emotes[3][0]} (${top_emotes[3][1]}), ${top_emotes[4][0]} (${top_emotes[4][1]})`);
+    permissions: [null],
+    execute: async (args) => {
+        if (!inCooldown.includes(args.user.username)) {
+            if (args.msg_args.length == 2 && Object.keys(args.emotes).includes(args.msg_args[1].toLowerCase())) {
+                let items = Object.keys(args.emotes[args.msg_args[1].toLowerCase()]).map((key) => {
+                    return [key, args.emotes[args.msg_args[1].toLowerCase()][key]]
+                });
+                items.sort((f, s) => {
+                    return s[1] - f[1]
+                });
         
-        inCooldown.push(user.username);
-        setTimeout(() => inCooldown = inCooldown.filter(u => u !== user.username), this.help.cooldownMs);
+                let top_emotes = items.slice(0, 5);
+        
+                console.log(top_emotes)
+
+                inCooldown.push(args.user.username);
+                setTimeout(() => inCooldown = inCooldown.filter(u => u !== args.user.username), this.cooldownMs);
+        
+                return `${await args.lang.TranslationKey("cmd.etop.execute.success", args)} ${top_emotes[0][0]} (${top_emotes[0][1]}), ${top_emotes[1][0]} (${top_emotes[1][1]}), ${top_emotes[2][0]} (${top_emotes[2][1]}), ${top_emotes[3][0]} (${top_emotes[3][1]}), ${top_emotes[4][0]} (${top_emotes[4][1]})`;
+            } else {
+                let items = Object.keys(args.emotes[args.target.slice(1, args.target.length)]).map((key) => {
+                    return [key, args.emotes[args.target.slice(1, args.target.length)][key]]
+                });
+                items.sort((f, s) => {
+                    return s[1] - f[1]
+                });
+        
+                let top_emotes = items.slice(0, 5);
+        
+                console.log(top_emotes)
+
+                inCooldown.push(args.user.username);
+                setTimeout(() => inCooldown = inCooldown.filter(u => u !== args.user.username), this.cooldownMs);
+        
+                return `${await args.lang.TranslationKey("cmd.etop.execute.success", args)} ${top_emotes[0][0]} (${top_emotes[0][1]}), ${top_emotes[1][0]} (${top_emotes[1][1]}), ${top_emotes[2][0]} (${top_emotes[2][1]}), ${top_emotes[3][0]} (${top_emotes[3][1]}), ${top_emotes[4][0]} (${top_emotes[4][1]})`;
+            }
+        }
     }
-};
+}
 
 let inCooldown = [];

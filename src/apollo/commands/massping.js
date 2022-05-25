@@ -1,4 +1,4 @@
-// Copyright (C) 2022 NotDankEnough (iLotterytea)
+// Copyright (C) 2022 ilotterytea
 // 
 // This file is part of iLotteryteaLive.
 // 
@@ -15,76 +15,48 @@
 // You should have received a copy of the GNU General Public License
 // along with iLotteryteaLive.  If not, see <http://www.gnu.org/licenses/>.
 
-// Libraries.
-const {
-    readFileSync
-} = require("fs");
-const tmi = require("tmi.js");
-const axios = require("axios").default;
+const { default: axios } = require("axios")
 
-/**
- * Help.
- */
-module.exports.help = {
-    name: "Ping em, Fors! LUL 💪 ",
-    author: "ilotterytea",
-    description: "",
-    cooldownMs: 15000,
-    superUserOnly: true,
-    authorOnly: false
-}
+module.exports = {
+    cooldownMs: 5000,
+    permissions: ["br"],
+    execute: async (args) => {
+        if (!inCooldown.includes(args.user.username)) {
+            var chatters = await (await axios.get(`https://tmi.twitch.tv/group/user/${args.target.slice(1, args.target.length)}/chatters`)).data.chatters;
+            var msga = args.msg_args.filter(n => n !== `${args.prefix}massping`).join(' ');
 
-/**
- * Run the command.
- * @param {*} client Client.
- * @param {*} target Target.
- * @param {*} user User.
- * @param {*} msg Message.
- * @param {*} args Arguments.
- */
-exports.run = async (client, target, user, msg, args) => {
-    if (!inCooldown.includes(user.username)) {
-        const users = await (await axios.get(`https://tmi.twitch.tv/group/user/${target.slice(1, target.length)}/chatters`)).data.chatters;
-        let args = msg.trim().split(' ');
-
-        // -o: Ping in one message:
-        if (args.includes("-o")) {
-            let users_string = "";
-
-            for (let i = 0; i < users.moderators.length; i++) {
-                users_string = users_string += `${users.moderators[i]} `
-            }
-            for (let i = 0; i < users.vips.length; i++) {
-                users_string = users_string += `${users.vips[i]} `
-            }
-            for (let i = 0; i < users.viewers.length; i++) {
-                users_string = users_string += `${users.viewers[i]} `
+            for (let i = 0; i < chatters.broadcaster.length; i++) {
+                args.apollo.client.say(args.target, `@${chatters.broadcaster[i]}, ${msga}`);
             }
 
-            args = args.filter(u => u !== "-o");
-            args = args.filter(u => u !== "!massping");
+            for (let i = 0; i < chatters.vips.length; i++) {
+                args.apollo.client.say(args.target, `@${chatters.vips[i]}, ${msga}`);
+            }
 
-            client.say(target, `${users_string} ${args.join(' ')}`);
+            for (let i = 0; i < chatters.moderators.length; i++) {
+                args.apollo.client.say(args.target, `@${chatters.moderators[i]}, ${msga}`);
+            }
 
-            inCooldown.push(user.username);
-            setTimeout(() => inCooldown = inCooldown.filter(u => u !== user.username), this.help.cooldownMs);
-            return;
-        }
-        args = args.filter(u => u !== "!massping");
+            for (let i = 0; i < chatters.staff.length; i++) {
+                args.apollo.client.say(args.target, `@${chatters.staff[i]}, ${msga}`);
+            }
 
-        for (let i = 0; i < users.moderators.length; i++) {
-            client.say(target, `@${users.moderators[i]}, ${args.join(' ')}`);
-        }
-        for (let i = 0; i < users.vips.length; i++) {
-            client.say(target, `@${users.vips[i]}, ${args.join(' ')}`);
-        }
-        for (let i = 0; i < users.viewers.length; i++) {
-            client.say(target, `@${users.viewers[i]}, ${args.join(' ')}`);
-        }
+            for (let i = 0; i < chatters.admins.length; i++) {
+                args.apollo.client.say(args.target, `@${chatters.admins[i]}, ${msga}`);
+            }
 
-        inCooldown.push(user.username);
-        setTimeout(() => inCooldown = inCooldown.filter(u => u !== user.username), this.help.cooldownMs);
+            for (let i = 0; i < chatters.global_mods.length; i++) {
+                args.apollo.client.say(args.target, `@${chatters.global_mods[i]}, ${msga}`);
+            }
+
+            for (let i = 0; i < chatters.viewers.length; i++) {
+                args.apollo.client.say(args.target, `@${chatters.viewers[i]}, ${msga}`);
+            }
+            inCooldown.push(args.user.username);
+            setTimeout(() => inCooldown = inCooldown.filter(u => u !== args.user.username), this.cooldownMs);
+            return null;
+        }
     }
-};
+}
 
 let inCooldown = [];

@@ -1,24 +1,12 @@
 {
-    "name": "iLotteryteaLive",
-    "description": "A lidl utility bot.",
-    "homepage": "http://hmmtodayiwill.ru/",
-    "version": "2.1.1",
-    "author": "iLotterytea <hatesociety@pm.me>",
-    "scripts": {
-        "release": "node Initialize.js"
-    },
-    "dependencies": {
-        "7tv": "^0.0.4",
-        "axios": "^0.26.1",
-        "dotenv": "^16.0.0",
-        "express": "^4.17.3",
-        "fs": "^0.0.1-security",
-        "http": "^0.0.1-security",
-        "node-telegram-bot-api": "^0.56.0",
-        "os-utils": "^0.0.14",
-        "pg": "^8.7.3",
-        "tmi.js": "^1.8.5",
-        "twitch": "^4.6.7",
-        "twitchrequest": "^1.4.9"
-    }
+  "dependencies": {
+    "7tv": "^0.0.4",
+    "axios": "^0.27.2",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "fs": "^0.0.1-security",
+    "tmi.js": "^1.8.5",
+    "twitch": "^4.6.7",
+    "twitch-auth": "^4.6.7"
+  }
 }

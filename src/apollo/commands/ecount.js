@@ -1,4 +1,4 @@
-// Copyright (C) 2022 NotDankEnough (iLotterytea)
+// Copyright (C) 2022 ilotterytea
 // 
 // This file is part of iLotteryteaLive.
 // 
@@ -15,47 +15,23 @@
 // You should have received a copy of the GNU General Public License
 // along with iLotteryteaLive.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Help.
- */
-exports.help = {
-    value: true,
-    name: "7TV channel emote count!",
-    author: "ilotterytea",
-    description: "Shows how much of the specified 7TV channel emote has been used. Updates the emote database every 90 seconds.",
-    cooldownMs: 1500,
-    superUserOnly: false,
-    authorOnly: false
-}
-
-/**
- * Run the command.
- * @param {*} client Client.
- * @param {*} target Target.
- * @param {*} user User.
- * @param {*} msg Message.
- * @param {*} args Arguments.
- */
-exports.run = async (client, target, user, msg, args) => {
-    if (!inCooldown.includes(user.username)) {
-        const mArgs = msg.split(' ');
-        //const username = (msg.split(' ').length > 2 && msg.includes("-e:")) ? ... : null
-
-        if (mArgs.length == 1) {
-            client.say(target, `@${user.username}, provide an emote.`);
-            return;
-        };
-        
-        if (mArgs[1] in args.emote_data[target.slice(1, target.length)]["stv"]) {
-            client.say(target, `${mArgs[1]} has been used ${args.emote_data[target.slice(1, target.length)]["stv"][mArgs[1]].toLocaleString()} times.`);
-            return;
-        } else {
-            client.say(target, `@${user.username}, I know nothing about ${mArgs[1]} ¯\\_ FeelsDankMan _/¯ (Advice: use !help ecount for more info haHAA )`);
+module.exports = {
+    cooldownMs: 5000,
+    permissions: [null],
+    execute: async (args) => {
+        if (!inCooldown.includes(args.user.username)) {
+            if (args.msg_args.length == 1) {
+                return await args.lang.TranslationKey("cmd.ecount.execute.notfull", args);
+            }
+    
+            if (args.msg_args[1] in args.emotes[args.target.slice(1, args.target.length)]) {
+                return await args.lang.TranslationKey("cmd.ecount.execute.success", args, [args.msg_args[1], args.emotes[args.target.slice(1, args.target.length)][args.msg_args[1]].toLocaleString()]);
+            }
+            inCooldown.push(args.user.username);
+            setTimeout(() => inCooldown = inCooldown.filter(u => u !== args.user.username), this.cooldownMs);
+            return null;
         }
-
-        inCooldown.push(user.username);
-        setTimeout(() => inCooldown = inCooldown.filter(u => u !== user.username), this.help.cooldownMs);
     }
-};
+}
 
 let inCooldown = [];

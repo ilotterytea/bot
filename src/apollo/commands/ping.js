@@ -1,4 +1,4 @@
-// Copyright (C) 2022 NotDankEnough (iLotterytea)
+// Copyright (C) 2022 ilotterytea
 // 
 // This file is part of iLotteryteaLive.
 // 
@@ -15,52 +15,32 @@
 // You should have received a copy of the GNU General Public License
 // along with iLotteryteaLive.  If not, see <http://www.gnu.org/licenses/>.
 
-// Libraries.
-const { readFileSync } = require("fs");
-const tmi = require("tmi.js");
-
-/**
- * Help.
- */
-module.exports.help = {
-    name: "Ping!",
-    author: "ilotterytea",
-    description: "Checking if it's alive, and a bunch of other data.",
+module.exports = {
     cooldownMs: 5000,
-    superUserOnly: false,
-    authorOnly: false
-}
+    permissions: [null],
+    execute: async (args) => {
+        if (!inCooldown.includes(args.user.username)) {
+            function formatTime(seconds) {
+                function pad(s) {
+                    return (s < 10 ? '0': '') + s;
+                }
 
-/**
- * Run the command.
- * @param {*} client Client.
- * @param {*} target Target.
- * @param {*} user User.
- * @param {*} msg Message.
- * @param {*} args Arguments.
- */
-exports.run = async (client, target, user, msg, args) => {
-    function timeformat(seconds){
-        function pad(s){
-            return (s < 10 ? '0' : '') + s;
+                var days = Math.floor(seconds / (60 * 60 * 24));
+                var hours = Math.floor(seconds / (60 * 60) % 24);
+                var minutes = Math.floor(seconds % (60 * 60) / 60);
+                var sec = Math.floor(seconds % 60);
+
+                return `${days} d. ${pad(hours)}:${pad(minutes)}:${pad(sec)}`;
+            }
+            var pingms = await args.apollo.client.ping();
+            const text = await args.lang.getNotFilteredTranslationKey("cmd.ping.execute.success", args);
+
+            inCooldown.push(args.user.username);
+            setTimeout(() => inCooldown = inCooldown.filter(u => u !== args.user.username), this.cooldownMs);
+
+            return text.replace("%uptime%", formatTime(process.uptime())).replace("%logonchannels%", args.apollo.options.channelsToJoin.length).replace("%tmi%", Math.floor(Math.round(pingms * 1000)));
         }
-        var days = Math.floor(seconds / (60*60*24))
-        var hours = Math.floor(seconds / (60 * 60) % 24);
-        var minutes = Math.floor(seconds % (60*60) / 60);
-        var sec = Math.floor(seconds % 60); 
-    
-        
-        return `${days}d. ${pad(hours)}:${pad(minutes)}:${pad(sec)}`;
     }
-
-    if (!inCooldown.includes(user.username)) {
-        client.ping().then((ms) => {
-            client.say(target, `@${user.username}, Pong! Session uptime: ${timeformat(process.uptime())}! ${args.join.as_anonymous.length} channels are tracked in anonymous mode, landed in ${args.join.as_client.length} channels. Latency to TMI: ${Math.floor(Math.round(ms * 1000))}ms catDankSpin `);
-        });
-
-        inCooldown.push(user.username);
-        setTimeout(() => inCooldown = inCooldown.filter(u => u !== user.username), this.help.cooldownMs);
-    }
-};
+}
 
 let inCooldown = [];
