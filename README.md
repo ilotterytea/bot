@@ -6,3 +6,5 @@ Full reworking of [ilotterybot](https://github.com/notdankenough/ilotterybot). I
 > Q: How do I add to my channel?
 
 A: *It is not yet possible to add a bot to your channel yourself or add it to the anonymous tracking list. Contact [![](https://img.shields.io/badge/NotDankEnough%20(@justbuildahouse)-blue?style=plastic&logo=telegram)](https://t.me/justbuildahouse) if you need a bot right now. - March 21, 2022*
+
+![kek](https://cdn.7tv.app/emote/60ae9995229664e866bd3871/1x) *- May 26, 2022*
