@@ -37,8 +37,8 @@
     },
     "emoteupdater": {
         "stv": {
-            "new_emotes": "[7TV] Added channel emotes: %0%",
-            "deleted_emotes": "[7TV] Deleted/removed channel emotes: %0%"
+            "new_emotes": "[7TV] 🆕 Added channel emotes: %0%",
+            "deleted_emotes": "[7TV] ❌ Deleted/removed channel emotes: %0%"
         }
     },
     "roles": {
