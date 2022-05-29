@@ -77,16 +77,19 @@ class ApolloClient {
                 }
 
                 // lol
-                if (msg == "test" || (msg == "NUTS" && target == "#fedotir")) {
+                if (msg == "NUTS" && target == "#fedotir") {
                     if (!(args.channel in this.storage.stats.tests)) {
                         this.storage.stats.tests[args.channel] = 0;
                     }
-
                     this.storage.stats.tests[args.channel] = this.storage.stats.tests[args.channel] += 1;
-                    if (arg.msg == "NUTS" && args.target == "#fedotir") {
-                        this.client.say(target, await this.Translations.TranslationKey("testnuts", args, [this.storage.stats.tests[args.channel]]));
-                        return;
+                    //this.client.say(target, await this.Translations.TranslationKey("testnuts", args, [this.storage.stats.tests[args.channel]]));
+                    return;
+                }
+                if (msg == "test" && target != "#fedotir") {
+                    if (!(args.channel in this.storage.stats.tests)) {
+                        this.storage.stats.tests[args.channel] = 0;
                     }
+                    this.storage.stats.tests[args.channel] = this.storage.stats.tests[args.channel] += 1;
                     this.client.say(target, await this.Translations.TranslationKey("test", args, [this.storage.stats.tests[args.channel]]));
                     return;
                 }
@@ -117,7 +120,6 @@ class ApolloClient {
                             this.client.say(target, `@${user.username}, lol`);
                             return;
                         }
-
                         // Say info about command:
                         if (existsSync(`src/apollo/commands/${args.msg_args[1]}.js`)) {
                             this.storage.stats.executed_commands[args.channel] = this.storage.stats.executed_commands[args.channel] += 1;
@@ -144,23 +146,6 @@ class ApolloClient {
                             }
                             
                         } else {
-                            if (cmd.permissions.includes("br") && user.username == args.channel) {
-                                try {
-                                    this.storage.stats.executed_commands[args.channel] = this.storage.stats.executed_commands[args.channel] += 1;
-                                    var response = await cmd.execute(args);
-                                    if (response != null) {
-                                        this.client.say(target, response);
-                                    }
-                                } catch (err) {
-                                    this.client.say(target, await this.Translations.TranslationKey("error", args));
-                                    logger(`Error occurred during the execution of ${args.msg_args[0]} command: ${err}`, "err", true);
-                                }
-                                return;
-                            } else {
-                                this.storage.stats.executed_commands[args.channel] = this.storage.stats.executed_commands[args.channel] += 1;
-                                this.client.say(target, await this.Translations.TranslationKey("roles.yourenotabroadcaster", args));
-                            }
-
                             // Does the sender have a superuser role?
                             if (this.storage.roles.authority.includes(user["user-id"]) && cmd.permissions.includes("su")) {
                                 try {
@@ -174,9 +159,20 @@ class ApolloClient {
                                     logger(`Error occurred during the execution of ${args.msg_args[0]} command: ${err}`, "err", true);
                                 }
                                 return;
-                            } else {
-                                this.storage.stats.executed_commands[args.channel] = this.storage.stats.executed_commands[args.channel] += 1;
-                                this.client.say(target, await this.Translations.TranslationKey("roles.notenoughpermissions", args));
+                            }
+
+                            if (cmd.permissions.includes("br") && user.username == args.channel) {
+                                try {
+                                    this.storage.stats.executed_commands[args.channel] = this.storage.stats.executed_commands[args.channel] += 1;
+                                    var response = await cmd.execute(args);
+                                    if (response != null) {
+                                        this.client.say(target, response);
+                                    }
+                                } catch (err) {
+                                    this.client.say(target, await this.Translations.TranslationKey("error", args));
+                                    logger(`Error occurred during the execution of ${args.msg_args[0]} command: ${err}`, "err", true);
+                                }
+                                return;
                             }
                         }
                     }

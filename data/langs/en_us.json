@@ -1,6 +1,6 @@
 {
     "test": "test %0% successfully completed!",
-    "testnuts": "NUTS %0% successfully completed!",
+    "testnuts": "Collected %0% NUTS",
     "error": "@%user%, an unexpected error occurred during the execution of the command - a report about this has been sent. :/",
     "cmd": {
         "help": {
