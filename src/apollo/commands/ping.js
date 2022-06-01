@@ -21,7 +21,6 @@ module.exports = {
     permissions: [null],
     execute: async (args) => {
         if (!inCooldown.includes(args.user.username)) {
-            var cpuload = Math.round(await os.cpu.usage());
             var mem = `${Math.round(await (await os.mem.used()).usedMemMb)} MB/${Math.round(await (await os.mem.used()).totalMemMb)} MB`
 
             function formatTime(seconds) {
@@ -43,7 +42,7 @@ module.exports = {
             inCooldown.push(args.user.username);
             setTimeout(() => inCooldown = inCooldown.filter(u => u !== args.user.username), this.cooldownMs);
 
-            return text.replace("%uptime%", formatTime(process.uptime())).replace("%logonchannels%", args.apollo.options.channelsToJoin.length).replace("%tmi%", Math.floor(Math.round(pingms * 1000))).replace("%cpul%", cpuload).replace("%mem%", mem);
+            return text.replace("%uptime%", formatTime(process.uptime())).replace("%logonchannels%", args.apollo.options.channelsToJoin.length).replace("%tmi%", Math.floor(Math.round(pingms * 1000))).replace("%mem%", mem);
         }
     }
 }

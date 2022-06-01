@@ -31,7 +31,7 @@
             "name": "Ping!",
             "desc": "Checking if it's alive, and a bunch of other data.",
             "execute": {
-                "success": "FeelsDankMan 🏓 Pong! Session uptime: %uptime%. Landed in %logonchannels% channels. Memory usage: %mem%. CPU load: %cpul%%. Latency to TMI: %tmi%ms"
+                "success": "FeelsDankMan 🏓 Pong! Session uptime: %uptime%. Landed in %logonchannels% channels. Memory usage: %mem%. Latency to TMI: %tmi%ms"
             }
         }
     },
