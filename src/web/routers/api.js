@@ -23,13 +23,31 @@ router.use(function timeLog(req, res, next) {
     next();
 });
 router.get("/status", async (req, res) => {
-    var json = {
-        status: "ok",
-        stats: {
-            botuptime: "",
-            landedin: "",
-            
+    function formatTime(seconds) {
+        function pad(s) {
+            return (s < 10 ? '0': '') + s;
         }
+
+        var days = Math.floor(seconds / (60 * 60 * 24));
+        var hours = Math.floor(seconds / (60 * 60) % 24);
+        var minutes = Math.floor(seconds % (60 * 60) % 24);
+        var sec = Math.floor(seconds % 60);
+
+        return `${days} d. ${pad(hours)}:${pad(minutes)}:${pad(sec)}`;
+    }
+    var stats = JSON.parse(readFileSync("storage/stats.json", {encoding: "utf-8"}));
+    var json = {
+        bot: {
+            uptime: formatTime(process.uptime()),
+            latency: await this.apolloClient.ping(),
+            landedin: await this.apolloClient.getChannels()
+        },
+        stats: {
+            trackedchatlinesduringbotworking: stats.amountofchatlinesweretracked,
+            executedcommandsalltime: stats.allexecutedcommands
+        },
+        roles: await JSON.parse(readFileSync("storage/roles.json", {encoding: "utf-8"})),
+        stvemotes: await JSON.parse(readFileSync("storage/emotes.json", {encoding: "utf-8"}))
     }
     res.json(json).status(200);
 });

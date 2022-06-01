@@ -31,7 +31,7 @@
             "name": "Ping!",
             "desc": "Checking if it's alive, and a bunch of other data.",
             "execute": {
-                "success": "FeelsDankMan 🏓 Pong! Session uptime: %uptime%. Landed in %logonchannels% channels. Latency to TMI: %tmi%ms"
+                "success": "FeelsDankMan 🏓 Pong! Session uptime: %uptime%. Landed in %logonchannels% channels. Memory usage: %mem%. CPU load: %cpul%%. Latency to TMI: %tmi%ms"
             }
         }
     },
@@ -44,5 +44,36 @@
     "roles": {
         "notenoughpermissions": "@%user%, sori u dunt hev permisions to du that! Okayeg",
         "yourenotabroadcaster": "@%user%, wait u nut a bratcaster! Okayeg"
+    },
+    "web": {
+        "title": "%0%'s dashboard:",
+        "headers": {
+            "stats": "Leaderboards and some statistics",
+            "storage": "Storage and user control",
+            "dangerzone": "Danger zone!"
+        },
+        "content": {
+            "stats": {
+                "test": "How many times was test successful?",
+                "executed": "How many users have executed the commands in all time?",
+                "chatlines": "How many chat lines were collected by bot?",
+                "nut": "How many users have eaten the nuts?",
+                "other": "Other minor numbers of statistics..."
+            },
+            "storage": {
+                "deluser": "Delete user",
+                "chmoduser": "Change user's role",
+                "editcounts": "Edit stats, emotes, etc. counts..."
+            },
+            "dangerzone": {
+                "desc": "Be careful when looking at this section of the panel...",
+                "erase": "Erase all user, public data",
+                "shutdown": "Shutdown the bot"
+            },
+            "channel": {
+                "about": "About %0%",
+                "followers": "%0% followers"
+            }
+        }
     }
 }

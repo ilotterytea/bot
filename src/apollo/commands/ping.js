@@ -14,12 +14,16 @@
 // 
 // You should have received a copy of the GNU General Public License
 // along with iLotteryteaLive.  If not, see <http://www.gnu.org/licenses/>.
+var os = require("node-os-utils");
 
 module.exports = {
     cooldownMs: 5000,
     permissions: [null],
     execute: async (args) => {
         if (!inCooldown.includes(args.user.username)) {
+            var cpuload = Math.round(await os.cpu.usage());
+            var mem = `${Math.round(await (await os.mem.used()).usedMemMb)} MB/${Math.round(await (await os.mem.used()).totalMemMb)} MB`
+
             function formatTime(seconds) {
                 function pad(s) {
                     return (s < 10 ? '0': '') + s;
@@ -32,13 +36,14 @@ module.exports = {
 
                 return `${days} d. ${pad(hours)}:${pad(minutes)}:${pad(sec)}`;
             }
+
             var pingms = await args.apollo.client.ping();
-            const text = await args.lang.getNotFilteredTranslationKey("cmd.ping.execute.success", args);
+            let text = await args.lang.getNotFilteredTranslationKey("cmd.ping.execute.success", args);
 
             inCooldown.push(args.user.username);
             setTimeout(() => inCooldown = inCooldown.filter(u => u !== args.user.username), this.cooldownMs);
 
-            return text.replace("%uptime%", formatTime(process.uptime())).replace("%logonchannels%", args.apollo.options.channelsToJoin.length).replace("%tmi%", Math.floor(Math.round(pingms * 1000)));
+            return text.replace("%uptime%", formatTime(process.uptime())).replace("%logonchannels%", args.apollo.options.channelsToJoin.length).replace("%tmi%", Math.floor(Math.round(pingms * 1000))).replace("%cpul%", cpuload).replace("%mem%", mem);
         }
     }
 }
