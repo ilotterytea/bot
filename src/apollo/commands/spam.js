@@ -15,15 +15,15 @@
 // You should have received a copy of the GNU General Public License
 // along with iLotteryteaLive.  If not, see <http://www.gnu.org/licenses/>.
 module.exports = {
-    cooldownMs: 5000,
-    permissions: ["br"],
+    cooldownMs: 60000,
+    permissions: ["su", "br", "dank"],
     execute: async (args) => {
         if (!inCooldown.includes(args.user.username)) {
             inCooldown.push(args.user.username);
             setTimeout(() => inCooldown = inCooldown.filter(u => u !== args.user.username), this.cooldownMs);
 
             var range = parseInt(args.msg_args[1]);
-            if (isNaN(range)) return args.lang.TranslationKey("cmd.spam.execute.integer_failure", args, null);
+            if (isNaN(range)) return await args.lang.TranslationKey("cmd.spam.execute.integer_failure", args, null);
 
             var msg = args.msg_args.slice(2, args.msg_args.length);
 

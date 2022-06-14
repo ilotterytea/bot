@@ -18,8 +18,8 @@
 const { default: axios } = require("axios")
 
 module.exports = {
-    cooldownMs: 5000,
-    permissions: ["br"],
+    cooldownMs: 60000,
+    permissions: ["su", "br"],
     execute: async (args) => {
         if (!inCooldown.includes(args.user.username)) {
             var chatters = await (await axios.get(`https://tmi.twitch.tv/group/user/${args.target.slice(1, args.target.length)}/chatters`)).data.chatters;

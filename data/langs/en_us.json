@@ -40,6 +40,37 @@
             "execute": {
                 "integer_failure": "@%user%, correct use of this command 🤓: !spam 1-100 message"
             }
+        },
+        "join": {
+            "name": "Get the bot to join your chat room!",
+            "desc": "",
+            "execute": {
+                "not_found": "@%user%, user %0% not found!",
+                "already_in": "@%user%, user %0% (%1%) is already on the join list!",
+                "success": "@%user%, sucessfully joined in %0%'s chat room (%1%)!"
+            }
+        },
+        "storage": {
+            "name": "Storage manipulator!",
+            "desc": "Change the user's role (chown), prefix, leave the someone's chat room (part).",
+            "execute": {
+                "not_found": "@%user%, user %0% not found!",
+                "group_not_found": "@%user%, group %0% not exists!",
+                "group_changed": "@%user%, user %0% (%1%) was successfully assigned to the %2% group!",
+                "prefix_now": "%0%",
+                "prefix_changed": "@%user%, the command prefix successfully changed! (%0%)",
+                "parted_successfully": "@%user%, the bot has safely parted from %0% (%1%) chat room!",
+                "not_in_join_list": "@%user%, user %0% (%1%) isn't on the join list!"
+            }
+        },
+        "set": {
+            "name": "Settings!",
+            "desc": "Set the preferred options for your channel.",
+            "execute": {
+                "help": "@%user%, available options: lang (change the bot language in this chat)",
+                "availablelangs": "@%user%, available languages: %0%",
+                "langsuccess": "@%user%, the bot now speaks English in this chat! KKona"
+            }
         }
     },
     "emoteupdater": {

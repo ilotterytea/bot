@@ -15,54 +15,52 @@
 // You should have received a copy of the GNU General Public License
 // along with iLotteryteaLive.  If not, see <http://www.gnu.org/licenses/>.
 
-const { StaticAuthProvider, ApiClient } = require("twitch/lib");
+const ttv = require("twitch");
+const ttva = require("twitch-auth")
 
 class TwitchGQL {
     constructor (clientId, token) {
-        this.StaticAuthProvider = new StaticAuthProvider(clientId, token);
-        this.GQL = new ApiClient({th});
+        this.StaticAuthProvider = new ttva.StaticAuthProvider(clientId, token);
+        this.GQL = new ttv.ApiClient({authProvider: this.StaticAuthProvider});
     }
 
-    async getUsernamesById(ids) {
+    async getNamesByIds(ids) {
+        const userids = await this.GQL.helix.users.getUsersByIds(ids);
         let usernames = [];
-        ids.forEach(async (value) => {
-            const user = await this.GQL.helix.users.getUsersByIds()
-            if (!user) {
+
+        userids.forEach(async (value, index, array) => {
+            if (!userids[index]) {
                 return false;
             }
-            usernames.push(user.name);
+            usernames.push(userids[index].name);
         });
+
         return usernames;
     }
-    async isValidUserByUsername(username) {
-        const user = await this.GQL.helix.users.getUserByName(username);
-        if (!user) {
-            return false;
-        }
+
+    async getUserById(id) {
+        const user = await this.GQL.helix.users.getUserById(id);
+        if (!user) return false;
+        user.id
+        return user;
+    }
+
+    async getUserByName(name) {
+        const user = await this.GQL.helix.users.getUserByName(name);
+        if (!user) return false;
+        return user;
+    }
+
+    async isValidUserByName(name) {
+        const user = await this.GQL.helix.users.getUserByName(name);
+        if (!user) return false;
         return true;
     }
+
     async isValidUserById(id) {
         const user = await this.GQL.helix.users.getUserById(id);
-        if (!user) {
-            return false;
-        }
+        if (!user) return false;
         return true;
-    }
-
-    async getFormattedUserDataByUsername(username) {
-        const user = await this.GQL.helix.users.getUserByName(username);
-        if (!user) {
-            return false;
-        }
-        return 
-    }
-
-    async setCategory(target, name) {
-
-    }
-
-    async setStreamName(target, name) {
-
     }
 }
 

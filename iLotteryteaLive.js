@@ -18,11 +18,8 @@
 const { existsSync, mkdirSync, readFileSync, writeFileSync } = require("fs");
 const { ApolloClient } = require("./src/apollo/ApolloClient");
 const ApolloLogger = require("./src/apollo/utils/ApolloLogger");
+const { TwitchGQL } = require("./src/apollo/utils/HelixTwitch");
 const { WebClient } = require("./src/web/WebClient");
-
-const {ApiClient} = require("twitch");
-const {StaticAuthProvider} = require("twitch-auth");
-const { Console } = require("console");
 
 require("dotenv").config({path: "./bot.env"});
 
@@ -58,28 +55,15 @@ async function Initialize() {
             }, null, 2), {encoding: "utf-8"});
         }
     }
+
     ApolloLogger("--- Bot is starting! Checking the directories...", "log", true);
     await DirectoryCheck();
     ApolloLogger("Initializing the bot components...", "log", true);
-    const storage = JSON.parse(readFileSync("storage/storage.json", {encoding: "utf-8"}));
-    const HelixAuth = new StaticAuthProvider(process.env.TTV_CLIENT, process.env.TTV_TOKEN);
-    const GQL = new ApiClient({authProvider: HelixAuth});
-    
-    async function GetUsersByIds(ids) {
-        const userids = await GQL.helix.users.getUsersByIds(ids);
-        let usernames = [];
 
-        userids.forEach(async (value, index, array) => {
-            if (!userids[index]) {
-                return false;
-            }
-            usernames.push(userids[index].name);
-        });
+    let storage = JSON.parse(readFileSync("storage/storage.json", {encoding: "utf-8"}));
+    const GQL = new TwitchGQL(process.env.TTV_CLIENT, process.env.TTV_TOKEN);
 
-        return usernames;
-    }
-
-    var channels = await GetUsersByIds(storage.join.asclient);
+    var channels = await GQL.getNamesByIds(storage.join.asclient);
 
     const apolloClient = new ApolloClient({
         username: process.env.TTV_LOGIN,

@@ -16,8 +16,8 @@
 // along with iLotteryteaLive.  If not, see <http://www.gnu.org/licenses/>.
 
 module.exports = {
-    cooldownMs: 5000,
-    permissions: [null],
+    cooldownMs: 1500,
+    permissions: ["pub"],
     execute: async (args) => {
         if (!inCooldown.includes(args.user.username)) {
             if (args.msg_args.length == 1) {

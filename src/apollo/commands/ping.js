@@ -18,7 +18,7 @@ var os = require("node-os-utils");
 
 module.exports = {
     cooldownMs: 5000,
-    permissions: [null],
+    permissions: ["pub"],
     execute: async (args) => {
         if (!inCooldown.includes(args.user.username)) {
             var mem = `${Math.round(await (await os.mem.used()).usedMemMb)} MB/${Math.round(await (await os.mem.used()).totalMemMb)} MB`

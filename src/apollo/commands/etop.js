@@ -17,7 +17,7 @@
 
 module.exports = {
     cooldownMs: 5000,
-    permissions: [null],
+    permissions: ["pub"],
     execute: async (args) => {
         if (!inCooldown.includes(args.user.username)) {
             if (args.msg_args.length == 2 && Object.keys(args.emotes).includes(args.msg_args[1].toLowerCase())) {

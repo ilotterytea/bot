@@ -35,9 +35,13 @@ class TranslationManager {
         Object.keys(this.channels).forEach(async (value, index, array) => {
             this.attached_to_languages[value] = this.channels[value].lang
         });
-    }  
+    }
 
     async TranslationKey(key, args, customvariables) {
+        if (!(args.target.slice(1, args.target.length) in this.attached_to_languages)) {
+            const text = eval(`this.languages["en_us"].${key}`);
+            return this.replaceVariables(text, args, customvariables);
+        }
         const text = eval(`this.languages[this.attached_to_languages[args.target.slice(1, args.target.length)]].${key}`);
         return this.replaceVariables(text, args, customvariables);
     }
@@ -54,11 +58,13 @@ class TranslationManager {
                     splittedkey[i] = splittedkey[i].replace("%emotes%", args.emotes);
                     break;
                 case (splittedkey[i].includes("%0%")):
-                    splittedkey[i] = splittedkey[i].replace("%0%", customvariables[0])
+                    splittedkey[i] = splittedkey[i].replace("%0%", customvariables[0]);
                     break;
                 case (splittedkey[i].includes("%1%")):
-                    splittedkey[i] = splittedkey[i].replace("%1%", customvariables[1])
+                    splittedkey[i] = splittedkey[i].replace("%1%", customvariables[1]);
                     break;
+                case (splittedkey[i].includes("%2%")):
+                    splittedkey[i] = splittedkey[i].replace("%2%", customvariables[2]);
                 default:
                     break;
             }
@@ -72,6 +78,9 @@ class TranslationManager {
     }
 
     async getNotFilteredTranslationKey(key, args) {
+        if (!(args.target.slice(1, args.target.length) in this.attached_to_languages)) {
+            return eval(`this.languages["en_us"].${key}`);
+        }
         return eval(`this.languages[this.attached_to_languages[args.target.slice(1, args.target.length)]].${key}`);
     }
 }

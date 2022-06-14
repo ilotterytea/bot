@@ -17,24 +17,23 @@
 const { existsSync, readFileSync, writeFileSync } = require("fs");
 const tmi = require("tmi.js");
 const logger = require("./utils/ApolloLogger");
+const { TwitchGQL } = require("./utils/HelixTwitch");
 const { SevenTVEmoteUpdater } = require("./utils/SevenTVEmoteUpdater");
 const { TranslationManager } = require("./utils/TranslationManager");
 
 class ApolloClient {
     constructor (options = {username: "", password: "", channelsToJoin: [], prefix: ""}, storage, twitchgql) {
-        this.storage = storage;
-        this.options = options;
-        this.gql = twitchgql;
-        this.client = new tmi.Client({
+        this.storage        = storage;
+        this.options        = options;
+        this.gql            = twitchgql;
+        this.client         = new tmi.Client({
             connection: {reconnect: true, secure: true},
-            identity: {
-                username: this.options.username,
-                password: this.options.password
-            },
-            channels: this.options.channelsToJoin
+            identity: {username: this.options.username,password: this.options.password},
+            channels: this.options.channelsToJoin,
+            options: {debug: true}
         });
-        this.EmoteUpdater = new SevenTVEmoteUpdater(this.options.channelsToJoin);
-        this.Translations = new TranslationManager(this.storage.preferred, "data/langs");
+        this.EmoteUpdater   = new SevenTVEmoteUpdater(this.options.channelsToJoin);
+        this.Translations   = new TranslationManager(this.storage.preferred, "data/langs");
     }
 
     async create() {
@@ -57,18 +56,20 @@ class ApolloClient {
 
                 // Arguments:
                 var args = {
-                    target: target,
-                    channel: target.slice(1, target.length),
-                    user: user,
-                    msg: msg,
-                    msg_args: msg.split(' '),
-                    lang: this.Translations,
-                    apollo: this,
-                    prefix: this.storage.prefix,
-                    emotes: await this.EmoteUpdater.getEmotes,
-                    strrole: (this.storage.roles.authority.includes(user["user-id"])) ? "su" : (user.username == target.slice(1, target.length)) ? "br" : "all"
+                    target:     target,
+                    channel:    target.slice(1, target.length),
+                    user:       user,
+                    msg:        msg,
+                    msg_args:   msg.split(' '),
+                    gql:        this.gql,
+                    storage:    this.storage,
+                    lang:       this.Translations,
+                    apollo:     this,
+                    prefix:     this.storage.prefix,
+                    emotes:     await this.EmoteUpdater.getEmotes,
+                    role:    (this.storage.roles.authority.includes(user["user-id"])) ? "su" : (user.username == target.slice(1, target.length)) ? "br" : (this.storage.roles.feelingspecial.includes(user["user-id"])) ? "dank" : null
                 }
-
+                
                 if (!(args.channel in this.storage.stats.chat_lines)) {
                     this.storage.stats.chat_lines[args.channel] = 0;
                     this.storage.stats.chat_lines[args.channel] = this.storage.stats.chat_lines[args.channel] += 1;
@@ -94,13 +95,15 @@ class ApolloClient {
                     return;
                 }
 
+                if (args.storage.roles.permabanned.includes(user["user-id"])) return;
+
                 // Start the command processor if message starts with a prefix:
                 if (msg.startsWith(this.storage.prefix)) {
                     if (!(args.channel in this.storage.stats.executed_commands)) {
                         this.storage.stats.executed_commands[args.channel] = 0;
                     }
 
-                    if (args.msg_args[0] == "!dispose" && args.strrole == "su" && (target == "#ilotterytea" || target == "#fembajtea")) {
+                    if (args.msg_args[0] == "!dispose" && args.role == "su" && (target == "#ilotterytea" || target == "#fembajtea")) {
                         this.storage.stats.executed_commands[args.channel] = this.storage.stats.executed_commands[args.channel] += 1;
                         this.client.say(target, "peepoLeave ");
                         this.dispose();
@@ -132,8 +135,39 @@ class ApolloClient {
                     // Execute the command if it exists:
                     if (existsSync(`src/apollo/commands/${args.msg_args[0].slice(1, args.msg_args[0].length)}.js`)) {
                         const cmd = require(`./commands/${args.msg_args[0].slice(1, args.msg_args[0].length)}.js`);
-                        // If command don't require superuser role, then run it:
-                        if (!(cmd.permissions.includes("su") || cmd.permissions.includes("br"))) {
+                        const cmdperm = cmd.permissions.join('');
+                        let runcmd = false;
+
+                        // Compare the user's role and command permission:
+                        switch (true) {
+                            case (cmd.permissions.includes("pub")):
+                                runcmd = true;
+                                break;
+                            case (cmdperm == "subrdank" && (args.role == "su" || args.role == "br" || args.role == "dank")):
+                                runcmd = true;
+                                break;
+                            case (cmdperm == "su" && args.role == "su"):
+                                runcmd = true;
+                                break;
+                            case (cmdperm == "subr" && (args.role == "su" || args.role == "dank")):
+                                runcmd = true;
+                                break;
+                            case (cmdperm == "sudank" && (args.role == "su" || args.role == "br")):
+                                runcmd = true;
+                                break;
+                            case (cmdperm == "br" && args.role == "br"):
+                                runcmd = true;
+                                break;
+                            case (cmdperm == "brdank" && (args.role == "br" || args.role == "dank")):
+                                runcmd = true;
+                                break;
+                            case (cmdperm == "dank" && args.role == "dank"):
+                                runcmd = true;
+                                break;
+                            default:
+                                break;
+                        }
+                        if (runcmd) {
                             try {
                                 this.storage.stats.executed_commands[args.channel] = this.storage.stats.executed_commands[args.channel] += 1;
                                 var response = await cmd.execute(args);
@@ -143,36 +177,6 @@ class ApolloClient {
                             } catch (err) {
                                 this.client.say(target, await this.Translations.TranslationKey("error", args));
                                 logger(`Error occurred during the execution of ${args.msg_args[0]} command: ${err}`, "err", true);
-                            }
-                            
-                        } else {
-                            // Does the sender have a superuser role?
-                            if (this.storage.roles.authority.includes(user["user-id"]) && cmd.permissions.includes("su")) {
-                                try {
-                                    this.storage.stats.executed_commands[args.channel] = this.storage.stats.executed_commands[args.channel] += 1;
-                                    var response = await cmd.execute(args);
-                                    if (response != null) {
-                                        this.client.say(target, response);
-                                    }
-                                } catch (err) {
-                                    this.client.say(target, await this.Translations.TranslationKey("error", args));
-                                    logger(`Error occurred during the execution of ${args.msg_args[0]} command: ${err}`, "err", true);
-                                }
-                                return;
-                            }
-
-                            if (cmd.permissions.includes("br") && user.username == args.channel) {
-                                try {
-                                    this.storage.stats.executed_commands[args.channel] = this.storage.stats.executed_commands[args.channel] += 1;
-                                    var response = await cmd.execute(args);
-                                    if (response != null) {
-                                        this.client.say(target, response);
-                                    }
-                                } catch (err) {
-                                    this.client.say(target, await this.Translations.TranslationKey("error", args));
-                                    logger(`Error occurred during the execution of ${args.msg_args[0]} command: ${err}`, "err", true);
-                                }
-                                return;
                             }
                         }
                     }
