@@ -149,10 +149,10 @@ class ApolloClient {
                             case (cmdperm == "su" && args.role == "su"):
                                 runcmd = true;
                                 break;
-                            case (cmdperm == "subr" && (args.role == "su" || args.role == "dank")):
+                            case (cmdperm == "subr" && (args.role == "su" || args.role == "br")):
                                 runcmd = true;
                                 break;
-                            case (cmdperm == "sudank" && (args.role == "su" || args.role == "br")):
+                            case (cmdperm == "sudank" && (args.role == "su" || args.role == "dank")):
                                 runcmd = true;
                                 break;
                             case (cmdperm == "br" && args.role == "br"):
