@@ -33,6 +33,13 @@
             "execute": {
                 "success": "FeelsDankMan 🏓 Pong! Session uptime: %uptime%. Landed in %logonchannels% channels. Memory usage: %mem%. Latency to TMI: %tmi%ms"
             }
+        },
+        "spam": {
+            "name": "Spam!",
+            "desc": "Sending a message with the specified repetitions.",
+            "execute": {
+                "integer_failure": "@%user%, correct use of this command 🤓: !spam 1-100 message"
+            }
         }
     },
     "emoteupdater": {

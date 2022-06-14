@@ -56,6 +56,14 @@ class TwitchGQL {
         }
         return 
     }
+
+    async setCategory(target, name) {
+
+    }
+
+    async setStreamName(target, name) {
+
+    }
 }
 
 module.exports = {TwitchGQL}

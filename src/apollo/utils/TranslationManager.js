@@ -26,7 +26,7 @@ class TranslationManager {
         this.languages = {};
         this.attached_to_languages = {};
     }
-
+    
     async LoadLanguages() {
         this.language_names.forEach(async (value, index, array) => {
             this.languages[value.replace(".json", '')] = JSON.parse(readFileSync(`${this.langs_directory}/${value}`, {encoding: "utf-8"}));
