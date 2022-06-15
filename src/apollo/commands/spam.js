@@ -25,10 +25,16 @@ module.exports = {
             var range = parseInt(args.msg_args[1]);
             if (isNaN(range)) return await args.lang.TranslationKey("cmd.spam.execute.integer_failure", args, null);
 
-            var msg = args.msg_args.slice(2, args.msg_args.length);
+            var msg = args.msg_args.slice(2, args.msg_args.length).join(" ");
+            var regex = /(!|@|#|\$|%|\^|&|\*|\(|\)|-|=|\+|\\|\/|:|"|'|\[|\]|\||<|>|\?|\.)/;
+
+            // This check should prevent the bot from executing commands:
+            if (regex.test(msg) && (args.role != "su")) {
+                return await args.lang.TranslationKey("cmd.spam.execute.sus", args, null);
+            }
 
             for (let i = 0; i < range; i++) {
-                args.apollo.client.say(args.target, msg.join(" "));
+                args.apollo.client.say(args.target, msg);
             }
 
             return null;
