@@ -9,10 +9,10 @@
         },
         "etop": {
             "name": "Emote top!",
-            "desc": "Top 5 most used 7TV channel emotes.",
+            "desc": "Top 15 most used 7TV channel emotes.",
             "execute": {
-                "success": "Top 5 emotes by the total count of used times:",
-                "notenoughemotes": "This channel has less than 5 7TV channel emotes."
+                "success": "Top 15 emotes by the total count of used times:",
+                "notenoughemotes": "This channel has less than 15 7TV channel emotes."
             }
         },
         "ecount": {
