@@ -25,7 +25,7 @@ class TwitchGQL {
     }
 
     async isStreamLive(username) {
-        const user = await this.GQL.helix.users.getUsersByName(username);
+        const user = await this.GQL.helix.users.getUserByName(username);
         if (!user) return false;
 
         return await user.getStream() !== null;
