@@ -212,7 +212,7 @@ class ApolloClient {
             var newemotes = this.EmoteUpdater.getNewEmotes;
 
             this.options.channelsToJoin.forEach(async (value, index, array) => {
-                if (value == "#fembajtea") {
+                if (value == "#ilotterytea") {
                     var a_emotes = ["ShelbyWalk", "peepoArrive", "billyArrive", "docArrive", "WalterArrive"];
                     this.client.say(value, await this.Translations.ParsedText("arrive", value.slice(1, value.length), a_emotes[Math.floor(Math.random() * (a_emotes.length - 1))]));
                 }
