@@ -23,6 +23,8 @@ module.exports = {
             inCooldown.push(args.user.username);
             setTimeout(() => inCooldown = inCooldown.filter(u => u !== args.user.username), this.cooldownMs);
 
+            if (args.channel != "ilotterytea" || args.channel != "fembajtea") return null;
+
             if (args.role == "su" && args.msg_args.length > 1) {
                 const name = args.msg_args[1].toLowerCase();
                 const user = await args.gql.getUserByName(name);

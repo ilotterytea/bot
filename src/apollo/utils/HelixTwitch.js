@@ -16,12 +16,19 @@
 // along with iLotteryteaLive.  If not, see <http://www.gnu.org/licenses/>.
 
 const ttv = require("twitch");
-const ttva = require("twitch-auth")
+const ttva = require("twitch-auth");
 
 class TwitchGQL {
     constructor (clientId, token) {
         this.StaticAuthProvider = new ttva.StaticAuthProvider(clientId, token);
         this.GQL = new ttv.ApiClient({authProvider: this.StaticAuthProvider});
+    }
+
+    async isStreamLive(username) {
+        const user = await this.GQL.helix.users.getUsersByName(username);
+        if (!user) return false;
+
+        return await user.getStream() !== null;
     }
 
     async getNamesByIds(ids) {
