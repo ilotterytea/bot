@@ -196,8 +196,8 @@ class ApolloClient {
                 this.options.channelsToJoin.forEach(async (value, index, array) => {
                     var target = value.slice(1, value.length);
 
-                if (newemotes[target] != '' && newemotes[target] != undefined) this.client.action(value, await this.Translations.ParsedText("emoteupdater.new_emotes", args.channel, "[STV]", newemotes[target]));
-                if (delemotes[target] != '' && delemotes[target] != undefined) this.client.action(value, await this.Translations.ParsedText("emoteupdater.deleted_emotes", {target: value}, "[STV]", delemotes[target]));
+                if (newemotes[target] != '' && newemotes[target] != undefined) this.client.action(value, await this.Translations.ParsedText("emoteupdater.new_emotes", value.slice(1, value.length), "[STV]", newemotes[target]));
+                if (delemotes[target] != '' && delemotes[target] != undefined) this.client.action(value, await this.Translations.ParsedText("emoteupdater.deleted_emotes", value.slice(1, value.length), "[STV]", delemotes[target]));
                 });
                 await this.SaveStorage();
             }, 2500);
@@ -219,8 +219,8 @@ class ApolloClient {
 
                 var target = value.slice(1, value.length);
 
-                if (newemotes[target] != '' && newemotes[target] != undefined) this.client.action(value, await this.Translations.ParsedText("emoteupdater.new_emotes", args.channel, "[STV]", newemotes[target]));
-                if (delemotes[target] != '' && delemotes[target] != undefined) this.client.action(value, await this.Translations.ParsedText("emoteupdater.deleted_emotes", args.channel, "[STV]", delemotes[target]));
+                if (newemotes[target] != '' && newemotes[target] != undefined) this.client.action(value, await this.Translations.ParsedText("emoteupdater.new_emotes", value.slice(1, value.length), "[STV]", newemotes[target]));
+                if (delemotes[target] != '' && delemotes[target] != undefined) this.client.action(value, await this.Translations.ParsedText("emoteupdater.deleted_emotes", value.slice(1, value.length), "[STV]", delemotes[target]));
                 });
         });
         this.client.on("reconnect", async () => logger(`Client is reconnecting...`, "log", true));
