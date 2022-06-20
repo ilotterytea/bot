@@ -18,37 +18,32 @@
 const { readdirSync, readFileSync } = require("fs");
 
 class TranslationManager {
-    #langdir;
-    #directory;
-    #loaded_languages;
-    #preferred_users;
-    #storage;
 
     constructor (storage, langDir) {
-        this.#langdir = langDir;
-        this.#storage = storage.preferred;
-        this.#directory = [];
-        this.#loaded_languages = {};
-        this.#preferred_users = {};
+        this.langdir = langDir;
+        this.storage = storage.preferred;
+        this.directory = [];
+        this.loaded_languages = {};
+        this.preferred_users = {};
     }
 
     async LoadLanguageFiles() {
-        this.#directory = [];
-        this.#loaded_languages = {};
+        this.directory = [];
+        this.loaded_languages = {};
 
-        this.#directory = readdirSync(this.#langdir);
-        this.#directory.forEach((value, index, array) => {
-            this.#loaded_languages[value.replace(".json", "")] = JSON.parse(readFileSync(`${this.#langdir}/${value}`));
+        this.directory = readdirSync(this.langdir);
+        this.directory.forEach((value, index, array) => {
+            this.loaded_languages[value.replace(".json", "")] = JSON.parse(readFileSync(`${this.langdir}/${value}`));
         });
 
         this.UpdateUserPreferrences();
     }
 
     async UpdateUserPreferrences() {
-        this.#preferred_users = {};
+        this.preferred_users = {};
 
-        Object.keys(this.#storage).forEach(value => {
-            this.#preferred_users[value] = this.#storage[value].lang;
+        Object.keys(this.storage).forEach(value => {
+            this.preferred_users[value] = this.storage[value].lang;
         });
     }
 
@@ -56,13 +51,13 @@ class TranslationManager {
         var language = "";
         var text = "";
 
-        if (!(channel in this.#preferred_users)) {
+        if (!(channel in this.preferred_users)) {
             language = "en_us";
         } else {
-            language = this.#preferred_users[channel];
+            language = this.preferred_users[channel];
         }
 
-        text = this.#loaded_languages[language][key_id].split(' ');
+        text = this.loaded_languages[language][key_id].split(' ');
 
         return text;
     }
@@ -71,13 +66,13 @@ class TranslationManager {
         var language = "";
         var text = "";
 
-        if (!(channel in this.#preferred_users)) {
+        if (!(channel in this.preferred_users)) {
             language = "en_us";
         } else {
-            language = this.#preferred_users[channel];
+            language = this.preferred_users[channel];
         }
 
-        text = this.#loaded_languages[language][key_id].split(' ');
+        text = this.loaded_languages[language][key_id].split(' ');
 
         text.forEach((value, i, array)=> {
             switch (true) {
