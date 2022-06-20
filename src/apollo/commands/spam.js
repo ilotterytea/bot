@@ -24,10 +24,10 @@ module.exports = {
 
             var range = parseInt(args.msg_args[1]);
 
-            if (isNaN(range)) return await args.lang.TranslationKey("cmd.spam.execute.integer_failure", args, null);
+            if (isNaN(range)) return await args.lang.ParsedText("cmd.spam.exec.usage", args.channel, args.user.username);
 
             // Range limit:
-            if (range > 32) return await args.lang.TranslationKey("cmd.spam.execute.integer_failure", args, null);
+            if (range > 32) return await args.lang.ParsedText("cmd.spam.exec.usage", args.channel, args.user.username);
 
             // Doesn't continue the code execution if channel is live:
             if (await args.gql.isStreamLive(args.channel)) return null;
@@ -37,7 +37,7 @@ module.exports = {
 
             // This check should prevent the bot from executing commands:
             if (regex.test(msg) && (args.role != "su")) {
-                return await args.lang.TranslationKey("cmd.spam.execute.sus", args, null);
+                return await args.lang.ParsedText("cmd.spam.exec.unauthorized", args.channel, args.user.username);
             }
 
             for (let i = 0; i < range; i++) {

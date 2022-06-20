@@ -33,12 +33,12 @@ class ApolloClient {
             options: {debug: true}
         });
         this.EmoteUpdater   = new SevenTVEmoteUpdater(this.options.channelsToJoin);
-        this.Translations   = new TranslationManager(this.storage.preferred, "data/langs");
+        this.Translations   = new TranslationManager(this.storage, "data/langs");
     }
 
     async create() {
         // Load translation keys:
-        await this.Translations.LoadLanguages();
+        await this.Translations.LoadLanguageFiles();
         // Load and update 7TV emotes:
         await this.EmoteUpdater.LoadEmotes(this.storage.emotes);
         await this.EmoteUpdater.UpdateEmotes();
@@ -83,7 +83,6 @@ class ApolloClient {
                         this.storage.stats.tests[args.channel] = 0;
                     }
                     this.storage.stats.tests[args.channel] = this.storage.stats.tests[args.channel] += 1;
-                    //this.client.say(target, await this.Translations.TranslationKey("testnuts", args, [this.storage.stats.tests[args.channel]]));
                     return;
                 }
                 if (msg == "test" && target != "#fedotir") {
@@ -91,7 +90,7 @@ class ApolloClient {
                         this.storage.stats.tests[args.channel] = 0;
                     }
                     this.storage.stats.tests[args.channel] = this.storage.stats.tests[args.channel] += 1;
-                    this.client.say(target, await this.Translations.TranslationKey("test", args, [this.storage.stats.tests[args.channel]]));
+                    this.client.say(target, await this.Translations.ParsedText("test.test", args.channel, "test", this.storage.stats.tests[args.channel]));
                     return;
                 }
 
@@ -105,7 +104,8 @@ class ApolloClient {
 
                     if (args.msg_args[0] == "!dispose" && args.role == "su" && (target == "#ilotterytea" || target == "#fembajtea")) {
                         this.storage.stats.executed_commands[args.channel] = this.storage.stats.executed_commands[args.channel] += 1;
-                        this.client.say(target, "peepoLeave ");
+                        var a_emotes = ["docLeave", "peepoLeave", "ppPoof", "monkaGIGAftSaj"];
+                        this.client.say(target, await this.Translations.ParsedText("leave", args.channel, a_emotes[Math.floor(Math.random() * (a_emotes.length - 1))]));
                         this.dispose();
                         return;
                     }
@@ -114,20 +114,20 @@ class ApolloClient {
                     if (args.msg_args[0] == `${this.storage.prefix}help`) {
                         if (args.msg_args.length == 1) {
                             this.storage.stats.executed_commands[args.channel] = this.storage.stats.executed_commands[args.channel] += 1;
-                            this.client.say(target, await this.Translations.TranslationKey("cmd.help.help", args));
+                            this.client.say(target, await this.Translations.ParsedText("cmd.help.exec.help", args.channel, args.user.username));
                             return;
                         }
                         // "!help help":
                         if (args.msg_args[1] == "help") {
                             this.storage.stats.executed_commands[args.channel] = this.storage.stats.executed_commands[args.channel] += 1;
-                            this.client.say(target, `@${user.username}, lol`);
+                            this.client.say(target, await this.Translations.ParsedText("cmd.help.exec.lolresponse", args.channel, args.user.username));
                             return;
                         }
                         // Say info about command:
                         if (existsSync(`src/apollo/commands/${args.msg_args[1]}.js`)) {
                             this.storage.stats.executed_commands[args.channel] = this.storage.stats.executed_commands[args.channel] += 1;
                             const cmd = `cmd.${args.msg_args[1]}`
-                            this.client.say(target, `@${user.username}, ${await this.Translations.TranslationKey(cmd + ".name", args)} ${await this.Translations.TranslationKey(cmd + ".desc", args)}`);
+                            this.client.say(target, await this.Translations.ParsedText("cmd.help.exec.response", args.channel, await this.Translations.PlainText(`${cmd}.name`), await this.Translations.PlainText(`${cmd}.desc`)));
                         }
                         return;
                     }
@@ -175,7 +175,7 @@ class ApolloClient {
                                     this.client.say(target, response);
                                 }
                             } catch (err) {
-                                this.client.say(target, await this.Translations.TranslationKey("error", args));
+                                this.client.say(target, await this.Translations.ParsedText("error", args.channel, args.user.username));
                                 logger(`Error occurred during the execution of ${args.msg_args[0]} command: ${err}`, "err", true);
                             }
                         }
@@ -196,8 +196,8 @@ class ApolloClient {
                 this.options.channelsToJoin.forEach(async (value, index, array) => {
                     var target = value.slice(1, value.length);
 
-                if (newemotes[target] != '' && newemotes[target] != undefined) this.client.action(value, await this.Translations.TranslationKey("emoteupdater.stv.new_emotes", {target: value}, [newemotes[target]]));
-                if (delemotes[target] != '' && delemotes[target] != undefined) this.client.action(value, await this.Translations.TranslationKey("emoteupdater.stv.deleted_emotes", {target: value}, [delemotes[target]]));
+                if (newemotes[target] != '' && newemotes[target] != undefined) this.client.action(value, await this.Translations.ParsedText("emoteupdater.new_emotes", args.channel, "[STV]", newemotes[target]));
+                if (delemotes[target] != '' && delemotes[target] != undefined) this.client.action(value, await this.Translations.ParsedText("emoteupdater.deleted_emotes", {target: value}, "[STV]", delemotes[target]));
                 });
                 await this.SaveStorage();
             }, 2500);
@@ -212,11 +212,15 @@ class ApolloClient {
             var newemotes = this.EmoteUpdater.getNewEmotes;
 
             this.options.channelsToJoin.forEach(async (value, index, array) => {
-                if (value == "#ilotterytea") this.client.say(value, "iLotteryteaLive ");
+                if (value == "#fembajtea") {
+                    var a_emotes = ["ShelbyWalk", "peepoArrive", "billyArrive", "docArrive", "WalterArrive"];
+                    this.client.say(value, await this.Translations.ParsedText("arrive", value.slice(1, value.length), a_emotes[Math.floor(Math.random() * (a_emotes.length - 1))]));
+                }
+
                 var target = value.slice(1, value.length);
 
-                if (newemotes[target] != '' && newemotes[target] != undefined) this.client.action(value, await this.Translations.TranslationKey("emoteupdater.stv.new_emotes", {target: value}, [newemotes[target]]));
-                if (delemotes[target] != '' && delemotes[target] != undefined) this.client.action(value, await this.Translations.TranslationKey("emoteupdater.stv.deleted_emotes", {target: value}, [delemotes[target]]));
+                if (newemotes[target] != '' && newemotes[target] != undefined) this.client.action(value, await this.Translations.ParsedText("emoteupdater.new_emotes", args.channel, "[STV]", newemotes[target]));
+                if (delemotes[target] != '' && delemotes[target] != undefined) this.client.action(value, await this.Translations.ParsedText("emoteupdater.deleted_emotes", args.channel, "[STV]", delemotes[target]));
                 });
         });
         this.client.on("reconnect", async () => logger(`Client is reconnecting...`, "log", true));

@@ -25,26 +25,26 @@ module.exports = {
             inCooldown.push(args.user.username);
             setTimeout(() => inCooldown = inCooldown.filter(u => u !== args.user.username), this.cooldownMs);
 
-            if (args.msg_args.length < 2) return await args.lang.TranslationKey("cmd.set.execute.help", args, null);
+            if (args.msg_args.length < 2) return await args.lang.ParsedText("cmd.set.exec.usage", args.channel, args.user.username);
             switch (args.msg_args[1]) {
                 // Set the channel language (e.g. !set lang en_us):
                 case "lang":
                     var availablelangs = readdirSync("data/langs").join('').split(".json").join(' ');
                     
-                    if (args.msg_args.length < 3) return await args.lang.TranslationKey("cmd.set.execute.availablelangs", args, [availablelangs]);
+                    if (args.msg_args.length < 3) return await args.lang.ParsedText("cmd.set.exec.languagesetup.available", args.channel, args.user.username, availablelangs);
 
                     if (existsSync(`data/langs/${args.msg_args[2].toLowerCase()}.json`)) {
                         if (!(args.channel.toLowerCase() in args.storage.preferred)) args.storage.preferred[args.channel.toLowerCase()] = {};
                         args.storage.preferred[args.channel.toLowerCase()].lang = args.msg_args[2].toLowerCase();
 
-                        await args.lang.LoadLanguages();
+                        await args.lang.UpdateUserPreferrences();
                     } else {
-                        return await args.lang.TranslationKey("cmd.set.execute.availablelangs", args, [availablelangs]);
+                        return await args.lang.ParsedText("cmd.set.exec.languagesetup.available", args.channel, args.user.username, availablelangs);
                     }
 
-                    return await args.lang.TranslationKey("cmd.set.execute.langsuccess", args, null);
+                    return await args.lang.ParsedText("cmd.set.exec.languagesetup.response", args.channel, args.user.username);
                 default:
-                    return await args.lang.TranslationKey("cmd.set.execute.help", args, null);
+                    return await args.lang.ParsedText("cmd.set.exec.usage", args.channel, args.user.username);
             }
         }
     }

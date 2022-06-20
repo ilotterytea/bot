@@ -164,3 +164,6 @@ storage/*
 test.js
 *.env
 *.sql
+dankupdate.sh
+dankindex.js
+.vscode

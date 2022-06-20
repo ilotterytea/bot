@@ -18,70 +18,105 @@
 const { readdirSync, readFileSync } = require("fs");
 
 class TranslationManager {
-    constructor (preferredlangchannels, langs_directory) {
-        this.channels = preferredlangchannels;
-        this.langs_directory = langs_directory;
-        this.language_names = readdirSync(langs_directory);
+    #langdir;
+    #directory;
+    #loaded_languages;
+    #preferred_users;
+    #storage;
 
-        this.languages = {};
-        this.attached_to_languages = {};
-    }
-    
-    async LoadLanguages() {
-        this.language_names.forEach(async (value, index, array) => {
-            this.languages[value.replace(".json", '')] = JSON.parse(readFileSync(`${this.langs_directory}/${value}`, {encoding: "utf-8"}));
-        });
-        
-        Object.keys(this.channels).forEach(async (value, index, array) => {
-            this.attached_to_languages[value] = this.channels[value].lang
-        });
+    constructor (storage, langDir) {
+        this.#langdir = langDir;
+        this.#storage = storage.preferred;
+        this.#directory = [];
+        this.#loaded_languages = {};
+        this.#preferred_users = {};
     }
 
-    async TranslationKey(key, args, customvariables) {
-        if (!(args.target.slice(1, args.target.length) in this.attached_to_languages)) {
-            const text = eval(`this.languages["en_us"].${key}`);
-            return this.replaceVariables(text, args, customvariables);
+    async LoadLanguageFiles() {
+        this.#directory = [];
+        this.#loaded_languages = {};
+
+        this.#directory = readdirSync(this.#langdir);
+        this.#directory.forEach((value, index, array) => {
+            this.#loaded_languages[value.replace(".json", "")] = JSON.parse(readFileSync(`${this.#langdir}/${value}`));
+        });
+
+        this.UpdateUserPreferrences();
+    }
+
+    async UpdateUserPreferrences() {
+        this.#preferred_users = {};
+
+        Object.keys(this.#storage).forEach(value => {
+            this.#preferred_users[value] = this.#storage[value].lang;
+        });
+    }
+
+    async PlainText(key_id, channel) {
+        var language = "";
+        var text = "";
+
+        if (!(channel in this.#preferred_users)) {
+            language = "en_us";
+        } else {
+            language = this.#preferred_users[channel];
         }
-        const text = eval(`this.languages[this.attached_to_languages[args.target.slice(1, args.target.length)]].${key}`);
-        return this.replaceVariables(text, args, customvariables);
+
+        text = this.#loaded_languages[language][key_id].split(' ');
+
+        return text;
     }
 
-    async replaceVariables(key, args, customvariables) {
-        var splittedkey = key.split(" ");
+    async ParsedText(key_id, channel, ...args) {
+        var language = "";
+        var text = "";
 
-        for (let i = 0; i < splittedkey.length; i++) {
-            switch(true) {
-                case (splittedkey[i].includes("%user%")):
-                    splittedkey[i] = splittedkey[i].replace("%user%", args.user.username);
+        if (!(channel in this.#preferred_users)) {
+            language = "en_us";
+        } else {
+            language = this.#preferred_users[channel];
+        }
+
+        text = this.#loaded_languages[language][key_id].split(' ');
+
+        text.forEach((value, i, array)=> {
+            switch (true) {
+                case (value.includes("%0%")):
+                    text[i] = text[i].replace("%0%", args[0]);    
                     break;
-                case (splittedkey[i].includes("%emotes%")):
-                    splittedkey[i] = splittedkey[i].replace("%emotes%", args.emotes);
+                case (value.includes("%1%")):
+                    text[i] = text[i].replace("%1%", args[1]);    
                     break;
-                case (splittedkey[i].includes("%0%")):
-                    splittedkey[i] = splittedkey[i].replace("%0%", customvariables[0]);
+                case (value.includes("%2%")):
+                    text[i] = text[i].replace("%2%", args[2]);    
                     break;
-                case (splittedkey[i].includes("%1%")):
-                    splittedkey[i] = splittedkey[i].replace("%1%", customvariables[1]);
+                case (value.includes("%3%")):
+                    text[i] = text[i].replace("%3%", args[3]);    
                     break;
-                case (splittedkey[i].includes("%2%")):
-                    splittedkey[i] = splittedkey[i].replace("%2%", customvariables[2]);
+                case (value.includes("%4%")):
+                    text[i] = text[i].replace("%4%", args[4]);    
+                    break;
+                case (value.includes("%5%")):
+                    text[i] = text[i].replace("%5%", args[5]);    
+                    break;
+                case (value.includes("%6%")):
+                    text[i] = text[i].replace("%6%", args[6]);    
+                    break;
+                case (value.includes("%7%")):
+                    text[i] = text[i].replace("%7%", args[7]);    
+                    break;
+                case (value.includes("%8%")):
+                    text[i] = text[i].replace("%8%", args[8]);    
+                    break;
+                case (value.includes("%9%")):
+                    text[i] = text[i].replace("%9%", args[9]);    
+                    break;
                 default:
                     break;
             }
-        }
+        });
 
-        return splittedkey.join(' ');
-    }
-
-    async getTranslationKeysByTarget(target) {
-        return this.languages[this.attached_to_languages[target.slice(1, target.length)]];
-    }
-
-    async getNotFilteredTranslationKey(key, args) {
-        if (!(args.target.slice(1, args.target.length) in this.attached_to_languages)) {
-            return eval(`this.languages["en_us"].${key}`);
-        }
-        return eval(`this.languages[this.attached_to_languages[args.target.slice(1, args.target.length)]].${key}`);
+        return text.join(' ');
     }
 }
 

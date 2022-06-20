@@ -34,8 +34,10 @@ module.exports = {
 
                 inCooldown.push(args.user.username);
                 setTimeout(() => inCooldown = inCooldown.filter(u => u !== args.user.username), this.cooldownMs);
-        
-                return `${await args.lang.TranslationKey("cmd.etop.execute.success", args)} ${top_emotes[0][0]} (${top_emotes[0][1]}), ${top_emotes[1][0]} (${top_emotes[1][1]}), ${top_emotes[2][0]} (${top_emotes[2][1]}), ${top_emotes[3][0]} (${top_emotes[3][1]}), ${top_emotes[4][0]} (${top_emotes[4][1]}), ${top_emotes[5][0]} (${top_emotes[5][1]}), ${top_emotes[6][0]} (${top_emotes[6][1]}), ${top_emotes[7][0]} (${top_emotes[7][1]}), ${top_emotes[8][0]} (${top_emotes[8][1]}), ${top_emotes[9][0]} (${top_emotes[9][1]}), ${top_emotes[10][0]} (${top_emotes[10][1]}), ${top_emotes[11][0]} (${top_emotes[11][1]}), ${top_emotes[12][0]} (${top_emotes[12][1]}), ${top_emotes[13][0]} (${top_emotes[13][1]}), ${top_emotes[14][0]} (${top_emotes[14][1]})`;
+                
+                var text = `${top_emotes[0][0]} (${top_emotes[0][1]}), ${top_emotes[1][0]} (${top_emotes[1][1]}), ${top_emotes[2][0]} (${top_emotes[2][1]}), ${top_emotes[3][0]} (${top_emotes[3][1]}), ${top_emotes[4][0]} (${top_emotes[4][1]}), ${top_emotes[5][0]} (${top_emotes[5][1]}), ${top_emotes[6][0]} (${top_emotes[6][1]}), ${top_emotes[7][0]} (${top_emotes[7][1]}), ${top_emotes[8][0]} (${top_emotes[8][1]}), ${top_emotes[9][0]} (${top_emotes[9][1]}), ${top_emotes[10][0]} (${top_emotes[10][1]}), ${top_emotes[11][0]} (${top_emotes[11][1]}), ${top_emotes[12][0]} (${top_emotes[12][1]}), ${top_emotes[13][0]} (${top_emotes[13][1]}), ${top_emotes[14][0]} (${top_emotes[14][1]})`;
+
+                return await args.lang.ParsedText("cmd.etop.exec.response", args.channel, text);
             } else {
                 let items = Object.keys(args.emotes[args.target.slice(1, args.target.length)]).map((key) => {
                     return [key, args.emotes[args.target.slice(1, args.target.length)][key]]
@@ -48,8 +50,9 @@ module.exports = {
 
                 inCooldown.push(args.user.username);
                 setTimeout(() => inCooldown = inCooldown.filter(u => u !== args.user.username), this.cooldownMs);
-        
-                return `${await args.lang.TranslationKey("cmd.etop.execute.success", args)} ${top_emotes[0][0]} (${top_emotes[0][1]}), ${top_emotes[1][0]} (${top_emotes[1][1]}), ${top_emotes[2][0]} (${top_emotes[2][1]}), ${top_emotes[3][0]} (${top_emotes[3][1]}), ${top_emotes[4][0]} (${top_emotes[4][1]}), ${top_emotes[5][0]} (${top_emotes[5][1]}), ${top_emotes[6][0]} (${top_emotes[6][1]}), ${top_emotes[7][0]} (${top_emotes[7][1]}), ${top_emotes[8][0]} (${top_emotes[8][1]}), ${top_emotes[9][0]} (${top_emotes[9][1]}), ${top_emotes[10][0]} (${top_emotes[10][1]}), ${top_emotes[11][0]} (${top_emotes[11][1]}), ${top_emotes[12][0]} (${top_emotes[12][1]}), ${top_emotes[13][0]} (${top_emotes[13][1]}), ${top_emotes[14][0]} (${top_emotes[14][1]})`;
+                var text = `${top_emotes[0][0]} (${top_emotes[0][1]}), ${top_emotes[1][0]} (${top_emotes[1][1]}), ${top_emotes[2][0]} (${top_emotes[2][1]}), ${top_emotes[3][0]} (${top_emotes[3][1]}), ${top_emotes[4][0]} (${top_emotes[4][1]}), ${top_emotes[5][0]} (${top_emotes[5][1]}), ${top_emotes[6][0]} (${top_emotes[6][1]}), ${top_emotes[7][0]} (${top_emotes[7][1]}), ${top_emotes[8][0]} (${top_emotes[8][1]}), ${top_emotes[9][0]} (${top_emotes[9][1]}), ${top_emotes[10][0]} (${top_emotes[10][1]}), ${top_emotes[11][0]} (${top_emotes[11][1]}), ${top_emotes[12][0]} (${top_emotes[12][1]}), ${top_emotes[13][0]} (${top_emotes[13][1]}), ${top_emotes[14][0]} (${top_emotes[14][1]})`;
+
+                return await args.lang.ParsedText("cmd.etop.exec.response", args.channel, text);
             }
         }
     }

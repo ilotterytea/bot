@@ -20,15 +20,17 @@ module.exports = {
     permissions: ["pub"],
     execute: async (args) => {
         if (!inCooldown.includes(args.user.username)) {
+            inCooldown.push(args.user.username);
+            setTimeout(() => inCooldown = inCooldown.filter(u => u !== args.user.username), this.cooldownMs);
+
             if (args.msg_args.length == 1) {
-                return await args.lang.TranslationKey("cmd.ecount.execute.notfull", args);
+                return await args.lang.ParsedText("cmd.ecount.exec.not_enough_params", args.channel, args.user.username);
             }
     
             if (args.msg_args[1] in args.emotes[args.target.slice(1, args.target.length)]) {
-                return await args.lang.TranslationKey("cmd.ecount.execute.success", args, [args.msg_args[1], args.emotes[args.target.slice(1, args.target.length)][args.msg_args[1]].toLocaleString()]);
+                return await args.lang.ParsedText("cmd.ecount.exec.response", args.channel, args.msg_args[1], args.emotes[args.target.slice(1, args.target.length)][args.msg_args[1]].toLocaleString());
             }
-            inCooldown.push(args.user.username);
-            setTimeout(() => inCooldown = inCooldown.filter(u => u !== args.user.username), this.cooldownMs);
+
             return null;
         }
     }

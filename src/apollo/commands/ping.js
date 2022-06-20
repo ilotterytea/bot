@@ -14,6 +14,7 @@
 // 
 // You should have received a copy of the GNU General Public License
 // along with iLotteryteaLive.  If not, see <http://www.gnu.org/licenses/>.
+const { readFileSync } = require("fs");
 var os = require("node-os-utils");
 
 module.exports = {
@@ -21,6 +22,9 @@ module.exports = {
     permissions: ["pub"],
     execute: async (args) => {
         if (!inCooldown.includes(args.user.username)) {
+            inCooldown.push(args.user.username);
+            setTimeout(() => inCooldown = inCooldown.filter(u => u !== args.user.username), this.cooldownMs);
+
             var mem = `${Math.round(await (await os.mem.used()).usedMemMb)} MB/${Math.round(await (await os.mem.used()).totalMemMb)} MB`
 
             function formatTime(seconds) {
@@ -37,12 +41,15 @@ module.exports = {
             }
 
             var pingms = await args.apollo.client.ping();
-            let text = await args.lang.getNotFilteredTranslationKey("cmd.ping.execute.success", args);
 
-            inCooldown.push(args.user.username);
-            setTimeout(() => inCooldown = inCooldown.filter(u => u !== args.user.username), this.cooldownMs);
+            var uptime = formatTime(process.uptime());
+            var logon_rooms = args.apollo.options.channelsToJoin.length;
+            var tmiping = Math.floor(Math.round(pingms * 1000));
 
-            return text.replace("%uptime%", formatTime(process.uptime())).replace("%logonchannels%", args.apollo.options.channelsToJoin.length).replace("%tmi%", Math.floor(Math.round(pingms * 1000))).replace("%mem%", mem);
+            var commit = readFileSync("storage/commit.txt", {encoding: "utf-8"}).split("-0-g");
+            var commit_branch = commit[0].replace("heads/", "");
+
+            return await args.lang.ParsedText("cmd.ping.exec.response", args.channel, "FeelsDankMan 🏓 ", uptime, logon_rooms, mem, tmiping, commit[1], commit_branch);
         }
     }
 }

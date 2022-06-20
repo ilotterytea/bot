@@ -32,7 +32,7 @@ module.exports = {
                 var ur = args.msg_args[2].split(':');
                 var user = await args.gql.getUserByName(ur[0]);
 
-                if (!user) return await args.lang.TranslationKey("cmd.storage.execute.not_found", args, [ur[0]]);
+                if (!user) return await args.lang.ParsedText("user.not_found", args.channel, args.user.username, ur[0]);
 
                 switch (ur[1]) {
                     case "authority":
@@ -56,20 +56,20 @@ module.exports = {
                         args.storage.roles.permabanned          = args.storage.roles.permabanned.filter(u => u !== user.id);
                         break;
                     default:
-                        return await args.lang.TranslationKey("cmd.storage.execute.group_not_found", args, [ur[1]]);
+                        return await args.lang.ParsedText("cmd.storage.exec.group.not_found", args.channel, args.user.username, ur[1]);
                 }
 
-                return await args.lang.TranslationKey("cmd.storage.execute.group_changed", args, [user.name, user.id, ur[1]]);
+                return await args.lang.ParsedText("cmd.storage.exec.group.changed", args.channel, args.user.username, user.name, user.id, ur[1]);
             }
 
             // Change the prefix (e.g. !storage prefix ~@):
             if (edit == "prefix") {
-                if (args.msg_args.length < 3) return await args.lang.TranslationKey("cmd.storage.execute.prefix_now", args, [args.storage.prefix]);
+                if (args.msg_args.length < 3) return await args.lang.ParsedText("cmd.storage.exec.prefix.now", args.channel, args.storage.prefix);
 
                 var pref = args.msg_args[2];
                 args.storage.prefix = pref;
 
-                return await args.lang.TranslationKey("cmd.storage.execute.prefix_changed", args, [pref]);
+                return await args.lang.ParsedText("cmd.storage.exec.prefix.changed", args.channel, args.user.username, pref);
             }
 
             // Leave the channel (e.g. !storage part monkeos):
@@ -78,14 +78,14 @@ module.exports = {
 
                 var user = await args.gql.getUserByName(args.msg_args[2]);
 
-                if (!user) return await args.lang.TranslationKey("cmd.storage.execute.not_found", args, [args.msg_args[2]]);
+                if (!user) return await args.lang.ParsedText("user.not_found", args.channel, args.user.username, args.msg_args[2]);
                 if (args.storage.join.asclient.includes(user.id)) {
                     args.storage.join.asclient = args.storage.join.asclient.filter(u => u !== user.id);
                     args.apollo.client.part(`#${user.name}`);
                     
-                    return await args.lang.TranslationKey("cmd.storage.execute.parted_successfully", args, [user.name, user.id]);
+                    return await args.lang.ParsedText("cmd.storage.exec.part.successfully", args.channel, args.user.username, user.name, user.id);
                 } else {
-                    return await args.lang.TranslationKey("cmd.storage.execute.not_in_join_list", args, [user.name, user.id]);
+                    return await args.lang.ParsedText("cmd.storage.exec.part.not_in_join_list", args.channel, args.user.username, user.name, user.id);
                 }
             }
         }
