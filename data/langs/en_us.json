@@ -42,10 +42,10 @@
     "cmd.join.exec.already_in": "@%0%, user %1% (%2%) is already on the join list!",
 
     "cmd.set.name": "Settings!",
-    "cmd.set.desc": "Set the preferred bot options for yourself. For broadcasters, for their channel.",
+    "cmd.set.desc": "Set the preferred bot options for the channel.",
     "cmd.set.author": "iLotterytea",
-    "cmd.set.exec.usage": "@%0%, available options: lang (change the bot language to you).",
-    "cmd.set.exec.languagesetup.response": "@%0%, the bot now speaks English with you! KKona ",
+    "cmd.set.exec.usage": "@%0%, available options: lang (change the bot language in this chat).",
+    "cmd.set.exec.languagesetup.response": "@%0%, the bot now speaks English in this chat! KKona ",
     "cmd.set.exec.languagesetup.available": "@%0%, available languages: %1%",
     
     "cmd.massping.name": "Ping em, Fors! LUL 💪 ",
