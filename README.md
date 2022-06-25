@@ -5,4 +5,4 @@ Full reworking of [ilotterybot](https://github.com/notdankenough/ilotterybot). I
 ## FAQ:
 > Q: How do I add to my channel?
 
-A: *Just send "!join" to the verified chats ([fembajtea (the bot channel)](https://www.twitch.tv/popout/fembajtea/chat), [ilotterytea](https://twitch.tv/popout/ilotterytea/chat), [fedotir](https://twitch.tv/popout/fedotir/chat), [saopin_](https://twitch.tv/popout/saopin_/chat)) and the bot will join your chat (you need at least 15 [7TV emotes](https://7tv.app) on your channel for the !etop command to be fully functional) ![:)](https://static-cdn.jtvnw.net/emoticons/v2/1/default/dark/1.0)*
+A: *Just send "!join" to the verified chats ([fembajtea (the bot channel)](https://www.twitch.tv/popout/fembajtea/chat), [ilotterytea](https://twitch.tv/popout/ilotterytea/chat)) and the bot will join your chat (you need at least 15 [7TV emotes](https://7tv.app) on your channel for the !etop command to be fully functional) ![:)](https://static-cdn.jtvnw.net/emoticons/v2/1/default/dark/1.0)*
