@@ -23,43 +23,15 @@ module.exports = {
             inCooldown.push(args.user.username);
             setTimeout(() => inCooldown = inCooldown.filter(u => u !== args.user.username), this.cooldownMs);
 
-            console.log(args.channel);
-            console.log(args.channel != "ilotterytea");
-            console.log(args.channel != "fembajtea");
-
             if ((args.channel != "fembajtea") && (args.channel != "ilotterytea")) return null;
 
-            if (args.role == "su" && args.msg_args.length > 1) {
-                const name = args.msg_args[1].toLowerCase();
-                const user = await args.gql.getUserByName(name);
-                
-                if (!user) return await args.lang.ParsedText("user.not_found", args.channel, args.user.username, args.msg_args[1]);
-
-                if (!(args.storage.join.asclient.includes(user.id))) {
-                    args.storage.join.asclient.push(user.id);
-                } else {
-                    return await args.lang.ParsedText("cmd.join.exec.already_in", args.channel, user.name, user.id);
-                }
-                
-                args.apollo.client.join(`#${name}`);
-                args.apollo.client.say(`#${name}`, await args.lang.ParsedText("newarrive", args.channel, name));
-
-                return await args.lang.ParsedText("cmd.join.exec.response", args.channel, args.user.username, user.name, user.id);
-            }
-
-            const user = await args.gql.getUserByName(args.user.username);
-            if (!user) return await args.lang.ParsedText("user.something_went_wrong", args.channel, args.user.username);
-
-            if (!(args.storage.join.asclient.includes(user.id))) {
-                args.storage.join.asclient.push(user.id);
-            } else {
-                return await args.lang.ParsedText("cmd.join.exec.already_in", args.channel, args.user.username, user.name, user.id);
-            }
-
+            if (args.storage.join.asclient.includes(args.user["user-id"])) return await args.lang.ParsedText("cmd.join.exec.already_in", args.channel, args.user.username);
+            
             args.apollo.client.join(`#${args.user.username}`);
-            args.apollo.client.say(`#${args.user.username}`, await args.lang.ParsedText("newarrive", args.channel, args.user.username));
+            
+            args.storage.join.asclient.push(args.user["user-id"]);
 
-            return await args.lang.ParsedText("cmd.join.exec.response", args.channel, args.user.username, user.name, user.id);
+            return await args.lang.ParsedText("cmd.join.exec.response", args.channel, args.user.username, args.user.username, args.user["user-id"]);
         }
     }
 }

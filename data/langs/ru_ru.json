@@ -41,7 +41,7 @@
     "cmd.join.desc": "Получите бота в своем чате!",
     "cmd.join.author": "iLotterytea",
     "cmd.join.exec.response": "@%0%, успешно присоединился к чату %1% (%2%)!",
-    "cmd.join.exec.already_in": "@%0%, пользователь %1% (%2%) уже в списке чатов!",
+    "cmd.join.exec.already_in": "@%0%, вы уже добавлены!",
 
     "cmd.set.name": "Настройки!",
     "cmd.set.desc": "Установите желанные настройки бота для канала.",

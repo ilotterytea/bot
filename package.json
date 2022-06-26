@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "sudo node iLotteryteaLive.js",
+    "start": "node iLotteryteaLive.js",
     "web": "sudo node ./server-apollo/index.js"
   },
   "dependencies": {

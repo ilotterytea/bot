@@ -39,7 +39,7 @@
     "cmd.join.desc": "Get the bot to join your chat room!",
     "cmd.join.author": "iLotterytea",
     "cmd.join.exec.response": "@%0%, successfully joined in %1%'s chat room (%2%)!",
-    "cmd.join.exec.already_in": "@%0%, user %1% (%2%) is already on the join list!",
+    "cmd.join.exec.already_in": "@%0%, you're already on the join list!",
 
     "cmd.set.name": "Settings!",
     "cmd.set.desc": "Set the preferred bot options for the channel.",
