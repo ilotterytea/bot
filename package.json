@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "start": "node iLotteryteaLive.js",
-    "web": "node ./server-apollo/index.js"
+    "start": "sudo node iLotteryteaLive.js",
+    "web": "sudo node ./server-apollo/index.js"
   },
   "dependencies": {
     "7tv": "^0.0.4",
