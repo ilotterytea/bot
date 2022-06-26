@@ -17,7 +17,7 @@
     "cmd.help.desc": "",
     "cmd.help.author": "iLotterytea",
     "cmd.help.exec.response": "%0% %1%",
-    "cmd.help.exec.help": "@%0%, Полный список моих доступных команд: https://github.com/NotDankEnough/notdankenough/blob/master/md/iLotteryteaLive.md#twitch-commands FeelsDankMan 🔎 📖",
+    "cmd.help.exec.help": "@%0%, Полный список моих доступных команд: https://bot.hmmtodayiwill.ru/commands?lang=ru FeelsDankMan 🔎 📖",
     "cmd.help.exec.lolresponse": "@%0%, lol",
 
     "cmd.ping.name": "Пинг-понг!",
