@@ -71,5 +71,17 @@
     "cmd.storage.exec.group.not_found": "@%0%, группа %1% не существует!",
     "cmd.storage.exec.group.changed": "@%0%, пользователь %1% (%2%) был успешно привязан к группе %3%!",
     "cmd.storage.exec.part.successfully": "@%0%, комната %1% (%2%) безопасно покинута ботом!",
-    "cmd.storage.exec.part.not_in_join_list": "@%0%, пользователь %1% (%2%) не в списке чатов!"
+    "cmd.storage.exec.part.not_in_join_list": "@%0%, пользователь %1% (%2%) не в списке чатов!",
+
+    "cmd.scmd.name": "Создать команду!",
+    "cmd.scmd.desc": "",
+    "cmd.scmd.author": "iLotterytea",
+    "cmd.scmd.exec.list.response": "@%0%, Список пользовательских команд на канале %1%: %2%",
+    "cmd.scmd.exec.list.no": "@%0%, На этом канале нету пользовательских команд! :(",
+    "cmd.scmd.exec.make.success": "@%0%, Успешно создана новая команда \"%1%\"!",
+    "cmd.scmd.exec.make.failure": "@%0%, Команда \"%1%\" уже существует!",
+    "cmd.scmd.exec.rm.success": "@%0%, Команда \"%1%\" успешно удалена!",
+    "cmd.scmd.exec.rm.failure": "@%0%, Команды \"%1%\" нету на этом канале!",
+    "cmd.scmd.exec.ch.success": "@%0%, Успешно редактирован ответ команды \"%1%\"!",
+    "cmd.scmd.exec.ch.failure": "@%0%, Команды \"%1%\" нету на этом канале!"
 }

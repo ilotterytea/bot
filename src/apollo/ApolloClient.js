@@ -16,6 +16,7 @@
 // along with iLotteryteaLive.  If not, see <http://www.gnu.org/licenses/>.
 const { existsSync, readFileSync, writeFileSync } = require("fs");
 const tmi = require("tmi.js");
+const StaticMessageHandler = require("./handlers/StaticMessageHandler");
 const logger = require("./utils/ApolloLogger");
 const { TwitchGQL } = require("./utils/HelixTwitch");
 const { SevenTVEmoteUpdater } = require("./utils/SevenTVEmoteUpdater");
@@ -34,6 +35,8 @@ class ApolloClient {
         });
         this.EmoteUpdater   = new SevenTVEmoteUpdater(this.options.channelsToJoin);
         this.Translations   = new TranslationManager(this.storage, "data/langs");
+
+        this.StaticMsgHandler = new StaticMessageHandler("./storage/static_replies.json");
     }
 
     async create() {
@@ -64,6 +67,7 @@ class ApolloClient {
                     gql:        this.gql,
                     storage:    this.storage,
                     lang:       this.Translations,
+                    staticcmd:  this.StaticMsgHandler,
                     apollo:     this,
                     prefix:     this.storage.prefix,
                     emotes:     await this.EmoteUpdater.getEmotes,
@@ -98,11 +102,13 @@ class ApolloClient {
 
                 // Start the command processor if message starts with a prefix:
                 if (msg.startsWith(this.storage.prefix)) {
+                    var cmd = args.msg_args[0].slice(1, args.msg_args[0].length);
+
                     if (!(args.channel in this.storage.stats.executed_commands)) {
                         this.storage.stats.executed_commands[args.channel] = 0;
                     }
 
-                    if (args.msg_args[0] == "!dispose" && args.role == "su" && (target == "#ilotterytea" || target == "#fembajtea")) {
+                    if (args.msg_args[0] == "!dispose" && args.role == "su" && (target == "#ilotterytea" || target == "#fembajbot")) {
                         this.storage.stats.executed_commands[args.channel] = this.storage.stats.executed_commands[args.channel] += 1;
                         var a_emotes = ["docLeave", "peepoLeave", "ppPoof", "monkaGIGAftSaj"];
                         this.client.say(target, await this.Translations.ParsedText("leave", args.channel, a_emotes[Math.floor(Math.random() * (a_emotes.length - 1))]));
@@ -180,6 +186,11 @@ class ApolloClient {
                             }
                         }
                     }
+
+                    //////////////
+                    var staticmsg = await this.StaticMsgHandler.check(cmd, args.user["room-id"], args.user.username);
+
+                    if (staticmsg != false) this.client.say(target, `@${args.user.username}, ${staticmsg}`);
                 }
             } catch(err) {
                 logger(err, "err", true);
@@ -240,6 +251,8 @@ class ApolloClient {
 
     async SaveStorage() {
         writeFileSync("storage/storage.json", JSON.stringify(this.storage, null, 2), {encoding: "utf-8"});
+        this.StaticMsgHandler.save();
+        
         logger("Storage saved!", "log", true);
     }
 }

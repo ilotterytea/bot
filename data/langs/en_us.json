@@ -69,5 +69,17 @@
     "cmd.storage.exec.group.not_found": "@%0%, group %1% not exists!",
     "cmd.storage.exec.group.changed": "@%0%, user %1% (%2%) was successfully assigned to the %3% group!",
     "cmd.storage.exec.part.successfully": "@%0%, the bot has safely parted from %1% (%2%) chat room!",
-    "cmd.storage.exec.part.not_in_join_list": "@%0%, user %1% (%2%) isn't on the join list!"
+    "cmd.storage.exec.part.not_in_join_list": "@%0%, user %1% (%2%) isn't on the join list!",
+
+    "cmd.scmd.name": "Create a new static command!",
+    "cmd.scmd.desc": "",
+    "cmd.scmd.author": "iLotterytea",
+    "cmd.scmd.exec.list.response": "@%0%, List of user-created commands on %1%'s channel: %2%",
+    "cmd.scmd.exec.list.no": "@%0%, This channel has no user-created commands! :(",
+    "cmd.scmd.exec.make.success": "@%0%, Successfully created a new command \"%1%\"!",
+    "cmd.scmd.exec.make.failure": "@%0%, Command \"%1%\" already exists!",
+    "cmd.scmd.exec.rm.success": "@%0%, Successfully removed a command \"%1%\"!",
+    "cmd.scmd.exec.rm.failure": "@%0%, Command \"%1%\" doesn't exist on your channel!",
+    "cmd.scmd.exec.ch.success": "@%0%, Successfully changed the response of the command \"%1%\"!",
+    "cmd.scmd.exec.ch.failure": "@%0%, Command \"%1%\" doesn't exist on your channel!"
 }
