@@ -80,3 +80,12 @@ async function Initialize() {
 
 
 Initialize();
+
+process.on("unhandledRejection", async (reason, promise) => {
+    console.log(reason);
+});
+
+process.on("uncaughtException", async (err) => {
+    console.log(err);
+    return process.exit(1);
+});
