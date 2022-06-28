@@ -18,21 +18,21 @@
 const ttv = require("twitch");
 const ttva = require("twitch-auth");
 
-class TwitchGQL {
+class TwitchAPI {
     constructor (clientId, token) {
         this.StaticAuthProvider = new ttva.StaticAuthProvider(clientId, token);
-        this.GQL = new ttv.ApiClient({authProvider: this.StaticAuthProvider});
+        this.API = new ttv.ApiClient({authProvider: this.StaticAuthProvider});
     }
 
     async isStreamLive(username) {
-        const user = await this.GQL.helix.users.getUserByName(username);
+        const user = await this.API.helix.users.getUserByName(username);
         if (!user) return false;
 
         return await user.getStream() !== null;
     }
 
     async getNamesByIds(ids) {
-        const userids = await this.GQL.helix.users.getUsersByIds(ids);
+        const userids = await this.API.helix.users.getUsersByIds(ids);
         let usernames = [];
 
         userids.forEach(async (value, index, array) => {
@@ -46,29 +46,29 @@ class TwitchGQL {
     }
 
     async getUserById(id) {
-        const user = await this.GQL.helix.users.getUserById(id);
+        const user = await this.API.helix.users.getUserById(id);
         if (!user) return false;
         user.id
         return user;
     }
 
     async getUserByName(name) {
-        const user = await this.GQL.helix.users.getUserByName(name);
+        const user = await this.API.helix.users.getUserByName(name);
         if (!user) return false;
         return user;
     }
 
     async isValidUserByName(name) {
-        const user = await this.GQL.helix.users.getUserByName(name);
+        const user = await this.API.helix.users.getUserByName(name);
         if (!user) return false;
         return true;
     }
 
     async isValidUserById(id) {
-        const user = await this.GQL.helix.users.getUserById(id);
+        const user = await this.API.helix.users.getUserById(id);
         if (!user) return false;
         return true;
     }
 }
 
-module.exports = {TwitchGQL}
+module.exports = {TwitchAPI}

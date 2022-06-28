@@ -1,4 +1,6 @@
 {
+  "version": "1.2.0",
+  "type": "module",
   "scripts": {
     "start": "node iLotteryteaLive.js",
     "web": "node ./server-apollo/index.js",
