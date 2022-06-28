@@ -15,17 +15,63 @@
 // You should have received a copy of the GNU General Public License
 // along with iLotteryteaLive.  If not, see <http://www.gnu.org/licenses/>.
 
-const { appendFileSync } = require("fs")
+// Libraries:
+const { appendFileSync } = require("fs");
 
-module.exports = function (message, level, showInConsole = false) {
+/**
+ * Apollo Logger.
+ * @param {*} log_level Log level. There are 3 log levels: debug, warning, error.
+ * @param {*} name Script name. This parameter will be removed when I make a good logger.
+ * @param  {...any} args Debug message.
+ */
+function ApolloLogger(log_level, name, ...args) {
     function pad(e) {
         return ( (e < 10) ? "0" : "" ) + e.toString();
     }
+
     const date = new Date();
     const date_minimal = `${pad(date.getUTCDate())}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCFullYear())}`
     const date_template = `${pad(date.getUTCDate())}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCFullYear())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}.${pad(date.getUTCMilliseconds())}`;
-    appendFileSync(`storage/logs/${date_minimal}.log`, `[${date_template} (UTC)] ${(level == "log") ? "*" : "!!!"} ${message}\n`, {encoding: "utf-8"});
-    if (showInConsole) {
-        console.log(`[${date_template} (UTC)] ${(level == "log") ? "*" : "!!!"} ${message}`);
+
+    switch (log_level) {
+        case "debug":
+            appendFileSync(`./storage/logs/${date_minimal}.log`, `[${date_template}] [DEBUG] ${name.toUpperCase()}: ${args.join(' ')}\n`);
+            console.debug(`[${date}] [DEBUG] ${name.toUpperCase()}: ${args.join(' ')}`);
+            break;
+        case "warn":
+            appendFileSync(`./storage/logs/${date_minimal}.log`, `[${date_template}] [WARN] ${name.toUpperCase()}: ${args.join(' ')}\n`);
+            console.debug(`[${date}] [WARN] ${name.toUpperCase()}: ${args.join(' ')}`);
+            break;
+        case "error":
+            appendFileSync(`./storage/logs/${date_minimal}.log`, `[${date_template}] [ERROR] ${name.toUpperCase()}: ${args.join(' ')}\n`);
+            console.debug(`[${date}] [ERROR] ${name.toUpperCase()}: ${args.join(' ')}`);
+            break;
     }
 }
+
+/**
+ * Log with debug level.
+ * @param {*} name Script name. This parameter will be removed when I make a good logger.
+ * @param  {...any} args Debug message.
+ */
+module.exports.debug = async (name, ...args) => {
+    ApolloLogger("debug", name, ...args);
+};
+
+/**
+ * Log with warn level.
+ * @param {*} name Script name. This parameter will be removed when I make a good logger.
+ * @param  {...any} args Debug message.
+ */
+module.exports.warn = async (name, ...args) => {
+    ApolloLogger("warn", name, ...args);
+};
+
+/**
+ * Log with error level.
+ * @param {*} name Script name. This parameter will be removed when I make a good logger.
+ * @param  {...any} args Debug message.
+ */
+module.exports.error = async (name, ...args) => {
+    ApolloLogger("error", name, ...args);
+};
