@@ -160,10 +160,7 @@ dist
 # Support for Project snippet scope
 
 storage
-storage/*
+local
 test.js
 *.env
 *.sql
-dankupdate.sh
-dankindex.js
-.vscode

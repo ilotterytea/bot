@@ -1,0 +1,32 @@
+{
+    "configurations": [
+        {
+            "name": "Launch the web server (via npm)",
+            "request": "launch",
+            "runtimeArgs": [
+                "run",
+                "web",
+                "-d"
+            ],
+            "runtimeExecutable": "npm",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        },
+        {
+            "name": "Launch the bot instance (via npm)",
+            "request": "launch",
+            "runtimeArgs": [
+                "run",
+                "bot",
+                "-d"
+            ],
+            "runtimeExecutable": "npm",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        }
+    ]
+}
