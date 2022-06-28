@@ -16,6 +16,7 @@
 // along with iLotteryteaLive.  If not, see <http://www.gnu.org/licenses/>.
 
 // Libraries:
+const { default: chalk } = require("chalk");
 const { appendFileSync } = require("fs");
 
 /**
@@ -34,17 +35,18 @@ function ApolloLogger(log_level, name, ...args) {
     const date_template = `${pad(date.getUTCDate())}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCFullYear())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}.${pad(date.getUTCMilliseconds())}`;
 
     switch (log_level) {
+        
         case "debug":
             appendFileSync(`./storage/logs/${date_minimal}.log`, `[${date_template}] [DEBUG] ${name.toUpperCase()}: ${args.join(' ')}\n`);
-            console.debug(`[${date}] [DEBUG] ${name.toUpperCase()}: ${args.join(' ')}`);
+            console.debug(`${chalk.gray("[" + date_template + "]")} ${chalk.bgGreen("DEBUG")} ${name.toUpperCase()}: ${args.join(' ')}`);
             break;
         case "warn":
             appendFileSync(`./storage/logs/${date_minimal}.log`, `[${date_template}] [WARN] ${name.toUpperCase()}: ${args.join(' ')}\n`);
-            console.debug(`[${date}] [WARN] ${name.toUpperCase()}: ${args.join(' ')}`);
+            console.debug(`${chalk.gray("[" + date_template + "]")} ${chalk.bgYellow("WARN")} ${name.toUpperCase()}: ${args.join(' ')}`);
             break;
         case "error":
             appendFileSync(`./storage/logs/${date_minimal}.log`, `[${date_template}] [ERROR] ${name.toUpperCase()}: ${args.join(' ')}\n`);
-            console.debug(`[${date}] [ERROR] ${name.toUpperCase()}: ${args.join(' ')}`);
+            console.debug(`${chalk.gray("[" + date_template + "]")} ${chalk.bgRed("ERROR")} ${name.toUpperCase()}: ${args.join(' ')}`);
             break;
     }
 }
