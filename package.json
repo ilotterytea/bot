@@ -1,21 +1,32 @@
 {
-  "version": "1.2.0",
-  "type": "module",
-  "scripts": {
-    "start": "node iLotteryteaLive.js",
-    "web": "node ./server-apollo/index.js",
-    "debug": "node test.js"
+  "name": "itb2",
+  "displayName": "iLotterytea's Twitch Bot 2",
+  "description": "A lidl utility bot.",
+  "version": "2.1.77",
+  "author": "NotDankEnough <hatesociety@pm.me> (https://hmmtodayiwill.ru)",
+  "homepage": "https://bot.hmmtodayiwill.ru",
+  "bugs": {
+    "email": "hatesociety@pm.me",
+    "url": "https://github.com/notdankenough/itb2/"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/notdankenough/itb2.git"
+  },
+  "license": "GPL-3.0",
+
+  "scripts": {
+    "bot": "node --experimental-json-modules ./iLotteryteaLive.js"
+  },
+
   "dependencies": {
+    "@types/tmi.js": "^1.8.1",
     "7tv": "^0.0.4",
     "axios": "^0.27.2",
     "chalk": "^5.0.1",
     "commander": "^9.3.0",
-    "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.1",
-    "express": "^4.18.1",
     "fs": "^0.0.1-security",
-    "inquirer": "^9.0.0",
     "node-os-utils": "^1.3.6",
     "tmi.js": "^1.8.5",
     "twitch": "^4.6.7",

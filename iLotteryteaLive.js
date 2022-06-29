@@ -18,8 +18,7 @@
 const { existsSync, mkdirSync, readFileSync, writeFileSync } = require("fs");
 const { ApolloClient } = require("./src/apollo/ApolloClient");
 const ApolloLogger = require("./src/apollo/utils/ApolloLogger");
-const { TwitchGQL } = require("./src/apollo/utils/HelixTwitch");
-const { WebClient } = require("./src/web/WebClient");
+const { TwitchAPI } = require("./src/apollo/utils/HelixTwitch");
 
 require("dotenv").config({path: "./bot.env"});
 
@@ -56,25 +55,20 @@ async function Initialize() {
         }
     }
 
-    ApolloLogger("--- Bot is starting! Checking the directories...", "log", true);
+    ApolloLogger.debug("iLotteryteaLive", "--- Bot is starting! Checking the directories...");
     await DirectoryCheck();
-    ApolloLogger("Initializing the bot components...", "log", true);
+    ApolloLogger.debug("iLotteryteaLive", "Initializing the bot components...");
 
     let storage = JSON.parse(readFileSync("storage/storage.json", {encoding: "utf-8"}));
-    const GQL = new TwitchGQL(process.env.TTV_CLIENT, process.env.TTV_TOKEN);
+    const API = new TwitchAPI(process.env.TTV_CLIENT, process.env.TTV_TOKEN);
 
-    var channels = await GQL.getNamesByIds(storage.join.asclient);
+    var channels = await API.getNamesByIds(storage.join.asclient);
 
     const apolloClient = new ApolloClient({
-        username: process.env.TTV_LOGIN,
+        username: process.env.TTV_USERNAME,
         password: process.env.TTV_PASSWORD,
         channelsToJoin: channels
-    }, storage, GQL);
-
-    const webClient = new WebClient(apolloClient, 12906, __dirname);
-
-    // Web client in development stage...
-    //webClient.create();
+    }, storage, API);
     apolloClient.create();
 }
 

@@ -1,23 +1,23 @@
 // Copyright (C) 2022 ilotterytea
 // 
-// This file is part of iLotteryteaLive.
+// This file is part of ApolloClient.
 // 
-// iLotteryteaLive is free software: you can redistribute it and/or modify
+// ApolloClient is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 // 
-// iLotteryteaLive is distributed in the hope that it will be useful,
+// ApolloClient is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 // 
 // You should have received a copy of the GNU General Public License
-// along with iLotteryteaLive.  If not, see <http://www.gnu.org/licenses/>.
+// along with ApolloClient.  If not, see <http://www.gnu.org/licenses/>.
 const { existsSync, readFileSync, writeFileSync } = require("fs");
 const tmi = require("tmi.js");
 const StaticMessageHandler = require("./handlers/StaticMessageHandler");
-const logger = require("./utils/ApolloLogger");
+const ApolloLogger = require("./utils/ApolloLogger");
 const { TwitchGQL } = require("./utils/HelixTwitch");
 const { SevenTVEmoteUpdater } = require("./utils/SevenTVEmoteUpdater");
 const { TranslationManager } = require("./utils/TranslationManager");
@@ -182,7 +182,7 @@ class ApolloClient {
                                 }
                             } catch (err) {
                                 this.client.say(target, await this.Translations.ParsedText("error", args.channel, args.user.username));
-                                logger(`Error occurred during the execution of ${args.msg_args[0]} command: ${err}`, "err", true);
+                                ApolloLogger.error("ApolloClient", `Error occurred during the execution of ${args.msg_args[0]} command: ${err}`);
                             }
                         }
                     }
@@ -193,7 +193,7 @@ class ApolloClient {
                     if (staticmsg != false) this.client.say(target, `@${args.user.username}, ${staticmsg}`);
                 }
             } catch(err) {
-                logger(err, "err", true);
+                ApolloLogger.error("ApolloClient", err);
                 this.dispose();
             }
         });
@@ -215,9 +215,9 @@ class ApolloClient {
         }, 30000);
 
         // Internet connection events:
-        this.client.on("connecting", async (address, port) => logger(`Client is connecting to ${address}:${port}...`, "log", true));
+        this.client.on("connecting", async (address, port) => ApolloLogger.debug("ApolloClient", `Client is connecting to ${address}:${port}...`));
         this.client.on("connected", async (address, port) => {
-            logger(`Client is connected to ${address}:${port}!`, "log", true);
+            ApolloLogger.debug("ApolloClient", `Client is connected to ${address}:${port}!`);
 
             var delemotes = this.EmoteUpdater.getDeletedEmotes;
             var newemotes = this.EmoteUpdater.getNewEmotes;
@@ -234,8 +234,8 @@ class ApolloClient {
                 if (delemotes[target] != '' && delemotes[target] != undefined) this.client.action(value, await this.Translations.ParsedText("emoteupdater.deleted_emotes", value.slice(1, value.length), "[7TV]", delemotes[target]));
                 });
         });
-        this.client.on("reconnect", async () => logger(`Client is reconnecting...`, "log", true));
-        this.client.on("disconnected", async (reason) => logger(`Client is disconnected! Reason: ${reason}`, "warn", true));
+        this.client.on("reconnect", async () => ApolloLogger.debug("ApolloClient", `Client is reconnecting...`));
+        this.client.on("disconnected", async (reason) => ApolloLogger.debug("ApolloClient", `Client is disconnected! Reason: ${reason}`));
     }
 
     getClient() {
@@ -245,7 +245,7 @@ class ApolloClient {
     async dispose() {
         this.client.disconnect();
         this.SaveStorage();
-        logger(`Client is disposed!`, "log", true);
+        ApolloLogger.debug("ApolloClient", `Client is disposed!`);
         process.exit(0);
     }
 
@@ -253,7 +253,7 @@ class ApolloClient {
         writeFileSync("storage/storage.json", JSON.stringify(this.storage, null, 2), {encoding: "utf-8"});
         this.StaticMsgHandler.save();
         
-        logger("Storage saved!", "log", true);
+        ApolloLogger.debug("ApolloClient", "Storage saved!");
     }
 }
 

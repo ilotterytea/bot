@@ -16,6 +16,7 @@
 // along with iLotteryteaLive.  If not, see <http://www.gnu.org/licenses/>.
 const { readFileSync } = require("fs");
 var os = require("node-os-utils");
+const { version, name } = require("../../../package.json");
 
 module.exports = {
     cooldownMs: 5000,
@@ -49,7 +50,7 @@ module.exports = {
             var commit = readFileSync("storage/commit.txt", {encoding: "utf-8"}).split("-0-g");
             var commit_branch = commit[0].replace("heads/", "");
 
-            return await args.lang.ParsedText("cmd.ping.exec.response", args.channel, "FeelsDankMan 🏓 ", uptime, logon_rooms, mem, tmiping, commit[1], commit_branch);
+            return await args.lang.ParsedText("cmd.ping.exec.response", args.channel, "FeelsDankMan 🏓 ", uptime, logon_rooms, mem, tmiping, `${version}-${name}`, commit[1], commit_branch);
         }
     }
 }

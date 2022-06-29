@@ -21,7 +21,7 @@
     "cmd.ping.name": "Ping!",
     "cmd.ping.desc": "Checking if it's alive, and a bunch of other data.",
     "cmd.ping.author": "iLotterytea",
-    "cmd.ping.exec.response": "%0% Pong! Session uptime: %1%. Landed in %2% channels. Memory usage: %3%. Latency to TMI: %4%ms. Commit %5% (%6%).",
+    "cmd.ping.exec.response": "%0% Pong! Session uptime: %1%. Landed in %2% channels. Memory usage: %3%. Latency to TMI: %4%ms. Running on version %5% (Commit %6% [%7%]).",
 
     "cmd.ecount.name": "7TV channel emote count!",
     "cmd.ecount.desc": "Shows how much of the specified 7TV channel emote has been used. Updates the emote database every 90 seconds.",

@@ -32,7 +32,7 @@ class SevenTVEmoteUpdater {
     }
 
     async SaveEmotes() {
-        ApolloLogger("7TV channel emotes were updated!", "log", true);
+        ApolloLogger.debug("SevenTVEmoteUpdater", "7TV channel emotes were updated!");
     }
 
     async UpdateEmoteCounter(target, message) {
