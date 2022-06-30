@@ -2,7 +2,7 @@
   "name": "itb2",
   "displayName": "iLotterytea's Twitch Bot 2",
   "description": "A lidl utility bot.",
-  "version": "2.1.78",
+  "version": "2.2.0",
   "author": "NotDankEnough <hatesociety@pm.me> (https://hmmtodayiwill.ru)",
   "homepage": "https://bot.hmmtodayiwill.ru",
   "bugs": {
@@ -16,8 +16,10 @@
   "license": "GPL-3.0",
 
   "scripts": {
-    "bot": "node --experimental-json-modules ./iLotteryteaLive.js"
+    "build": "tsc --resolveJsonModule index.ts",
+    "run": "node index.js"
   },
+
 
   "dependencies": {
     "@types/tmi.js": "^1.8.1",
