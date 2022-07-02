@@ -23,25 +23,26 @@ import ApolloConfiguration from "./src/apollo/ApolloConfiguration";
 import TwitchAPI from "./src/apollo/clients/TwitchAPI";
 import MessageHandler from "./src/apollo/handlers/MessageHandler";
 import ApolloLogger from "./src/apollo/utils/ApolloLogger";
-
 import {version, name} from "./package.json";
+import getAssets from "./src/apollo/utils/NetworkManager";
 
 main();
 
 async function main() {
     ApolloLogger.debug("Initializer", `--> Hello, user! I'm using ${name} v${version}!`);
-    const CLIOptions = CLI();
-    const isInDebugMode = CLIOptions.debug;
-    const disableInternetConnection = CLIOptions["disable-internet-sync"];
+    const opts = CLI();
+
+    if (!opts["disable-internet-sync"]) await getAssets(ApolloConfiguration.env.LANG_PATH);
 
     const API = await TwitchAPI(ApolloConfiguration.Passport.ClientID, ApolloConfiguration.Passport.AccessToken);
-    const Apollo = ApolloClient(ApolloConfiguration.Passport.Username, ApolloConfiguration.Passport.Password, API, isInDebugMode);
+    const Apollo = ApolloClient(ApolloConfiguration.Passport.Username, ApolloConfiguration.Passport.Password, API, opts.debug);
 
     const MsgHandler = new MessageHandler(Apollo, API);
+
     try {
         MsgHandler.HandleMessages();
         MsgHandler.SubEvents();
-    } catch (err) {
+    } catch (err: any) {
         ApolloLogger.error("Initializer", "Something went wrong while handling the messages: ", err);
     }
 }
@@ -68,9 +69,6 @@ function CLI() {
     Program
         .option("--disable-internet-sync", "Don't update localization files every time you reboot.", false)
         .alias("-i");
-    
-    Program
-        .option("--console-mode", "Connecting to the Twitch, but commands will be accepted in terminal")
     
     // Parse the arguments:
     Program.parse(process.argv);
