@@ -1,3 +1,4 @@
+#!/usr/bin/env/ ts-node
 // Copyright (C) 2022 ilotterytea
 // 
 // This file is part of iLotteryteaLive.
