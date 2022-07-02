@@ -28,5 +28,12 @@ export default {
         ClientID: "",
         ClientSecret: "",
         AccessToken: ""
+    },
+    env: {
+        NET: {
+            API_GETLANG: "https://bot.hmmtodayiwill.ru/api/v1/get_lang_schema"
+        },
+        LOCAL_PATH: "./local/",
+        LANG_PATH: "./local/langs"
     }
 }
