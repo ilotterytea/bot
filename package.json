@@ -16,8 +16,7 @@
   "license": "GPL-3.0",
 
   "scripts": {
-    "build": "tsc --resolveJsonModule index.ts",
-    "run": "node index.js"
+    "run": "ts-node index.ts"
   },
 
 
