@@ -162,5 +162,6 @@ dist
 storage
 local
 test.js
+test.ts
 *.env
 *.sql

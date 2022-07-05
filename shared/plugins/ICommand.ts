@@ -14,30 +14,17 @@
 // 
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
+import { Client } from "tmi.js";
+import ApolloConfiguration from "../../src/apollo/ApolloConfiguration"
 
-namespace Localizator {
-    export class Localizator {
-        constructor() {
+interface ICommand<T> {
+    get getId(): string;
+    get getCooldownMs(): number;
+    get getPermissions(): string[];
 
-        }
-
-        async function parsedText(line_id: string, channel_id: string | undefined, ...args: string[]) {
-            return "";
-        }
-    }
-
-    export async function distLanguageFiles(raw_json: any) {
-        var json: any;
-    
-        Object.keys(raw_json).forEach(async (value: string) => {
-            Object.keys(raw_json[value]).forEach(async (i_value: string) => {
-                if (!(i_value in json)) json[i_value] = {};
-    
-                json[i_value][value] = raw_json[value][i_value];
-            });
-        });
-        return json;
-    }   
+    execute(args: {
+        client: Client
+    }): Promise<T>;
 }
 
-export default Localizator;
+export default ICommand;

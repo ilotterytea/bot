@@ -20,16 +20,20 @@ import chalk from "chalk";
 import { Command } from "commander";
 import ApolloClient from "./src/apollo/clients/ApolloClient";
 import pck from "./package.json";
-import ApolloConfiguration from "./src/apollo/ApolloConfiguration";
 import TwitchAPI from "./src/apollo/clients/TwitchAPI";
 import MessageHandler from "./src/apollo/handlers/MessageHandler";
 import ApolloLogger from "./src/apollo/utils/ApolloLogger";
 import {version, name} from "./package.json";
 import getAssets from "./src/apollo/utils/NetworkManager";
+import ApolloConfiguration from "./src/apollo/ApolloConfiguration";
 
-main();
+main({
+    Username: "lol",
+    Password: "lol"
+    ""
+})
 
-async function main() {
+async function main(credentials: ApolloConfiguration.Credentials) {
     ApolloLogger.debug("Initializer", `--> Hello, user! I'm using ${name} v${version}!`);
     const opts = CLI();
 
