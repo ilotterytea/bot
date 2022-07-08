@@ -7,8 +7,9 @@
         </h2>
 </div>
 
-Full reworking of [ilotterybot](https://github.com/notdankenough/ilotterybot). It uses JavaScript instead of Python, as in the legacy version.
-+ [TO-DO List](https://github.com/NotDankEnough/iLotteryteaLive/projects/1)
+Full reworking of [ilotterybot](https://github.com/notdankenough/ilotterybot). It uses JavaScript instead of Python, as in the legacy version.<br>
+You can test the bot in 2 chats: [in the chat room of the bot itself *(fembajbot)*](https://www.twitch.tv/popout/fembajbot/chat), as well as in [my chat room *(ilotterytea)*](https://www.twitch.tv/popout/ilotterytea/chat).
++ [TO-DO List](https://github.com/NotDankEnough/itb2/projects/1)
 + [Website](https://bot.hmmtodayiwill.ru/)
 
 ## Installation guide:
