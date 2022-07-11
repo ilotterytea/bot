@@ -39,9 +39,14 @@ namespace IStorage {
          * Array with **user IDs**. This is necessary so that if the owner of the channel changed his nickname, the bot immediately joined the channel.
          */
         Join: {
-            Client: number[] | undefined,
-            Anonymous: number[] | undefined
+            Client: number[],
+            Anonymous: number[]
         },
+
+        Global: {
+            Target: Target,
+            Users: User[]
+        }
 
         /**
          * Channels.
@@ -55,59 +60,92 @@ namespace IStorage {
      * @author NotDankEnough
      */
     export interface Target {
-        RoomID: number | null,
-        Prefix: string | null,
-        LanguageID: string | null,
-        Emotes: Emote[] | null,
-        Commands: Command[] | null,
-        SuccessfulTests: number | null,
-        ChatLines: number | null,
-        ExecutedCommands: number | null
+        
+        /**
+         * Chat room ID. Get it from *ChatUserstate["room-id"]*.
+         */
+        RoomID?: number | null,
+
+        /**
+         * Chat room prefix.
+         */
+        Prefix?: string | null,
+
+        /**
+         * Chat room preferred language.
+         */
+        LanguageID?: string | null,
+
+        /**
+         * Chat room emotes.
+         */
+        Emotes?: Emote[] | null,
+
+        /**
+         * Chat room static, scripted commands, modules.
+         */
+        Modules?: Module[] | null,
+
+        /**
+         * Successful tests in chat room.
+         */
+        SuccessfulTests?: number | null,
+
+        /**
+         * Number of collected chat lines in chat room.
+         */
+        ChatLines?: number | null,
+
+        /**
+         * Number of executed chat commands in chat room.
+         */
+        ExecutedCommands?: number | null
+    }
+
+    export interface Module {
+
     }
 
     /**
-     * Command Settings Interface (IStorage). Version 2.
+     * Module Settings Interface (IStorage). Version 2.
      * @since 2.2.0
      * @author NotDankEnough
      */
-    export interface Command {
-        /**
-         * Command ID.
-         */
-        ID: number | null,
+    export interface Module {
 
         /**
-         * Command type.
+         * Enable/disable the module.
          */
-        Type: CommandTypes | null,
+        Value: boolean,
 
         /**
-         * Path to the script. Required if you select *SCRIPTED* in the *Type* parameter.
+         * Module ID.
+         */
+        ID: string,
+
+        /**
+         * Module type.
+         */
+        Type: ModuleTypes,
+
+        /**
+         * Path to the script. Required if you select *SCRIPTEDCMD* in the *Type* parameter.
          */
         ScriptPath?: PathLike | undefined,
 
         /**
-         * Command response. The bot will send messages in the order specified in this array. Required if you select *STATIC* in the *Type* parameter.
+         * Module response. The bot will send messages in the order specified in this array. Required if you select *STATICCMD* in the *Type* parameter.
          */
         Response?: string[] | undefined
     }
 
     /**
-     * Command types.
+     * Module types.
      * @since 2.2.0
      * @author NotDankEnough
      */
-    export enum CommandTypes {
-        /**
-         * Use it for static command.
-         */
-        STATIC,
-        
-        /**
-         * Use it for command that have a .ts script.
-         */
-        SCRIPTED
-    }
+    export type ModuleTypes = "scriptedcmd" |
+        "staticcmd" | "module"
 
     /**
      * Emote Interface (IStorage). Version 2.
@@ -130,6 +168,20 @@ namespace IStorage {
          */
         UsedTimes: number | undefined
     }
+
+    export interface User {
+        ID: number,
+        Role?: UserRoles,
+        moduleAccess?: Module["ID"][]
+    }
+
+    export type UserRoles = "superuser" |
+        "broadcaster" |
+        "mod" | 
+        "special" |
+        "vip" |
+        "user" |
+        "suspended";
 }
 
 

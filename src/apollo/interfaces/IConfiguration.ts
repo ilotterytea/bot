@@ -21,36 +21,48 @@
  * @author NotDankEnough
  */
 interface ICredentials {
+    
+    /**
+     * Section name. Not required.
+     */
+    "#Authentication": {
     /**
      * Bot's username.
      */
     Username: string | undefined,
+    
+    "==UsernameTooltip=="?: string | undefined,
 
     /**
      * Bot's OAuth token from https://twitchapps.com/tmi.
      */
     Password: string | undefined,
+    "==PasswordTooltip=="?: string | undefined,
 
     /**
      * Client ID from your Twitch Developers Application.
      */
     ClientID: string | undefined,
+    "==ClientIDTooltip=="?: string | undefined,
 
     /**
      * Client Secret from your Twitch Developers Application.
      */
     ClientSecret: string | undefined,
+    "==ClientSecretTooltip=="?: string | undefined,
 
     /**
      * Access token when you're authenticating in your Twitch Developers Application.
      */
     AccessToken: string | undefined,
+    "==AccessTokenTooltip=="?: string | undefined,
 
     /**
      * API key from server. Required for use the "!iu save <LINK>".
      * More info can be found here: https://hmmtodayiwill.ru/api/key
      */
     //IOKeyAPI?: string | undefined
+    }
 }
 
 export default ICredentials;

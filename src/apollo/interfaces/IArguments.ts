@@ -18,7 +18,7 @@
 import { readFileSync } from "fs";
 import { ChatUserstate, Client } from "tmi.js";
 import { HelixApiGroup } from "twitch/lib/API/Helix/HelixApiGroup";
-import Localizator from "../utils/Localization";
+import Localizator from "../utils/files/Localization";
 import StaticCommands from "../handlers/StaticCMDHandler";
 import IStorage from "./IStorage";
 import EmoteUpdater from "../utils/EmoteUpdater";
@@ -83,11 +83,6 @@ interface IArguments {
      * Localization manager.
      */
     LocalAPI: Localizator.Localizator,
-    
-    /**
-     * Command handler.
-     */
-    StaticCMD: StaticCommands.Handler,
 
     /**
      * Emote API.
