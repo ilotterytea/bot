@@ -1,3 +1,4 @@
+<!-- HEADER -->
 <div align="center">
         <h2><img src="https://cdn.frankerfacez.com/emote/675001/1" style="vertical-align:middle;" width="22"> iLotterytea's Twitch Bot 2 (formerly ilotterybot2)
         <br>
@@ -7,16 +8,28 @@
         </h2>
 </div>
 
+<!-- DESCRIPTION -->
 Full reworking of [ilotterybot](https://github.com/notdankenough/ilotterybot). It uses JavaScript instead of Python, as in the legacy version.
 + [TO-DO List](https://github.com/NotDankEnough/iLotteryteaLive/projects/1)
 + [Website](https://bot.hmmtodayiwill.ru/)
 
+## Dependicies:
+- nodejs
+- npm
+- ts-node
+<!-- INSTALLATION GUIDE -->
 ## Installation guide:
 1. Run these commands in the terminal:
 ```bash
 $ git clone --recurse-submodules https://github.com/notdankenough/itb2.git
 $ cd itb2
 $ npm install
+```
+2. Initialize the first steps of bot. It will create configuration files:
+```bash
+$ npm run firststeps
+```
+3. 
 $ npm run bot
 ```
 <!-- $ sudo chmod +x ./index.js

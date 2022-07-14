@@ -1,4 +1,4 @@
-// Copyright (C) 2022 ilotterytea
+// Copyright (C) 2022 NotDankEnough (ilotterytea)
 // 
 // This file is part of itb2.
 // 

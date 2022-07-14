@@ -15,30 +15,26 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
+import { Client } from "tmi.js";
 import { Logger } from "tslog";
-import Files from "./apollo/files/Files";
-import CLI from "./apollo/utils/CLI";
+import ApolloClient from "./clients/ApolloClient";
+import ConfigIni from "./files/ConfigIni";
+import IConfiguration from "./interfaces/IConfiguration";
+import CLI from "./utils/CLI";
 
 const log: Logger = new Logger({name: "itb2-main"});
 
-async function Main() {
-    log.silly("Loading, please wait...");
-    const CLIArguments = CLI().opts();
+async function ApolloInit() {
+    const CLIProgram = CLI();
+    const CLIArguments = CLIProgram.opts();
+    const Config: IConfiguration = ConfigIni.parse("config.ini");
 
-    if (CLIArguments["init"]) {
-        log.silly("Initializating first setup...");
-
-        await Files.verifySystemIntergrity("./local");
-
-    }
+    const TmiClient: Client = ApolloClient(
+        Config.username,
+        Config.password,
+        ["l"],
+        CLIArguments["debug"]
+    );
 }
 
-Main();
-
-process.on("unhandledRejection", (reason: unknown, promise: Promise<unknown>) => {
-    log.error(reason);
-});
-
-process.on("uncaughtException", (error: Error, origin: NodeJS.UncaughtExceptionListener) => {
-    log.fatal(error);
-});
+export default ApolloInit();

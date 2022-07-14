@@ -1,4 +1,4 @@
-// Copyright (C) 2022 ilotterytea
+// Copyright (C) 2022 NotDankEnough (ilotterytea)
 // 
 // This file is part of itb2.
 // 
@@ -14,17 +14,12 @@
 // 
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
-import { Client } from "tmi.js";
-import ApolloConfiguration from "../../src/apollo/ApolloConfiguration"
 
-interface ICommand<T> {
-    get getId(): string;
-    get getCooldownMs(): number;
-    get getPermissions(): string[];
-
-    execute(args: {
-        client: Client
-    }): Promise<T>;
+interface IConfiguration {
+    username: string;
+    password: string;
+    client_id: string;
+    access_token: string;
 }
 
-export default ICommand;
+export default IConfiguration;

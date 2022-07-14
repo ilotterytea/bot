@@ -1,4 +1,4 @@
-// Copyright (C) 2022 ilotterytea
+// Copyright (C) 2022 NotDankEnough (ilotterytea)
 // 
 // This file is part of itb2.
 // 
@@ -15,13 +15,17 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
-interface IModule {
-    getModuleName(): string;
-    getModuleDescription(): string;
-    getModuleCooldown(): number;
-    getModuleType(): string;
+import { Command } from "commander";
 
-    run(args: IArguments): void;
+/**
+ * An silly Command-Line Interface.
+ * @returns Fully baked program.
+ */
+function CLI() {
+    const Program = new Command("apollo");
+
+    Program.parse(process.argv);
+    return Program;
 }
 
-export default IModule;
+export default CLI;

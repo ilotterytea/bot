@@ -1,4 +1,4 @@
-// Copyright (C) 2022 ilotterytea
+// Copyright (C) 2022 NotDankEnough (ilotterytea)
 // 
 // This file is part of itb2.
 // 
@@ -15,13 +15,27 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace EmoteUpdater {
-    export class SevenTV {
-        constructor() {
-            
-        }
+import { Client } from "tmi.js";
 
-    }
+function ApolloClient(
+    username: string,
+    password: string,
+    channels: string[],
+    isInDebugMode?: boolean | undefined
+) {
+    const client: Client = new Client({
+        options: {debug: isInDebugMode},
+        connection: { secure: true, reconnect: true},
+        identity: {
+            username: username,
+            password: password
+        },
+        channels: [username]
+    });
+
+    client.connect();
+
+    return client;
 }
 
-export default EmoteUpdater;
+export default ApolloClient;
