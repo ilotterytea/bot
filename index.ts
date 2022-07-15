@@ -16,6 +16,7 @@
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
 import { Logger } from "tslog";
+import ApolloInit from "./apollo/ApolloInit";
 import Files from "./apollo/files/Files";
 import CLI from "./apollo/utils/CLI";
 
@@ -30,7 +31,10 @@ async function Main() {
 
         await Files.verifySystemIntergrity("./local");
 
+        return;
     }
+
+    await ApolloInit();
 }
 
 Main();

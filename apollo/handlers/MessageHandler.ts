@@ -15,13 +15,18 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
-interface IConfiguration {
-    Authorization: {
-        Username: string,
-        Password: string,
-        ClientID: string,
-        AccessToken: string
+import { ChatUserstate, Client } from "tmi.js";
+import TwitchApi from "../clients/ApiClient";
+import StoreManager from "../files/StoreManager";
+
+namespace Messages {
+    export async function Handler(client: Client, api: TwitchApi.Client, storage: StoreManager) {
+        client.on("message", async (channel: string, user: ChatUserstate, message: string, self: boolean) => {
+            if (message == "forsenLevel") {
+                client.say(channel, "forsenLevel ⏫ ts4");
+            }
+        });
     }
 }
 
-export default IConfiguration;
+export default Messages;

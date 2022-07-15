@@ -17,8 +17,11 @@
 
 import { Client } from "tmi.js";
 import { Logger } from "tslog";
+import TwitchApi from "./clients/ApiClient";
 import ApolloClient from "./clients/ApolloClient";
 import ConfigIni from "./files/ConfigIni";
+import StoreManager from "./files/StoreManager";
+import Messages from "./handlers/MessageHandler";
 import IConfiguration from "./interfaces/IConfiguration";
 import CLI from "./utils/CLI";
 
@@ -27,14 +30,28 @@ const log: Logger = new Logger({name: "itb2-main"});
 async function ApolloInit() {
     const CLIProgram = CLI();
     const CLIArguments = CLIProgram.opts();
-    const Config: IConfiguration = ConfigIni.parse("config.ini");
+    const Config: IConfiguration = await ConfigIni.parse("config.ini");
+    const Datastore: StoreManager = new StoreManager("local/datastore.json");
+
+    const TmiApi: TwitchApi.Client = new TwitchApi.Client(
+        Config.Authorization.ClientID,
+        Config.Authorization.AccessToken
+    );
 
     const TmiClient: Client = ApolloClient(
-        Config.username,
-        Config.password,
-        ["l"],
+        Config.Authorization.Username,
+        Config.Authorization.Password,
+        Datastore.getClientJoinID!,
+        TmiApi,
         CLIArguments["debug"]
     );
+
+    try {
+        Messages.Handler(TmiClient, TmiApi, Datastore);
+    } catch (err) {
+        log.error(err);
+    }
+
 }
 
-export default ApolloInit();
+export default ApolloInit;

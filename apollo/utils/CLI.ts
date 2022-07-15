@@ -24,6 +24,9 @@ import { Command } from "commander";
 function CLI() {
     const Program = new Command("apollo");
 
+    Program.option("--init", "", false);
+    Program.option("--debug", "", false);
+
     Program.parse(process.argv);
     return Program;
 }

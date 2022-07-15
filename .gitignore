@@ -157,11 +157,6 @@ dist
 .history
 .ionide
 
-# Support for Project snippet scope
-
-storage
+# itb2's git ignore:
 local
-test.js
-test.ts
-*.env
-*.sql
+*.ini

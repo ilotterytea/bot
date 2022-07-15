@@ -19,6 +19,7 @@ import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { Logger } from "tslog";
 import sql3 from "sqlite3";
 import sql from "sqlite";
+import IStorage from "../interfaces/IStorage";
 
 const log: Logger = new Logger({name: "files"});
 
@@ -26,29 +27,47 @@ namespace Files {
     export async function verifySystemIntergrity(folder?: string | undefined) {
         var fd: string = (folder == undefined) ? "local" : folder;
 
-        if (!(existsSync(`${fd}`))) mkdirSync(`${fd}`); log.debug("Created a new folder in ", fd, "/");
-        if (!(existsSync(`${fd}/logs`))) mkdirSync(`${fd}/logs`); log.debug("Created a new folder in ", fd, "/logs");
-        if (!(existsSync(`${fd}/users`))) mkdirSync(`${fd}/users`); log.debug("Created a new folder in ", fd, "/users");
-        if (!(existsSync(`${fd}/users/pub`))) mkdirSync(`${fd}/users/pub`); log.debug("Created a new folder in ", fd, "/users/pub");
-        if (!(existsSync(`${fd}/users/logs`))) mkdirSync(`${fd}/users/logs`); log.debug("Created a new folder in ", fd, "/users/logs");
-        
-        if (!(existsSync(`${fd}/apollottv.db`))) {
-            writeFileSync(`${fd}/apollottv.db`, "", {encoding: "utf-8"});
-            await createSampleSQL(`${fd}/apollottv.db`);
+        if (!(existsSync(`${fd}`))) {
+            mkdirSync(`${fd}`);
+            log.debug("Created a new folder in ", fd, "/");
+        }
+
+        if (!(existsSync(`${fd}/logs`))) {
+            mkdirSync(`${fd}/logs`);
+            log.debug("Created a new folder in ", fd, "/logs");
+        }
+
+        if (!(existsSync(`${fd}/datastore.json`))) {
+            generateANewStorageFile(`${fd}/datastore.json`);
+        }
+
+        if (!(existsSync("config.ini"))) {
+            generateANewCfgFile("config.ini");
         }
     }
 
-    async function createSampleSQL(file_path: string) {
-        sql.open({
-            filename: file_path,
-            driver: sql3.Database
-        }).then((db) => {
-            db.exec("CREATE TABLE \"join\" (extId primary int, asAuthorized bool)");
-            db.exec("CREATE TABLE \"target\" (extId primary int, prefix varchar(255) null, langid varchar(8), successfullyTests int null, chatlines int null, executedcmds int null, isSuspended bool)");
-            db.exec("CREATE TABLE \"users\" (extId primary int, role varchar(16))");
-            db.exec("CREATE TABLE \"modules\" (extId int, name varchar(255), enabledOn varchar(255))");
-            db.exec("CREATE TABLE \"emotes\" (extId int, name varchar(255), targetId int, provider varchar(5), count int)");
-        });
+    function generateANewStorageFile(file_path: string) {
+        var data: IStorage.Main = {
+            Version: "v2",
+            Join: {
+                AsClient: [],
+                AsAnonymous: []
+            },
+            Global: {
+                Prefix: "!",
+                Modules: {},
+                Users: {}
+            },
+            Targets: {},
+            Emotes: {}
+        }
+
+        writeFileSync(file_path, JSON.stringify(data, null, 2), {encoding: "utf-8"});
+    }
+
+    function generateANewCfgFile(file_path: string) {
+        var text: string = `[Authorization]\nUsername = ""\nPassword = ""\nClientID = ""\nAccessToken = ""`;
+        writeFileSync(file_path, text, {encoding: "utf-8"});
     }
 }
 

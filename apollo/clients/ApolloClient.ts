@@ -16,11 +16,16 @@
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
 import { Client } from "tmi.js";
+import { Logger } from "tslog";
+import TwitchApi from "./ApiClient";
+
+const log: Logger = new Logger({name: "ApolloClient"});
 
 function ApolloClient(
     username: string,
     password: string,
-    channels: string[],
+    channelIDs: number[],
+    api: TwitchApi.Client,
     isInDebugMode?: boolean | undefined
 ) {
     const client: Client = new Client({
@@ -33,8 +38,22 @@ function ApolloClient(
         channels: [username]
     });
 
-    client.connect();
-
+    client.connect()
+        .catch((err) => {
+            log.error(err);
+        })
+        .then(async () => {
+            channelIDs.forEach(async (id) => {
+                await api.getUserById(id).catch((err) => {
+                    log.error(err);
+                }).then((user) => {
+                    if (user == undefined) return;
+                    client.join(`#${user.login}`);
+                });
+            });
+        });
+    
+    client.on("connected", (address, port) => log.silly("The client (", username, ") connected to ", address, ":", port));
     return client;
 }
 
