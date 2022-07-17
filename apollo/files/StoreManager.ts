@@ -53,6 +53,11 @@ class StoreManager {
     get getFullData() {
         return this.data;
     }
+
+    getPrefix(target_id: string) : string {
+        if (Object.keys(this.data.Targets[target_id]).includes("Prefix")) return this.data.Targets[target_id].Prefix!;
+        return this.data.Global.Prefix;
+    }
 }
 
 export default StoreManager;

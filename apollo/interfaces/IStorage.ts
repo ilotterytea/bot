@@ -40,7 +40,7 @@ namespace IStorage {
             /** The modules with edited responses. */
             EditedResponses?: {[module_id: string]: string[]} | undefined
         },
-        Prefix?: string | undefined,
+        Prefix?: string,
         ChatLines?: number | undefined,
         SuccessfullyCompletedTests?: number | undefined,
         ExecutedCommands?: number | undefined,

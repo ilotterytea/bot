@@ -15,17 +15,57 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
-import { ChatUserstate, Client } from "tmi.js";
+import {
+    ChatUserstate,
+    Client
+} from "tmi.js";
 import TwitchApi from "../clients/ApiClient";
 import StoreManager from "../files/StoreManager";
+import IArguments from "../interfaces/IArguments";
+import Localizator from "../utils/Locale";
+import ModuleManager from "../utils/ModuleManager";
 
 namespace Messages {
-    export async function Handler(client: Client, api: TwitchApi.Client, storage: StoreManager) {
+    export async function Handler(
+        client: Client,
+        api: TwitchApi.Client,
+        storage: StoreManager,
+        locale: Localizator,
+        module: ModuleManager
+    ) {
         client.on("message", async (channel: string, user: ChatUserstate, message: string, self: boolean) => {
-            if (message == "forsenLevel") {
-                client.say(channel, "forsenLevel ⏫ ts4");
+            if (self) return;
+            
+            if (message.startsWith(storage.getPrefix(user["room-id"]!))) {
+                var args: IArguments = {
+                    client: client,
+                    localizator: locale,
+                    storage: storage,
+                    target: {
+                        id: user["room-id"]!,
+                        name: channel
+                    },
+                    message: {
+                        raw: message,
+                        command: message.split(' ')[0].split(storage.getPrefix(user["room-id"]!))[1]
+                    }
+                }
+
+                if (module.contains(args.message.command!)) {
+                    var response = await module.call(args.message.command!, args);
+
+                    if (response == false) {
+                        return;
+                    }
+
+                    return client.say(channel, response as string);
+                }
             }
         });
+    }
+
+    export async function TSCommandHandler(args: IArguments) {
+
     }
 }
 

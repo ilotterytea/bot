@@ -24,6 +24,8 @@ import StoreManager from "./files/StoreManager";
 import Messages from "./handlers/MessageHandler";
 import IConfiguration from "./interfaces/IConfiguration";
 import CLI from "./utils/CLI";
+import Localizator from "./utils/Locale";
+import ModuleManager from "./utils/ModuleManager";
 
 const log: Logger = new Logger({name: "itb2-main"});
 
@@ -32,6 +34,10 @@ async function ApolloInit() {
     const CLIArguments = CLIProgram.opts();
     const Config: IConfiguration = await ConfigIni.parse("config.ini");
     const Datastore: StoreManager = new StoreManager("local/datastore.json");
+    const Locale: Localizator = new Localizator();
+    const Modules: ModuleManager = new ModuleManager();
+
+    await Locale.loadLanguages(false);
 
     const TmiApi: TwitchApi.Client = new TwitchApi.Client(
         Config.Authorization.ClientID,
@@ -47,7 +53,7 @@ async function ApolloInit() {
     );
 
     try {
-        Messages.Handler(TmiClient, TmiApi, Datastore);
+        await Messages.Handler(TmiClient, TmiApi, Datastore, Locale, Modules);
     } catch (err) {
         log.error(err);
     }
