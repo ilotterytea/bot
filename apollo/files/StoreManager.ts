@@ -42,6 +42,40 @@ class StoreManager {
         );
     }
 
+    removeTarget(target_id: string) {
+        if (!(this.containsTarget(target_id))) return false;
+        delete this.data.Targets[target_id];
+        return true;
+    }
+
+    addTarget(target_id: string, values?: IStorage.Target | undefined) {
+        if (this.containsTarget(target_id)) return false;
+
+        if (values === undefined) {
+            this.data.Targets[target_id] = {};
+            return true;
+        } else {
+            this.data.Targets[target_id] = values;
+        }
+
+        return true;
+    }
+
+    updateTarget(target_id: string, key: keyof IStorage.Target, value: any) {
+        if (!(this.containsTarget(target_id))) {
+            this.addTarget(target_id);
+        }
+
+        this.data.Targets[""][key] = value;
+
+        return true;
+    }
+
+    containsTarget(target_id: string) {
+        if (!(target_id in this.data.Targets)) return false;
+        return true;
+    }
+
     get getClientJoinID() {
         return this.data.Join?.AsClient;
     }
