@@ -44,7 +44,7 @@ type LineIds = "user.not_found" | "arrive" | "leave" | "newarrive" |
 "cmd.scmd.name" | "cmd.scmd.desc" | "cmd.scmd.author" |
 "cmd.scmd.exec.list.response" | "cmd.scmd.exec.list.no" | "cmd.scmd.exec.make.success" |
 "cmd.scmd.exec.make.failure" | "cmd.scmd.exec.rm.success" | "cmd.scmd.exec.rm.failure" |
-"cmd.scmd.exec.ch.success" | "cmd.scmd.exec.ch.failure";
+"cmd.scmd.exec.ch.success" | "cmd.scmd.exec.ch.failure" | "measure.megabyte";
 
 class Localizator {
     private languages: {[lang_id: string]: {[line_id: string]: LineIds}} | undefined;
@@ -122,34 +122,34 @@ class Localizator {
         _text.forEach((value, index) => {
             switch (true) {
                 case (value.includes("%0%")):
-                    _text[index] = _text[index].replace("%0%", args[0]);
+                    _text[index] = _text[index].replace("%0%", args[0][0]);
                     break;
                 case (value.includes("%1%")):
-                    _text[index] = _text[index].replace("%1%", args[1]);
+                    _text[index] = _text[index].replace("%1%", args[0][1]);
                     break;
                 case (value.includes("%2%")):
-                    _text[index] = _text[index].replace("%2%", args[2]);
+                    _text[index] = _text[index].replace("%2%", args[0][2]);
                     break;
                 case (value.includes("%3%")):
-                    _text[index] = _text[index].replace("%3%", args[3]);
+                    _text[index] = _text[index].replace("%3%", args[0][3]);
                     break;
                 case (value.includes("%4%")):
-                    _text[index] = _text[index].replace("%4%", args[4]);
+                    _text[index] = _text[index].replace("%4%", args[0][4]);
                     break;
                 case (value.includes("%5%")):
-                    _text[index] = _text[index].replace("%5%", args[5]);
+                    _text[index] = _text[index].replace("%5%", args[0][5]);
                     break;
                 case (value.includes("%6%")):
-                    _text[index] = _text[index].replace("%6%", args[6]);
+                    _text[index] = _text[index].replace("%6%", args[0][6]);
                     break;
                 case (value.includes("%7%")):
-                    _text[index] = _text[index].replace("%7%", args[7]);
+                    _text[index] = _text[index].replace("%7%", args[0][7]);
                     break;
                 case (value.includes("%8%")):
-                    _text[index] = _text[index].replace("%8%", args[8]);
+                    _text[index] = _text[index].replace("%8%", args[0][8]);
                     break;
                 case (value.includes("%9%")):
-                    _text[index] = _text[index].replace("%9%", args[9]);
+                    _text[index] = _text[index].replace("%9%", args[0][9]);
                     break;
                 default:
                     break;

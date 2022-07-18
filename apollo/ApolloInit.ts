@@ -38,6 +38,9 @@ async function ApolloInit() {
     const Modules: ModuleManager = new ModuleManager();
 
     await Locale.loadLanguages(false);
+    Locale.setPreferredLanguages(Datastore.getFullData.Targets);
+    Modules.init(); 
+
 
     const TmiApi: TwitchApi.Client = new TwitchApi.Client(
         Config.Authorization.ClientID,
