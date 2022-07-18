@@ -45,6 +45,9 @@ namespace Messages {
                         id: user["room-id"]!,
                         name: channel
                     },
+                    user: {
+                        id: user["user-id"]!
+                    },
                     message: {
                         raw: message,
                         command: message.split(' ')[0].split(storage.getPrefix(user["room-id"]!))[1]

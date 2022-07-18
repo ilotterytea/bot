@@ -24,6 +24,9 @@ interface IArguments {
     client: Client;
     storage: StoreManager;
     localizator: Localizator;
+    user: {
+        id: string
+    },
     target: {
         name: string,
         id: string

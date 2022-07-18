@@ -24,18 +24,51 @@ import Ping from "../../shared_modules/Ping";
 
 class ModuleManager {
     private modules: {[module_id: string]: IModule.IModule};
+    private cooldown: {[module_id: string]: string[]};
 
     constructor () {
         this.modules = {};
+        this.cooldown = {};
     }
 
     async call(module_id: string, args: IArguments, ...optional_args: any[]) : Promise<string | boolean> {
         if (!(module_id in this.modules)) return Promise.resolve(false);
-        return Promise.resolve(await this.modules[module_id].run(args));
+
+        this.createCooldownArray(module_id);
+
+        if (this.cooldown[module_id].includes(args.user.id)) return Promise.resolve(false);
+
+        var response = Promise.resolve(await this.modules[module_id].run(args));
+        this.cooldownUser(args.user.id, module_id, this.modules[module_id].cooldownMs!);
+
+        return response;
     }
 
     init() {
         this.modules["ping"] = new Ping(5000, "public", "public");
+    }
+
+    private createCooldownArray(module_id: string) {
+        if (!(module_id in this.cooldown)) {
+            this.cooldown[module_id] = [];
+        }
+        return true;
+    }
+
+    private putInCooldown(module_id: string, user_id: string) {
+        this.createCooldownArray(module_id);
+        if (this.cooldown[module_id].includes(user_id)) return false;
+
+        this.cooldown[module_id].push(user_id);
+        return true;
+    }
+
+    private cooldownUser(user_id: string, module_id: string, cooldownMs: number) {
+        this.putInCooldown(module_id, user_id);
+
+        setTimeout(() => {
+            this.cooldown[module_id] = this.cooldown[module_id].filter(user => user !== user_id);
+        }, cooldownMs);
     }
 
     contains(module_id: string) {
