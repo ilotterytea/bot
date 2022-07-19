@@ -19,6 +19,7 @@ import { Logger } from "tslog";
 import ApolloInit from "./apollo/ApolloInit";
 import Files from "./apollo/files/Files";
 import CLI from "./apollo/utils/CLI";
+import ServerInit from "./www/ServerInit";
 
 const log: Logger = new Logger({name: "itb2-main"});
 
@@ -33,8 +34,8 @@ async function Main() {
 
         return;
     }
-
-    await ApolloInit();
+    await ServerInit(CLIArguments);
+    if (!CLIArguments["testWebOnly"]) await ApolloInit(CLIArguments);
 }
 
 Main();
