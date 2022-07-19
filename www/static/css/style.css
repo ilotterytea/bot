@@ -1,0 +1,194 @@
+/**
+ * Copyright (C) 2022 NotDankEnough (ilotterytea)
+ * 
+ * This file is part of itb2.
+ * 
+ * itb2 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * itb2 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with itb2.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Manrope:wght@400;600&display=swap');
+ @import url('https://use.fontawesome.com/releases/v6.1.1/css/all.css');
+ @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,600;1,400&display=swap');
+
+
+:root {
+    --page: #eee;
+    
+    --text-0: #121212;
+    --text-1: #ddd;
+
+    --navbar-0: #121212;
+    --navbar-1: #363636;
+
+    --anchor: rgb(96, 138, 255);
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+body, section {
+    min-height: 0;
+    min-width: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    font-family: "Inter", sans-serif;
+    background: var(--page);
+    color: var(--text-0);
+}
+
+h1, h2, h3 {
+    font-family: "Manrope", sans-serif;
+}
+section .sbarandbody {
+    flex: 1 1 0%;
+    display: flex;
+}
+
+.body-text {
+    width: 80%;
+  margin-left: 20%;
+  margin-top:56px;
+}
+.navigation {
+    background: linear-gradient(0deg, var(--navbar-0), var(--navbar-1));
+    color: white;
+    padding: 12px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 0 8px 4px var(--navbar-1);
+}
+
+#brand {
+    display: flex;
+    align-items: center;
+}
+
+a {
+    text-decoration: none;
+    color: var(--anchor);
+}
+
+.container {
+    display: flex;
+}
+.sidebar {
+    height: 100vh;
+  background: gray;
+  width: 12.5%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding-top: 60px;
+  color: white;
+  z-index: -1;
+  overflow: scroll;
+  }
+    
+.sidebar a {
+    padding: 8px;
+    font-size: 16px;
+    display: block;
+    text-decoration: none;
+    background-color: #fbfbfb;
+    margin: 8px;
+    border-radius: 6px;
+    color: #141414;
+    box-shadow: 0px 0px 1px 1px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgb(167, 167, 167);
+}
+
+.sidebar .brand {
+    display: flex;
+    align-items: center;
+    padding-left: 5px;
+}
+
+#underline {text-decoration: underline;}
+
+.sidebar .brand img {
+    vertical-align: middle;
+    border-radius: 5px;
+    padding-right: 12px;
+}
+    
+.sidebar a:hover {
+    cursor: pointer;
+    background-color: #0099ff;
+    color: #fff;
+}
+ /*спиздил со стаковерфлоу гигачад момент*/
+ .rainbow_text_animated {
+    background: linear-gradient(to right, #6666ff, #0099ff , #00ff00, #ff3399, #6666ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: rainbow_animation 6s ease-in-out infinite;
+    background-size: 400% 100%;
+}
+
+table { /* Table */
+    margin-bottom: 30px;
+    width: 100%;
+    text-align: left;
+    color: #3f3f3f;
+    border-collapse: collapse;
+    border: 1px solid #e8e8e8;
+}
+table tr:nth-child(even) {
+    background-color: #f7f7f7;
+}
+table th, table td {
+    padding: 10px 15px;
+}
+table th {
+    background-color: #f0f0f0;
+    border: 1px solid #dedede;
+    border-bottom-color: #c9c9c9;
+}
+table td {
+    border: 1px solid #e8e8e8;
+}
+code {
+   background: linear-gradient(0deg, #e2dbb0, #dbcf7e);
+   border-radius: 5px;
+   margin: 6px;
+   padding: 0 2px;
+   border: 1px solid #b9ac87;
+}
+@keyframes rainbow_animation {
+    0%,100% {
+        background-position: 0 0;
+    }
+
+    50% {
+        background-position: 100% 0;
+    }
+}

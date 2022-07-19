@@ -160,3 +160,4 @@ dist
 # itb2's git ignore:
 local
 *.ini
+test.ts
