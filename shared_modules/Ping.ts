@@ -52,7 +52,7 @@ class Ping implements IModule.IModule {
 
         var pingms = Math.floor(Math.round((await Arguments.client.ping())[0] * 1000));
         var uptime = formatTime(process.uptime());
-        var channels = Arguments.storage.getClientJoinID?.length;
+        var channels = Arguments.storage.getClientJoin?.length;
                 
         return Promise.resolve(Arguments.localizator.parsedText("cmd.ping.exec.response", Arguments.target.id, "FeelsDankMan  🏓 ", uptime, channels, `${usedmem} ${Arguments.localizator.parsedText("measure.megabyte", Arguments.target.id)}/${totalmem} ${Arguments.localizator.parsedText("measure.megabyte", Arguments.target.id)}`, pingms, `${packagejson.version}-${packagejson.name}`, short(), branch()));
     }

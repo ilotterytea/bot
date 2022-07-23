@@ -21,7 +21,9 @@ import {
 } from "tmi.js";
 import TwitchApi from "../clients/ApiClient";
 import StoreManager from "../files/StoreManager";
+import CompleteATEST from "../fun/TestCompletionHandler";
 import IArguments from "../interfaces/IArguments";
+import IStorage from "../interfaces/IStorage";
 import Localizator from "../utils/Locale";
 import ModuleManager from "../utils/ModuleManager";
 
@@ -35,8 +37,19 @@ namespace Messages {
     ) {
         client.on("message", async (channel: string, user: ChatUserstate, message: string, self: boolean) => {
             if (self) return;
-            
-            if (message.startsWith(storage.getPrefix(user["room-id"]!))) {
+            if (!storage.containsTarget(user["room-id"]!)) storage.createTarget(user["room-id"]!, {
+                ChatLines: 0,
+                ExecutedCommands: 0,
+                SuccessfullyCompletedTests: 0,
+                Emotes: {}
+            });
+
+            console.log(storage.getTarget(user["room-id"]!));
+
+            CompleteATEST(client, channel, user["room-id"]!, message, locale, storage.getTarget(user["room-id"]!) as IStorage.Target);
+
+            if (message.startsWith(storage.getGlobalPrefix)) {
+                console.log("ben");
                 var args: IArguments = {
                     client: client,
                     localizator: locale,
@@ -50,7 +63,7 @@ namespace Messages {
                     },
                     message: {
                         raw: message,
-                        command: message.split(' ')[0].split(storage.getPrefix(user["room-id"]!))[1]
+                        command: message.split(' ')[0].split(storage.getGlobalPrefix)[1]
                     }
                 }
 

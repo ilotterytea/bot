@@ -15,83 +15,147 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
-import { readFileSync, writeFileSync } from "fs";
+import { readdirSync, readFileSync, writeFileSync } from "fs";
 import { Logger } from "tslog";
 import IStorage from "../interfaces/IStorage";
 
 const log: Logger = new Logger({name: "StoreManager"});
 
-class StoreManager {
-    private data: IStorage.Main;
-    private file_path: string;
+interface IManager<T> {
+    add: (id: string, data?: T | undefined) => boolean | null;
+    edit: (id: string, key: keyof T, value: any) => boolean | null;
+    delete: (id: string) => boolean | null;
+    get: (id: string, key?: keyof T | undefined) => any | null;
 
-    constructor (file_path: string) {
-        this.file_path = file_path;
-        this.data = JSON.parse(readFileSync(this.file_path, {encoding: "utf-8"}));
+    isExists: (id: string) => boolean;
+    isValueExists: (id: string, key: keyof T) => boolean | null;
+}
 
-        log.debug("Data storage successfully loaded from file ", this.file_path);
+class TargetManager implements IManager<IStorage.Target> {
+    private data: {[target_id: string]: IStorage.Target};
+
+    constructor (target_data: {[target_id: string]: IStorage.Target}) {
+        this.data = target_data;
     }
 
-    async save() {
-        writeFileSync(
-            this.file_path,
-            JSON.stringify(this.data, null, 2),
-            {
-                encoding: "utf-8"
-            }
-        );
+    add(target_id: string, data?: IStorage.Target | undefined) {
+        return true;
     }
-
-    removeTarget(target_id: string) {
-        if (!(this.containsTarget(target_id))) return false;
-        delete this.data.Targets[target_id];
+    edit(target_id: string, key: keyof IStorage.Target, value: any) {
+        return true;
+    }
+    delete(target_id: string, data?: IStorage.Target | undefined) {
+        return true;
+    }
+    get(target_id: string, key?: keyof IStorage.Target | undefined) {
         return true;
     }
 
-    addTarget(target_id: string, values?: IStorage.Target | undefined) {
+    isExists(target_id: string) {
+        return true;
+    }
+
+    isValueExists(target_id: string, key: keyof IStorage.Target) {
+        return true;
+    }
+}
+
+class StoreManager {
+    private global_data: IStorage.Main;
+    private target_data: {[target_id: string]: IStorage.Target};
+    private file_paths: {[path_id: string]: string};
+    targets: TargetManager;
+
+    constructor (global_file_path: string, target_folder_path: string) {
+        this.file_paths = {
+            global: global_file_path,
+            target: target_folder_path
+        };
+
+
+        this.global_data = JSON.parse(readFileSync(this.file_paths["global"], {encoding: "utf-8"}));
+        this.target_data = this.multiDictLoad(this.file_paths["target"]);
+        this.targets = new TargetManager(this.target_data);
+    }
+
+    private multiDictLoad(folder_path: string) {
+        var files = readdirSync(folder_path);
+        var dict: {[file_name: string]: any} = {};
+
+        files.forEach((file) => {
+            var file_name: string = file.split('.')[0];
+            var file_data: any = JSON.parse(readFileSync(`${folder_path}/${file}`, {encoding: "utf-8"}));
+
+            if (!(file_name in dict)) dict[file_name] = {};
+
+            dict[file_name] = file_data;
+        });
+
+        return dict;
+    }
+    
+    // Save all data:
+    save() {
+        var entries: number = 0;
+
+        writeFileSync(this.file_paths["global"], JSON.stringify(this.global_data, null, 2), {encoding: "utf-8"});
+        entries++;
+
+        Object.keys(this.target_data).forEach((target) => {
+            writeFileSync(`${this.file_paths["target"]}/${target}.json`, JSON.stringify(this.target_data[target], null, 2), {encoding: "utf-8"});
+            entries++;
+        });
+        log.debug("Saved", entries, "entries!");
+    }
+
+    // Channel manipulations:
+    createTarget(target_id: string, data: IStorage.Target) {
         if (this.containsTarget(target_id)) return false;
 
-        if (values === undefined) {
-            this.data.Targets[target_id] = {};
-            return true;
-        } else {
-            this.data.Targets[target_id] = values;
-        }
+        this.target_data[target_id] = {};
+        var target: IStorage.Target = data;
+        this.target_data[target_id] = {};
 
         return true;
     }
-
-    updateTarget(target_id: string, key: keyof IStorage.Target, value: any) {
-        if (!(this.containsTarget(target_id))) {
-            this.addTarget(target_id);
-        }
-
-        this.data.Targets[""][key] = value;
-
+    removeTarget(target_id: string) {
+        if (!this.containsTarget(target_id)) return false;
+        delete this.target_data[target_id];
         return true;
     }
+    changeTargetValue(target_id: string, key: keyof IStorage.Target, value: any) {
+        if (!this.containsTarget(target_id)) return false;
 
+        this.target_data[target_id][key] = value;
+        return true;
+    }
+    getTargetValue(target_id: string, key: keyof IStorage.Target) {
+        if (!this.containsTarget(target_id)) return false;
+        return this.target_data[target_id][key];
+    }
+    getTarget(target_id: string) {
+        if (!this.containsTarget(target_id)) return false;
+        return this.target_data[target_id];
+    }
     containsTarget(target_id: string) {
-        if (!(target_id in this.data.Targets)) return false;
+        if (!(target_id in this.target_data)) return false;
         return true;
     }
-
-    get getClientJoinID() {
-        return this.data.Join?.AsClient;
+    containsTargetValue(target_id: string, key: keyof IStorage.Target) {
+        if (!this.containsTarget(target_id)) return false;
+        if (!(key in this.target_data[target_id])) return false;
+        return true;
     }
+    get getTargets() { return this.target_data; }
 
-    get getAnonymousJoinIDs() {
-        return this.data.Join?.AsAnonymous;
-    }
+    // Global manipulations:
+    get getVersion() { return this.global_data.Version; }
+    get getClientJoin() { return this.global_data.Join?.AsClient; }
+    get getAnonymousJoin() { return this.global_data.Join?.AsAnonymous; }
+    get getGlobalPrefix() { return this.global_data.Global.Prefix; }
+    get getGlobalModules() { return this.global_data.Global.Modules; }
 
-    get getFullData() {
-        return this.data;
-    }
 
-    getPrefix(target_id: string) : string {
-        if (Object.keys(this.data.Targets[target_id]).includes("Prefix")) return this.data.Targets[target_id].Prefix!;
-        return this.data.Global.Prefix;
-    }
 }
 
 export default StoreManager;

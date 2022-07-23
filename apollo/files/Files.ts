@@ -29,20 +29,27 @@ namespace Files {
 
         if (!(existsSync(`${fd}`))) {
             mkdirSync(`${fd}`);
-            log.debug("Created a new folder in ", fd, "/");
+            log.debug("Created a new folder", `${fd}`);
         }
 
         if (!(existsSync(`${fd}/logs`))) {
             mkdirSync(`${fd}/logs`);
-            log.debug("Created a new folder in ", fd, "/logs");
+            log.debug("Created a new folder", `${fd}/logs`);
+        }
+
+        if (!(existsSync(`${fd}/targets`))) {
+            mkdirSync(`${fd}/targets`);
+            log.debug("Created a new folder", `${fd}/targets`);
         }
 
         if (!(existsSync(`${fd}/datastore.json`))) {
             generateANewStorageFile(`${fd}/datastore.json`);
+            log.debug("Created a new file", `${fd}/datastore.json`);
         }
 
         if (!(existsSync("config.ini"))) {
             generateANewCfgFile("config.ini");
+            log.debug("Created a new file", `${fd}/config.ini`);
         }
     }
 
@@ -57,9 +64,7 @@ namespace Files {
                 Prefix: "!",
                 Modules: {},
                 Users: {}
-            },
-            Targets: {},
-            Emotes: {}
+            }
         }
 
         writeFileSync(file_path, JSON.stringify(data, null, 2), {encoding: "utf-8"});

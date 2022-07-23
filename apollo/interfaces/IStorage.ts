@@ -26,9 +26,7 @@ namespace IStorage {
             Prefix: string,
             Modules: {[module_id: string]: Module},
             Users?: {[user_extid: string]: User} | undefined
-        },
-        Targets: {[room_id: string]: Target},
-        Emotes: {[emote_id: string]: Emote}
+        }
     }
 
     export interface Target {
@@ -44,7 +42,8 @@ namespace IStorage {
         ChatLines?: number | undefined,
         SuccessfullyCompletedTests?: number | undefined,
         ExecutedCommands?: number | undefined,
-        AuthToken?: string | undefined
+        AuthToken?: string | undefined,
+        Emotes?: {[provider_id: string]: {[emote_id: string]: Emote}}
     }
 
     export interface Timer{
@@ -55,7 +54,7 @@ namespace IStorage {
 
     export interface Emote {
         Name: string,
-        UsedIn: string[],
+        UsedIn: {[target_id: string]: number},
         Provider?: EmoteProviderTypes | undefined
     }
 

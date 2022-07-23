@@ -31,13 +31,13 @@ const log: Logger = new Logger({name: "itb2-main"});
 
 async function ApolloInit(opts: {[key: string]: any}) {
     const Config: IConfiguration = await ConfigIni.parse("config.ini");
-    const Datastore: StoreManager = new StoreManager("local/datastore.json");
+    const Datastore: StoreManager = new StoreManager("local/datastore.json", "local/targets");
     const Locale: Localizator = new Localizator();
     const Modules: ModuleManager = new ModuleManager();
 
     await Locale.loadLanguages(false);
-    Locale.setPreferredLanguages(Datastore.getFullData.Targets);
-    Modules.init(); 
+    Locale.setPreferredLanguages(Datastore.getTargets);
+    Modules.init();
 
     const TmiApi: TwitchApi.Client = new TwitchApi.Client(
         Config.Authorization.ClientID,
@@ -47,7 +47,7 @@ async function ApolloInit(opts: {[key: string]: any}) {
     const TmiClient: Client = ApolloClient(
         Config.Authorization.Username,
         Config.Authorization.Password,
-        Datastore.getClientJoinID!,
+        Datastore.getClientJoin!,
         TmiApi,
         opts["debug"]
     );
