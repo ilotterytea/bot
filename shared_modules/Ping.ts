@@ -22,12 +22,12 @@ import { readFileSync } from "fs";
 import { short, branch } from "git-rev-sync";
 import packagejson from "../package.json";
 
-class Ping implements IModule.IModule {
+export default class Ping implements IModule.IModule {
     cooldownMs: number;
-    permissions: IModule.Permissions;
-    minPermissions: IModule.Permissions;
+    permissions: IModule.AccessLevels;
+    minPermissions?: IModule.AccessLevels;
 
-    constructor (cooldownMs: number, perms: IModule.Permissions, minperms: IModule.Permissions) {
+    constructor (cooldownMs: number, perms: IModule.AccessLevels, minperms?: IModule.AccessLevels | undefined) {
         this.cooldownMs = cooldownMs;
         this.permissions = perms;
         this.minPermissions = minperms;
@@ -52,10 +52,8 @@ class Ping implements IModule.IModule {
 
         var pingms = Math.floor(Math.round((await Arguments.client.ping())[0] * 1000));
         var uptime = formatTime(process.uptime());
-        var channels = Arguments.storage.getClientJoin?.length;
+        var channels = Arguments.storage.getClientChannels?.length;
                 
         return Promise.resolve(Arguments.localizator.parsedText("cmd.ping.exec.response", Arguments.target.id, "FeelsDankMan  🏓 ", uptime, channels, `${usedmem} ${Arguments.localizator.parsedText("measure.megabyte", Arguments.target.id)}/${totalmem} ${Arguments.localizator.parsedText("measure.megabyte", Arguments.target.id)}`, pingms, `${packagejson.version}-${packagejson.name}`, short(), branch()));
     }
 }
-
-export default Ping;
