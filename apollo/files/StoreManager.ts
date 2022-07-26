@@ -15,8 +15,10 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
+import STVProvider from "emotelib/dist/providers/STVProvider";
 import { readdirSync, readFileSync, writeFileSync } from "fs";
 import { Logger } from "tslog";
+import TwitchApi from "../clients/ApiClient";
 import IStorage from "../interfaces/IStorage";
 
 const log: Logger = new Logger({name: "StoreManager"});
@@ -43,6 +45,7 @@ class TargetManager implements IManager<IStorage.Target> {
         if (target_id === undefined) return false;
         if (data === undefined) {
             data = {
+                Name: "",
                 SuccessfullyCompletedTests: 0,
                 ExecutedCommands: 0,
                 ChatLines: 0,
@@ -168,10 +171,16 @@ class StoreManager {
     private global_data: IStorage.Main;
     private target_data: {[target_id: string]: IStorage.Target};
     private file_paths: {[path_id: string]: string};
+    private ApiClient: TwitchApi.Client;
+    private tmp: {[variable: string]: any};
+
     targets: TargetManager;
     users: UserManager;
 
-    constructor (global_file_path: string, target_folder_path: string) {
+    constructor (global_file_path: string, target_folder_path: string, twitch_api: TwitchApi.Client) {
+        this.ApiClient = twitch_api;
+        this.tmp = {};
+
         this.file_paths = {
             global: global_file_path,
             target: target_folder_path
@@ -181,6 +190,8 @@ class StoreManager {
         this.target_data = this.multiDictLoad(this.file_paths["target"]);
         this.targets = new TargetManager(this.target_data);
         this.users = new UserManager(this.global_data.Global.Users!);
+
+        this.parseChannels(this.global_data.Join?.AsClient!);
     }
 
     private multiDictLoad(folder_path: string) {
@@ -198,11 +209,29 @@ class StoreManager {
 
         return dict;
     }
+
+    private parseChannels(target_ids: number[]) {
+        if (!("target_names" in this.tmp)) this.tmp["target_names"] = [];
+        
+        target_ids.forEach((id) => {
+            this.ApiClient.getUserById(id).then((user) => {
+                this.tmp["target_names"].push(user?.login);
+            });
+        });
+    }
     
     // Save all data:
-    save() {
+    save(stv_emotes: {[target_name: string]: {[emote_name: string]: IStorage.Emote}}) {
         var entries: number = 0;
         var lines: number = 0;
+
+        Object.keys(stv_emotes).forEach((e_target) => {
+            Object.keys(this.target_data).forEach((target) => {
+                if (this.target_data[target].Name! === e_target) {
+                    this.target_data[target].Emotes!["stv"] = stv_emotes[e_target];
+                }
+            });
+        });
 
         lines = lines + JSON.stringify(this.global_data, null, 2).split('\n').length;
 
@@ -219,8 +248,9 @@ class StoreManager {
 
     // Global manipulations:
     get getVersion() { return this.global_data.Version; }
-    get getClientChannels() { return this.global_data.Join?.AsClient; }
-    get getAnonymousChannels() { return this.global_data.Join?.AsAnonymous; }
+    get getClientChannelIDs() { return this.global_data.Join?.AsClient; }
+    get getClientChannelNames() : string[] { return this.tmp["target_names"]; }
+    get getAnonymousChannelIDs() { return this.global_data.Join?.AsAnonymous; }
     get getGlobalPrefix() { return this.global_data.Global.Prefix; }
     get getGlobalModules() { return this.global_data.Global.Modules; }
 }

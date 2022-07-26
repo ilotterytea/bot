@@ -24,8 +24,7 @@ const log: Logger = new Logger({name: "ApolloClient"});
 function ApolloClient(
     username: string,
     password: string,
-    channelIDs: number[],
-    api: TwitchApi.Client,
+    channels: string[],
     isInDebugMode?: boolean | undefined
 ) {
     const client: Client = new Client({
@@ -43,13 +42,8 @@ function ApolloClient(
             log.error(err);
         })
         .then(async () => {
-            channelIDs.forEach(async (id) => {
-                await api.getUserById(id).catch((err) => {
-                    log.error(err);
-                }).then((user) => {
-                    if (user == undefined) return;
-                    client.join(`#${user.login}`);
-                });
+            channels.forEach(async (id) => {
+                client.join(`#${id}`);
             });
         });
     

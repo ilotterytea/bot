@@ -40,7 +40,8 @@ interface IArguments {
     message: {
         raw?: string,
         command?: string
-    }
+    },
+    channel_emotes: {[emote_name: string]: IStorage.Emote}
 }
 
 export default IArguments;

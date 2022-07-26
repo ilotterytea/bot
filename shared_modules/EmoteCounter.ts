@@ -22,7 +22,7 @@ import { readFileSync } from "fs";
 import { short, branch } from "git-rev-sync";
 import packagejson from "../package.json";
 
-export default class Ping implements IModule.IModule {
+export default class EmoteCounter implements IModule.IModule {
     cooldownMs: number;
     permissions: IModule.AccessLevels;
     minPermissions?: IModule.AccessLevels;
@@ -34,26 +34,14 @@ export default class Ping implements IModule.IModule {
     }
 
     async run(Arguments: IArguments) {
-        var totalmem = await (await os.mem.used()).totalMemMb;
-        var usedmem = await (await os.mem.used()).usedMemMb;
-        
-        function formatTime(seconds: number) {
-            function pad(s: number) {
-                return (s < 10 ? '0' : '') + s.toString();
-            }
+        const emote: string = Arguments.message.raw!.split(' ')[1];
 
-            var days = Math.floor(seconds / (60 * 60 * 24));
-            var hours = Math.floor(seconds / (60 * 60) % 24);
-            var minutes = Math.floor(seconds % (60 * 60) / 60);
-            var sec = Math.floor(seconds % 60);
-
-            return `${days} d. ${pad(hours)}:${pad(minutes)}:${pad(sec)}`;
+        if (!(emote in Arguments.channel_emotes)) {
+            return Promise.resolve(false);
         }
 
-        var pingms = Math.floor(Math.round((await Arguments.client.ping())[0] * 1000));
-        var uptime = formatTime(process.uptime());
-        var channels = Arguments.storage.getClientChannelNames?.length;
-                
-        return Promise.resolve(Arguments.localizator.parsedText("cmd.ping.exec.response", Arguments.target.id, "FeelsDankMan  🏓 ", uptime, channels, `${usedmem} ${Arguments.localizator.parsedText("measure.megabyte", Arguments.target.id)}/${totalmem} ${Arguments.localizator.parsedText("measure.megabyte", Arguments.target.id)}`, pingms, `${packagejson.version}-${packagejson.name}`, short(), branch()));
+        const usedtimes: number = Arguments.channel_emotes[emote].UsedTimes;
+
+        return Promise.resolve(Arguments.localizator.parsedText("cmd.ecount.exec.response", Arguments.target.id, emote, usedtimes));
     }
 }

@@ -56,7 +56,8 @@ namespace Messages {
             message: {
                 raw: "",
                 command: ""
-            }
+            },
+            channel_emotes: {}
         });
         client.on("message", async (channel: string, user: ChatUserstate, message: string, self: boolean) => {
             if (self) return;
@@ -72,6 +73,9 @@ namespace Messages {
 
             // +1 chat line to the target's file:
             storage.targets.edit(user["room-id"], "ChatLines", storage.targets.get(user["room-id"], "ChatLines") as number + 1);
+
+            await stvemotes.levelUpEmote(message, channel.slice(1, channel.length));
+            console.log(stvemotes.getEmote("test", channel.slice(1, channel.length)));
 
             if (message == "test") {
                 storage.targets.edit(user["room-id"], "SuccessfullyCompletedTests", storage.targets.get(user["room-id"], "SuccessfullyCompletedTests") as number + 1);
@@ -100,7 +104,8 @@ namespace Messages {
                     message: {
                         raw: message,
                         command: message.split(' ')[0].split(storage.getGlobalPrefix)[1]
-                    }
+                    },
+                    channel_emotes: stvemotes.getAllChannelEmotes(channel.slice(1, channel.length))
                 }
 
                 if (storage.users.get(user["user-id"], "InternalType") === "supauser") args.user.extRole = IModule.AccessLevels.SUPAUSER;
@@ -129,8 +134,8 @@ namespace Messages {
 
         // Save local files:
         setInterval(() => {
-            storage.save();
-        }, 60000);
+            storage.save(stvemotes.getEmotes);
+        }, 10000);
     }
 
     export async function StaticCommandHandler(args: IArguments) {

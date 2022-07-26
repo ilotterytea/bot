@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
+import EmoteLib from "emotelib";
 import { Client } from "tmi.js";
 import { Logger } from "tslog";
 import TwitchApi from "./clients/ApiClient";
@@ -32,27 +33,36 @@ const log: Logger = new Logger({name: "itb2-main"});
 
 async function ApolloInit(opts: {[key: string]: any}) {
     const Config: IConfiguration = await ConfigIni.parse("config.ini");
-    const Datastore: StoreManager = new StoreManager("local/datastore.json", "local/targets");
-    const Locale: Localizator = new Localizator();
-    const Modules: ModuleManager = new ModuleManager();
-    const STVEmotes: EmoteUpdater.SevenTV = new EmoteUpdater.SevenTV(["ilotterytea", "fembajbot"]);
-
-    await Locale.loadLanguages(false);
-    Locale.setPreferredLanguages(Datastore.targets.getTargets, Datastore.targets.getUserlinks());
-    Modules.init();
 
     const TmiApi: TwitchApi.Client = new TwitchApi.Client(
         Config.Authorization.ClientID,
         Config.Authorization.AccessToken
     );
 
+    const Datastore: StoreManager = new StoreManager("local/datastore.json", "local/targets", TmiApi);
+    const Locale: Localizator = new Localizator();
+    const Modules: ModuleManager = new ModuleManager();
+    const Emotelib: EmoteLib = new EmoteLib({
+        client_id: Config.Authorization.ClientID,
+        access_token: Config.Authorization.AccessToken
+    });
+
+    await Locale.loadLanguages(false);
+    Locale.setPreferredLanguages(Datastore.targets.getTargets, Datastore.targets.getUserlinks());
+    Modules.init();
+
+    const STVEmotes: EmoteUpdater.SevenTV = new EmoteUpdater.SevenTV(Emotelib.seventv, Datastore.getClientChannelNames!);
+
     const TmiClient: Client = ApolloClient(
         Config.Authorization.Username,
         Config.Authorization.Password,
-        Datastore.getClientChannels!,
-        TmiApi,
+        Datastore.getClientChannelNames!,
         opts["debug"]
     );
+
+    await STVEmotes.load(Datastore.targets.getTargets);
+
+    console.log(Datastore.targets.getTargets)
 
     try {
         await Messages.Handler(TmiClient, TmiApi, Datastore, Locale, Modules, STVEmotes);

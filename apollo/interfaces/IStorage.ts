@@ -17,7 +17,7 @@
 
 namespace IStorage {
     export interface Main {
-        Version: string
+        Version: string,
         Join?: {
             AsClient?: number[] | undefined,
             AsAnonymous?: number[] | undefined
@@ -54,9 +54,9 @@ namespace IStorage {
     }
 
     export interface Emote {
-        Name: string,
-        UsedIn: {[target_id: string]: number},
-        Provider?: EmoteProviderTypes | undefined
+        ID?: string | undefined,
+        UsedTimes: number,
+        OriginalName?: string | undefined
     }
 
     export interface Module {
