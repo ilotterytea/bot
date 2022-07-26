@@ -22,13 +22,13 @@ import IStorage from "../interfaces/IStorage";
 const log: Logger = new Logger({name: "StoreManager"});
 
 interface IManager<T> {
-    add: (id: string, data?: T | undefined) => boolean | null;
-    edit: (id: string, key: keyof T, value: any) => boolean | null;
-    delete: (id: string) => boolean | null;
-    get: (id: string, key?: keyof T | undefined) => any | null;
+    add: (id: string | undefined, data?: T | undefined) => boolean | null;
+    edit: (id: string | undefined, key: keyof T, value: any) => boolean | null;
+    delete: (id: string | undefined) => boolean | null;
+    get: (id: string | undefined, key?: keyof T | undefined) => any | null;
 
-    isExists: (id: string) => boolean;
-    isValueExists: (id: string, key: keyof T) => boolean | null;
+    isExists: (id: string | undefined) => boolean;
+    isValueExists: (id: string | undefined, key: keyof T) => boolean | null;
 }
 
 class TargetManager implements IManager<IStorage.Target> {
@@ -38,24 +38,128 @@ class TargetManager implements IManager<IStorage.Target> {
         this.data = target_data;
     }
 
-    add(target_id: string, data?: IStorage.Target | undefined) {
+    add(target_id: string | undefined, data?: IStorage.Target | undefined) {
+        if (this.isExists(target_id)) return false;
+        if (target_id === undefined) return false;
+        if (data === undefined) {
+            data = {
+                SuccessfullyCompletedTests: 0,
+                ExecutedCommands: 0,
+                ChatLines: 0,
+                Emotes: {},
+                Modules: {}
+            }
+        }
+
+        this.data[target_id] = data;
         return true;
     }
-    edit(target_id: string, key: keyof IStorage.Target, value: any) {
+    edit(target_id: string | undefined, key: keyof IStorage.Target, value?: any) {
+        if (target_id === undefined) return false;
+        if (!this.isExists(target_id)) return false;
+
+        if (value === undefined) {
+            delete this.data[target_id][key];
+            return true;
+        }
+        
+        this.data[target_id][key] = value;
         return true;
     }
-    delete(target_id: string, data?: IStorage.Target | undefined) {
+    delete(target_id: string | undefined) {
+        if (target_id === undefined) return false;
+        if (!this.isExists(target_id)) return false;
+        delete this.data[target_id];
         return true;
     }
-    get(target_id: string, key?: keyof IStorage.Target | undefined) {
+    get(target_id: string | undefined, key?: keyof IStorage.Target | undefined) {
+        if (target_id === undefined) return false;
+        if (!this.isExists(target_id)) return false;
+
+        if (key === undefined) {
+            return this.data[target_id];
+        }
+
+        if (!this.isValueExists(target_id, key)) return false;
+
+        return this.data[target_id][key];
+    }
+
+    isExists(target_id: string | undefined) {
+        if (target_id === undefined) return false;
+        if (!(target_id in this.data)) return false;
         return true;
     }
 
-    isExists(target_id: string) {
+    isValueExists(target_id: string | undefined, key: keyof IStorage.Target) {
+        if (!this.isExists(target_id)) return false;
+        if (target_id === undefined) return false;
+        if (!(key in this.data[target_id])) return false;
         return true;
     }
 
-    isValueExists(target_id: string, key: keyof IStorage.Target) {
+    getUserlinks() {
+        var users: {[user_name: string]: string} = {};
+
+        Object.keys(this.data).forEach((user) => {
+            users[this.data[user].Name!] = user;
+        });
+
+        return users;
+    }
+    get getTargets() { return this.data; }
+}
+
+class UserManager implements IManager<IStorage.User> {
+    private data: {[user_id: string]: IStorage.User};
+
+    constructor (user_data: {[user_id: string]: IStorage.User}) {
+        this.data = user_data;
+    }
+
+    add(id: string | undefined, data?: IStorage.User | undefined) {
+        if (this.isExists(id)) return false;
+        if (id === undefined) return false;
+        if (data === undefined) {
+            data = {
+                InternalType: ""
+            }
+        }
+        this.data[id] = data;
+        return true;
+    }
+    edit(id: string | undefined, key: keyof IStorage.User, value: any) {
+        if (!this.isExists(id)) return false;
+        if (!this.isValueExists(id, key)) return false;
+        this.data[id!][key] = value;
+        return true;
+    }
+    delete(id: string | undefined) {
+        if (id === undefined) return false;
+        if (!this.isExists(id)) return false;
+        delete this.data[id];
+        return true;
+    }
+    get(id: string | undefined, key?: keyof IStorage.User | undefined) {
+        if (!this.isExists(id)) return false;
+
+        if (key === undefined) {
+            return this.data[id!];
+        }
+
+        if (!this.isValueExists(id, key)) return false;
+
+        return this.data[id!][key];
+    }
+    isExists(id: string | undefined) {
+        if (id === undefined) return false;
+        if (!(id in this.data)) return false;
+        return true;
+    }
+    isValueExists(id: string | undefined, key: keyof IStorage.User) {
+        if (id === undefined) return false;
+        if (!this.isExists(id)) return false;
+        if (!(key in this.data[id])) return false;
         return true;
     }
 }
@@ -65,6 +169,7 @@ class StoreManager {
     private target_data: {[target_id: string]: IStorage.Target};
     private file_paths: {[path_id: string]: string};
     targets: TargetManager;
+    users: UserManager;
 
     constructor (global_file_path: string, target_folder_path: string) {
         this.file_paths = {
@@ -72,10 +177,10 @@ class StoreManager {
             target: target_folder_path
         };
 
-
         this.global_data = JSON.parse(readFileSync(this.file_paths["global"], {encoding: "utf-8"}));
         this.target_data = this.multiDictLoad(this.file_paths["target"]);
         this.targets = new TargetManager(this.target_data);
+        this.users = new UserManager(this.global_data.Global.Users!);
     }
 
     private multiDictLoad(folder_path: string) {
@@ -97,65 +202,27 @@ class StoreManager {
     // Save all data:
     save() {
         var entries: number = 0;
+        var lines: number = 0;
+
+        lines = lines + JSON.stringify(this.global_data, null, 2).split('\n').length;
 
         writeFileSync(this.file_paths["global"], JSON.stringify(this.global_data, null, 2), {encoding: "utf-8"});
         entries++;
 
         Object.keys(this.target_data).forEach((target) => {
+            lines = lines + JSON.stringify(this.target_data[target], null, 2).split('\n').length;
             writeFileSync(`${this.file_paths["target"]}/${target}.json`, JSON.stringify(this.target_data[target], null, 2), {encoding: "utf-8"});
             entries++;
         });
-        log.debug("Saved", entries, "entries!");
+        log.debug("Saved", entries, "entries with", lines, "lines total!");
     }
-
-    // Channel manipulations:
-    createTarget(target_id: string, data: IStorage.Target) {
-        if (this.containsTarget(target_id)) return false;
-
-        this.target_data[target_id] = {};
-        var target: IStorage.Target = data;
-        this.target_data[target_id] = {};
-
-        return true;
-    }
-    removeTarget(target_id: string) {
-        if (!this.containsTarget(target_id)) return false;
-        delete this.target_data[target_id];
-        return true;
-    }
-    changeTargetValue(target_id: string, key: keyof IStorage.Target, value: any) {
-        if (!this.containsTarget(target_id)) return false;
-
-        this.target_data[target_id][key] = value;
-        return true;
-    }
-    getTargetValue(target_id: string, key: keyof IStorage.Target) {
-        if (!this.containsTarget(target_id)) return false;
-        return this.target_data[target_id][key];
-    }
-    getTarget(target_id: string) {
-        if (!this.containsTarget(target_id)) return false;
-        return this.target_data[target_id];
-    }
-    containsTarget(target_id: string) {
-        if (!(target_id in this.target_data)) return false;
-        return true;
-    }
-    containsTargetValue(target_id: string, key: keyof IStorage.Target) {
-        if (!this.containsTarget(target_id)) return false;
-        if (!(key in this.target_data[target_id])) return false;
-        return true;
-    }
-    get getTargets() { return this.target_data; }
 
     // Global manipulations:
     get getVersion() { return this.global_data.Version; }
-    get getClientJoin() { return this.global_data.Join?.AsClient; }
-    get getAnonymousJoin() { return this.global_data.Join?.AsAnonymous; }
+    get getClientChannels() { return this.global_data.Join?.AsClient; }
+    get getAnonymousChannels() { return this.global_data.Join?.AsAnonymous; }
     get getGlobalPrefix() { return this.global_data.Global.Prefix; }
     get getGlobalModules() { return this.global_data.Global.Modules; }
-
-
 }
 
 export default StoreManager;

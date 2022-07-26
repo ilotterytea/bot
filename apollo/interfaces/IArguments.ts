@@ -18,13 +18,19 @@
 import { Client } from "tmi.js";
 import StoreManager from "../files/StoreManager";
 import Localizator from "../utils/Locale";
+import IModule from "./IModule";
 import IStorage from "./IStorage";
 
 interface IArguments {
     client: Client;
     storage: StoreManager;
     localizator: Localizator;
+    bot: {
+        name: string
+    },
     user: {
+        extRole: IModule.AccessLevels,
+        name: string,
         id: string
     },
     target: {

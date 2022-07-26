@@ -21,6 +21,8 @@ import IModule from "../interfaces/IModule";
 
 // Commands:
 import Ping from "../../shared_modules/Ping";
+import Spam from "../../shared_modules/Spam";
+import Massping from "../../shared_modules/Massping";
 
 class ModuleManager {
     private modules: {[module_id: string]: IModule.IModule};
@@ -38,6 +40,10 @@ class ModuleManager {
 
         if (this.cooldown[module_id].includes(args.user.id)) return Promise.resolve(false);
 
+        if ((args.user.extRole < this.modules[module_id].permissions!)) {
+            return Promise.resolve(false);
+        }
+
         var response = Promise.resolve(await this.modules[module_id].run(args));
         this.cooldownUser(args.user.id, module_id, this.modules[module_id].cooldownMs!);
 
@@ -45,7 +51,9 @@ class ModuleManager {
     }
 
     init() {
-        this.modules["ping"] = new Ping(5000, "public", "public");
+        this.modules["ping"] = new Ping(5000, IModule.AccessLevels.PUBLIC);
+        this.modules["spam"] = new Spam(30000, IModule.AccessLevels.MOD);
+        this.modules["massping"] = new Massping(60000, IModule.AccessLevels.BROADCASTER);
     }
 
     private createCooldownArray(module_id: string) {
@@ -75,6 +83,8 @@ class ModuleManager {
         if (module_id in this.modules) return true;
         return false;
     }
+
+    get length() { return Object.keys(this.modules).length; }
 }
 
 export default ModuleManager;

@@ -20,15 +20,25 @@ import IArguments from "./IArguments";
 namespace IModule {
     export interface IModule {
         cooldownMs?: number | undefined;
-        permissions?: Permissions | undefined;
-        minPermissions?: Permissions | undefined;
+        permissions?: AccessLevels | undefined;
+        minPermissions?: AccessLevels | undefined;
         run: (Arguments: IArguments, ...args: []) => Promise<string | boolean>;
     }
+    
+    /** @deprecated */
     export type Permissions = "public" |
     "vip" |
     "mod" |
     "broadcaster" |
     "supauser";
+
+    export enum AccessLevels {
+        PUBLIC,
+        VIP,
+        MOD,
+        BROADCASTER,
+        SUPAUSER
+    }
 }
 
 export default IModule;

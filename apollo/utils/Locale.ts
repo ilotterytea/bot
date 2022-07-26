@@ -23,7 +23,8 @@ const log: Logger = new Logger({name: "Localizator"});
 
 type LineIds = "user.not_found" | "arrive" | "leave" | "newarrive" |
 "test.test" | "terminal.error" | "emoteupdater.new_emotes" |
-"emoteupdater.deleted_emotes" | "cmd.help.name" | "cmd.help.desc" |
+"emoteupdater.deleted_emotes" | "emoteupdater.user_added_emote" | "emoteupdater.user_deleted_emote" |
+"emoteupdater.user_updated_emote" | "cmd.help.name" | "cmd.help.desc" |
 "cmd.help.author" | "cmd.help.exec.response" | "cmd.help.exec.help" |
 "cmd.help.exec.lolresponse" | "cmd.ping.name" | "cmd.ping.desc" |
 "cmd.ping.author" | "cmd.ping.exec" | "cmd.ping.author" |
@@ -49,13 +50,15 @@ type LineIds = "user.not_found" | "arrive" | "leave" | "newarrive" |
 class Localizator {
     private languages: {[lang_id: string]: {[line_id: string]: LineIds}} | undefined;
     private preferred_langs: {[lang_id: string]: string[]};
+    private user_links: {[target_name: string]: string};
 
     constructor () {
         this.languages = {};
+        this.user_links = {};
         this.preferred_langs = {};
     }
 
-    setPreferredLanguages(raw_targets: {[target_id: string]: IStorage.Target}) {
+    setPreferredLanguages(raw_targets: {[target_id: string]: IStorage.Target}, user_links: {[target_name: string]: string}) {
         Object.keys(this.languages!).forEach((lang_id) => {
             Object.keys(raw_targets).forEach((target_id) => {
                 if (raw_targets[target_id].LanguageId === lang_id) {
@@ -64,6 +67,8 @@ class Localizator {
                 }
             });
         });
+        this.user_links = user_links;
+        console.log(this.user_links);
     }
 
     async loadLanguages(noInternetSync: boolean, custom_languages?: {[lang_id: string]: {[line_id: string]: LineIds}}) {
@@ -85,7 +90,6 @@ class Localizator {
                 log.warn("Raw JSON languages aren't supported yet.");
                 return;
             }
-            console.log(response.data);
             this.languages = response.data;
         }).catch((err) => log.error(err));
         log.silly("dun");
@@ -97,10 +101,18 @@ class Localizator {
 
     parsedText(line_id: LineIds, target_id: string, ...args: any[]) {
         var lang_id: string = "en_us";
+        var regex: RegExp = /^[0-9]*$/;
+        var isID: boolean = regex.test(target_id);
 
-        Object.keys(this.preferred_langs).forEach((lang_id2) => {
-            if (this.preferred_langs[lang_id2].includes(target_id)) {
-                lang_id = lang_id2;
+        if (!isID) {
+            if (target_id in this.user_links) target_id = this.user_links[target_id];
+        }
+
+        console.log(isID);
+
+        Object.keys(this.preferred_langs).forEach((lang) => {
+            if (this.preferred_langs[lang].includes(target_id)) {
+                lang_id = lang;
             }
         });
 
@@ -108,8 +120,9 @@ class Localizator {
             log.warn("Language with", lang_id, "code doesn't exist! Setting the en_us language...");
             delete this.preferred_langs[lang_id];
             lang_id = "en_us";
-            this.preferred_langs[lang_id].push(target_id);
         }
+
+        console.log(lang_id);
 
         var message: string = this.replaceDummyValues(this.languages![lang_id][line_id], args);
 
@@ -163,9 +176,12 @@ class Localizator {
         if (!(lang_id in this.preferred_langs)) this.preferred_langs[lang_id] = [];
 
         Object.keys(this.preferred_langs).forEach((lang_id2) => {
-            if (this.preferred_langs[lang_id2].includes(target_id)) {
-                this.preferred_langs[lang_id2] = this.preferred_langs[lang_id2].filter(t => t !== target_id);
-            }
+
+            this.preferred_langs[lang_id2].forEach((user) => {
+                if (user.includes(target_id)) {
+                    this.preferred_langs[lang_id2] = this.preferred_langs[lang_id2].filter(t => t !== user);
+                }
+            });
         });
 
         this.preferred_langs[lang_id].push(target_id);

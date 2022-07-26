@@ -30,6 +30,7 @@ namespace IStorage {
     }
 
     export interface Target {
+        Name?: string,
         LanguageId?: string | undefined,
         Modules?: {
             EnabledIDs?: number[] | undefined,
@@ -69,7 +70,7 @@ namespace IStorage {
         InternalType?: InternalUserTypes | undefined
     }
 
-    type InternalUserTypes = "suspended" | "special" | "supauser";
+    type InternalUserTypes = "" | "suspended" | "special" | "supauser";
     type ModuleTypes = "scripted" | "static";
     type EmoteProviderTypes = "ttv" | "bttv" | "ffz" | "stv";
 }
