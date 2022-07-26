@@ -21,9 +21,10 @@ import {
 } from "tmi.js";
 import TwitchApi from "../clients/ApiClient";
 import StoreManager from "../files/StoreManager";
-import CompleteATEST from "../fun/TestCompletionHandler";
 import IArguments from "../interfaces/IArguments";
+import IModule from "../interfaces/IModule";
 import IStorage from "../interfaces/IStorage";
+import EmoteUpdater from "../utils/emotes/EmoteUpdater";
 import Localizator from "../utils/Locale";
 import ModuleManager from "../utils/ModuleManager";
 
@@ -33,32 +34,67 @@ namespace Messages {
         api: TwitchApi.Client,
         storage: StoreManager,
         locale: Localizator,
-        module: ModuleManager
+        module: ModuleManager,
+        stvemotes: EmoteUpdater.SevenTV
     ) {
+        stvemotes.subscribe({
+            client: client,
+            localizator: locale,
+            storage: storage,
+            bot: {
+                name: ""
+            },
+            target: {
+                id: "",
+                name: ""
+            },
+            user: {
+                extRole: IModule.AccessLevels.PUBLIC,
+                name: "",
+                id: ""
+            },
+            message: {
+                raw: "",
+                command: ""
+            }
+        });
         client.on("message", async (channel: string, user: ChatUserstate, message: string, self: boolean) => {
             if (self) return;
-            if (!storage.containsTarget(user["room-id"]!)) storage.createTarget(user["room-id"]!, {
-                ChatLines: 0,
-                ExecutedCommands: 0,
+            // Create a new target file if the channel was created recently:
+            if (!storage.targets.isExists(user["room-id"])) storage.targets.add(user["room-id"], {
                 SuccessfullyCompletedTests: 0,
-                Emotes: {}
+                ExecutedCommands: 0,
+                ChatLines: 0,
+                Emotes: {},
+                Modules: {},
+                Name: channel.slice(1, channel.length)
             });
 
-            console.log(storage.getTarget(user["room-id"]!));
+            // +1 chat line to the target's file:
+            storage.targets.edit(user["room-id"], "ChatLines", storage.targets.get(user["room-id"], "ChatLines") as number + 1);
 
-            CompleteATEST(client, channel, user["room-id"]!, message, locale, storage.getTarget(user["room-id"]!) as IStorage.Target);
+            if (message == "test") {
+                storage.targets.edit(user["room-id"], "SuccessfullyCompletedTests", storage.targets.get(user["room-id"], "SuccessfullyCompletedTests") as number + 1);
+                client.say(channel, locale.parsedText("test.test", user["room-id"]!, "test", storage.targets.get(user["room-id"], "SuccessfullyCompletedTests") as number));
+            }
+
+            console.log(storage.targets.get(user["room-id"]));
 
             if (message.startsWith(storage.getGlobalPrefix)) {
-                console.log("ben");
                 var args: IArguments = {
                     client: client,
                     localizator: locale,
                     storage: storage,
+                    bot: {
+                        name: ""
+                    },
                     target: {
                         id: user["room-id"]!,
                         name: channel
                     },
                     user: {
+                        extRole: IModule.AccessLevels.PUBLIC,
+                        name: user["username"]!,
                         id: user["user-id"]!
                     },
                     message: {
@@ -67,20 +103,37 @@ namespace Messages {
                     }
                 }
 
+                if (storage.users.get(user["user-id"], "InternalType") === "supauser") args.user.extRole = IModule.AccessLevels.SUPAUSER;
+                else {
+                    if (args.user.id === args.target.id) args.user.extRole = IModule.AccessLevels.BROADCASTER;
+                    if (user["badges"]?.moderator === "1") args.user.extRole = IModule.AccessLevels.MOD;
+                    if (user["badges"]?.vip === "1") args.user.extRole = IModule.AccessLevels.VIP;
+                }
+
                 if (module.contains(args.message.command!)) {
                     var response = await module.call(args.message.command!, args);
 
-                    if (response == false) {
+                    if (typeof response == "boolean") {
                         return;
                     }
+                    
+                    args.storage.targets.edit(
+                        user["room-id"]!, "ExecutedCommands",
+                        args.storage.targets.get(user["room-id"]!, "ExecutedCommands") as number + 1
+                    );
 
                     return client.say(channel, response as string);
                 }
             }
         });
+
+        // Save local files:
+        setInterval(() => {
+            storage.save();
+        }, 60000);
     }
 
-    export async function TSCommandHandler(args: IArguments) {
+    export async function StaticCommandHandler(args: IArguments) {
 
     }
 }
