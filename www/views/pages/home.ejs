@@ -23,11 +23,16 @@
         <%- include("../partials/head_meta", { pageurl: "", pagetitle: "Home" }) %>
     </head>
     <body>
-        <%- include("../partials/navbar.ejs") %>
-        <section class="sbarandbody">
-            <div class="body-text">
-                <h1>iLotterytea's Twitch Bot 2</h1>
+        <%- include("../partials/navbar.ejs", {targets: [
+            "ilotterytea", "greddyss", "m4x0nn", "monkeos",
+            "xomachel"
+        ]}) %>
+        <div class="wrapper">
+            <div class="content">
+                <section>
+                    How about you find some bitches?
+                </section>
             </div>
-        </section>
+        </div>
     </body>
 </html>

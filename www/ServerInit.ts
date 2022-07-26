@@ -30,7 +30,32 @@ async function ServerInit(opts: {[key: string]: string}) {
         App.set("views", `${__dirname}/views`);
 
         App.get("/", (req, res) => {
-            res.render("pages/home");
+            res.render("pages/home", {
+                botn: "fembajbot"
+            });
+        });
+
+        App.get("/commands", (req, res) => {
+            res.render("pages/commands", {
+                cmds: [
+                    {
+                        name: "Ping!",
+                        namespace_id: "ping",
+                        template: "!ping",
+                        description: "Checking if it's alive, and a bunch of other data.",
+                        options: "",
+                        cooldown: "5 sec.",
+                        notes: "",
+                        role: "public",
+                        examples: {
+                            default: [
+                                "!ping",
+                                "lol"
+                            ]
+                        }
+                    }
+                ]
+            });
         });
 
         App.use(express.static(`${__dirname}/static`));
