@@ -64,6 +64,27 @@ namespace TwitchApi {
     
             return user;
         }
+
+        async getUserByName(user_name: string) {
+            var user: HelixUser | undefined;
+    
+            await axios.get(
+                "https://api.twitch.tv/helix/users?login=" + user_name,
+                {
+                    responseType: "json",
+                    headers: {
+                        "Authorization": "Bearer " + this.access_token,
+                        "Client-Id": this.client_id
+                    }
+                }
+            ).then((response) => {
+                user = response.data.data[0];
+            }).catch((reason) => {
+                log.error(reason);
+            });
+    
+            return Promise.resolve(user);
+        }
     }
 }
 
