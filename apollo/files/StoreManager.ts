@@ -221,7 +221,7 @@ class StoreManager {
     }
     
     // Save all data:
-    save(stv_emotes: {[target_name: string]: {[emote_name: string]: IStorage.Emote}}) {
+    async save(stv_emotes: {[target_name: string]: {[emote_name: string]: IStorage.Emote}}) {
         var entries: number = 0;
         var lines: number = 0;
 

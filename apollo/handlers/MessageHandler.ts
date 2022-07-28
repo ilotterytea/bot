@@ -57,7 +57,8 @@ namespace Messages {
                 raw: "",
                 command: ""
             },
-            channel_emotes: {}
+            channel_emotes: {},
+            stv: undefined
         });
         client.on("message", async (channel: string, user: ChatUserstate, message: string, self: boolean) => {
             if (self) return;
@@ -105,7 +106,8 @@ namespace Messages {
                         raw: message,
                         command: message.split(' ')[0].split(storage.getGlobalPrefix)[1]
                     },
-                    channel_emotes: stvemotes.getAllChannelEmotes(channel.slice(1, channel.length))
+                    channel_emotes: stvemotes.getAllChannelEmotes(channel.slice(1, channel.length)),
+                    stv: stvemotes
                 }
 
                 if (storage.users.get(user["user-id"], "InternalType") === "supauser") args.user.extRole = IModule.AccessLevels.SUPAUSER;
@@ -133,8 +135,8 @@ namespace Messages {
         });
 
         // Save local files:
-        setInterval(() => {
-            storage.save(stvemotes.getEmotes);
+        setInterval(async () => {
+            await storage.save(stvemotes.getEmotes);
         }, 10000);
     }
 

@@ -17,6 +17,7 @@
 
 import { Client } from "tmi.js";
 import StoreManager from "../files/StoreManager";
+import EmoteUpdater from "../utils/emotes/EmoteUpdater";
 import Localizator from "../utils/Locale";
 import IModule from "./IModule";
 import IStorage from "./IStorage";
@@ -41,7 +42,8 @@ interface IArguments {
         raw?: string,
         command?: string
     },
-    channel_emotes: {[emote_name: string]: IStorage.Emote}
+    channel_emotes: {[emote_name: string]: IStorage.Emote},
+    stv: EmoteUpdater.SevenTV | undefined
 }
 
 export default IArguments;
