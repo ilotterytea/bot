@@ -48,7 +48,7 @@ function ApolloClient(
                 if (id == "ilotterytea") {
                     const arrive_emotes: string[] = [
                         "ShelbyWalk",
-                        "BillyArrive",
+                        "billyArrive",
                         "peepoArrive",
                         "iLotteryteaLive",
                         "Chillin",
