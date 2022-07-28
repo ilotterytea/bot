@@ -45,7 +45,8 @@ type LineIds = "user.not_found" | "arrive" | "leave" | "newarrive" |
 "cmd.scmd.name" | "cmd.scmd.desc" | "cmd.scmd.author" |
 "cmd.scmd.exec.list.response" | "cmd.scmd.exec.list.no" | "cmd.scmd.exec.make.success" |
 "cmd.scmd.exec.make.failure" | "cmd.scmd.exec.rm.success" | "cmd.scmd.exec.rm.failure" |
-"cmd.scmd.exec.ch.success" | "cmd.scmd.exec.ch.failure" | "measure.megabyte";
+"cmd.scmd.exec.ch.success" | "cmd.scmd.exec.ch.failure" | "measure.megabyte" |
+"mode.descending" | "mode.ascending";
 
 class Localizator {
     private languages: {[lang_id: string]: {[line_id: string]: LineIds}} | undefined;

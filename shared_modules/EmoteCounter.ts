@@ -42,6 +42,6 @@ export default class EmoteCounter implements IModule.IModule {
 
         const usedtimes: number = Arguments.channel_emotes[emote].UsedTimes;
 
-        return Promise.resolve(Arguments.localizator.parsedText("cmd.ecount.exec.response", Arguments.target.id, emote, usedtimes));
+        return Promise.resolve(Arguments.localizator.parsedText("cmd.ecount.exec.response", Arguments.target.id, "[7TV]", emote, usedtimes));
     }
 }

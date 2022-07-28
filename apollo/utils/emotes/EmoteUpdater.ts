@@ -48,11 +48,17 @@ namespace EmoteUpdater {
             this.src = new EventSource("https://events.7tv.app/v1/channel-emotes" + this.link);
         }
 
-        getEmote(emote_name: string, target_name: string) { return this.emotes[target_name][emote_name]; }
+        getEmote(emote_name: string, target_name: string) { 
+            if (!(target_name in this.emotes)) return false;
+            if (!(emote_name in this.emotes[target_name])) return false;
+            return this.emotes[target_name][emote_name];
+        }
         getAllChannelEmotes(target_name: string) { return this.emotes[target_name]; }
 
         async levelUpEmote(message: string, target_name: string) {
             var _message: string[] = message.split(' ');
+
+            if (!(target_name in this.emotes)) return false;
 
             _message.forEach((word) => {
                 if (word in this.emotes[target_name]) this.emotes[target_name][word].UsedTimes = this.emotes[target_name][word].UsedTimes + 1;
