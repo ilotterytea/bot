@@ -7,15 +7,3 @@
         <img src="https://img.shields.io/github/package-json/v/notdankenough/itb2?style=plastic">
         </h2>
 </div>
-
-<!-- DESCRIPTION. todo lol -->
-+ [TO-DO List](https://github.com/NotDankEnough/iLotteryteaLive/projects/1)
-+ [Website](https://bot.hmmtodayiwill.ru/)
-
-## Dependencies:
-- nodejs
-- npm
-- ts-node
-<!-- INSTALLATION GUIDE -->
-## Installation guide:
-> TODO
