@@ -69,7 +69,6 @@ class Localizator {
             });
         });
         this.user_links = user_links;
-        console.log(this.user_links);
     }
 
     async loadLanguages(noInternetSync: boolean, custom_languages?: {[lang_id: string]: {[line_id: string]: LineIds}}) {
@@ -109,8 +108,6 @@ class Localizator {
             if (target_id in this.user_links) target_id = this.user_links[target_id];
         }
 
-        console.log(isID);
-
         Object.keys(this.preferred_langs).forEach((lang) => {
             if (this.preferred_langs[lang].includes(target_id)) {
                 lang_id = lang;
@@ -122,8 +119,6 @@ class Localizator {
             delete this.preferred_langs[lang_id];
             lang_id = "en_us";
         }
-
-        console.log(lang_id);
 
         var message: string = this.replaceDummyValues(this.languages![lang_id][line_id], args);
 

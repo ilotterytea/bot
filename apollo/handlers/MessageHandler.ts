@@ -77,14 +77,11 @@ namespace Messages {
             storage.targets.edit(user["room-id"], "ChatLines", storage.targets.get(user["room-id"], "ChatLines") as number + 1);
 
             await stvemotes.levelUpEmote(message, channel.slice(1, channel.length));
-            console.log(stvemotes.getEmote("test", channel.slice(1, channel.length)));
 
             if (message == "test") {
                 storage.targets.edit(user["room-id"], "SuccessfullyCompletedTests", storage.targets.get(user["room-id"], "SuccessfullyCompletedTests") as number + 1);
                 client.say(channel, locale.parsedText("test.test", user["room-id"]!, "test", storage.targets.get(user["room-id"], "SuccessfullyCompletedTests") as number));
             }
-
-            console.log(storage.targets.get(user["room-id"]));
 
             if (message.startsWith(storage.getGlobalPrefix)) {
                 var args: IArguments = {

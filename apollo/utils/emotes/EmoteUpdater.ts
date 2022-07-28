@@ -168,7 +168,7 @@ namespace EmoteUpdater {
                 "ready",
                 (e) => {
                   // Should be "7tv-event-sub.v1" since this is the `v1` endpoint
-                  console.log(e.data);
+                  log.debug(e.data);
                 }
               );
               
@@ -177,8 +177,6 @@ namespace EmoteUpdater {
                 (e) => {
                   // This is a JSON payload matching the type for the specified event channel
                   var data: {[key: string]: any} = JSON.parse(e.data);
-
-                  console.log(data);
 
                   switch (data.action) {
                     case "ADD":

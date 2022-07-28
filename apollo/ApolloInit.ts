@@ -62,8 +62,6 @@ async function ApolloInit(opts: {[key: string]: any}, cfg: IConfiguration) {
 
     await STVEmotes.load(Datastore.targets.getTargets);
 
-    console.log(Datastore.targets.getTargets)
-
     try {
         await Messages.Handler(TmiClient, TmiApi, Datastore, Locale, Modules, STVEmotes);
 

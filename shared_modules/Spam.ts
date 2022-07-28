@@ -55,8 +55,6 @@ export default class Spam implements IModule.IModule {
         delete message[0];
         delete message[1];
 
-        console.log(message.join(' '));
-
         if (commandRegex.test(message.join(' ').trim())) {
             Arguments.client.say(Arguments.target.name, Arguments.localizator.parsedText("cmd.spam.exec.unauthorized", Arguments.target.id, Arguments.user.name));
             return Promise.resolve(false);
