@@ -36,7 +36,10 @@ async function ServerInit(opts: {[key: string]: string}) {
         });
 
         App.get("/commands", (req, res) => {
-            res.render("pages/commands", {
+            res.render("pages/home", {
+                botn: "fembajbot"
+            });
+            /*res.render("pages/commands", {
                 cmds: [
                     {
                         name: "Ping!",
@@ -55,6 +58,24 @@ async function ServerInit(opts: {[key: string]: string}) {
                         }
                     }
                 ]
+            });*/
+        });
+
+        App.get("/about", (req, res) => {
+            res.render("pages/home", {
+                botn: "fembajbot"
+            });
+        });
+
+        App.get("/stats", (req, res) => {
+            res.render("pages/home", {
+                botn: "fembajbot"
+            });
+        });
+
+        App.get("/me", (req, res) => {
+            res.render("pages/home", {
+                botn: "fembajbot"
             });
         });
 
