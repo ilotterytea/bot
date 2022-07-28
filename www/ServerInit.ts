@@ -20,6 +20,7 @@ import express from "express";
 import http from "http";
 import https from "https";
 import IConfiguration from "../apollo/interfaces/IConfiguration";
+import { readFileSync } from "fs";
 
 const log: Logger = new Logger({name: "www-serverinit"});
 
@@ -87,9 +88,9 @@ async function ServerInit(opts: {[key: string]: string}, ssl_certificate: IConfi
             });
         } else {
             var credentials = {
-                key: ssl_certificate.Web.Private,
-                cert: ssl_certificate.Web.Certificate,
-                ca: ssl_certificate.Web.Chain
+                key: readFileSync(ssl_certificate.Web.Private, {encoding: "utf-8"}),
+                cert: readFileSync(ssl_certificate.Web.Certificate, {encoding: "utf-8"}),
+                ca: readFileSync(ssl_certificate.Web.Chain, {encoding: "utf-8"})
             };
 
             http.createServer(App).listen(80, () => {
