@@ -1,6 +1,0 @@
-[submodule "server-apollo"]
-	path = server-apollo
-	url = https://github.com/NotDankEnough/server-apollo.git
-[submodule "libs/EmotesLib"]
-	path = libs/EmotesLib
-	url = https://github.com/notdankenough/EmotesLib.git

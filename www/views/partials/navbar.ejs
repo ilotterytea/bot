@@ -1,0 +1,32 @@
+<div class="navigation">
+    <a class="item" href="/commands">
+        <span class="material-symbols-outlined">keyboard_command_key</span>
+        Commands
+    </a>
+    <a class="item" href="/">
+        <span class="material-symbols-outlined">info</span>
+         About
+    </a>
+    <div class="dropdown">
+        <a href="/" id="brand" style="margin: 12px 24px;">
+            <img src="img/logo.png" width="32">
+            <h3 style="padding-left: 12px; color: var(--text-1);" class="rainbow_text_animated">iLotterytea's Twitch Bot 2</h3>
+        </a>
+        <div class="dropdown-content">
+            <% targets.forEach(function (target) { %>
+                <a href="#" style="display: flex; vertical-align: middle;">
+                    <img style="border-radius: 5px; margin-right:5px;" src="https://static-cdn.jtvnw.net/jtv_user_pictures/8c6bc62b-87df-4f4f-b8b3-32900d1440dd-profile_image-70x70.png" width="18" height="18">
+                    <p><%= target %></p>
+                </a>
+            <% }); %>
+        </div>
+    </div>
+    <a class="item" href="/stats?c=global">
+        <span class="material-symbols-outlined">monitoring</span>
+        Statistics
+    </a>
+    <a class="item" href="/me">
+        <span class="material-symbols-outlined">account_circle</span>
+        My account...
+    </a>
+</div>

@@ -1,0 +1,320 @@
+/**
+ * Copyright (C) 2022 NotDankEnough (ilotterytea)
+ * 
+ * This file is part of itb2.
+ * 
+ * itb2 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * itb2 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with itb2.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Manrope:wght@400;600&display=swap');
+ @import url('https://use.fontawesome.com/releases/v6.1.1/css/all.css');
+ @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0');
+
+:root {
+    --page: #eee;
+    
+    --text-0: #121212;
+    --text-1: #ddd;
+
+    --navbar-0: #121212;
+    --navbar-1: #363636;
+
+    --navbar-btn-hover-0: #ddd;
+    --navbar-btn-hover-1: #c5c5c5;
+    --navbar-btn-border: #aaa;
+    --navbar-btn-active: #e23030;
+
+    --anchor: #608aff;
+    --anchor-hover: #4c6dc9;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+body, section {
+    min-height: 0;
+    min-width: 0;
+}
+
+h1, h2, h3, h4, h5, h6, p {
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: "Inter", sans-serif;
+    background: var(--page);
+    color: var(--text-0);
+}
+
+h1, h2, h3 {
+    font-family: "Manrope", sans-serif;
+}
+section .sbarandbody {
+    flex: 1 1 0%;
+    display: flex;
+}
+
+.body-text {
+    width: 80%;
+  margin-left: 20%;
+  margin-top:56px;
+}
+.navigation {
+    background: linear-gradient(0deg, var(--navbar-0), var(--navbar-1));
+    color: white;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 8px 4px var(--navbar-1);
+}
+
+.navigation .item {
+    margin: 12px 12px;
+    color: var(--navbar-btn-hover-1);
+    border-bottom: var(--navbar-btn-hover-1) dotted 1px;
+}
+
+.navigation .item:hover {
+    border-bottom: var(--navbar-btn-hover-0) dotted 1px;
+    color: var(--navbar-btn-hover-0);
+}
+
+.navigation .item.active {
+    border-bottom: var(--navbar-btn-active) solid 2px;
+    color: var(--navbar-btn-active);
+}
+
+.material-symbols-outlined {
+    vertical-align: middle;
+}
+
+#brand {
+    display: flex;
+    align-items: center;
+}
+
+a {
+    text-decoration: none;
+    color: var(--anchor);
+}
+
+a:hover {
+    color: var(--anchor-hover);
+}
+
+.container {
+    display: flex;
+}
+.sidebar {
+    height: 100vh;
+  background: gray;
+  width: 12.5%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding-top: 60px;
+  color: white;
+  z-index: -1;
+  overflow: scroll;
+  }
+    
+.sidebar a {
+    padding: 8px;
+    font-size: 16px;
+    display: block;
+    text-decoration: none;
+    background-color: #fbfbfb;
+    margin: 8px;
+    border-radius: 6px;
+    color: #141414;
+    box-shadow: 0px 0px 1px 1px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgb(167, 167, 167);
+}
+
+.sidebar .brand {
+    display: flex;
+    align-items: center;
+    padding-left: 5px;
+}
+
+#underline {text-decoration: underline;}
+
+.sidebar .brand img {
+    vertical-align: middle;
+    border-radius: 5px;
+    padding-right: 12px;
+}
+    
+.sidebar a:hover {
+    cursor: pointer;
+    background-color: #0099ff;
+    color: #fff;
+}
+ /*спиздил со стаковерфлоу гигачад момент*/
+ .rainbow_text_animated {
+    background: linear-gradient(to right, #6666ff, #0099ff , #00ff00, #ff3399, #6666ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: rainbow_animation 6s ease-in-out infinite;
+    background-size: 400% 100%;
+}
+
+table { /* Table */
+    margin-bottom: 30px;
+    width: 100%;
+    text-align: left;
+    color: #3f3f3f;
+    border-collapse: collapse;
+    border: 1px solid #e8e8e8;
+}
+table tr:nth-child(even) {
+    background-color: #f7f7f7;
+}
+table th, table td {
+    padding: 10px 15px;
+}
+table th {
+    background-color: #f0f0f0;
+    border: 1px solid #dedede;
+    border-bottom-color: #c9c9c9;
+}
+table td {
+    border: 1px solid #e8e8e8;
+}
+code {
+   background: linear-gradient(0deg, #e2dbb0, #dbcf7e);
+   border-radius: 5px;
+   margin: 6px;
+   padding: 0 2px;
+   border: 1px solid #b9ac87;
+}
+@keyframes rainbow_animation {
+    0%,100% {
+        background-position: 0 0;
+    }
+
+    50% {
+        background-position: 100% 0;
+    }
+}
+
+/* PAGE CONTENT */
+.wrapper {
+    padding: 40px 0;
+    margin: 0 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-grow: 1;
+}
+.content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.content section {
+    padding: 10px;
+    max-width: 1000px;
+}
+
+/* FOOTER */
+footer {
+    width: 100%;
+    left: 0;
+    bottom: 0;
+    background: linear-gradient(0deg, var(--navbar-0), var(--navbar-1));
+    box-shadow: 0p;
+    color: var(--text-1);
+
+    box-shadow: 0 0 8px 4px var(--navbar-1);
+}
+
+.content.infooter,.wrapper.infooter {
+    flex-direction: row;
+    justify-content: left;
+}
+.content.infooter p {
+    padding: 2px;
+}
+
+/* DROPDOWN!!! */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 320px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 5px;
+  }
+
+.dropdown-content a:nth-child(even) {
+    background-color: #eee;
+}
+  
+  .dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+  }
+  
+  .dropdown-content a:hover {
+    background-color: #f1f1f1;
+    border-radius: 5px;
+}
+  
+  .dropdown:hover .dropdown-content {
+    display: block;
+  }
+  
+  .dropdown:hover .dropbtn {
+    background-color: #3e8e41;
+  }
+
+  #cmd_description {
+    border-left: #b9ac87 solid 5px;
+  }
+  #cmd_desc_content {
+    margin-left: 12px;
+  }
+  code {
+    background: linear-gradient(0deg, #b9ac87, #cebf97);
+    border: #9c9172 solid 1px;
+    border-radius: 4px;
+    padding: 2px 8px;
+    margin: 0 -4px;
+    font-size: 16px;
+  }
