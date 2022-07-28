@@ -24,6 +24,8 @@ import Ping from "../../shared_modules/Ping";
 import Spam from "../../shared_modules/Spam";
 import Massping from "../../shared_modules/Massping";
 import EmoteCounter from "../../shared_modules/EmoteCounter";
+import EmoteTop from "../../shared_modules/EmoteTop";
+import SystemProcess from "../../shared_modules/SystemProcess";
 
 class ModuleManager {
     private modules: {[module_id: string]: IModule.IModule};
@@ -56,6 +58,8 @@ class ModuleManager {
         this.modules["spam"] = new Spam(30000, IModule.AccessLevels.MOD);
         this.modules["massping"] = new Massping(60000, IModule.AccessLevels.BROADCASTER);
         this.modules["ecount"] = new EmoteCounter(5000, IModule.AccessLevels.PUBLIC);
+        this.modules["etop"] = new EmoteTop(10000, IModule.AccessLevels.PUBLIC);
+        this.modules["system"] = new SystemProcess(0, IModule.AccessLevels.BROADCASTER);
     }
 
     private createCooldownArray(module_id: string) {
