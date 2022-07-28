@@ -136,7 +136,7 @@ namespace Messages {
         // Save local files:
         setInterval(async () => {
             await storage.save(stvemotes.getEmotes);
-        }, 10000);
+        }, 60000);
     }
 
     export async function StaticCommandHandler(args: IArguments) {
