@@ -33,14 +33,18 @@ interface IManager<T> {
     isValueExists: (id: string | undefined, key: keyof T) => boolean | null;
 }
 
-class TargetManager implements IManager<IStorage.Target> {
+class TargetManager {
     private data: {[target_id: string]: IStorage.Target};
+    private g_data: IStorage.Main;
+    private pchannel_func: any;
 
-    constructor (target_data: {[target_id: string]: IStorage.Target}) {
+    constructor (target_data: {[target_id: string]: IStorage.Target}, global_data: IStorage.Main, parseChannels_function: any) {
         this.data = target_data;
+        this.g_data = global_data;
+        this.pchannel_func = parseChannels_function;
     }
 
-    add(target_id: string | undefined, data?: IStorage.Target | undefined) {
+    async add(target_id: string | undefined, data?: IStorage.Target | undefined) {
         if (this.isExists(target_id)) return false;
         if (target_id === undefined) return false;
         if (data === undefined) {
@@ -55,6 +59,8 @@ class TargetManager implements IManager<IStorage.Target> {
         }
 
         this.data[target_id] = data;
+        this.g_data.Join.AsClient.push(parseInt(target_id));
+        await this.pchannel_func(this.g_data.Join.AsClient);
         return true;
     }
     edit(target_id: string | undefined, key: keyof IStorage.Target, value?: any) {
@@ -188,7 +194,7 @@ class StoreManager {
 
         this.global_data = JSON.parse(readFileSync(this.file_paths["global"], {encoding: "utf-8"}));
         this.target_data = this.multiDictLoad(this.file_paths["target"]);
-        this.targets = new TargetManager(this.target_data);
+        this.targets = new TargetManager(this.target_data, this.global_data, this.parseChannels);
         this.users = new UserManager(this.global_data.Global.Users!);
 
         this.parseChannels(this.global_data.Join?.AsClient!);
@@ -212,6 +218,7 @@ class StoreManager {
 
     private parseChannels(target_ids: number[]) {
         if (!("target_names" in this.tmp)) this.tmp["target_names"] = [];
+        this.tmp["target_names"] = [];
         
         target_ids.forEach((id) => {
             this.ApiClient.getUserById(id).then((user) => {

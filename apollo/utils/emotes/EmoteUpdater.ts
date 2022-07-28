@@ -35,7 +35,7 @@ namespace EmoteUpdater {
         constructor (stvprovider: STVProvider, channels: string[]) {
             this.dstv = stvprovider;
             this.emotes = {};
-            this.targets = [];
+            this.targets = channels;
             this.link = "";
             this.targets.forEach((target, index) => {
                 if (index == 0) {
@@ -145,6 +145,22 @@ namespace EmoteUpdater {
 
         isTargetExists(target_name: string) {
             return target_name in this.emotes;
+        }
+
+        resubscribe(args: IArguments, targets: string[]) {
+            this.link = "";
+            this.targets = targets;
+
+            this.targets.forEach((target, index) => {
+                if (index == 0) {
+                    this.link = this.link + "?channel=" + target;
+                } else {
+                    this.link = this.link + "&channel=" + target;
+                }
+            });
+
+            this.src = new EventSource("https://events.7tv.app/v1/channel-emotes" + this.link);
+            this.subscribe(args);
         }
 
         subscribe(args: IArguments) {

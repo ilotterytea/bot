@@ -16,6 +16,7 @@
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
 import { Client } from "tmi.js";
+import TwitchApi from "../clients/ApiClient";
 import StoreManager from "../files/StoreManager";
 import EmoteUpdater from "../utils/emotes/EmoteUpdater";
 import Localizator from "../utils/Locale";
@@ -43,7 +44,8 @@ interface IArguments {
         command?: string
     },
     channel_emotes: {[emote_name: string]: IStorage.Emote},
-    stv: EmoteUpdater.SevenTV | undefined
+    stv: EmoteUpdater.SevenTV | undefined,
+    tapi: TwitchApi.Client | undefined
 }
 
 export default IArguments;

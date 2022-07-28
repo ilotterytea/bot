@@ -58,7 +58,8 @@ namespace Messages {
                 command: ""
             },
             channel_emotes: {},
-            stv: undefined
+            stv: undefined,
+            tapi: undefined
         });
         client.on("message", async (channel: string, user: ChatUserstate, message: string, self: boolean) => {
             if (self) return;
@@ -107,7 +108,8 @@ namespace Messages {
                         command: message.split(' ')[0].split(storage.getGlobalPrefix)[1]
                     },
                     channel_emotes: stvemotes.getAllChannelEmotes(channel.slice(1, channel.length)),
-                    stv: stvemotes
+                    stv: stvemotes,
+                    tapi: api
                 }
 
                 if (storage.users.get(user["user-id"], "InternalType") === "supauser") args.user.extRole = IModule.AccessLevels.SUPAUSER;
