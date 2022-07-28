@@ -37,30 +37,6 @@ namespace Messages {
         module: ModuleManager,
         stvemotes: EmoteUpdater.SevenTV
     ) {
-        stvemotes.subscribe({
-            client: client,
-            localizator: locale,
-            storage: storage,
-            bot: {
-                name: ""
-            },
-            target: {
-                id: "",
-                name: ""
-            },
-            user: {
-                extRole: IModule.AccessLevels.PUBLIC,
-                name: "",
-                id: ""
-            },
-            message: {
-                raw: "",
-                command: ""
-            },
-            channel_emotes: {},
-            stv: undefined,
-            tapi: undefined
-        });
         client.on("message", async (channel: string, user: ChatUserstate, message: string, self: boolean) => {
             if (self) return;
             // Create a new target file if the channel was created recently:

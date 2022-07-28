@@ -40,6 +40,9 @@ async function ApolloInit(opts: {[key: string]: any}, cfg: IConfiguration) {
     );
 
     const Datastore: StoreManager = new StoreManager("local/datastore.json", "local/targets", TmiApi);
+
+    await Datastore.parseChannels(Datastore.getClientChannelIDs);
+
     const Locale: Localizator = new Localizator();
     const Modules: ModuleManager = new ModuleManager();
     const Emotelib: EmoteLib = new EmoteLib({
@@ -51,8 +54,6 @@ async function ApolloInit(opts: {[key: string]: any}, cfg: IConfiguration) {
     Locale.setPreferredLanguages(Datastore.targets.getTargets, Datastore.targets.getUserlinks());
     Modules.init();
 
-    const STVEmotes: EmoteUpdater.SevenTV = new EmoteUpdater.SevenTV(Emotelib.seventv, Datastore.getClientChannelNames!);
-
     const TmiClient: Client = ApolloClient(
         Config.Authorization.Username,
         Config.Authorization.Password,
@@ -60,7 +61,11 @@ async function ApolloInit(opts: {[key: string]: any}, cfg: IConfiguration) {
         opts["debug"]
     );
 
+    const STVEmotes: EmoteUpdater.SevenTV = new EmoteUpdater.SevenTV(Emotelib.seventv, Datastore.getClientChannelNames);
+
     await STVEmotes.load(Datastore.targets.getTargets);
+
+    STVEmotes.subscribeToEmoteUpdates(TmiClient, Locale, Datastore.getClientChannelNames);
 
     try {
         await Messages.Handler(TmiClient, TmiApi, Datastore, Locale, Modules, STVEmotes);

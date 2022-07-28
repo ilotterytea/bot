@@ -178,14 +178,14 @@ class StoreManager {
     private target_data: {[target_id: string]: IStorage.Target};
     private file_paths: {[path_id: string]: string};
     private ApiClient: TwitchApi.Client;
-    private tmp: {[variable: string]: any};
+    private target_names: string[];
 
     targets: TargetManager;
     users: UserManager;
 
     constructor (global_file_path: string, target_folder_path: string, twitch_api: TwitchApi.Client) {
         this.ApiClient = twitch_api;
-        this.tmp = {};
+        this.target_names = [];
 
         this.file_paths = {
             global: global_file_path,
@@ -196,8 +196,6 @@ class StoreManager {
         this.target_data = this.multiDictLoad(this.file_paths["target"]);
         this.targets = new TargetManager(this.target_data, this.global_data, this.parseChannels);
         this.users = new UserManager(this.global_data.Global.Users!);
-
-        this.parseChannels(this.global_data.Join?.AsClient!);
     }
 
     private multiDictLoad(folder_path: string) {
@@ -216,13 +214,12 @@ class StoreManager {
         return dict;
     }
 
-    private parseChannels(target_ids: number[]) {
-        if (!("target_names" in this.tmp)) this.tmp["target_names"] = [];
-        this.tmp["target_names"] = [];
+    async parseChannels(target_ids: number[]) {
         
-        target_ids.forEach((id) => {
-            this.ApiClient.getUserById(id).then((user) => {
-                this.tmp["target_names"].push(user?.login);
+        target_ids.forEach(async (id) => {
+            await this.ApiClient.getUserById(id).then((user) => {
+                if (user === undefined) return false;
+                this.target_names.push(user.login);
             });
         });
     }
@@ -256,7 +253,7 @@ class StoreManager {
     // Global manipulations:
     get getVersion() { return this.global_data.Version; }
     get getClientChannelIDs() { return this.global_data.Join?.AsClient; }
-    get getClientChannelNames() : string[] { return this.tmp["target_names"]; }
+    get getClientChannelNames() : string[] { return this.target_names; }
     get getAnonymousChannelIDs() { return this.global_data.Join?.AsAnonymous; }
     get getGlobalPrefix() { return this.global_data.Global.Prefix; }
     get getGlobalModules() { return this.global_data.Global.Modules; }

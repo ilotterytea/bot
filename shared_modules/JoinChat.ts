@@ -55,7 +55,7 @@ export default class JoinChat implements IModule.IModule {
         });
 
         Arguments.stv?.newTargetEmote(Arguments.user.name);
-        Arguments.stv?.resubscribe(Arguments, Arguments.storage.getClientChannelNames);
+        Arguments.stv?.join(Arguments.user.name);
 
         return Promise.resolve(Arguments.localizator.parsedText("cmd.join.exec.response", Arguments.target.id, Arguments.user.name, Arguments.user.id));
     }

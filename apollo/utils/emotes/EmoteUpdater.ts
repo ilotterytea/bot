@@ -22,30 +22,159 @@ import { Logger } from "tslog";
 import STVProvider from "emotelib/dist/providers/STVProvider";
 import IEmote from "emotelib/dist/interfaces/IEmote";
 import TwitchApi from "../../clients/ApiClient";
+import { Client } from "tmi.js";
+import Localizator from "../Locale";
+import WebSocket from "ws";
 
 const log: Logger = new Logger({name: "EmoteUpdater"});
 namespace EmoteUpdater {
+    export interface EmoteEventUpdate {
+        // The channel this update affects.
+        channel: string;
+        // The ID of the emote.
+        emote_id: string;
+        // The name or channel alias of the emote.
+        name: string;
+        // The action done.
+        action: "ADD" | "REMOVE" | "UPDATE";
+        // The user who caused this event to trigger.
+        actor: string;
+        // An emote object. Null if the action is "REMOVE".
+        emote?: ExtraEmoteData;
+      }
+      
+      export interface ExtraEmoteData {
+        // Original name of the emote.
+        name: string;
+        // The visibility bitfield of this emote.
+        visibility: number;
+        // The MIME type of the images.
+        mime: string;
+        // The TAGs on this emote.
+        tags: string[];
+        // The widths of the images.
+        width: [number, number, number, number];
+        // The heights of the images.
+        height: [number, number, number, number];
+        // The animation status of the emote.
+        animated: boolean;
+        // Infomation about the uploader.
+        owner: {
+          // 7TV ID of the owner.
+          id: string;
+          // Twitch ID of the owner.
+          twitch_id: string;
+          // Twitch DisplayName of the owner.
+          display_name: string;
+          // Twitch Login of the owner.
+          login: string;
+        };
+        // The first string in the inner array will contain the "name" of the URL, like "1" or "2" or "3" or "4"
+        // or some custom event names we haven't figured out yet such as "christmas_1" or "halloween_1" for special versions of emotes.
+        // The second string in the inner array will contain the actual CDN URL of the emote. You should use these URLs and not derive URLs
+        // based on the emote ID and size you want, since in future we might add "custom styles" and this will allow you to easily update your app,
+        // and solve any future breaking changes you apps might receive due to us changing.
+        urls: [[string, string]];
+    }
     export class SevenTV {
         private emotes: {[target_name: string]: {[emote_name: string]: IStorage.Emote}};
-        private targets: string[];
-        private link: string;
-        private src: EventSource;
         private dstv: STVProvider;
+        private sub7tv: EventSource | null;
+        private socket: WebSocket | null;
 
         constructor (stvprovider: STVProvider, channels: string[]) {
             this.dstv = stvprovider;
             this.emotes = {};
-            this.targets = channels;
-            this.link = "";
-            this.targets.forEach((target, index) => {
-                if (index == 0) {
-                    this.link = this.link + "?channel=" + target;
-                } else {
-                    this.link = this.link + "&channel=" + target;
+            this.sub7tv = null;
+            this.socket = null;
+        }
+
+        /**
+         * Join the channel to 7TV EventAPI via WebSocket.
+         * @param target_name 
+         * @returns False if WebSocket doesn't exists.
+         */
+        join(target_name: string) {
+            if (this.socket === null) return false;
+
+            this.socket.send(JSON.stringify({
+                action: "join",
+                payload: target_name
+            }, null, 2), (err) => {
+                log.error("Error occurred while adding the channel", target_name, "to 7TV EventAPI via WebSocket:", err?.message);
+            });
+        }
+
+        /**
+         * Part the channel from 7TV EventAPI via WebSocket.
+         * @param target_name 
+         * @returns False if WebSocket doesn't exists.
+         */
+        part(target_name: string) {
+            if (this.socket === null) return false;
+            this.socket.send(JSON.stringify({
+                action: "part",
+                payload: target_name
+            }, null, 2), (err) => {
+                log.error("Error occurred while parting the channel", target_name, "from 7TV EventAPI via WebSocket:", err);
+            });
+        }
+
+        /**
+         * Subscribe to 7TV Event API via WebSocket.
+         * @param client Tmi.js client.
+         * @param locale Localizatior.
+         * @param channels Channels that will be joined at startup.
+         */
+        subscribeToEmoteUpdates(client: Client, locale: Localizator, channels: string[]) {
+            if (this.socket === null) {
+                this.socket = new WebSocket("wss://events.7tv.app/v1/channel-emotes");
+            } else {
+                this.socket.close();
+                this.socket = new WebSocket("wss://events.7tv.app/v1/channel-emotes");
+            }
+
+            this.socket.addEventListener("open", (event) => {
+                if (this.socket === null) return;
+
+                channels.forEach(async (channel) => {
+                    this.join(channel);
+                });
+            });
+
+            this.socket.addEventListener("message", (event) => {
+                const data: {action: string, payload: string} = JSON.parse(event.data.toString());
+                
+                if (data.action == "ping") return;
+                if (data.action == "update") {
+                    const emote: EmoteEventUpdate = JSON.parse(data.payload);
+
+                    switch (emote.action) {
+                        case "ADD":
+                            this.newEmote(emote.name, emote.channel, {ID: emote.emote_id, UsedTimes: 0});
+                            client.action(`#${emote.channel}`, locale.parsedText("emoteupdater.user_added_emote", emote.channel, "[7TV]", emote.actor, emote.name));
+                            break;
+                        case "REMOVE":
+                            this.removeEmote(emote.name, emote.channel);
+                            client.action(`#${emote.channel}`, locale.parsedText("emoteupdater.user_deleted_emote", emote.channel, "[7TV]", emote.actor, emote.name));
+                            break;
+                        case "UPDATE":
+                            this.updateEmoteName(emote.emote!.name, emote.name, emote.channel);
+                            client.action(`#${emote.channel}`, locale.parsedText("emoteupdater.user_updated_emote", emote.channel, "[7TV]", emote.actor, emote.emote!.name, emote.name));
+                            break;
+                        default:
+                            break;
+                      }
                 }
             });
 
-            this.src = new EventSource("https://events.7tv.app/v1/channel-emotes" + this.link);
+            this.socket.addEventListener("error", (event) => {
+                log.error(event.error);
+            });
+
+            this.socket.addEventListener("close", (event) => {
+                log.debug(event);
+            });
         }
 
         getEmote(emote_name: string, target_name: string) { 
@@ -146,73 +275,8 @@ namespace EmoteUpdater {
         isTargetExists(target_name: string) {
             return target_name in this.emotes;
         }
-
-        resubscribe(args: IArguments, targets: string[]) {
-            this.link = "";
-            this.targets = targets;
-
-            this.targets.forEach((target, index) => {
-                if (index == 0) {
-                    this.link = this.link + "?channel=" + target;
-                } else {
-                    this.link = this.link + "&channel=" + target;
-                }
-            });
-
-            this.src = new EventSource("https://events.7tv.app/v1/channel-emotes" + this.link);
-            this.subscribe(args);
-        }
-
-        subscribe(args: IArguments) {
-            this.src.addEventListener(
-                "ready",
-                (e) => {
-                  // Should be "7tv-event-sub.v1" since this is the `v1` endpoint
-                  log.debug(e.data);
-                }
-              );
-              
-              this.src.addEventListener(
-                "update",
-                (e) => {
-                  // This is a JSON payload matching the type for the specified event channel
-                  var data: {[key: string]: any} = JSON.parse(e.data);
-
-                  switch (data.action) {
-                    case "ADD":
-                        this.newEmote(data.name, data.channel, {ID: data.id, UsedTimes: 0});
-                        args.client.action(`#${data.channel}`, args.localizator.parsedText("emoteupdater.user_added_emote", data.channel, "[7TV]", data.actor, data.name));
-                        break;
-                    case "REMOVE":
-                        this.removeEmote(data.name, data.channel);
-                        args.client.action(`#${data.channel}`, args.localizator.parsedText("emoteupdater.user_deleted_emote", data.channel, "[7TV]", data.actor, data.name));
-                        break;
-                    case "UPDATE":
-                        this.updateEmoteName(data.emote.name, data.name, data.channel);
-                        args.client.action(`#${data.channel}`, args.localizator.parsedText("emoteupdater.user_updated_emote", data.channel, "[7TV]", data.actor, data.emote.name, data.name));
-                        break;
-                    default:
-                        break;
-                  }
-                }
-              );
-              
-              this.src.addEventListener(
-                "open",
-                (e) => {
-                  // Connection was opened.
-                }
-              );
-              
-              this.src.addEventListener(
-                "error",
-                (e) => {
-                }
-              );
-        }
-
+  
         get getEmotes() { return this.emotes; }
-        get getSubscribedTargets() { return this.targets; }
     }
 }
 
