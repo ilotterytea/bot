@@ -44,6 +44,20 @@ function ApolloClient(
         .then(async () => {
             channels.forEach(async (id) => {
                 client.join(`#${id}`);
+
+                if (id == "ilotterytea") {
+                    const arrive_emotes: string[] = [
+                        "ShelbyWalk",
+                        "BillyArrive",
+                        "peepoArrive",
+                        "iLotteryteaLive",
+                        "Chillin",
+                        "WalterArrive",
+                        "docArrive"
+                    ];
+                    
+                    client.say(`#${id}`, arrive_emotes[Math.floor(Math.random() * arrive_emotes.length)]);
+                }
             });
         });
     
