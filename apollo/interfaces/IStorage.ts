@@ -16,16 +16,44 @@
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace IStorage {
+    /** @deprecated */
+    export interface V1Main {
+        version: string,
+        join: {
+            asanonymous: string[],
+            asclient: string[]
+        },
+        prefix: string,
+        emotes: {
+            [target_name: string]: {
+                [emote_name: string]: number
+            }
+        },
+        roles: {
+            [role_name: string]: number[]
+        },
+        stats: {
+            chat_lines: {[target_name: string]: number},
+            executed_commands: {[target_name: string]: number},
+            tests: {[target_name: string]: number}
+        },
+        preferred: {
+            [target_name: string]: {
+                lang: string
+            }
+        }
+    }
+
     export interface Main {
         Version: string,
-        Join?: {
-            AsClient?: number[] | undefined,
-            AsAnonymous?: number[] | undefined
+        Join: {
+            AsClient: number[],
+            AsAnonymous: number[]
         },
         Global: {
             Prefix: string,
             Modules: {[module_id: string]: Module},
-            Users?: {[user_extid: string]: User} | undefined
+            Users: {[user_extid: string]: User}
         }
     }
 
@@ -67,7 +95,7 @@ namespace IStorage {
     }
 
     export interface User {
-        InternalType?: InternalUserTypes | undefined
+        InternalType?: InternalUserTypes | string | undefined
     }
 
     type InternalUserTypes = "" | "suspended" | "special" | "supauser";
