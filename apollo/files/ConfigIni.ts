@@ -15,10 +15,11 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
-import { readFileSync, WriteFileOptions, writeFileSync } from "fs";
+import { existsSync, readFileSync, WriteFileOptions, writeFileSync } from "fs";
 
 namespace ConfigIni {
     export async function parse(file_path: string) {
+        if (!existsSync(file_path)) return false;
         var file: string[] = readFileSync(file_path, {encoding: "utf-8"}).split("\n");
         var dict: any;
         dict = {};

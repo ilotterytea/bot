@@ -31,8 +31,8 @@ import ModuleManager from "./utils/ModuleManager";
 
 const log: Logger = new Logger({name: "itb2-main"});
 
-async function ApolloInit(opts: {[key: string]: any}) {
-    const Config: IConfiguration = await ConfigIni.parse("config.ini");
+async function ApolloInit(opts: {[key: string]: any}, cfg: IConfiguration) {
+    const Config: IConfiguration = cfg;
 
     const TmiApi: TwitchApi.Client = new TwitchApi.Client(
         Config.Authorization.ClientID,

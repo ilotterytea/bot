@@ -19,10 +19,11 @@ import { Logger } from "tslog";
 import express from "express";
 import http from "http";
 import https from "https";
+import IConfiguration from "../apollo/interfaces/IConfiguration";
 
 const log: Logger = new Logger({name: "www-serverinit"});
 
-async function ServerInit(opts: {[key: string]: string}) {
+async function ServerInit(opts: {[key: string]: string}, ssl_certificate: IConfiguration) {
     
     try {
         const App = express();
@@ -86,9 +87,9 @@ async function ServerInit(opts: {[key: string]: string}) {
             });
         } else {
             var credentials = {
-                key: "",
-                cert: "",
-                ca: ""
+                key: ssl_certificate.Web.Private,
+                cert: ssl_certificate.Web.Certificate,
+                ca: ssl_certificate.Web.Chain
             };
 
             http.createServer(App).listen(80, () => {

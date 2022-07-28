@@ -21,6 +21,11 @@ interface IConfiguration {
         Password: string,
         ClientID: string,
         AccessToken: string
+    },
+    Web: {
+        Private: string,
+        Certificate: string,
+        Chain: string
     }
 }
 

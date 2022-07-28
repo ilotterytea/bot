@@ -17,7 +17,9 @@
 
 import { Logger } from "tslog";
 import ApolloInit from "./apollo/ApolloInit";
+import ConfigIni from "./apollo/files/ConfigIni";
 import Files from "./apollo/files/Files";
+import IConfiguration from "./apollo/interfaces/IConfiguration";
 import CLI from "./apollo/utils/CLI";
 import ServerInit from "./www/ServerInit";
 
@@ -26,6 +28,7 @@ const log: Logger = new Logger({name: "itb2-main"});
 async function Main() {
     log.silly("Loading, please wait...");
     const CLIArguments = CLI().opts();
+    const cfg: IConfiguration | boolean = await ConfigIni.parse("config.ini");
 
     if (CLIArguments["init"]) {
         log.silly("Initializating first setup...");
@@ -34,8 +37,14 @@ async function Main() {
 
         return;
     }
-    await ServerInit(CLIArguments);
-    if (!CLIArguments["testWebOnly"]) await ApolloInit(CLIArguments);
+
+    if (typeof cfg === "boolean") {
+        log.warn("The configuration parser returned a boolean value. Does the file exist?");
+        return;
+    }
+
+    await ServerInit(CLIArguments, cfg);
+    if (!CLIArguments["testWebOnly"]) await ApolloInit(CLIArguments, cfg);
 }
 
 Main();
