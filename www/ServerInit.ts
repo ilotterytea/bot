@@ -38,29 +38,40 @@ async function ServerInit(opts: {[key: string]: string}, ssl_certificate: IConfi
         });
 
         App.get("/commands", (req, res) => {
-            res.render("pages/home", {
-                botn: "fembajbot"
+            const cmds: {[key: string]: any} = JSON.parse(readFileSync("www/static/metadata/cmds.json", {encoding: "utf-8"}));
+
+            res.render("pages/commands", {
+                cmds: cmds
             });
-            /*res.render("pages/commands", {
-                cmds: [
-                    {
-                        name: "Ping!",
-                        namespace_id: "ping",
-                        template: "!ping",
-                        description: "Checking if it's alive, and a bunch of other data.",
-                        options: "",
-                        cooldown: "5 sec.",
-                        notes: "",
-                        role: "public",
-                        examples: {
-                            default: [
-                                "!ping",
-                                "lol"
-                            ]
-                        }
-                    }
-                ]
-            });*/
+        });
+
+        App.get("/commands/:namespaceId", (req, res) => {
+            const cmds: {[key: string]: any} = JSON.parse(readFileSync("www/static/metadata/cmds.json", {encoding: "utf-8"}));
+
+            if (!(req.params.namespaceId in cmds)) {
+                res.render("pages/error", {
+                    status: 404,
+                    message: "The command with ID " + req.params.namespaceId +" does not exist.",
+                    kitty: "https://http.cat/404"
+                });
+                return;
+            }
+            if ("isHidden" in cmds[req.params.namespaceId]) {
+                if (cmds[req.params.namespaceId].isHidden == true) {
+                    res.render("pages/error", {
+                        status: 401,
+                        message: "The command with ID " + req.params.namespaceId +" is hidden from public view.",
+                        kitty: "https://http.cat/401"
+                    });
+                    return;
+                }
+            }
+
+            res.render("pages/commandpage", {
+                cmd: cmds[req.params.namespaceId],
+                cmds: cmds,
+                bot_name: "fembajbot"
+            });
         });
 
         App.get("/about", (req, res) => {

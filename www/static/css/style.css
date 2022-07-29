@@ -35,8 +35,21 @@
     --navbar-btn-border: #aaa;
     --navbar-btn-active: #e23030;
 
-    --anchor: #608aff;
-    --anchor-hover: #4c6dc9;
+    --anchor-blue: #608aff;
+    --anchor-blue-hover: #4c6dc9;
+
+    --anchor: #d84a37;
+    --anchor-hover: #f19150;
+
+    --button-0: #76b347;
+    --button-1: #5e9e2e;
+    --button-border: #63a62f;
+
+    --flair-module: #608aff;
+
+    --code-0: #e2dbb0;
+    --code-1: #dbcf7e;
+    --code-border: #b9ac87;
 }
 
 html, body {
@@ -76,11 +89,17 @@ section .sbarandbody {
     display: flex;
 }
 
-.body-text {
-    width: 80%;
-  margin-left: 20%;
-  margin-top:56px;
+/* - - - - - - ANCHORS - - - - - - */
+a {
+    text-decoration: none;
+    color: var(--anchor);
 }
+a:hover {
+    color: var(--anchor-hover);
+    cursor: pointer;
+}
+
+/* - - - - NAVIGATION BAR - - - - */
 .navigation {
     background: linear-gradient(0deg, var(--navbar-0), var(--navbar-1));
     color: white;
@@ -97,6 +116,7 @@ section .sbarandbody {
 .navigation .item {
     margin: 12px 12px;
     color: var(--navbar-btn-hover-1);
+    padding: 6px 0;
     border-bottom: var(--navbar-btn-hover-1) dotted 1px;
 }
 
@@ -117,15 +137,6 @@ section .sbarandbody {
 #brand {
     display: flex;
     align-items: center;
-}
-
-a {
-    text-decoration: none;
-    color: var(--anchor);
-}
-
-a:hover {
-    color: var(--anchor-hover);
 }
 
 .container {
@@ -208,13 +219,7 @@ table th {
 table td {
     border: 1px solid #e8e8e8;
 }
-code {
-   background: linear-gradient(0deg, #e2dbb0, #dbcf7e);
-   border-radius: 5px;
-   margin: 6px;
-   padding: 0 2px;
-   border: 1px solid #b9ac87;
-}
+
 @keyframes rainbow_animation {
     0%,100% {
         background-position: 0 0;
@@ -241,7 +246,6 @@ code {
 }
 .content section {
     padding: 10px;
-    max-width: 1000px;
 }
 
 /* FOOTER */
@@ -303,18 +307,212 @@ footer {
   .dropdown:hover .dropbtn {
     background-color: #3e8e41;
   }
-
-  #cmd_description {
-    border-left: #b9ac87 solid 5px;
-  }
-  #cmd_desc_content {
-    margin-left: 12px;
-  }
   code {
-    background: linear-gradient(0deg, #b9ac87, #cebf97);
-    border: #9c9172 solid 1px;
-    border-radius: 4px;
-    padding: 2px 8px;
-    margin: 0 -4px;
+    background: linear-gradient(0deg, var(--code-0), var(--code-1));
+    border-radius: 5px;
+    margin: 6px;
+    padding: 0 2px;
+    border: 1px solid var(--code-border);
     font-size: 16px;
+    page-break-inside: avoid;
+    overflow: auto;
+    display: block;
+    word-wrap: break-word;
   }
+
+/* -_-_-_-_-_-_-_-_-_-_- */
+/* - - - COMMANDS - - - */
+/* -_-_-_-_-_-_-_-_-_-_- */
+
+.box {
+    padding: 24px;
+    margin: 6px;
+    background: linear-gradient(0deg, #e6e6e6, #fff);
+    border:rgb(167, 167, 167) solid 1px;
+    border-radius: 5px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    display: flex;   
+}
+
+.box #summary {
+    margin-left: 5px;
+    text-align: left;
+    flex: 1;
+    max-width: 365px;
+}
+
+.box #action {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    padding: 12px;
+}
+
+section.list {
+    max-height: 580px;
+    overflow-y: scroll;
+    border: #000 solid 1px;
+    border-radius: 5px;
+    background: #d8d8d8;
+}
+
+
+
+/* -_-_-_-_-_-_-_-_-_-_- */
+/* - - - COMMAND PAGE - - - */
+/* -_-_-_-_-_-_-_-_-_-_- */
+
+.content.row { flex-direction: row; }
+section.page  {
+    width: 720px;
+    line-height: 24px;
+}
+
+section.commandlist .commands{
+    max-height: 580px;
+    overflow-y: scroll;
+    border: #000 solid 1px;
+    border-radius: 5px;
+    background: #d8d8d8;
+}
+
+section.page section {
+    margin: 12px 0;
+}
+
+section.page h1#name {
+    font-size: 32px;
+    line-height: 32px;
+}
+
+section.page h2 {
+    color: var(--code-border);
+    text-shadow: 0 1px 0 #57503f;
+}
+
+section.page code#template {
+    margin: 16px 0;
+}
+
+section.page #params_container #cooldown b,section.page #params_container #permissions b {
+    color: #ff0000;
+    border-bottom: #ff0000 solid 2px;
+}
+
+section.page #params_another_container_for_useless_border_left {
+    border-left: var(--code-border) solid 4px;
+    padding-left: 22px;
+}
+
+section.page section#notes p {
+    padding-left: 28px;
+    text-align: justify;
+}
+
+/* - - - - - M E S S A G E S - - - - - */
+.msg {
+    padding: 8px;
+    background: linear-gradient(0deg, #151515, #353535);
+    border: #616161 solid 1px;
+    color: var(--text-1);
+    vertical-align: middle;
+}
+.msg img.badge {
+    width: 16px;
+    height: auto;
+    cursor: help;
+    vertical-align: middle;
+}
+.msg .username {
+    font-weight:bold;
+    background: linear-gradient(90deg, #831717, #ff0000, #fff126);
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.msg .username.bot {
+    background: #ff69b4;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.msg #timestamp { color: #6d6d6d; }
+
+/* - - - - - - D E T A I L S - - - - - */
+details summary::-webkit-details-marker {
+    display: none
+}
+/* Убираем стандартный маркер Firefox */
+details > summary {
+    list-style: none;
+}
+details {
+    border: #000 solid 1px;
+    border-radius: 5px;
+    margin: 6px 0;
+}
+summary {
+    background: #cfcfcf;
+    padding: 5px 24px;
+    border-radius: 5px;
+}
+summary:hover {
+    cursor:pointer;
+}
+
+details summary:before {
+    content: '\f0fe';
+    font-family: "Font Awesome 5 Free";
+}
+
+details[open] summary:before {
+    content: '\f146';
+}
+
+/* - - - - - - I N P U T S - - - - - - */
+input {
+    margin: 14px 0;
+    padding: 5px 8px;
+    background: #fff;
+    border: #ddd solid 1px;
+}
+
+/* - - - - - - F L A I R S - - - - - - */
+span.flair {
+    background: linear-gradient(0deg, gold, yellow);
+    border: gold solid 1px;
+    border-radius: 5px;
+    padding: 2px 6px;
+    font-size: 12px;
+    vertical-align: middle;
+    color: black;
+}
+
+span.flair#Module { 
+    background: linear-gradient(0deg, var(--anchor-blue-hover), var(--anchor-blue));
+    border-color: #105c8f;
+    color: var(--text-1);
+}
+
+/* -_-_-_-_-_-_-_-_-_-_- */
+/* - - - BUTTONS - - - */
+/* -_-_-_-_-_-_-_-_-_-_- */
+.classic_button {
+    padding: 5px 12px;
+    background: linear-gradient(180deg, var(--button-0), var(--button-1));
+    border: var(--button-border) solid 1px;
+    border-radius: 5px;
+    color: #fff;
+    text-shadow: 0 -1px 0 #4c9025;
+}
+.classic_button:hover {
+    background: linear-gradient(0deg, var(--button-0), var(--button-1));
+    color: #fef;
+}
+
+/* - - - - - - COLORS - - - - - - */
+yellow { color: #ffd701; }
+purple { color: #9876aa; }
+blue { color: #5a939e; }
+green { color: #b0c89b; }
+orange { color: #ce8e75; }
+gray { color: #555; }

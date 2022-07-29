@@ -20,38 +20,52 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <%- include("../partials/head_meta", { pageurl: "", pagetitle: "Commands" }) %>
+        <%- include("../partials/head_meta", { pageurl: "", darkmode: false, pagetitle: "Commands" }) %>
     </head>
     <body>
-        <%- include("../partials/navbar.ejs", {targets: [
-            "ilotterytea", "greddyss", "m4x0nn", "monkeos",
-            "xomachel", "leonidtelevizor", "humanstudi0"
-        ]}) %>
+        <%- include("../partials/navbar.ejs", {active: "commands", targets:[]}) %>
         <div class="wrapper">
             <div class="content">
                 <section>
-                    <h2 id="cmd_name">Ping!</h2>
-                    <div id="cmd_description">
-                        <div id="cmd_desc_content">
-                            <code>!ping</code>
-                            <p id="cmd_realestdescription">lol</p>
-                            <div id="cmd_params">
-                                <p id="cmd_perms"><span class="material-symbols-outlined">military_tech</span> Permissions: be cool</p>
-                                <p id="cmd_cooldown"><span class="material-symbols-outlined">timelapse</span> Cooldown: 5 sec.</p>
-                            </div>
-                            <div id="cmd_dialog">
-                                <div class="msg">
-                                    <span style="color: rgb(95 ,95, 95);">20:38</span> <img src="https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/1"> <span style="color: #898989;">greddyss:</span> lol
-                                </div>
-                                <div class="msg">
-                                    <span style="color: rgb(95 ,95, 95);">20:39</span> <img src="https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/1"> <span style="color: #898989;">greddyss:</span> xd
-                                </div>
-                            </div>
+                    <h2>Command finder</h2>
+                </section>
+                <section class="search">
+                    <input id="searchbar" onkeyup="search()" type="text" name="search" placeholder="Search modules...">
+                </section>
+                <section class="list">
+                    <% Object.keys(cmds).forEach((cmd) => { %>
+                    <section class="box" id="<%= cmds[cmd].namespace_id %>">
+                        <div id="image">
+                            <img src="../img/computer-disk.png" width="64">
                         </div>
-                        
-                    </div>
+                        <div id="summary">
+                            <h2 id="name"><%= cmds[cmd].name %> <span class="flair" id="<%= cmds[cmd].type %>"><%= cmds[cmd].type %></span></h2>
+                            <p id="desc"><%- cmds[cmd].description %></p>
+                        </div>
+                        <div id="action">
+                            <a href="/commands/<%= cmds[cmd].namespace_id %>" class="classic_button">
+                                <span class="material-symbols-outlined">search</span>
+                            </a>
+                        </div>
+                    </section>
+                    <% }); %>
                 </section>
             </div>
         </div>
     </body>
+    <script>
+        function search() {
+            let input = document.getElementById("searchbar").value.toLowerCase();
+
+            let x = document.getElementsByClassName("box");
+            console.log(input);
+            for (let i = 0; i < x.length; i++) {
+                if (!x[i].id.includes(input)) {
+                    x[i].style.display = "none";
+                } else {
+                    x[i].style.display = "";
+                }
+            }
+        }
+    </script>
 </html>

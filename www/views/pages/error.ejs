@@ -23,11 +23,13 @@
         <%- include("../partials/head_meta", { pageurl: "", darkmode: false, pagetitle: "Home" }) %>
     </head>
     <body>
-        <%- include("../partials/navbar.ejs", {targets: [], active: ""}) %>
+        <%- include("../partials/navbar.ejs", {targets: [], active:""}) %>
         <div class="wrapper">
             <div class="content">
-                <section>
-                    Work in progress...
+                <section style="text-align: center;">
+                    <img src="<%= kitty %>">
+                    <hr style="margin: 10px;">
+                    <h1 style="color: #e00a0a; margin-top: 25px;"><%= message %></h1>
                 </section>
             </div>
         </div>

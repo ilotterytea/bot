@@ -1,0 +1,134 @@
+<!--
+ Copyright (C) 2022 NotDankEnough (ilotterytea)
+ 
+ This file is part of itb2.
+ 
+ itb2 is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ itb2 is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with itb2.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <%- include("../partials/head_meta", { pageurl: "", darkmode: false, pagetitle: "Commands" }) %>
+    </head>
+    <body>
+        <%- include("../partials/navbar.ejs", {targets: [], active: "commands"}) %>
+        <div class="wrapper">
+            <div class="content row">
+                <section class="commandlist">
+                    <input id="searchbar" onkeyup="search()" type="text" name="search" placeholder="Search modules...">
+                    <section class="commands">
+                        <% Object.keys(cmds).forEach((cmd) => { %>
+                            <section class="box" id="<%= cmds[cmd].namespace_id %>" name="<%= cmds[cmd].name %>">
+                                <div id="image">
+                                    <img src="../img/computer-disk.png" width="64">
+                                </div>
+                                <div id="summary">
+                                    <h2 id="name"><%= cmds[cmd].name %> <span class="flair" id="<%= cmds[cmd].type %>"><%= cmds[cmd].type %></span></h2>
+                                    <p id="desc"><%- cmds[cmd].description %></p>
+                                </div>
+                                <div id="action">
+                                    <a href="/commands/<%= cmds[cmd].namespace_id %>" class="classic_button">
+                                        <span class="material-symbols-outlined">search</span>
+                                    </a>
+                                </div>
+                            </section>
+                        <% }); %>
+                    </section>
+                </section>
+                <section class="page">
+                    <section id="summary">
+                        <h1 id="name"><%= cmd.name %> <span class="flair" id="<%= cmd.type %>"><%= cmd.type %></span></h1>
+                        <code id="template"><%= cmd.template %></code>
+                        <p id="desc"><%- cmd.description %></p>
+                    </section>
+                    
+                    <section id="params">
+                        <h2><span class="material-symbols-outlined">tune</span> Parameters:</h2>
+                        <div id="params_another_container_for_useless_border_left">   
+                            <div id="params_container">
+                                <p id="cooldown">
+                                    <span class="material-symbols-outlined">timer</span>
+                                    Cooldown: <b><%= cmd.cooldown %></b>
+                                </p>
+                                <p id="permissions">
+                                    <span class="material-symbols-outlined">badge</span>
+                                    You need <b><%= cmd.role %></b> permissions to run this command.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <% if (cmd.options.length > 0) { %>
+                    <section id="options">
+                        <h2><span class="material-symbols-outlined">settings</span> Options:</h2>
+                        <code><% cmd.options.forEach((option) => {%>
+                            <%- option %><br>
+                        <% }); %>
+                        </code>
+                    </section>
+                    <% } %>
+
+                    <% if (cmd.notes !== "") { %>
+                    <section id="notes">
+                        <h2><span class="material-symbols-outlined">sticky_note_2</span>Notes from the developer:</h2>
+                        <p><%= cmd.notes %></p>
+                    </section>
+                    <% } %>
+
+                    <section id="examples">
+                        <h2><span class="material-symbols-outlined">forum</span> Examples:</h2>
+                        <% Object.keys(cmd.examples).forEach((example) => { %>
+                            <details <% if (example == "Default") { %>open<%}%>>
+                                <summary> <%= example %></summary>
+                                <% cmd.examples[example].forEach((msg, index) => { %>
+                                    <% if ((index % 2 == 0) && cmd.examples[example][index] != "!!skip") { %>
+                                        <div class="msg">
+                                            <span id="timestamp">20:38</span>
+                                            <span class="username">ilotterytea:</span>
+                                            <%- cmd.examples[example][index] %>
+                                        </div>
+                                    <% } %>
+                                    <% if ((index % 2 == 1) && cmd.examples[example][index] != "!!skip") { %>
+                                        <div class="msg">
+                                            <span id="timestamp">20:38</span>
+                                            <img src="../img/robot.png" title="Bot" alt="[Bot]" class="badge">
+                                            <span class="username bot"><%= bot_name %>:</span>
+                                            <%- cmd.examples[example][index] %>
+                                        </div>
+                                    <% } %>
+                                <% }); %>
+                            </details>
+                        <% }); %>
+                    </section>
+                </section>
+            </div>
+        </div>
+    </body>
+    <script>
+        function search() {
+            let input = document.getElementById("searchbar").value.toLowerCase();
+
+            let x = document.getElementsByClassName("box");
+            console.log(input);
+            for (let i = 0; i < x.length; i++) {
+                if (!x[i].id.includes(input)) {
+                    x[i].style.display = "none";
+                } else {
+                    x[i].style.display = "";
+                }
+            }
+        }
+    </script>
+</html>

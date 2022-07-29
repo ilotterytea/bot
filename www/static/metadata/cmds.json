@@ -1,0 +1,120 @@
+{
+    "ping": {
+        "name": "Ping!",
+        "namespace_id": "ping",
+        "type": "Module",
+        "template": "!ping",
+        "description": "Checking if it's alive, and a bunch of other data.",
+        "options": [],
+        "cooldown": "5 sec.",
+        "notes": "",
+        "role": "public",
+        "examples": {
+            "Default": [
+                "!ping",
+                "<img src=\"https://cdn.frankerfacez.com/emote/536927/1\" alt=\"FeelsDankMan\" title=\"FeelsDankMan\"> 🏓 Ping! Session uptime: 0 d. 00:00:54. Landed in 6 chats. Memory usage: 418 MB/966 MB. Latency to TMI: 187ms. Commit 6ce8068 (master)."
+            ]
+        }
+    },
+    "ecount": {
+        "name": "Emote counter!",
+        "namespace_id": "ecount",
+        "type": "Module",
+        "template": "!ecount [EMOTE]",
+        "description": "Shows how much of the specified emote has been used. Currently supports only 7TV.",
+        "options": [
+            "[EMOTE] - 7TV Emote."
+        ],
+        "cooldown": "5 sec.",
+        "notes": "",
+        "role": "public",
+        "examples": {
+            "Default": [
+                "!ecount <img src=\"https://cdn.7tv.app/emote/62680b95ad9d41332dc15937/1x\" title=\"wait\" alt=\"wait\">",
+                "<img src=\"https://cdn.7tv.app/emote/62680b95ad9d41332dc15937/1x\" title=\"wait\" alt=\"wait\"> has been used 9,872 times."
+            ]
+        }
+    },
+    "etop": {
+        "name": "Emote leaderboard!",
+        "namespace_id": "etop",
+        "type": "Module",
+        "template": "!etop",
+        "description": "Leaderboard of emotes by their popularity in chat.",
+        "options": [],
+        "cooldown": "10 sec.",
+        "notes": "",
+        "role": "public",
+        "examples": {
+            "Default": [
+                "!etop",
+                "Top 15 7TV emotes (descending): <img src=\"https://cdn.7tv.app/emote/62680b95ad9d41332dc15937/1x\" title=\"wait\" alt=\"wait\"> (9872), <img src=\"https://cdn.7tv.app/emote/61fe4fec690425de3c6411a8/1x\" title=\"Xomachel\" alt=\"Xomachel\"> (7177), <img src=\"https://cdn.7tv.app/emote/61c7d53112987d64d6ae8be3/1x\" title=\"telegramJR\" alt=\"telegramJR\"> (2703), <img src=\"https://cdn.7tv.app/emote/615a5051d272bdadf849e32b/1x\" title=\"Danj\" alt=\"Danj\"> (2138), <img src=\"https://cdn.7tv.app/emote/6179a096e0801fb9878826f6/1x\" title=\"Pag\" alt=\"Pag\"> (1759), <img src=\"https://cdn.7tv.app/emote/61841f474ea2f24e50095a49/1x\" title=\"kek\" alt=\"kek\"> (1372), <img src=\"https://cdn.7tv.app/emote/617ced1ac632476d20d06612/1x\" title=\"test\" alt=\"test\"> (1243), <img src=\"https://cdn.7tv.app/emote/60aeed77361b0164e63396f7/1x\" title=\"heCrazy\" alt=\"heCrazy\"> (906), <img src=\"https://cdn.7tv.app/emote/6148dbf13d8c2d23697ac139/1x\" title=\"KazakhstanWave\" alt=\"KazakhstanWave\"> (905), <img src=\"https://cdn.7tv.app/emote/615fcebcbd2ecfefac11fbcd/1x\" title=\"SAJHop\" alt=\"SAJHop\"> (585), <img src=\"https://cdn.7tv.app/emote/62431281cf7b2b34daffda08/1x\" title=\"GREDDYSS\" alt=\"GREDDYSS\"> (562), <img src=\"https://cdn.7tv.app/emote/61ac4634ffa9aba101bcd0a1/1x\" title=\"Monkeos\" alt=\"Monkeos\"> (411), <img src=\"https://cdn.7tv.app/emote/60baa54d79ace719643f27ca/1x\" title=\"DankPoke\" alt=\"DankPoke\"> (307), <img src=\"https://cdn.7tv.app/emote/60ae9eb73c27a8b79ce067e2/1x\" title=\"BJLaguk_\" alt=\"BJLaguk_\"> (287), <img src=\"https://cdn.7tv.app/emote/60ef48af276c8fd8c63567d3/1x\" title=\"kekBomb\" alt=\"kekBomb\"> (242)"
+            ]
+            
+        }
+    },
+    "join": {
+        "name": "Join in your chat room!",
+        "namespace_id": "join",
+        "type": "Module",
+        "template": "!join",
+        "description": "Get the bot to join your chat room!",
+        "options": [],
+        "cooldown": "0 sec.",
+        "notes": "",
+        "role": "public",
+        "examples": {
+            "Default": [
+                "!join",
+                "<span class=\"username\">@ilotterytea</span>, successfully joined in ilotterytea's chat room (191400264)!"
+            ]
+        }
+    },
+    "massping": {
+        "name": "Ping all chatters in chat!",
+        "namespace_id": "massping",
+        "type": "Module",
+        "template": "!massping [...MSG]",
+        "description": "Ping em, Fors! <img src=\"https://static-cdn.jtvnw.net/emoticons/v2/425618/default/dark/1.0\" alt=\"LUL\" title=\"LUL\"> 💪",
+        "options": [
+            "[...MSG] - Message."
+        ],
+        "cooldown": "60 sec.",
+        "notes": "",
+        "role": "broadcaster",
+        "examples": {
+            "Default": [
+                "!massping yo!",
+                "<span class=\"username\">@ilotterytea</span>, yo! <gray title=\"And so the bot will spam until it reaches the last chatter.\" style=\"text-decoration:underline;cursor:help;\">[...]</gray>"
+            ]
+        }
+    },
+    "spam": {
+        "name": "Spam!",
+        "namespace_id": "spam",
+        "type": "Module",
+        "template": "!spam [INTEGER] [...MSG]",
+        "description": "Sending a message with the specified repetitions.",
+        "options": [
+            "[INTEGER] - How many times should the message be sent.",
+            "[...MSG] - Message."
+        ],
+        "cooldown": "30 sec.",
+        "notes": "",
+        "role": "moderator",
+        "examples": {
+            "Default": [
+                "!spam 5 xd",
+                "xd",
+                "!!skip",
+                "xd",
+                "!!skip",
+                "xd",
+                "!!skip",
+                "xd",
+                "!!skip",
+                "xd"
+            ]
+        }
+    }
+}
