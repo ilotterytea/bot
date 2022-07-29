@@ -19,7 +19,7 @@ import IArguments from "../apollo/interfaces/IArguments";
 import IModule from "../apollo/interfaces/IModule";
 import os from "node-os-utils";
 import { readFileSync } from "fs";
-import { short, branch } from "git-rev-sync";
+import git from "git-rev-sync";
 import packagejson from "../package.json";
 import child from "child_process";
 
@@ -38,6 +38,11 @@ export default class SystemProcess implements IModule.IModule {
         const turi_ip_ip = Arguments.message.raw!.split(' ')[1];
 
         switch (turi_ip_ip) {
+            case "pull":
+                await Arguments.client.say(Arguments.target.name, `forsenSpin pulling from repository (${git.remoteUrl().split('/')[git.remoteUrl().split('/').length - 1]}-${git.branch()})...`);
+                child.exec("git pull");
+                Arguments.client.say(Arguments.target.name, `forsenLevel done: ${git.message()} (${git.short()})`);
+                break;
             case "restart":
                 await Arguments.client.say(Arguments.target.name, "forsenSpin restarting...");
                 await Arguments.storage.save(Arguments.stv!.getEmotes);
