@@ -426,14 +426,16 @@ section.page section#notes p {
 }
 .msg .username {
     font-weight:bold;
+    color: transparent;
     background: linear-gradient(90deg, #831717, #ff0000, #fff126);
     background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    
 }
 .msg .username.bot {
     background: #ff69b4;
     background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
 }
 .msg #timestamp { color: #6d6d6d; }
 
