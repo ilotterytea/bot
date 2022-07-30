@@ -31,15 +31,8 @@ import ModuleManager from "./utils/ModuleManager";
 
 const log: Logger = new Logger({name: "itb2-main"});
 
-async function ApolloInit(opts: {[key: string]: any}, cfg: IConfiguration) {
+async function ApolloInit(opts: {[key: string]: any}, Datastore: StoreManager, TmiApi: TwitchApi.Client, cfg: IConfiguration) {
     const Config: IConfiguration = cfg;
-
-    const TmiApi: TwitchApi.Client = new TwitchApi.Client(
-        Config.Authorization.ClientID,
-        Config.Authorization.AccessToken
-    );
-
-    const Datastore: StoreManager = new StoreManager("local/datastore.json", "local/targets", TmiApi);
 
     await Datastore.parseChannels(Datastore.getClientChannelIDs);
 

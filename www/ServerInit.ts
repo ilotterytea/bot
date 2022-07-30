@@ -21,10 +21,12 @@ import http from "http";
 import https from "https";
 import IConfiguration from "../apollo/interfaces/IConfiguration";
 import { readFileSync } from "fs";
+import StoreManager from "../apollo/files/StoreManager";
+import TwitchApi from "../apollo/clients/ApiClient";
 
 const log: Logger = new Logger({name: "www-serverinit"});
 
-async function ServerInit(opts: {[key: string]: string}, ssl_certificate: IConfiguration) {
+async function ServerInit(opts: {[key: string]: string}, storage: StoreManager, ttvapi: TwitchApi.Client, ssl_certificate: IConfiguration) {
     
     try {
         const App = express();
@@ -80,10 +82,28 @@ async function ServerInit(opts: {[key: string]: string}, ssl_certificate: IConfi
             });
         });
 
-        App.get("/stats", (req, res) => {
-            res.render("pages/home", {
-                botn: "fembajbot"
-            });
+        App.get("/catalogue", async (req, res) => {
+            if (req.query.c == undefined) { req.query.c = "channel"; }
+            if (req.query.c == "channel") {
+                const users: any[] = [];
+
+                for await (const target of Object.keys(storage.targets.getTargets)) {
+                    await ttvapi.getUserByName(storage.targets.getTargets[target].Name!).then(async (user) => {
+                        if (user === undefined) return false;
+                        users.push(user);
+                        console.log(user);
+                    });
+                }
+                console.log(users);
+                
+                res.send("yes");
+                return;
+            }
+            
+        });
+
+        App.get("/channel/:id", async (req, res) => {
+            res.send("yes");
         });
 
         App.get("/me", (req, res) => {

@@ -22,6 +22,8 @@ import Files from "./apollo/files/Files";
 import IConfiguration from "./apollo/interfaces/IConfiguration";
 import CLI from "./apollo/utils/CLI";
 import ServerInit from "./www/ServerInit";
+import StoreManager from "./apollo/files/StoreManager";
+import TwitchApi from "./apollo/clients/ApiClient";
 
 const log: Logger = new Logger({name: "itb2-main"});
 
@@ -42,9 +44,15 @@ async function Main() {
         log.warn("The configuration parser returned a boolean value. Does the file exist?");
         return;
     }
+    const TmiApi: TwitchApi.Client = new TwitchApi.Client(
+        cfg.Authorization.ClientID,
+        cfg.Authorization.AccessToken
+    );
+    
+    const Datastore: StoreManager = new StoreManager("local/datastore.json", "local/targets", TmiApi);
 
-    await ServerInit(CLIArguments, cfg);
-    if (!CLIArguments["testWebOnly"]) await ApolloInit(CLIArguments, cfg);
+    await ServerInit(CLIArguments, Datastore, TmiApi, cfg);
+    if (!CLIArguments["testWebOnly"]) await ApolloInit(CLIArguments, Datastore, TmiApi, cfg);
 }
 
 Main();
