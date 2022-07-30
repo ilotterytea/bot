@@ -41,7 +41,8 @@ export default class SystemProcess implements IModule.IModule {
             case "pull":
                 await Arguments.client.say(Arguments.target.name, `forsenSpin pulling from repository (${git.remoteUrl().split('/')[git.remoteUrl().split('/').length - 1]}-${git.branch()})...`);
                 child.exec("git pull");
-                Arguments.client.say(Arguments.target.name, `forsenLevel done: ${git.message()} (${git.short()})`);
+                // timeout for updating the git message:
+                setTimeout(() => { Arguments.client.say(Arguments.target.name, `forsenLevel done: ${git.message()} (${git.short()})`); }, 5000);
                 break;
             case "restart":
                 await Arguments.client.say(Arguments.target.name, "forsenSpin restarting...");
