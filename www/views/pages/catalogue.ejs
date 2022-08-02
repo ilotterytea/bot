@@ -1,0 +1,71 @@
+<!--
+ Copyright (C) 2022 NotDankEnough (ilotterytea)
+ 
+ This file is part of itb2.
+ 
+ itb2 is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ itb2 is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with itb2.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <%- include("../partials/head_meta", { pageurl: "", darkmode: false, pagetitle: "Catalogue" }) %>
+    </head>
+    <body>
+        <%- include("../partials/navbar.ejs", {active: "catalogue", targets:[]}) %>
+        <div class="wrapper">
+            <div class="content">
+                <section>
+                    <h2>Channel catalogue</h2>
+                </section>
+                <section class="search">
+                    <input id="searchbar" onkeyup="search()" type="text" name="search" placeholder="Search channels...">
+                </section>
+                <section class="list">
+                    <% Object.keys(users).forEach((user, index) => { %>
+                    <section class="box" id="<%= users[index].login %>">
+                        <div id="image">
+                            <img src="<%= users[index].profile_image_url %>" width="64">
+                        </div>
+                        <div id="summary">
+                            <h2 id="name"><span title="<%= users[index].login %>"><%= users[index].display_name %></span> <span class="flair">With <%= bot_name %></span></h2>
+                            <p id="desc"><%= users[index].description %></p>
+                        </div>
+                        <div id="action">
+                            <a href="/channel/<%= users[index].id %>" class="classic_button">
+                                <span class="material-symbols-outlined">more</span>
+                            </a>
+                        </div>
+                    </section>
+                    <% }); %>
+                </section>
+            </div>
+        </div>
+    </body>
+    <script>
+        function search() {
+            let input = document.getElementById("searchbar").value.toLowerCase();
+
+            let x = document.getElementsByClassName("box");
+            console.log(input);
+            for (let i = 0; i < x.length; i++) {
+                if (!x[i].id.includes(input)) {
+                    x[i].style.display = "none";
+                } else {
+                    x[i].style.display = "";
+                }
+            }
+        }
+    </script>
+</html>

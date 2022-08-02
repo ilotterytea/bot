@@ -335,6 +335,10 @@ footer {
     display: flex;   
 }
 
+.box #image img {
+    border-radius: 8px;
+}
+
 .box #summary {
     margin-left: 5px;
     text-align: left;
@@ -357,6 +361,76 @@ section.list {
     background: #d8d8d8;
 }
 
+/* -_-_-_-_-_-_-_-_-_-_- */
+/* - - - HOME PAGE - - - */
+/* -_-_-_-_-_-_-_-_-_-_- */
+
+
+.footer#home {
+    width: 100%;
+    position: fixed;
+    background: #ddd;
+    border-top: #bbb solid 2px;
+    bottom: 0;
+    left: 0;
+    right:0;
+    padding: 16px;
+    display: flex;
+    flex-direction: row;
+}
+
+.footer#home img#pfp {
+    width: 16px;
+    height: auto;
+    border-radius: 5px;
+    vertical-align: middle;
+}
+
+section#name {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+section#name #name {
+    margin-top: 24px;
+}
+
+section#name #links {
+    display: flex;
+    flex-direction: row;
+}
+
+section#name #links a {
+    margin: 0 6px;
+}
+
+section#name img#logo {
+    box-shadow: 0 0 16px 1px rgb(0, 0, 0, 0.5);
+    border-radius: 32px;
+}
+
+section.home_buttons {
+    display: flex;
+    flex-direction: row;
+}
+
+section.home_buttons a.homebutton {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    margin: 32px;
+}
+
+
+
+section.home_buttons a.homebutton span {
+    font-size: 86px;
+    line-height: 32px;
+    margin: 32px 0;
+}
 
 
 /* -_-_-_-_-_-_-_-_-_-_- */
@@ -439,11 +513,133 @@ section.page section#notes p {
 }
 .msg #timestamp { color: #6d6d6d; }
 
+/* - - - - - - C H A N N E L - - - - - */
+section.main_profile {
+    display: flex;
+    padding: 10px;
+    border: #ddd solid 1px;
+    border-radius: 5px;
+    background: linear-gradient(0deg, #ddd, #fff);
+}
+
+section.main_profile #pfp img {
+    width: 86px;
+    border-radius: 8px;
+}
+
+section.main_profile #pfp p {
+    text-align: center;
+}
+
+section.main_profile #summary {
+    margin: 0 16px;
+}
+
+section.main_profile .detailinfo {
+    font-size: 12px;
+}
+/*-------------------------------------*/
+section.itb2_info {
+    margin: 12px 0;
+    border: #ddd solid 1px;
+    border-radius: 5px;
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+    background: linear-gradient(0deg, #ddd, #fff);
+}
+
+section.itb2_info #emotetop {
+    border-radius: 5px;
+    flex-grow: 1;
+    border: #bbb solid 1px;
+}
+section.itb2_info #emotetop #header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    background: #eee;
+    border-bottom: #ccc solid 1px;
+}
+
+section.itb2_info #emotetop #header img#icon {
+    background: linear-gradient(0deg, #248b83, #30D5C8);
+    padding: 10px;
+    width: 32px;
+    height: auto;
+}
+
+section.itb2_info #emotetop #header h3#title {
+    margin: 0 14px;
+}
+
+section.itb2_info #emotetop #emotes {
+    max-height: 320px;
+    overflow-y: scroll;
+    border-radius: 5px;
+}
+
+.emote {
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 6px;
+    background: #fff;
+}
+
+.emote.deleted_emote {
+    background: #eca1a1;
+}
+
+.emote:nth-child(even) {
+    background: #eaeaea;
+}
+
+.emote #numeration {
+    height: 100%;
+    width: 32px;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    flex-shrink: 0;
+    justify-content: center;
+}
+
+.emote #image {
+    width: auto;
+    height: 24px;
+    max-height: 128px;
+    max-width: 384px;
+    margin: 0 16px;
+}
+
+.emote #name {
+    max-width: 100%;
+    overflow: hidden;
+    flex-grow: 1;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin-right: auto;
+}
+
+section.itb2_info #monitoring {
+    flex-grow: 2;
+    margin: 5px;
+}
+
+section#notes {
+    border-left:  #bbb solid 6px;
+    color: #888;
+}
+
 /* - - - - - - D E T A I L S - - - - - */
 details summary::-webkit-details-marker {
     display: none
 }
-/* Убираем стандартный маркер Firefox */
 details > summary {
     list-style: none;
 }

@@ -20,9 +20,10 @@ import express from "express";
 import http from "http";
 import https from "https";
 import IConfiguration from "../apollo/interfaces/IConfiguration";
-import { readFileSync } from "fs";
+import { readdirSync, readFileSync } from "fs";
 import StoreManager from "../apollo/files/StoreManager";
 import TwitchApi from "../apollo/clients/ApiClient";
+import IStorage from "../apollo/interfaces/IStorage";
 
 const log: Logger = new Logger({name: "www-serverinit"});
 
@@ -83,27 +84,64 @@ async function ServerInit(opts: {[key: string]: string}, storage: StoreManager, 
         });
 
         App.get("/catalogue", async (req, res) => {
-            if (req.query.c == undefined) { req.query.c = "channel"; }
-            if (req.query.c == "channel") {
+            if (req.query.s == undefined) { req.query.s = "target"; }
+            if (req.query.s == "target") {
                 const users: any[] = [];
 
                 for await (const target of Object.keys(storage.targets.getTargets)) {
                     await ttvapi.getUserByName(storage.targets.getTargets[target].Name!).then(async (user) => {
                         if (user === undefined) return false;
                         users.push(user);
-                        console.log(user);
                     });
                 }
                 console.log(users);
-                
-                res.send("yes");
+                res.render("pages/catalogue", {
+                    users: users,
+                    bot_name: "fembajbot"
+                });
                 return;
             }
             
         });
 
         App.get("/channel/:id", async (req, res) => {
-            res.send("yes");
+            // usernames:
+            if (isNaN(parseInt(req.params.id))) {
+                var found: boolean = false;
+                for (const target of Object.keys(storage.targets.getTargets)) {
+                    if (req.params.id.toLowerCase() == storage.targets.getTargets[target].Name!) {
+                        req.params.id = target;
+                        found = true;
+                    }
+                }
+
+                if (!found) {
+                    res.render("pages/error", {
+                        status: 404,
+                        message: "Target with username " + req.params.id +" not found.",
+                        kitty: "https://http.cat/404"
+                    });
+                    return;
+                }
+            }
+
+            // ids:
+            if (!(req.params.id in storage.targets.getTargets) && /^[0-9].*$/.test(req.params.id)) {
+                res.render("pages/error", {
+                    status: 404,
+                    message: "Target with ID " + req.params.id +" not found.",
+                    kitty: "https://http.cat/404"
+                });
+                return;
+            }
+
+            var itb2data: IStorage.Target = storage.targets.getTargets[req.params.id];
+            var ttvdata = (isNaN(parseInt(req.params.id))) ? await ttvapi.getUserByName(req.params.id) : await ttvapi.getUserById(parseInt(req.params.id));
+
+            res.render("pages/channel", {
+                itb: itb2data,
+                ttv: ttvdata
+            });
         });
 
         App.get("/me", (req, res) => {
@@ -114,8 +152,8 @@ async function ServerInit(opts: {[key: string]: string}, storage: StoreManager, 
 
         App.use(express.static(`${__dirname}/static`));
         if (opts.debug) {
-            App.listen(8080, () => {
-                log.debug("The bot's web server is running on port", "8080");
+            http.createServer(App).listen(8080, () => {
+                log.debug("The bot web server is running on port", "8080");
             });
         } else {
             var credentials = {

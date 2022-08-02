@@ -1,0 +1,118 @@
+<!--
+ Copyright (C) 2022 NotDankEnough (ilotterytea)
+ 
+ This file is part of itb2.
+ 
+ itb2 is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ itb2 is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with itb2.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <%- include("../partials/head_meta", { pageurl: "", darkmode: false, pagetitle: "Channel" }) %>
+    </head>
+    <body>
+        <%- include("../partials/navbar.ejs", {targets: [], active: "catalogue"}) %>
+        <div class="wrapper">
+            <div class="content">
+                <section class="main_profile">
+                    <div id="pfp">
+                        <img src="<%= ttv.profile_image_url %>">
+                    </div>
+                    <div id="summary">
+                        <h2>About <%= ttv.display_name %>
+                            <span class="detailinfo">
+                                <gray>(<%= ttv.login %>, <%= ttv.id %>)</gray>
+                            </span>
+                        </h2>
+                        <p><%= ttv.description %></p>
+                    </div>
+                </section>
+                <section class="itb2_info">
+                    <div id="emotetop">
+                        <div id="header">
+                            <img id="icon" src="../img/7tv.png">
+                            <h3 id="title">7TV Emote Leaderboard</h3>
+                            <input type="checkbox" id="showdel" name="showdel" value="showdel" checked onclick="hidedeleted()">
+                            <label for="showdel">Show deleted</label>
+                        </div>
+                        <div id="emotes">
+                            <% var items = Object.keys(itb.Emotes["stv"]).map((key) => {
+                                return [key, itb.Emotes["stv"][key].UsedTimes, itb.Emotes["stv"][key].ID, {
+                                    isDqeleted: (itb.Emotes["stv"][key].isDeleted === undefined) ? false : itb.Emotes["stv"][key].isDeleted
+                                }];
+                            }); %>
+                            <% items.sort((f, s) => {
+                                return parseInt(s[1]) - parseInt(f[1]);
+                            });%>
+
+                            <% if (items.length == 0) {%>
+                                not found
+                            <%}%>
+
+                            <% items.forEach((item, index) => { %>
+                                <div class="emote <% if (item[3].isDeleted) { %>deleted_emote<%}%>">
+                                    <div id="numeration"><%= index + 1 %></div>
+
+                                    <a href="https://7tv.app/emotes/<%= item[2] %>" title="Go to the 7TV emote page..." target="_blank">
+                                        <img id="image" src="https://cdn.7tv.app/emote/<%= item[2] %>/2x">
+                                    </a>
+                                    <p id="name"><%= item[0] %></p>
+                                    <p id="usedtimes">
+                                        <% if (index + 1 < 4) { %>
+                                        <blue><%- item[1].toLocaleString() %></blue>
+                                        <% } else { %>
+                                        <%- item[1].toLocaleString() %>
+                                        <% } %>
+                                    </p>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                    <div id="monitoring">
+                        <div id="header">
+                            <span class="material-symbols-outlined">monitoring</span>
+                            Statistics
+                        </div>
+                        <div id="stats">
+                            <p>Successfully completed tests: <%= itb.SuccessfullyCompletedTests %></p>
+                            <p>Executed commands: <%= itb.ExecutedCommands %></p>
+                            <p>Chat lines: <%= itb.ChatLines %></p>
+                        </div>
+                    </div>
+                </section>
+                <section id="notes">
+                    <p>Deleted 7TV emotes have been tracked since July 30, 2022.</p>
+                    <p>Chat statistics have been tracked since May 2022.</p>
+                </section>
+            </div>
+        </div>
+    </body>
+    <script>
+        function hidedeleted() {
+            const show = document.getElementById("showdel").checked;
+            var elements = document.getElementsByClassName("deleted_emote");
+
+            if (show) {
+                for (let element of elements) {
+                    element.style.display = "";
+                }
+            } else {
+                for (let element of elements) {
+                    element.style.display = "none";
+                }
+            }
+        }
+    </script>
+</html>
