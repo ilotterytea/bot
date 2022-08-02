@@ -24,11 +24,9 @@ import ConfigIni from "./files/ConfigIni";
 import StoreManager from "./files/StoreManager";
 import Messages from "./handlers/MessageHandler";
 import IConfiguration from "./interfaces/IConfiguration";
-import CLI from "./utils/CLI";
 import EmoteUpdater from "./utils/emotes/EmoteUpdater";
 import Localizator from "./utils/Locale";
 import ModuleManager from "./utils/ModuleManager";
-
 const log: Logger = new Logger({name: "itb2-main"});
 
 async function ApolloInit(opts: {[key: string]: any}, Datastore: StoreManager, TmiApi: TwitchApi.Client, cfg: IConfiguration) {
@@ -37,13 +35,15 @@ async function ApolloInit(opts: {[key: string]: any}, Datastore: StoreManager, T
     await Datastore.parseChannels(Datastore.getClientChannelIDs);
 
     const Locale: Localizator = new Localizator();
+
+    Locale.load("localization/bot.json");
+
     const Modules: ModuleManager = new ModuleManager();
     const Emotelib: EmoteLib = new EmoteLib({
         client_id: Config.Authorization.ClientID,
         access_token: Config.Authorization.AccessToken
     });
 
-    await Locale.loadLanguages(false);
     Locale.setPreferredLanguages(Datastore.targets.getTargets, Datastore.targets.getUserlinks());
     Modules.init();
 
@@ -59,10 +59,8 @@ async function ApolloInit(opts: {[key: string]: any}, Datastore: StoreManager, T
     await STVEmotes.load(Datastore.targets.getTargets);
 
     STVEmotes.subscribeToEmoteUpdates(TmiClient, Locale, Datastore.getClientChannelNames);
-
     try {
         await Messages.Handler(TmiClient, TmiApi, Datastore, Locale, Modules, STVEmotes);
-
     } catch (err) {
         log.error(err);
     }

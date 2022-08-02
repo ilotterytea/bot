@@ -24,10 +24,10 @@ import IModule from "./IModule";
 import IStorage from "./IStorage";
 
 interface IArguments {
-    client: Client;
-    storage: StoreManager;
-    localizator: Localizator;
-    bot: {
+    client?: Client;
+    storage?: StoreManager;
+    localizator?: Localizator;
+    bot?: {
         name: string
     },
     user: {
@@ -41,11 +41,11 @@ interface IArguments {
     },
     message: {
         raw?: string,
-        command?: string
+        command: string
     },
-    channel_emotes: {[emote_name: string]: IStorage.Emote},
-    stv: EmoteUpdater.SevenTV | undefined,
-    tapi: TwitchApi.Client | undefined
+    channel_emotes?: {[emote_name: string]: IStorage.Emote},
+    stv?: EmoteUpdater.SevenTV | undefined,
+    tapi?: TwitchApi.Client | undefined
 }
 
 export default IArguments;

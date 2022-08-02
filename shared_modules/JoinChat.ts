@@ -42,10 +42,10 @@ export default class JoinChat implements IModule.IModule {
         //    channel = messages[1];
         //}
 
-        Arguments.client.join(`#${Arguments.user.name}`);
-        Arguments.client.say(`#${Arguments.user.name}`, "FeelsDankMan hello");
+        Arguments.client!.join(`#${Arguments.user.name}`);
+        Arguments.client!.say(`#${Arguments.user.name}`, "FeelsDankMan hello");
 
-        await Arguments.storage.targets.add(Arguments.user.id, {
+        await Arguments.storage!.targets.add(Arguments.user.id, {
             SuccessfullyCompletedTests: 0,
             ChatLines: 0,
             ExecutedCommands: 0,
@@ -57,6 +57,10 @@ export default class JoinChat implements IModule.IModule {
         Arguments.stv?.newTargetEmote(Arguments.user.name);
         Arguments.stv?.join(Arguments.user.name);
 
-        return Promise.resolve(Arguments.localizator.parsedText("cmd.join.exec.response", Arguments.target.id, Arguments.user.name, Arguments.user.id));
+        return Promise.resolve(Arguments.localizator!.parsedText("cmd.join.response", Arguments, [
+            Arguments.user.name,
+            Arguments.user.id
+        ]
+        ));
     }
 }

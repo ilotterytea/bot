@@ -17,10 +17,6 @@
 
 import IArguments from "../apollo/interfaces/IArguments";
 import IModule from "../apollo/interfaces/IModule";
-import os from "node-os-utils";
-import { readFileSync } from "fs";
-import { short, branch } from "git-rev-sync";
-import packagejson from "../package.json";
 
 export default class EmoteTop implements IModule.IModule {
     cooldownMs: number;
@@ -42,37 +38,46 @@ export default class EmoteTop implements IModule.IModule {
         var show_emotes: number = 15;        
 
         if (_message.includes('-m')) {
-            if ((_message.indexOf('-m') + 1 ) > _message.length - 1) return Promise.resolve(false);
-            const _mode: string = _message[_message.indexOf('-m') + 1].toLowerCase();
-            switch (_mode) {
-                case "descending":
-                    mode = "descending";
-                    break;
-                case "ascending":
-                    mode = "ascending";
-                    break;
-                default:
-                    mode = "descending";
-                    break;
+            if ((_message.indexOf('-m') + 1 ) <= _message.length - 1) {
+                const _mode: string = _message[_message.indexOf('-m') + 1].toLowerCase();
+                switch (_mode) {
+                    case "descending":
+                        mode = "descending";
+                        break;
+                    case "ascending":
+                        mode = "ascending";
+                        break;
+                    default:
+                        mode = "descending";
+                        break;
+                }
             }
         }
 
         if (_message.includes('-s')) {
-            if ((_message.indexOf('-s') + 1 ) > _message.length - 1) return Promise.resolve(false);
+            if ((_message.indexOf('-s') + 1 ) > _message.length - 1) return Promise.resolve(
+                Arguments.localizator!.parsedText("msg.wrong_option", Arguments, [
+                    "-s",
+                    "[INTEGER]"
+                ])
+            );
             var _show_emotes: number = parseInt(_message[_message.indexOf('-s') + 1]);
-            if (isNaN(_show_emotes)) return Promise.resolve(false);
+            if (isNaN(_show_emotes)) return Promise.resolve(
+                Arguments.localizator!.parsedText("msg.wrong_option", Arguments, [
+                    "-s",
+                    "[INTEGER]"
+                ])
+            );
             show_emotes = _show_emotes;
         }
 
-        if (show_emotes > Object.keys(Arguments.channel_emotes).length) {
-            show_emotes = Object.keys(Arguments.channel_emotes).length;
+        if (show_emotes > Object.keys(Arguments.channel_emotes!).length) {
+            show_emotes = Object.keys(Arguments.channel_emotes!).length;
         }
 
-        var items = Object.keys(Arguments.channel_emotes).map((key) => {
-            return [key, Arguments.channel_emotes[key].UsedTimes];
+        var items = Object.keys(Arguments.channel_emotes!).map((key) => {
+            return [key, Arguments.channel_emotes![key].UsedTimes];
         });
-
-        
 
         var top: (string|number)[][] = [];
 
@@ -103,9 +108,14 @@ export default class EmoteTop implements IModule.IModule {
             text = text + `${top[i][0]} (${top[i][1]})${(i + 1 >= show_emotes) ? "" : ", "}`;
         }
 
-        return Promise.resolve(Arguments.localizator.parsedText("cmd.etop.exec.response", Arguments.target.id,
-        show_emotes,
-        "7TV",
-        `(${Arguments.localizator.parsedText((mode === "descending") ? "mode.descending" : "mode.ascending", Arguments.target.id)})`, text));
+        return Promise.resolve(Arguments.localizator!.parsedText("cmd.etop.response", Arguments, [
+            show_emotes.toString(),
+            "7TV",
+            Arguments.localizator!.parsedText(
+                (mode === "descending") ? "mode.descending" : "mode.ascending",
+                Arguments
+            ),
+            text
+        ]));
     }
 }

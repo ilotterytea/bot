@@ -17,10 +17,6 @@
 
 import IArguments from "../apollo/interfaces/IArguments";
 import IModule from "../apollo/interfaces/IModule";
-import os from "node-os-utils";
-import { readFileSync } from "fs";
-import { short, branch } from "git-rev-sync";
-import packagejson from "../package.json";
 
 export default class EmoteCounter implements IModule.IModule {
     cooldownMs: number;
@@ -36,12 +32,12 @@ export default class EmoteCounter implements IModule.IModule {
     async run(Arguments: IArguments) {
         const emote: string = Arguments.message.raw!.split(' ')[1];
 
-        if (!(emote in Arguments.channel_emotes)) {
-            return Promise.resolve(false);
+        if (!(emote in Arguments.channel_emotes!)) {
+            return Promise.resolve(Arguments.localizator!.parsedText("cmd.ecount.not_found", Arguments, ["[7TV]", emote]));
         }
 
-        const usedtimes: number = Arguments.channel_emotes[emote].UsedTimes;
+        const usedtimes: number = Arguments.channel_emotes![emote].UsedTimes;
 
-        return Promise.resolve(Arguments.localizator.parsedText("cmd.ecount.exec.response", Arguments.target.id, "[7TV]", emote, usedtimes));
+        return Promise.resolve(Arguments.localizator!.parsedText("cmd.ecount.response", Arguments, ["[7TV]", emote, usedtimes.toString()]));
     }
 }

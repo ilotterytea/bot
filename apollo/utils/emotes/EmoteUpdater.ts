@@ -152,15 +152,55 @@ namespace EmoteUpdater {
                     switch (emote.action) {
                         case "ADD":
                             this.newEmote(emote.name, emote.channel, {ID: emote.emote_id, UsedTimes: 0});
-                            client.action(`#${emote.channel}`, locale.parsedText("emoteupdater.user_added_emote", emote.channel, "[7TV]", emote.actor, emote.name));
+                            client.action(`#${emote.channel}`, locale.parsedText("emoteupdater.user_added_emote", {
+                                user :{
+                                    extRole: 0,
+                                    name: "",
+                                    id: ""
+                                },
+                                message: {
+                                    command: ""
+                                },
+                                target: {
+                                    name: emote.channel,
+                                    id: ""
+                                }
+                            }, ["[7TV]", emote.actor, emote.name]));
                             break;
                         case "REMOVE":
                             this.removeEmote(emote.name, emote.channel);
-                            client.action(`#${emote.channel}`, locale.parsedText("emoteupdater.user_deleted_emote", emote.channel, "[7TV]", emote.actor, emote.name));
+                            client.action(`#${emote.channel}`, locale.parsedText("emoteupdater.user_deleted_emote", {
+                                user :{
+                                    extRole: 0,
+                                    name: "",
+                                    id: ""
+                                },
+                                message: {
+                                    command: ""
+                                },
+                                target: {
+                                    name: emote.channel,
+                                    id: ""
+                                }
+                            }, ["[7TV]", emote.actor, emote.name]));
                             break;
                         case "UPDATE":
                             this.updateEmoteName(emote.emote!.name, emote.name, emote.channel);
-                            client.action(`#${emote.channel}`, locale.parsedText("emoteupdater.user_updated_emote", emote.channel, "[7TV]", emote.actor, emote.emote!.name, emote.name));
+                            
+                            client.action(`#${emote.channel}`, locale.parsedText("emoteupdater.user_updated_emote", {
+                                user :{
+                                    extRole: 0,
+                                    name: "",
+                                    id: ""
+                                },
+                                message: {
+                                    command: ""
+                                },
+                                target: {
+                                    name: emote.channel,
+                                    id: ""
+                                }
+                            }, ["[7TV]", emote.actor, emote.emote?.name, emote.name]));
                             break;
                         default:
                             break;

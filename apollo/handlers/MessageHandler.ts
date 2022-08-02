@@ -56,7 +56,20 @@ namespace Messages {
 
             if (message == "test") {
                 storage.targets.edit(user["room-id"], "SuccessfullyCompletedTests", storage.targets.get(user["room-id"], "SuccessfullyCompletedTests") as number + 1);
-                client.say(channel, locale.parsedText("test.test", user["room-id"]!, "test", storage.targets.get(user["room-id"], "SuccessfullyCompletedTests") as number));
+                client.say(channel, locale.parsedText("msg.test", {
+                    user: {
+                        extRole: 0,
+                        name: "",
+                        id: ""
+                    },
+                    message: {
+                        command: ""
+                    },
+                    target: {
+                        id: user["room-id"]!,
+                        name: ""
+                    }
+                }, ["test", storage.targets.get(user["room-id"], "SuccessfullyCompletedTests") as number]));
             }
 
             if (message.startsWith(storage.getGlobalPrefix)) {
@@ -99,9 +112,9 @@ namespace Messages {
                         return;
                     }
                     
-                    args.storage.targets.edit(
+                    args.storage!.targets.edit(
                         user["room-id"]!, "ExecutedCommands",
-                        args.storage.targets.get(user["room-id"]!, "ExecutedCommands") as number + 1
+                        args.storage!.targets.get(user["room-id"]!, "ExecutedCommands") as number + 1
                     );
 
                     return client.say(channel, response as string);

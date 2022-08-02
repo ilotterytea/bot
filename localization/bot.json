@@ -1,0 +1,187 @@
+{
+    "msg.arrive": {
+        "en_us": "${0}",
+        "ru_ru": "${0}"
+    },
+    "msg.leave": {
+        "en_us": "${0}",
+        "ru_ru": "${0}"
+    },
+    "msg.joined": {
+        "en_us": "@${TARGET.NAME}, Hi! FeelsDankMan 👋",
+        "ru_ru": "@${TARGET.NAME}, Привет! FeelsDankMan 👋"
+    },
+    "msg.test": {
+        "en_us": "${0} ${1} succesfully completed!",
+        "ru_ru": "${0} ${1} успешно завершён!"
+    },
+    "msg.error": {
+        "en_us": "@${USER.NAME}, an error occurred while executing the command. FeelsDankMan",
+        "ru_ru": "@${USER.NAME}, произошла ошибка при выполнении команды. FeelsDankMan"
+    },
+    "msg.banned": {
+        "en_us": "⛔ NOTICE: The bot ${0} has been banned from ${1}'s chat room.",
+        "ru_ru": "⛔ ОПОВЕЩЕНИЕ: Бот ${0} был забанен в чате ${1}."
+    },
+    "msg.usage": {
+        "en_us": "@${USER.NAME}, ${0} Description: ${1} Cooldown: ${2} Details: ${3}",
+        "ru_ru": "@${USER.NAME}, ${0} Краткое описание: ${1} Остывание: ${2} Остальные детали: ${3}"
+    },
+    "msg.api_error": {
+        "en_us": "@${USER.NAME}, The API ${0} returned the status code: ${1}",
+        "ru_ru": "@${USER.NAME}, ${0} API вернул код состояния: ${1}"
+    },
+    "msg.wrong_option": {
+        "en_us": "@${USER.NAME}, wrong value for option ${0}. Maybe you should try ${0} ${1} ?",
+        "ru_ru": "@${USER.NAME}, неверный параметр для опции ${0}. Может быть вам стоит попробывать ${0} ${1} ?"
+    },
+    "measure.megabytes": {
+        "en_us": "Mbytes",
+        "ru_ru": "Мбайтов"
+    },
+    "emoteupdater.new_emotes": {
+        "en_us": "${0} New Emotes: ${1}",
+        "ru_ru": "${0} Новые эмоуты: ${1}"
+    },
+    "emoteupdater.deleted_emotes": {
+        "en_us": "${0} Deleted Emotes: ${1}",
+        "ru_ru": "${0} Удалённые эмоуты: ${1}"
+    },
+    "emoteupdater.user_added_emote": {
+        "en_us": "${0} ${1} added the emote ${2}",
+        "ru_ru": "${0} ${1} добавил(-а) эмоут ${2}"
+    },
+    "emoteupdater.user_removed_emote": {
+        "en_us": "${0} ${1} removed the emote ${2}",
+        "ru_ru": "${0} ${1} удалил(-а) эмоут ${2}"
+    },
+    "emoteupdater.user_updated_emote": {
+        "en_us": "${0} ${1} changed the emote name ${2} to ${3}",
+        "ru_ru": "${0} ${1} редактировал(-а) имя эмоута с ${2} на ${3}"
+    },
+    "mode.descending": {
+        "en_us": "descending",
+        "ru_ru": "по убыванию"
+    },
+    "mode.ascending": {
+        "en_us": "ascending",
+        "ru_ru": "по возрастанию"
+    },
+    "timer.new": {
+        "en_us": "@${USER.NAME}, the timer ${0} created.",
+        "ru_ru": "@${USER.NAME}, таймер ${0} создан!"
+    },
+    "timer.exists": {
+        "en_us": "@${USER.NAME}, timer with name ${0} already exists!",
+        "ru_ru": "@${USER.NAME}, таймер с именем ${0} уже существует!"
+    },
+    "timer.not_exists": {
+        "en_us": "@${USER.NAME}, the timer ${0} not exists!",
+        "ru_ru": "@${USER.NAME}, таймер с именем ${0} не существует!"
+    },
+    "timer.removed": {
+        "en_us": "@${USER.NAME}, timer ${0} removed!",
+        "ru_ru": "@${USER.NAME}, таймер с именем ${0} удалён!"
+    },
+    "timer.disabled": {
+        "en_us": "@${USER.NAME}, timer ${0} is disabled!",
+        "ru_ru": "@${USER.NAME}, таймер ${0} выключен!"
+    },
+    "timer.enabled": {
+        "en_us": "@${USER.NAME}, timer ${0} is enabled!",
+        "ru_ru": "@${USER.NAME}, таймер ${0} включен!"
+    },
+    "cmd.ping.response": {
+        "en_us": "@${USER.NAME}, FeelsDankMan 🏓 Pong! Session uptime: ${UPTIMEF}. Landed in ${CHANNELS.CLIENT.LENGTH} channels. Memory usage: ${0} @{MEASURE.MEGABYTES} / ${1} @{MEASURE.MEGABYTES}. Latency to TMI: ${2}ms. Running on version ${PCK.VERSION} (${PCK.NAME}) (Commit ${GIT.SHORT} [${GIT.BRANCH}])",
+        "ru_ru": "@${USER.NAME}, FeelsDankMan 🏓 Понг! Сессия активна: ${UPTIMEF}. Приземлён в ${CHANNELS.CLIENT.LENGTH} каналах. Потребление ОЗУ: ${0} @{MEASURE.MEGABYTES} / ${1} @{MEASURE.MEGABYTES}. Задержка до TMI: ${2}ms. Работает на версии ${PCK.VERSION} (${PCK.NAME}) (Фиксация ${GIT.SHORT} [${GIT.BRANCH}])"
+    },
+    "cmd.ecount.response": {
+        "en_us": "${0} ${1} has been used ${2} times.",
+        "ru_ru": "${0} ${1} был использован ${2} раз."
+    },
+    "cmd.ecount.not_found": {
+        "en_us": "${0} Emote ${1} not found in database.",
+        "ru_ru": "${0} Эмоут ${1} не был найден в базе данных."
+    },
+    "cmd.etop.response": {
+        "en_us": "Top ${0} ${1} emotes (${2}): ${3}",
+        "ru_ru": "${0} самых используемых ${1} эмоутов (${2}): ${3}"
+    },
+    "cmd.etop.limit_reached": {
+        "en_us": "@${USER.NAME}, limit reached. You can view only maximum top ${0} emotes. The emotes less than top ${0} can be found here: https://bot.hmmtodayiwill.ru/channel/${1}",
+        "ru_ru": "@${USER.NAME}, лимит превышен. Вы можете просматривать не больше топ ${0} эмоутов. Эмоуты, ниже топа ${0} можно найти здесь: https://bot.hmmtodayiwill.ru/channel/${1}"
+    },
+    "cmd.join.response": {
+        "en_us": "@${USER.NAME}, Succesfully joined to ${0}'s (${1}) chat room! ",
+        "ru_ru": "@${USER.NAME}, Успешно присоединён к чату ${0} (${1})!"
+    },
+    "cmd.join.already_in": {
+        "en_us": "@${USER.NAME}, User ${0} (${1}) is already in join array.",
+        "ru_ru": "@${USER.NAME}, Пользователь ${0} (${1}) уже находится в списке каналов."
+    },
+    "cmd.spam.limit_reached": {
+        "en_us": "@${USER.NAME}, limit reached. Max messages to spam: ${0}",
+        "ru_ru": "@${USER.NAME}, лимит превышен. Максимальное кол-во сообщений, которые может быть проспамлено: ${0}"
+    },
+    "cmd.spam.unresolved_number": {
+        "en_us": "@${USER.NAME}, Unresolved number of required spam message (${0}).",
+        "ru_ru": "@${USER.NAME}, Нерешённое количество нужного спама сообщения (${0})."
+    },
+    "cmd.spam.forbidden_symbol": {
+        "en_us": "@${USER.NAME}, Found the forbidden symbol in spam message.",
+        "ru_ru": "@${USER.NAME}, Найден запрещённый символ в сообщении для спама."
+    },
+    "cmd.system.restart": {
+        "en_us": "forsenSpin restarting...",
+        "ru_ru": "forsenSpin перезагружаюсь..."
+    },
+    "cmd.system.poweroff": {
+        "en_us": "forsenLevel 👋 bye bye",
+        "ru_ru": "forsenLevel 👋 пока пока"
+    },
+    "cmd.system.pull": {
+        "en_us": "forsenLevel pulling from ${GIT.BRANCH} branch...",
+        "ru_ru": "forsenLevel получаю из ветки ${GIT.BRANCH}..."
+    },
+    "cmd.system.pulled": {
+        "en_us": "beanchili pulled new commit from ${GIT.BRANCH} branch! Commit description: ${GIT.MESSAGE}",
+        "ru_ru": "beanchili получил новую фиксацию из ветки ${GIT.BRANCH}! Описание фиксации: ${GIT.MESSAGE}"
+    },
+    "cmd.system.not_found": {
+        "en_us": "forsenLevel Mode ${0} not found for !system command.",
+        "ru_ru": "forsenLevel Режим ${0} не найден для команды !system."
+    },
+    "cmd.user.lookup": {
+        "en_us": "@",
+        "ru_ru": "@"
+    },
+    "cmd.user.rules": {
+        "en_us": "@${USER.NAME}, FeelsDankMan 🔎📜 The rules of ${0}'s (${1}) chat room: ${2}",
+        "ru_ru": "@${USER.NAME}, FeelsDankMan 🔎📜 Правила чата ${0} (${1}): ${2}"
+    },
+    "cmd.user.picture": {
+        "en_us": "@${USER.NAME}, FeelsDankMan 🔎🖼️ The profile picture of ${0} (${1}): ${2}",
+        "ru_ru": "@${USER.NAME}, FeelsDankMan 🔎🖼️ Аватарка пользователя ${0} (${1}): ${2}"
+    },
+    "cmd.set.language.success": {
+        "en_us": "@${USER.NAME}, the bot speaks on English now! KKona",
+        "ru_ru": "@${USER.NAME}, бот теперь говорит по-русски! KKomrade"
+    },
+    "cmd.set.language.available": {
+        "en_us": "@${USER.NAME}, available localizations: ${LANGUAGES.AVAILABLE}",
+        "ru_ru": "@${USER.NAME}, доступные локализации: ${LANGUAGES.AVAILABLE}"
+    },
+    "cmd.set.prefix_success": {
+        "en_us": "@${USER.NAME}, Successfully set up the new prefix (${0}) for ${TARGET.NAME}",
+        "ru_ru": "@${USER.NAME}, успешно установлен префикс ${0} на канале ${TARGET.NAME}"
+    },
+    "cmd.set.event.seventv.disabled":{
+        "en_us": "@${USER.NAME}, 7TV events (new/deleted/updated emotes) are disabled.",
+        "ru_ru": "@${USER.NAME}, События с 7TV эмоутами (новые/удаленные/обновленные эмоуты) выключены."
+    },
+    "cmd.set.event.seventv.enabled": {
+        "en_us": "@${USER.NAME}, 7TV events (new/deleted/updated emotes) are enabled!",
+        "ru_ru": "@${USER.NAME}, События с 7TV эмоутами (новые/удаленные/обновленные эмоуты) включены!"
+
+    }
+}

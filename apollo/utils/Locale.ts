@@ -17,39 +17,18 @@
 
 import axios from "axios";
 import { Logger } from "tslog";
+import IArguments from "../interfaces/IArguments";
 import IStorage from "../interfaces/IStorage";
+import LineIds from "../types/LineIds";
+import os from "node-os-utils";
+import git from "git-rev-sync";
+import pck from "../../package.json";
+import { existsSync, readdirSync, readFileSync } from "fs";
 
 const log: Logger = new Logger({name: "Localizator"});
 
-type LineIds = "user.not_found" | "arrive" | "leave" | "newarrive" |
-"test.test" | "terminal.error" | "emoteupdater.new_emotes" |
-"emoteupdater.deleted_emotes" | "emoteupdater.user_added_emote" | "emoteupdater.user_deleted_emote" |
-"emoteupdater.user_updated_emote" | "cmd.help.name" | "cmd.help.desc" |
-"cmd.help.author" | "cmd.help.exec.response" | "cmd.help.exec.help" |
-"cmd.help.exec.lolresponse" | "cmd.ping.name" | "cmd.ping.desc" |
-"cmd.ping.author" | "cmd.ping.exec" | "cmd.ping.author" |
-"cmd.ping.exec.response" | "cmd.ecount.name" | "cmd.ecount.desc" |
-"cmd.ecount.author" | "cmd.ecount.exec.response" | "cmd.ecount.not_enough_params" |
-"cmd.etop.name" | "cmd.etop.desc" | "cmd.etop.author" |
-"cmd.etop.exec.response" | "cmd.etop.exec.not_enough_emotes" | "cmd.join.name" |
-"cmd.join.desc" | "cmd.join.author" | "cmd.join.exec.response" |
-"cmd.join.exec.already_in" | "cmd.set.name" | "cmd.set.desc" |
-"cmd.set.author" | "cmd.set.exec.usage" | "cmd.set.exec.languagesetup.response" |
-"cmd.set.exec.languagesetup.available" | "cmd.massping.name" | "cmd.massping.desc" |
-"cmd.massping.author" | "cmd.massping.exec.usage" | "cmd.massping.exec.response" |
-"cmd.spam.name" | "cmd.spam.desc" | "cmd.spam.author" |
-"cmd.spam.exec.usage" | "cmd.spam.exec.response" | "cmd.spam.exec.unauthorized" |
-"cmd.storage.name" | "cmd.storage.desc" | "cmd.storage.author" |
-"cmd.storage.exec.prefix.now" | "cmd.storage.exec.prefix.changed" | "cmd.storage.exec.group.not_found" |
-"cmd.storage.exec.group.changed" | "cmd.storage.exec.part.successfully" | "cmd.storage.exec.part.not_in_join_list" |
-"cmd.scmd.name" | "cmd.scmd.desc" | "cmd.scmd.author" |
-"cmd.scmd.exec.list.response" | "cmd.scmd.exec.list.no" | "cmd.scmd.exec.make.success" |
-"cmd.scmd.exec.make.failure" | "cmd.scmd.exec.rm.success" | "cmd.scmd.exec.rm.failure" |
-"cmd.scmd.exec.ch.success" | "cmd.scmd.exec.ch.failure" | "measure.megabyte" |
-"mode.descending" | "mode.ascending";
-
 class Localizator {
-    private languages: {[lang_id: string]: {[line_id: string]: LineIds}} | undefined;
+    private languages: {[lang_id: string]: {[line_id: string]: string}} | undefined;
     private preferred_langs: {[lang_id: string]: string[]};
     private user_links: {[target_name: string]: string};
 
@@ -57,6 +36,26 @@ class Localizator {
         this.languages = {};
         this.user_links = {};
         this.preferred_langs = {};
+    }
+
+    public load(localization_file: string) {
+        this.languages = {};
+
+        if (!existsSync(localization_file)) {
+            return new Error("Localization file (" + localization_file + ") doesn't exists!");
+        }
+
+        const lang: {[line_id: string]: {[lang_id: string]: string}} = JSON.parse(readFileSync(localization_file, {encoding: "utf-8"}));
+
+        for (const line_id of Object.keys(lang)) {
+            for (const lang_id of Object.keys(lang[line_id])) {
+                if (!(lang_id in this.languages)) {
+                    this.languages[lang_id] = {};
+                }
+
+                this.languages[lang_id][line_id] = lang[line_id][lang_id];
+            }
+        }
     }
 
     setPreferredLanguages(raw_targets: {[target_id: string]: IStorage.Target}, user_links: {[target_name: string]: string}) {
@@ -71,99 +70,278 @@ class Localizator {
         this.user_links = user_links;
     }
 
-    async loadLanguages(noInternetSync: boolean, custom_languages?: {[lang_id: string]: {[line_id: string]: LineIds}}) {
-        if (noInternetSync) {
-            this.languages = custom_languages;
-            log.debug("Loaded languages provided by the user!");
-            return;
-        }
-
-        var raw: boolean = false;
-        await axios.get("https://hmmtodayiwill.ru/api/assets/languages" + ((raw) ? "/?raw=true" : ""), {
-            responseType: "json"
-        }).then((response) => {
-            if (response.status != 200) {
-                log.warn("Got status from iLotterytea's API:", response.status);
-                return;
-            }
-            if (raw) {
-                log.warn("Raw JSON languages aren't supported yet.");
-                return;
-            }
-            this.languages = response.data;
-        }).catch((err) => log.error(err));
-        log.silly("dun");
-    }
-
     get getLanguages() { return this.languages; }
     get getAvailableLangs() { return Object.keys(this.languages!); }
     get getPreferredLangs() { return this.preferred_langs; }
 
-    parsedText(line_id: LineIds, target_id: string, ...args: any[]) {
+    /**
+     * Get the line ID with replaced placeholders.
+     * @param line_id Line ID to replace.
+     * @param args Arguments. Without arguments, the function will return a text
+     * @param options Options to parse.
+     * @param optional_args Optional arguments.
+     */
+    public parsedText(line_id: LineIds, args?: IArguments | undefined, optional_args?: any[], options?: {
+        useUsername?: boolean | undefined
+    }) {
+        // If languages aren't loaded -> return string with error.
+        if (this.languages === undefined) {
+            return "Line ID " + line_id + " can't be defined because languages aren't loaded.";
+        }
+
+        // Language ID.
         var lang_id: string = "en_us";
-        var regex: RegExp = /^[0-9]*$/;
-        var isID: boolean = regex.test(target_id);
+        var message: string | undefined = "";
 
-        if (!isID) {
-            if (target_id in this.user_links) target_id = this.user_links[target_id];
+        // If arguments isn't set:
+        if (args === undefined) {
+            return this.languages[lang_id][line_id];
         }
 
-        Object.keys(this.preferred_langs).forEach((lang) => {
-            if (this.preferred_langs[lang].includes(target_id)) {
-                lang_id = lang;
+        // Use username instead of user ID. Used in 7TV EventAPI notices.
+        var useUsername: boolean = (options !== undefined && options.useUsername !== undefined) ? options.useUsername : false;
+
+        // Set the user ID on useUsername:
+        if (useUsername) {
+            if (!(args.target?.name! in this.user_links)) {
+                log.warn("Username", args.target!.name!, "not found in this.user_links.");
+                return "";
             }
-        });
-
-        if (!(lang_id in this.languages!)) {
-            log.warn("Language with", lang_id, "code doesn't exist! Setting the en_us language...");
-            delete this.preferred_langs[lang_id];
-            lang_id = "en_us";
+            args.target!.id! = this.user_links[args.target?.name!];
         }
 
-        var message: string = this.replaceDummyValues(this.languages![lang_id][line_id], args);
+        // Getting the user's preferred language:
+        for (const l_id of Object.keys(this.preferred_langs)) {
+            if (this.preferred_langs[l_id].includes(args.target?.id!)) {
+                lang_id = l_id;
+            }
+        }
+
+        // Replacing the placeholders:
+        message = this.replaceDummyValues(this.languages[lang_id][line_id], args, lang_id, optional_args);
+        
+        if (message === undefined) {
+            message = "";
+        }
 
         return message;
     }
 
-    private replaceDummyValues(text: string, ...args: any[]) {
+    /**
+     * Get the custom text with replaced placeholders.
+     * @param text Text to replace.
+     * @param args Arguments.
+     * @param options Options to parse.
+     * @param optional_args Optional arguments.
+     */
+    public customParsedText(text: string, args: IArguments, ...optional_args: any[]) {
+        var message: string | undefined = "";
+
+        // Replacing the placeholders:
+        message = this.replaceDummyValues(text, args, "en_us", optional_args);
+        
+        if (message === undefined) {
+            message = "";
+        }
+
+        return message;
+    }
+
+    private replaceDummyValues(text: string, args: IArguments, lang_id?: string | undefined, optional_args?: any[]) {
         var _text = text.split(' ');
 
-        _text.forEach((value, index) => {
+        if (lang_id === undefined) {
+            lang_id = "en_us"
+        }
+
+        if (optional_args === undefined) optional_args = [];
+
+        for (const word of _text) {
             switch (true) {
-                case (value.includes("%0%")):
-                    _text[index] = _text[index].replace("%0%", args[0][0]);
+                // Targets:
+                case word.includes("${TARGET.NAME}"): {
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${TARGET.NAME}", args.target?.name!);
                     break;
-                case (value.includes("%1%")):
-                    _text[index] = _text[index].replace("%1%", args[0][1]);
+                }
+                case word.includes("${TARGET.ID}"): {
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${TARGET.ID}", args.target?.id!);
                     break;
-                case (value.includes("%2%")):
-                    _text[index] = _text[index].replace("%2%", args[0][2]);
+                }
+
+                // User:
+                case word.includes("${USER.NAME}"): {
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${USER.NAME}", args.user?.name!);
                     break;
-                case (value.includes("%3%")):
-                    _text[index] = _text[index].replace("%3%", args[0][3]);
+                }
+                case word.includes("${USER.ID}"): {
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${USER.ID}", args.user?.id!);
                     break;
-                case (value.includes("%4%")):
-                    _text[index] = _text[index].replace("%4%", args[0][4]);
+                }
+                
+                // Uptime:
+                case word.includes("${UPTIME}"): {
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${UPTIME}", process.uptime().toString());
                     break;
-                case (value.includes("%5%")):
-                    _text[index] = _text[index].replace("%5%", args[0][5]);
+                }
+                case word.includes("${UPTIMEF}"): {
+                    function formatTime(seconds: number) {
+                        function pad(s: number) {
+                            return (s < 10 ? '0' : '') + s.toString();
+                        }
+            
+                        var days = Math.floor(seconds / (60 * 60 * 24));
+                        var hours = Math.floor(seconds / (60 * 60) % 24);
+                        var minutes = Math.floor(seconds % (60 * 60) / 60);
+                        var sec = Math.floor(seconds % 60);
+            
+                        return `${days} d. ${pad(hours)}:${pad(minutes)}:${pad(sec)}`;
+                    }
+
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${UPTIMEF}", formatTime(process.uptime()));
                     break;
-                case (value.includes("%6%")):
-                    _text[index] = _text[index].replace("%6%", args[0][6]);
+                }
+                
+                // Channel:
+                case word.includes("${CHANNELS.CLIENT.LENGTH}"): {
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${CHANNELS.CLIENT.LENGTH}", args.storage!.getClientChannelIDs.length.toString());
                     break;
-                case (value.includes("%7%")):
-                    _text[index] = _text[index].replace("%7%", args[0][7]);
+                }
+
+                // Package.json:
+                case word.includes("${PCK.NAME}"): {
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${PCK.NAME}", pck.name);
                     break;
-                case (value.includes("%8%")):
-                    _text[index] = _text[index].replace("%8%", args[0][8]);
+                }
+                case word.includes("${PCK.VERSION}"): {
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${PCK.VERSION}", pck.version);
                     break;
-                case (value.includes("%9%")):
-                    _text[index] = _text[index].replace("%9%", args[0][9]);
+                }
+
+                // Git:
+                case word.includes("${GIT.SHORT}"): {
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${GIT.SHORT}", git.short());
                     break;
-                default:
+                }
+                case word.includes("${GIT.BRANCH}"): {
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${GIT.BRANCH}", git.branch());
                     break;
+                }
+                case word.includes("${GIT.MESSAGE}"): {
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${GIT.MESSAGE}", git.message());
+                    break;
+                }
+                
+                // Languages:
+                case word.includes("${LANGUAGES.AVAILABLE}"): {
+                    if (this.languages === undefined) return;
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${LANGUAGES.AVAILABLE}", Object.keys(this.languages).join(', '));
+                    break;
+                }
+
+                // Optional arguments:
+                case word.includes("${0}"): {
+                    if (optional_args.length === 0) {
+                        log.warn("The word includes tag ${0}, but optional arguments length equals to zero.");
+                        return;
+                    }
+
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${0}", optional_args[0]);
+                    break;
+                }
+                case word.includes("${1}"): {
+                    if (optional_args.length < 1) {
+                        log.warn("The word includes tag ${1}, but optional arguments length less than 1.");
+                        return;
+                    }
+
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${1}", optional_args[1]);
+                    break;
+                }
+                case word.includes("${2}"): {
+                    if (optional_args.length < 2) {
+                        log.warn("The word includes tag ${2}, but optional arguments length less than 2.");
+                        return;
+                    }
+
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${2}", optional_args[2]);
+                    break;
+                }
+                case word.includes("${3}"): {
+                    if (optional_args.length < 3) {
+                        log.warn("The word includes tag ${3}, but optional arguments length less than 3.");
+                        return;
+                    }
+
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${3}", optional_args[3]);
+                    break;
+                }
+                case word.includes("${4}"): {
+                    if (optional_args.length < 4) {
+                        log.warn("The word includes tag ${4}, but optional arguments length less than 4.");
+                        return;
+                    }
+
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${4}", optional_args[4]);
+                    break;
+                }
+                case word.includes("${5}"): {
+                    if (optional_args.length < 5) {
+                        log.warn("The word includes tag ${5}, but optional arguments length less than 5.");
+                        return;
+                    }
+
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${5}", optional_args[5]);
+                    break;
+                }
+                case word.includes("${6}"): {
+                    if (optional_args.length < 6) {
+                        log.warn("The word includes tag ${6}, but optional arguments length less than 6.");
+                        return;
+                    }
+
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${6}", optional_args[6]);
+                    break;
+                }
+                case word.includes("${7}"): {
+                    if (optional_args.length - 1 < 7) {
+                        log.warn("The word includes tag ${7}, but optional arguments length less than 7.");
+                        return;
+                    }
+
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${7}", optional_args[7]);
+                    break;
+                }
+                case word.includes("${8}"): {
+                    if (optional_args.length - 1 < 8) {
+                        log.warn("The word includes tag ${8}, but optional arguments length less than 8.");
+                        return;
+                    }
+
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${8}", optional_args[8]);
+                    break;
+                }
+                case word.includes("${9}"): {
+                    if (optional_args.length - 1 < 9) {
+                        log.warn("The word includes tag ${9}, but optional arguments length less than 9.");
+                        return;
+                    }
+
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${9}", optional_args[9]);
+                    break;
+                }
+
+                // Other:
+                case word.includes("@{MEASURE.MEGABYTES}"): {
+                    if (this.languages === undefined) return;
+
+                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("@{MEASURE.MEGABYTES}", this.languages[lang_id]["measure.megabytes"]);
+                    break;
+                }
+                default: {
+                    break;
+                }
             }
-        });
+        }
 
         return _text.join(' ');
     }

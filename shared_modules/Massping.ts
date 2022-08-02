@@ -38,27 +38,27 @@ export default class Massping implements IModule.IModule {
         delete message[0];
 
         for (var i = 0; i < chatters.vips.length; i++) {
-            Arguments.client.say(Arguments.target.name, `@${chatters.vips[i]}, ${message.join(' ').trim()}`);
+            Arguments.client!.say(Arguments.target.name, `@${chatters.vips[i]}, ${message.join(' ').trim()}`);
         }
 
         for (var i = 0; i < chatters.moderators.length; i++) {
-            Arguments.client.say(Arguments.target.name, `@${chatters.moderators[i]}, ${message.join(' ').trim()}`);
+            Arguments.client!.say(Arguments.target.name, `@${chatters.moderators[i]}, ${message.join(' ').trim()}`);
         }
 
         for (var i = 0; i < chatters.staff.length; i++) {
-            Arguments.client.say(Arguments.target.name, `@${chatters.staff[i]}, ${message.join(' ').trim()}`);
+            Arguments.client!.say(Arguments.target.name, `@${chatters.staff[i]}, ${message.join(' ').trim()}`);
         }
 
         for (var i = 0; i < chatters.admins.length; i++) {
-            Arguments.client.say(Arguments.target.name, `@${chatters.admins[i]}, ${message.join(' ').trim()}`);
+            Arguments.client!.say(Arguments.target.name, `@${chatters.admins[i]}, ${message.join(' ').trim()}`);
         }
 
         for (var i = 0; i < chatters.global_mods.length; i++) {
-            Arguments.client.say(Arguments.target.name, `@${chatters.global_mods[i]}, ${message.join(' ').trim()}`);
+            Arguments.client!.say(Arguments.target.name, `@${chatters.global_mods[i]}, ${message.join(' ').trim()}`);
         }
 
         for (var i = 0; i < chatters.viewers.length; i++) {
-            Arguments.client.say(Arguments.target.name, `@${chatters.viewers[i]}, ${message.join(' ').trim()}`);
+            Arguments.client!.say(Arguments.target.name, `@${chatters.viewers[i]}, ${message.join(' ').trim()}`);
         }
 
         return Promise.resolve(true);

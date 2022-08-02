@@ -36,24 +36,13 @@ export default class Ping implements IModule.IModule {
     async run(Arguments: IArguments) {
         var totalmem = await (await os.mem.used()).totalMemMb;
         var usedmem = await (await os.mem.used()).usedMemMb;
-        
-        function formatTime(seconds: number) {
-            function pad(s: number) {
-                return (s < 10 ? '0' : '') + s.toString();
-            }
 
-            var days = Math.floor(seconds / (60 * 60 * 24));
-            var hours = Math.floor(seconds / (60 * 60) % 24);
-            var minutes = Math.floor(seconds % (60 * 60) / 60);
-            var sec = Math.floor(seconds % 60);
-
-            return `${days} d. ${pad(hours)}:${pad(minutes)}:${pad(sec)}`;
-        }
-
-        var pingms = Math.floor(Math.round((await Arguments.client.ping())[0] * 1000));
-        var uptime = formatTime(process.uptime());
-        var channels = Arguments.storage.getClientChannelNames?.length;
+        var pingms = Math.floor(Math.round((await Arguments.client!.ping())[0] * 1000));
                 
-        return Promise.resolve(Arguments.localizator.parsedText("cmd.ping.exec.response", Arguments.target.id, "FeelsDankMan  🏓 ", uptime, channels, `${usedmem} ${Arguments.localizator.parsedText("measure.megabyte", Arguments.target.id)}/${totalmem} ${Arguments.localizator.parsedText("measure.megabyte", Arguments.target.id)}`, pingms, `${packagejson.version}-${packagejson.name}`, short(), branch()));
+        return Promise.resolve(Arguments.localizator!.parsedText("cmd.ping.response", Arguments, [
+            usedmem.toString(),
+            totalmem.toString(),
+            pingms.toString()
+        ]));
     }
 }

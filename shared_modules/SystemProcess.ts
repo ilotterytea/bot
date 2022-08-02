@@ -17,10 +17,6 @@
 
 import IArguments from "../apollo/interfaces/IArguments";
 import IModule from "../apollo/interfaces/IModule";
-import os from "node-os-utils";
-import { readFileSync } from "fs";
-import git from "git-rev-sync";
-import packagejson from "../package.json";
 import child from "child_process";
 
 export default class SystemProcess implements IModule.IModule {
@@ -39,33 +35,33 @@ export default class SystemProcess implements IModule.IModule {
 
         switch (turi_ip_ip) {
             case "pull":
-                await Arguments.client.say(Arguments.target.name, `forsenSpin pulling from repository (${git.remoteUrl().split('/')[git.remoteUrl().split('/').length - 1]}-${git.branch()})...`);
+                await Arguments.client!.say(Arguments.target.name, Arguments.localizator!.parsedText("cmd.system.pull", Arguments));
                 child.exec("git pull");
                 // timeout for updating the git message:
-                setTimeout(() => { Arguments.client.say(Arguments.target.name, `forsenLevel done: ${git.message()} (${git.short()})`); }, 5000);
+                setTimeout(() => { Arguments.client!.say(Arguments.target.name, Arguments.localizator!.parsedText("cmd.system.pulled", Arguments)); }, 1500);
                 break;
             case "restart":
-                await Arguments.client.say(Arguments.target.name, "forsenSpin restarting...");
-                await Arguments.storage.save(Arguments.stv!.getEmotes);
-                child.exec("git pull");
+                await Arguments.client!.say(Arguments.target.name, Arguments.localizator!.parsedText("cmd.system.restart", Arguments));
+                await Arguments.storage!.save(Arguments.stv!.getEmotes);
+                //child.exec("git pull");
                 child.execSync("ts-node index.ts --debug");
                 break;
             case "poweroff":
-                await Arguments.client.say(Arguments.target.name, "forsenLevel 👋 bye bye");
-                await Arguments.storage.save(Arguments.stv!.getEmotes);
+                await Arguments.client!.say(Arguments.target.name, Arguments.localizator!.parsedText("cmd.system.poweroff", Arguments));
+                await Arguments.storage!.save(Arguments.stv!.getEmotes);
                 process.exit(0);
             case "machine":
                 const xd = Arguments.message.raw!.split(' ')[2];
 
                 if (xd == "restart") {
-                    await Arguments.client.say(Arguments.target.name, "forsenSpin 💻 restarting the machine...");
-                    await Arguments.storage.save(Arguments.stv!.getEmotes);
+                    await Arguments.client!.say(Arguments.target.name, "forsenSpin 💻 restarting the machine...");
+                    await Arguments.storage!.save(Arguments.stv!.getEmotes);
                     child.exec("shutdown -r now");
                 }
 
                 if (xd == "shutdown") {
-                    await Arguments.client.say(Arguments.target.name, "forsenLevel 👋 💻 bye bye machine and you");
-                    await Arguments.storage.save(Arguments.stv!.getEmotes);
+                    await Arguments.client!.say(Arguments.target.name, "forsenLevel 👋 💻 bye bye machine and you");
+                    await Arguments.storage!.save(Arguments.stv!.getEmotes);
                     child.exec("shutdown now");
                 }
                 break;
