@@ -101,7 +101,8 @@ namespace Messages {
                     },
                     channel_emotes: stvemotes.getAllChannelEmotes(channel.slice(1, channel.length)),
                     stv: stvemotes,
-                    tapi: api
+                    tapi: api,
+                    timer: timer
                 }
 
                 if (storage.users.get(user["user-id"], "InternalType") === "supauser") args.user.extRole = IModule.AccessLevels.SUPAUSER;
