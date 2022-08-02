@@ -132,6 +132,10 @@ namespace Messages {
             await storage.save(stvemotes.getEmotes, timer.getTimers);
         }, 60000);
 
+        process.once("SIGHUP", async () => {
+            await storage.save(stvemotes.getEmotes, timer.getTimers);
+        });
+
         timer.tick(client);
     }
 

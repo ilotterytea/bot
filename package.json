@@ -18,6 +18,11 @@
     "test": "ts-node index.ts --debug"
   },
   "main": "index.ts",
+  "nodemonConfig": {
+    "ignore": ["local/*"],
+    "delay": 2000,
+    "signal": "SIGHUP"
+  },
   "dependencies": {
     "@types/eventsource": "^1.1.9",
     "axios": "^0.27.2",
