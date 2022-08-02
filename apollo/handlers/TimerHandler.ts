@@ -108,7 +108,7 @@ class TimerHandler {
 
     public disableTimer(target_id: string, timer_id: string) {
         if (!(target_id in this.tickDict)) return false;
-        if (timer_id in this.tickDict[target_id]) return false;
+        if (!(timer_id in this.tickDict[target_id])) return false;
 
         this.timers[target_id][timer_id].Value = false;
         this.disposeTick(target_id, timer_id);
