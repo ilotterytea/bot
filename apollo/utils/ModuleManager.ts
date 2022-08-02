@@ -27,6 +27,7 @@ import EmoteTop from "../../shared_modules/EmoteTop";
 import SystemProcess from "../../shared_modules/SystemProcess";
 import JoinChat from "../../shared_modules/JoinChat";
 import Settings from "../../shared_modules/Settings";
+import UserLookup from "../../shared_modules/UserData";
 
 class ModuleManager {
     private modules: {[module_id: string]: IModule.IModule};
@@ -63,6 +64,7 @@ class ModuleManager {
         this.modules["system"] = new SystemProcess(0, IModule.AccessLevels.BROADCASTER);
         this.modules["join"] = new JoinChat(0, IModule.AccessLevels.PUBLIC);
         this.modules["set"] = new Settings(5000, IModule.AccessLevels.BROADCASTER);
+        this.modules["user"] = new UserLookup(10000, IModule.AccessLevels.PUBLIC);
     }
 
     private createCooldownArray(module_id: string) {

@@ -152,8 +152,8 @@
         "ru_ru": "forsenLevel Режим ${0} не найден для команды !system."
     },
     "cmd.user.lookup": {
-        "en_us": "@",
-        "ru_ru": "@"
+        "en_us": "@${USER.NAME}, FeelsDankMan 🔎 ${0} (${1}, ${2}) | Bio: ${3} | Color: ${4} | Partner: ${5} | Affiliate: ${6} | Bot: ${7} | Banned: ${8}",
+        "ru_ru": "@${USER.NAME}, FeelsDankMan 🔎 ${0} (${1}, ${2}) | Биография: ${3} | Цвет: ${4} | Партнёр: ${5} | Компаньон: ${6} | Бот: ${7} | Забанен: ${8}"
     },
     "cmd.user.rules": {
         "en_us": "@${USER.NAME}, FeelsDankMan 🔎📜 The rules of ${0}'s (${1}) chat room: ${2}",
