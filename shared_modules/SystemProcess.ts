@@ -40,31 +40,6 @@ export default class SystemProcess implements IModule.IModule {
                 // timeout for updating the git message:
                 setTimeout(() => { Arguments.client!.say(Arguments.target.name, Arguments.localizator!.parsedText("cmd.system.pulled", Arguments)); }, 1500);
                 break;
-            case "restart":
-                await Arguments.client!.say(Arguments.target.name, Arguments.localizator!.parsedText("cmd.system.restart", Arguments));
-                await Arguments.storage!.save(Arguments.stv!.getEmotes, Arguments.timer!.getTimers);
-                //child.exec("git pull");
-                child.execSync("ts-node index.ts --debug");
-                break;
-            case "poweroff":
-                await Arguments.client!.say(Arguments.target.name, Arguments.localizator!.parsedText("cmd.system.poweroff", Arguments));
-                await Arguments.storage!.save(Arguments.stv!.getEmotes, Arguments.timer!.getTimers);
-                process.exit(0);
-            case "machine":
-                const xd = Arguments.message.raw!.split(' ')[2];
-
-                if (xd == "restart") {
-                    await Arguments.client!.say(Arguments.target.name, "forsenSpin 💻 restarting the machine...");
-                    await Arguments.storage!.save(Arguments.stv!.getEmotes, Arguments.timer!.getTimers);
-                    child.exec("shutdown -r now");
-                }
-
-                if (xd == "shutdown") {
-                    await Arguments.client!.say(Arguments.target.name, "forsenLevel 👋 💻 bye bye machine and you");
-                    await Arguments.storage!.save(Arguments.stv!.getEmotes, Arguments.timer!.getTimers);
-                    child.exec("shutdown now");
-                }
-                break;
             default:
                 break;
         }
