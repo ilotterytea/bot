@@ -3,14 +3,14 @@
         <span class="material-symbols-outlined">keyboard_command_key</span>
         Commands
     </a>
-    <a class="item <% if (active == "about") { %> active <% }%>" href="/">
-        <span class="material-symbols-outlined">info</span>
-         About
+    <a class="item <% if (active == "docs") { %> active <% }%>" href="/docs">
+        <span class="material-symbols-outlined">book</span>
+         Docs
     </a>
     <div class="dropdown">
         <a href="/" id="brand" style="margin: 12px 24px;">
             <img src="../img/logo.png" width="32">
-            <h3 style="padding-left: 12px; color: var(--text-1);" class="rainbow_text_animated">iLotterytea's Twitch Bot 2</h3>
+            <h3 style="padding-left: 12px;" class="rainbow_text_animated">iLotterytea's Twitch Bot 2</h3>
         </a>
         <div class="dropdown-content">
             <% targets.forEach(function (target) { %>
@@ -21,9 +21,9 @@
             <% }); %>
         </div>
     </div>
-    <a class="item <% if (active == "stats") { %> active <% }%>" href="/stats?c=global">
-        <span class="material-symbols-outlined">monitoring</span>
-        Statistics
+    <a class="item <% if (active == "catalogue") { %> active <% }%>" href="/catalogue?c=targets">
+        <span class="material-symbols-outlined">library_books</span>
+        Catalogue...
     </a>
     <a class="item <% if (active == "me") { %> active <% }%>" href="/me">
         <span class="material-symbols-outlined">account_circle</span>
