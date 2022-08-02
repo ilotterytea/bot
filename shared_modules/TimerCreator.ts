@@ -35,12 +35,7 @@ export default class TimerCreator implements IModule.IModule {
         const timer_id: string = _message[2];
         const intervalsec: number = parseInt(_message[3]) * 1000;
 
-        if (isNaN(intervalsec)) {
-            return Promise.resolve(Arguments.localizator!.parsedText("timer.incorrect_interval", Arguments, [
-                timer_id,
-                intervalsec
-            ]));
-        }
+        
 
         delete _message[0];
         delete _message[1];
@@ -49,6 +44,13 @@ export default class TimerCreator implements IModule.IModule {
         
         switch (option) {
             case "--new": {
+                if (isNaN(intervalsec)) {
+                    return Promise.resolve(Arguments.localizator!.parsedText("timer.incorrect_interval", Arguments, [
+                        timer_id,
+                        intervalsec
+                    ]));
+                }
+                
                 const msg = _message.join(' ');
 
                 const resp = Arguments.timer!.createTimer(

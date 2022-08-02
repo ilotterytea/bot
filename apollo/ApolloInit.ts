@@ -46,6 +46,7 @@ async function ApolloInit(opts: {[key: string]: any}, Datastore: StoreManager, T
     });
 
     const Timer: TimerHandler = new TimerHandler(Datastore.targets.getTargets);
+    await Timer.IDsToUsernames(TmiApi);
 
     Locale.setPreferredLanguages(Datastore.targets.getTargets, Datastore.targets.getUserlinks());
     Modules.init();
