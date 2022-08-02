@@ -38,7 +38,7 @@ export default class SystemProcess implements IModule.IModule {
                 await Arguments.client!.say(Arguments.target.name, Arguments.localizator!.parsedText("cmd.system.pull", Arguments));
                 child.exec("git pull");
                 // timeout for updating the git message:
-                setTimeout(() => { Arguments.client!.say(Arguments.target.name, Arguments.localizator!.parsedText("cmd.system.pulled", Arguments)); }, 1500);
+                setTimeout(async () => { await Arguments.client!.say(Arguments.target.name, Arguments.localizator!.parsedText("cmd.system.pulled", Arguments)); }, 1000);
                 break;
             default:
                 break;

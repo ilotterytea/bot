@@ -241,6 +241,8 @@ class StoreManager {
         });
 
         for (const target of Object.keys(timers)) {
+            if (timers[target] === undefined) timers[target] = {};
+            
             for (const timer of Object.keys(timers[target])) {
                 this.target_data[target].Timers![timer] = timers[target][timer];
             }

@@ -48,6 +48,7 @@ namespace Messages {
                 ExecutedCommands: 0,
                 ChatLines: 0,
                 Emotes: {},
+                Timers: {},
                 Modules: {},
                 Name: channel.slice(1, channel.length)
             });
