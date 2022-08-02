@@ -28,6 +28,7 @@ import SystemProcess from "../../shared_modules/SystemProcess";
 import JoinChat from "../../shared_modules/JoinChat";
 import Settings from "../../shared_modules/Settings";
 import UserLookup from "../../shared_modules/UserData";
+import TimerCreator from "../../shared_modules/TimerCreator";
 
 class ModuleManager {
     private modules: {[module_id: string]: IModule.IModule};
@@ -65,6 +66,7 @@ class ModuleManager {
         this.modules["join"] = new JoinChat(0, IModule.AccessLevels.PUBLIC);
         this.modules["set"] = new Settings(5000, IModule.AccessLevels.BROADCASTER);
         this.modules["user"] = new UserLookup(10000, IModule.AccessLevels.PUBLIC);
+        this.modules["timer"] = new TimerCreator(10000, IModule.AccessLevels.BROADCASTER);
     }
 
     private createCooldownArray(module_id: string) {
