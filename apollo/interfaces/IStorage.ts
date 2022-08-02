@@ -67,6 +67,7 @@ namespace IStorage {
             /** The modules with edited responses. */
             EditedResponses?: {[module_id: string]: string[]} | undefined
         },
+        Timers?: {[timer_id: string]: Timer} | undefined,
         Prefix?: string,
         ChatLines?: number | undefined,
         SuccessfullyCompletedTests?: number | undefined,
@@ -84,7 +85,8 @@ namespace IStorage {
     export interface Emote {
         ID?: string | undefined,
         UsedTimes: number,
-        OriginalName?: string | undefined
+        OriginalName?: string | undefined,
+        isDeleted?: boolean | undefined
     }
 
     export interface Module {

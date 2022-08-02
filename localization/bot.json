@@ -91,6 +91,18 @@
         "en_us": "@${USER.NAME}, timer ${0} is enabled!",
         "ru_ru": "@${USER.NAME}, таймер ${0} включен!"
     },
+    "timer.info": {
+        "en_us": "@${USER.NAME}, Timer ${0} (${1}). Interval: ${2}. Responses (${3}): ${4}",
+        "ru_ru": "@${USER.NAME}, Таймер ${0} (${1}). Интервал: ${2}. Сообщения (${3}): ${4}"
+    },
+    "timer.list": {
+        "en_us": "@${USER.NAME}, List of ${TARGET.NAME}'s (${TARGET.ID}) chat room timers: ${0} (Pro tip: use command ${1}timer --info [TIMER_NAME] to get more info about timer haHAA )",
+        "ru_ru": "@${USER.NAME}, Список таймеров чата ${TARGET.NAME} (${TARGET.ID}): ${0} (Совет: используй комманду ${1}timer --info [TIMER_NAME] , чтобы узнать больше информации о таймере haHAA )"
+    },
+    "timer.incorrect_interval": {
+        "en_us": "@${USER.NAME}, you tried to set the timer ${0} with incorrect interval: ${1}",
+        "ru_ru": "@${USER.NAME}, вы пытались установить таймер ${0} с неправильным интервалом: ${1}"
+    },
     "cmd.ping.response": {
         "en_us": "@${USER.NAME}, FeelsDankMan 🏓 Pong! Session uptime: ${UPTIMEF}. Landed in ${CHANNELS.CLIENT.LENGTH} channels. Memory usage: ${0} @{MEASURE.MEGABYTES} / ${1} @{MEASURE.MEGABYTES}. Latency to TMI: ${2}ms. Running on version ${PCK.VERSION} (${PCK.NAME}) (Commit ${GIT.SHORT} [${GIT.BRANCH}])",
         "ru_ru": "@${USER.NAME}, FeelsDankMan 🏓 Понг! Сессия активна: ${UPTIMEF}. Приземлён в ${CHANNELS.CLIENT.LENGTH} каналах. Потребление ОЗУ: ${0} @{MEASURE.MEGABYTES} / ${1} @{MEASURE.MEGABYTES}. Задержка до TMI: ${2}ms. Работает на версии ${PCK.VERSION} (${PCK.NAME}) (Фиксация ${GIT.SHORT} [${GIT.BRANCH}])"

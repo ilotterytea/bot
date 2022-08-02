@@ -18,6 +18,7 @@
 import { Client } from "tmi.js";
 import TwitchApi from "../clients/ApiClient";
 import StoreManager from "../files/StoreManager";
+import TimerHandler from "../handlers/TimerHandler";
 import EmoteUpdater from "../utils/emotes/EmoteUpdater";
 import Localizator from "../utils/Locale";
 import IModule from "./IModule";
@@ -45,7 +46,8 @@ interface IArguments {
     },
     channel_emotes?: {[emote_name: string]: IStorage.Emote},
     stv?: EmoteUpdater.SevenTV | undefined,
-    tapi?: TwitchApi.Client | undefined
+    tapi?: TwitchApi.Client | undefined,
+    timer?: TimerHandler | undefined
 }
 
 export default IArguments;

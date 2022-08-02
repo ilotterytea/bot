@@ -23,6 +23,7 @@ import ApolloClient from "./clients/ApolloClient";
 import ConfigIni from "./files/ConfigIni";
 import StoreManager from "./files/StoreManager";
 import Messages from "./handlers/MessageHandler";
+import TimerHandler from "./handlers/TimerHandler";
 import IConfiguration from "./interfaces/IConfiguration";
 import EmoteUpdater from "./utils/emotes/EmoteUpdater";
 import Localizator from "./utils/Locale";
@@ -44,6 +45,8 @@ async function ApolloInit(opts: {[key: string]: any}, Datastore: StoreManager, T
         access_token: Config.Authorization.AccessToken
     });
 
+    const Timer: TimerHandler = new TimerHandler(Datastore.targets.getTargets);
+
     Locale.setPreferredLanguages(Datastore.targets.getTargets, Datastore.targets.getUserlinks());
     Modules.init();
 
@@ -60,7 +63,7 @@ async function ApolloInit(opts: {[key: string]: any}, Datastore: StoreManager, T
 
     STVEmotes.subscribeToEmoteUpdates(TmiClient, Locale, Datastore.getClientChannelNames);
     try {
-        await Messages.Handler(TmiClient, TmiApi, Datastore, Locale, Modules, STVEmotes);
+        await Messages.Handler(TmiClient, TmiApi, Datastore, Locale, Modules, STVEmotes, Timer);
     } catch (err) {
         log.error(err);
     }

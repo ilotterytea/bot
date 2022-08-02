@@ -28,6 +28,7 @@ import IStorage from "../interfaces/IStorage";
 import EmoteUpdater from "../utils/emotes/EmoteUpdater";
 import Localizator from "../utils/Locale";
 import ModuleManager from "../utils/ModuleManager";
+import TimerHandler from "./TimerHandler";
 
 namespace Messages {
     export async function Handler(
@@ -36,7 +37,8 @@ namespace Messages {
         storage: StoreManager,
         locale: Localizator,
         module: ModuleManager,
-        stvemotes: EmoteUpdater.SevenTV
+        stvemotes: EmoteUpdater.SevenTV,
+        timer: TimerHandler
     ) {
         client.on("message", async (channel: string, user: ChatUserstate, message: string, self: boolean) => {
             if (self) return;
@@ -127,8 +129,10 @@ namespace Messages {
 
         // Save local files:
         setInterval(async () => {
-            await storage.save(stvemotes.getEmotes);
+            await storage.save(stvemotes.getEmotes, timer.getTimers);
         }, 60000);
+
+        timer.tick(client);
     }
 
     export async function StaticCommandHandler(args: IArguments) {

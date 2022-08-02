@@ -225,7 +225,10 @@ class StoreManager {
     }
     
     // Save all data:
-    async save(stv_emotes: {[target_name: string]: {[emote_name: string]: IStorage.Emote}}) {
+    async save(
+        stv_emotes: {[target_name: string]: {[emote_name: string]: IStorage.Emote}},
+        timers: {[target_id: string]: {[timer_id: string]: IStorage.Timer}}
+        ) {
         var entries: number = 0;
         var lines: number = 0;
 
@@ -236,6 +239,12 @@ class StoreManager {
                 }
             });
         });
+
+        for (const target of Object.keys(timers)) {
+            for (const timer of Object.keys(timers[target])) {
+                this.target_data[target].Timers![timer] = timers[target][timer];
+            }
+        }
 
         lines = lines + JSON.stringify(this.global_data, null, 2).split('\n').length;
 

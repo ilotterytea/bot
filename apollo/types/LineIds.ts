@@ -46,6 +46,9 @@ type LineIds =
 "timer.removed" |
 "timer.disabled" |
 "timer.enabled" |
+"timer.incorrect_interval" |
+"timer.info" |
+"timer.list" |
 // Ping command:
 "cmd.ping.response" |
 // Ecount command:
