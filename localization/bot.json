@@ -167,13 +167,17 @@
         "en_us": "@${USER.NAME}, the bot speaks on English now! KKona",
         "ru_ru": "@${USER.NAME}, бот теперь говорит по-русски! KKomrade"
     },
+    "cmd.set.language.not_exists": {
+        "en_us": "@${USER.NAME}, the language ${0} not found.",
+        "ru_ru": "@${USER.NAME}, язык ${0} не найден."
+    },
     "cmd.set.language.available": {
         "en_us": "@${USER.NAME}, available localizations: ${LANGUAGES.AVAILABLE}",
         "ru_ru": "@${USER.NAME}, доступные локализации: ${LANGUAGES.AVAILABLE}"
     },
-    "cmd.set.prefix_success": {
+    "cmd.set.prefix.success": {
         "en_us": "@${USER.NAME}, Successfully set up the new prefix (${0}) for ${TARGET.NAME}",
-        "ru_ru": "@${USER.NAME}, успешно установлен префикс ${0} на канале ${TARGET.NAME}"
+        "ru_ru": "@${USER.NAME}, успешно установлен префикс ${0} для канала ${TARGET.NAME}"
     },
     "cmd.set.event.seventv.disabled":{
         "en_us": "@${USER.NAME}, 7TV events (new/deleted/updated emotes) are disabled.",

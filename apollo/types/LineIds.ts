@@ -74,7 +74,8 @@ type LineIds =
 // Settings command:
 "cmd.set.language.success" |
 "cmd.set.language.available" |
-"cmd.set.prefix_success" |
+"cmd.set.language.not_found" |
+"cmd.set.prefix.success" |
 "cmd.set.event.seventv.disabled" |
 "cmd.set.event.seventv.enabled";
 

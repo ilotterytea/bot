@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
+import { Argument } from "commander";
 import {
     ChatUserstate,
     Client
@@ -72,7 +73,9 @@ namespace Messages {
                 }, ["test", storage.targets.get(user["room-id"], "SuccessfullyCompletedTests") as number]));
             }
 
-            if (message.startsWith(storage.getGlobalPrefix)) {
+            const prefix: string = (storage.targets.isValueExists(user["room-id"], "Prefix")) ? storage.targets.get(user["room-id"], "Prefix") as string : storage.getGlobalPrefix
+
+            if (message.startsWith(prefix)) {
                 var args: IArguments = {
                     client: client,
                     localizator: locale,

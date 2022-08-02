@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
-import { readdirSync } from "fs";
 import IArguments from "../interfaces/IArguments";
 import IModule from "../interfaces/IModule";
 
@@ -27,6 +26,7 @@ import EmoteCounter from "../../shared_modules/EmoteCounter";
 import EmoteTop from "../../shared_modules/EmoteTop";
 import SystemProcess from "../../shared_modules/SystemProcess";
 import JoinChat from "../../shared_modules/JoinChat";
+import Settings from "../../shared_modules/Settings";
 
 class ModuleManager {
     private modules: {[module_id: string]: IModule.IModule};
@@ -62,6 +62,7 @@ class ModuleManager {
         this.modules["etop"] = new EmoteTop(10000, IModule.AccessLevels.PUBLIC);
         this.modules["system"] = new SystemProcess(0, IModule.AccessLevels.BROADCASTER);
         this.modules["join"] = new JoinChat(0, IModule.AccessLevels.PUBLIC);
+        this.modules["set"] = new Settings(5000, IModule.AccessLevels.BROADCASTER);
     }
 
     private createCooldownArray(module_id: string) {
