@@ -97,7 +97,7 @@ namespace Messages {
                     },
                     message: {
                         raw: message,
-                        command: message.split(' ')[0].split(storage.getGlobalPrefix)[1]
+                        command: message.split(' ')[0].split(prefix)[1]
                     },
                     channel_emotes: stvemotes.getAllChannelEmotes(channel.slice(1, channel.length)),
                     stv: stvemotes,
