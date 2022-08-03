@@ -148,6 +148,8 @@ class Localizator {
     }
 
     private replaceDummyValues(text: string, args: IArguments, lang_id?: string | undefined, optional_args?: any[]) {
+        if (text === undefined) return;
+        
         var _text = text.split(' ');
 
         if (lang_id === undefined) {
