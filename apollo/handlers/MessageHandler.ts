@@ -135,6 +135,7 @@ namespace Messages {
         }, 60000);
 
         process.once("SIGHUP", async () => {
+            await client.disconnect();
             await storage.save(stvemotes.getEmotes, timer.getTimers);
         });
 
