@@ -35,8 +35,6 @@ export default class TimerCreator implements IModule.IModule {
         const timer_id: string = _message[2];
         const intervalsec: number = parseInt(_message[3]) * 1000;
 
-        
-
         delete _message[0];
         delete _message[1];
         delete _message[2];
@@ -72,6 +70,20 @@ export default class TimerCreator implements IModule.IModule {
                 return Promise.resolve(Arguments.localizator!.parsedText("timer.new", Arguments, [
                     timer_id
                 ]));
+            }
+
+            case "--ring": {
+                const resp = Arguments.timer!.getTimer(Arguments.target.id, timer_id);
+
+                if (!resp) {
+                    return Promise.resolve("no");
+                }
+                
+                for (const msg of resp.Response) {
+                    Arguments.client!.say(Arguments.target.name, msg);
+                }
+
+                return Promise.resolve(true);
             }
 
             case "--remove": {
