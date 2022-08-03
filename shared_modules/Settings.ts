@@ -49,6 +49,7 @@ export default class Settings implements IModule.IModule {
                 }
 
                 Arguments.localizator!.addPreferredUser(value, Arguments.target.id);
+                Arguments.storage!.targets.edit(Arguments.target.id, "LanguageId", value);
                 return Promise.resolve(Arguments.localizator!.parsedText("cmd.set.language.success", Arguments));
             }
             case (_message.includes("--prefix")): {
