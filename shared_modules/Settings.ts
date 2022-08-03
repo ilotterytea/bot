@@ -56,7 +56,7 @@ export default class Settings implements IModule.IModule {
                     return Promise.resolve(Arguments.localizator!.parsedText("msg.wrong_option", Arguments, ["--prefix", "[STRING]"]));
                 }
 
-                const value = _message[_message.indexOf("--lang") + 1];
+                const value = _message[_message.indexOf("--prefix") + 1];
 
                 Arguments.storage!.targets.edit(Arguments.target.id, "Prefix", value);
                 return Promise.resolve(Arguments.localizator!.parsedText("cmd.set.prefix.success", Arguments, [value]));
