@@ -12,7 +12,7 @@
         "ru_ru": "@${TARGET.NAME}, Привет! FeelsDankMan 👋"
     },
     "msg.test": {
-        "en_us": "${0} ${1} succesfully completed!",
+        "en_us": "${0} ${1} successfully completed!",
         "ru_ru": "${0} ${1} успешно завершён!"
     },
     "msg.error": {
@@ -120,8 +120,8 @@
         "ru_ru": "${0} самых используемых ${1} эмоутов (${2}): ${3}"
     },
     "cmd.etop.limit_reached": {
-        "en_us": "@${USER.NAME}, limit reached. You can view only maximum top ${0} emotes. The emotes less than top ${0} can be found here: https://bot.hmmtodayiwill.ru/channel/${1}",
-        "ru_ru": "@${USER.NAME}, лимит превышен. Вы можете просматривать не больше топ ${0} эмоутов. Эмоуты, ниже топа ${0} можно найти здесь: https://bot.hmmtodayiwill.ru/channel/${1}"
+        "en_us": "@${USER.NAME}, limit is reached. You can view no more than the top ${0} emotes. Emotes above #${0} can be found here: https://bot.hmmtodayiwill.ru/channel/${1}",
+        "ru_ru": "@${USER.NAME}, лимит превышен. Вы можете просматривать не больше топ ${0} эмоутов. Эмоуты, выше ${0} места можно найти здесь: https://bot.hmmtodayiwill.ru/channel/${1}"
     },
     "cmd.join.response": {
         "en_us": "@${USER.NAME}, Succesfully joined to ${0}'s (${1}) chat room! ",
