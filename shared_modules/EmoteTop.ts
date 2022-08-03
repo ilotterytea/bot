@@ -35,7 +35,7 @@ export default class EmoteTop implements IModule.IModule {
         
         // !etop -m descending/ascending -s 1-15
         var mode: TopModes = "descending";
-        var show_emotes: number = 15;        
+        var show_emotes: number = 10;        
 
         if (_message.includes('-m')) {
             if ((_message.indexOf('-m') + 1 ) <= _message.length - 1) {
@@ -68,6 +68,12 @@ export default class EmoteTop implements IModule.IModule {
                     "[INTEGER]"
                 ])
             );
+            if (_show_emotes > 15) {
+                return Promise.resolve(Arguments.localizator!.parsedText("cmd.etop.limit_reached", Arguments, [
+                    15,
+                    Arguments.target.id
+                ]));
+            }
             show_emotes = _show_emotes;
         }
 

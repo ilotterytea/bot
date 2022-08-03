@@ -120,7 +120,7 @@
         "ru_ru": "${0} самых используемых ${1} эмоутов (${2}): ${3}"
     },
     "cmd.etop.limit_reached": {
-        "en_us": "@${USER.NAME}, limit is reached. You can view no more than the top ${0} emotes. Emotes above #${0} can be found here: https://bot.hmmtodayiwill.ru/channel/${1}",
+        "en_us": "@${USER.NAME}, limit is reached. You can view no more than the top ${0} emotes. Emotes above ${0}th place can be found here: https://bot.hmmtodayiwill.ru/channel/${1}",
         "ru_ru": "@${USER.NAME}, лимит превышен. Вы можете просматривать не больше топ ${0} эмоутов. Эмоуты, выше ${0} места можно найти здесь: https://bot.hmmtodayiwill.ru/channel/${1}"
     },
     "cmd.join.response": {
