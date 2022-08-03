@@ -51,7 +51,7 @@
         "en_us": "${0} ${1} added the emote ${2}",
         "ru_ru": "${0} ${1} добавил(-а) эмоут ${2}"
     },
-    "emoteupdater.user_removed_emote": {
+    "emoteupdater.user_deleted_emote": {
         "en_us": "${0} ${1} removed the emote ${2}",
         "ru_ru": "${0} ${1} удалил(-а) эмоут ${2}"
     },
