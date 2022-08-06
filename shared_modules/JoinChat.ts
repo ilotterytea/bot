@@ -47,7 +47,7 @@ export default class JoinChat implements IModule.IModule {
             ChatLines: 0,
             ExecutedCommands: 0,
             Emotes: {},
-            Modules: {},
+            Modules: [],
             Timers: {}
         });
 

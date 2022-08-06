@@ -63,13 +63,7 @@ namespace IStorage {
     export interface Target {
         Name?: string,
         LanguageId?: string | undefined,
-        Modules?: {
-            EnabledIDs?: number[] | undefined,
-            /** User IDs which can use a specified modules. */
-            ModulePerm?: {[module_id: string]: string[]} | undefined,
-            /** The modules with edited responses. */
-            EditedResponses?: {[module_id: string]: string[]} | undefined
-        },
+        Modules?: Module[],
         Timers?: {[timer_id: string]: Timer} | undefined,
         Prefix?: string,
         ChatLines?: number | undefined,
@@ -110,6 +104,7 @@ namespace IStorage {
 
     export interface Module {
         Value: boolean,
+        ID: string,
         Type: ModuleTypes,
         ScriptPath?: string | undefined,
         Responses?: string[] | undefined
