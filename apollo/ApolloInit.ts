@@ -23,6 +23,7 @@ import ApolloClient from "./clients/ApolloClient";
 import ConfigIni from "./files/ConfigIni";
 import LocalStorage from "./files/LocalStorage";
 import Messages from "./handlers/MessageHandler";
+import StaticCommandHandler from "./handlers/StaticCommandHandler";
 import TimerHandler from "./handlers/TimerHandler";
 import IConfiguration from "./interfaces/IConfiguration";
 import EmoteUpdater from "./utils/emotes/EmoteUpdater";
@@ -74,6 +75,8 @@ async function ApolloInit(
 
     await Emotes.load(Storage.Targets.getTargets);
 
+    const StaticCommands: StaticCommandHandler = new StaticCommandHandler(Storage.Targets.getTargets);
+
     try {
         for (const name of Object.keys(Storage.Global.getSymlinks)) {
             await Emotes.sync7TVEmotes(name, false);
@@ -89,7 +92,8 @@ async function ApolloInit(
             TwitchApi: TmiApi,
             Timer: Timer,
             Module: Modules,
-            Emote: Emotes
+            Emote: Emotes,
+            StaticCmd: StaticCommands
         });        
 
     } catch (err) {

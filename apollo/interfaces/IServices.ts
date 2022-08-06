@@ -18,6 +18,7 @@
 import { Client } from "tmi.js";
 import TwitchApi from "../clients/ApiClient";
 import LocalStorage from "../files/LocalStorage";
+import StaticCommandHandler from "../handlers/StaticCommandHandler";
 import TimerHandler from "../handlers/TimerHandler";
 import EmoteUpdater from "../utils/emotes/EmoteUpdater";
 import Localizator from "../utils/Locale";
@@ -30,7 +31,8 @@ interface IServices {
     Locale: Localizator,
     Module?: ModuleManager | undefined,
     Emote?: EmoteUpdater | undefined,
-    Timer?: TimerHandler | undefined
+    Timer?: TimerHandler | undefined,
+    StaticCmd?: StaticCommandHandler | undefined
 }
 
 export default IServices;

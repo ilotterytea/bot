@@ -113,6 +113,8 @@ namespace Messages {
                     Services.Client.say(`#${args.Target.Username}`, response);
                 }
             }
+            
+            await StaticCommandHandler(args);
         });
 
         // Save local files:
@@ -146,8 +148,20 @@ namespace Messages {
         if (Services.Timer !== undefined) Services.Timer.tick(Services.Client);
     }
 
-    export async function StaticCommandHandler(args: IArguments) {
+    async function StaticCommandHandler(args: IArguments) {
+        if (args.Services.StaticCmd === undefined) return;
 
+        var cmd = args.Services.StaticCmd.get(
+            args.Target.ID,
+            args.Message.raw.split(' ')[0]
+        );
+
+        if (cmd === undefined) return;
+        if (cmd.Responses === undefined) return;
+
+        for (const msg of cmd.Responses) {
+            args.Services.Client.say(`#${args.Target.Username}`, msg);
+        }
     }
 }
 

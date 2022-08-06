@@ -30,6 +30,7 @@ import Settings from "../../shared_modules/Settings";
 import UserLookup from "../../shared_modules/UserData";
 import TimerCreator from "../../shared_modules/TimerCreator";
 import IStorage from "../interfaces/IStorage";
+import StaticCmds from "../../shared_modules/StaticCmds";
 
 class ModuleManager {
     private modules: {[module_id: string]: IModule.IModule};
@@ -91,6 +92,7 @@ class ModuleManager {
         this.modules["system"] = new SystemProcess(30000, IStorage.InternalRoles.SUPAUSER);
         this.modules["timer"] = new TimerCreator(10000, IModule.AccessLevels.BROADCASTER);
         this.modules["user"] = new UserLookup(10000, IModule.AccessLevels.PUBLIC);
+        this.modules["scmd"] = new StaticCmds(10000, IModule.AccessLevels.BROADCASTER);
     }
 
     private createCooldownArray(module_id: string) {
