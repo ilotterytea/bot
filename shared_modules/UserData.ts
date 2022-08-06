@@ -41,7 +41,6 @@ export default class UserLookup implements IModule.IModule {
 
         const data = response.data;
 
-        console.log(response.statusText);
         if (response.status != 200) return Promise.resolve(Arguments.Services.Locale.parsedText("msg.api_error", Arguments, [
             `${response.status}`
         ]));

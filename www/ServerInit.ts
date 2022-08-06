@@ -94,7 +94,6 @@ async function ServerInit(opts: {[key: string]: string}, storage: LocalStorage, 
                         users.push(user);
                     });
                 }
-                console.log(users);
                 res.render("pages/catalogue", {
                     users: users,
                     bot_name: "fembajbot"

@@ -99,10 +99,8 @@ namespace Messages {
                 );
             }
 
-            console.log(prefix);
             // Start processing the commands:
             if (message.startsWith(prefix)) {
-                console.log(args.Message.command);
 
                 // Execute command if it exists:
                 if (Services.Module === undefined) throw new Error("Cannot process the commands. No module instances assigned to services.");
