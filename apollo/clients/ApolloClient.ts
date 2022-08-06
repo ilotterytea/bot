@@ -53,7 +53,8 @@ function ApolloClient(
                         "iLotteryteaLive",
                         "Chillin",
                         "WalterArrive",
-                        "docArrive"
+                        "docArrive",
+                        "peepoHuy"
                     ];
                     
                     client.say(`#${id}`, arrive_emotes[Math.floor(Math.random() * arrive_emotes.length)]);
