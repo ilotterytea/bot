@@ -30,7 +30,9 @@ export default class TimerCreator implements IModule.IModule {
     }
 
     async run(Arguments: IArguments) {
-        const _message: string[] = Arguments.message.raw!.split(' ');
+        if (Arguments.Services.Timer === undefined) return Promise.resolve(false);
+
+        const _message: string[] = Arguments.Message.raw.split(' ');
         const option: string = _message[1];
         const timer_id: string = _message[2];
         const intervalsec: number = parseInt(_message[3]) * 1000;
@@ -43,7 +45,7 @@ export default class TimerCreator implements IModule.IModule {
         switch (option) {
             case "--new": {
                 if (isNaN(intervalsec)) {
-                    return Promise.resolve(Arguments.localizator!.parsedText("timer.incorrect_interval", Arguments, [
+                    return Promise.resolve(Arguments.Services.Locale.parsedText("timer.incorrect_interval", Arguments, [
                         timer_id,
                         intervalsec
                     ]));
@@ -51,8 +53,8 @@ export default class TimerCreator implements IModule.IModule {
                 
                 const msg = _message.join(' ');
 
-                const resp = Arguments.timer!.createTimer(
-                    Arguments.target.id,
+                const resp = Arguments.Services.Timer.createTimer(
+                    Arguments.Target.ID,
                     timer_id,
                     {
                         Value: true,
@@ -61,66 +63,66 @@ export default class TimerCreator implements IModule.IModule {
                         ],
                         IntervalMs: intervalsec
                     },
-                    Arguments.client!
+                    Arguments.Services.Client
                 );
                 
                 if (!resp) {
                     return Promise.resolve("no");
                 }
-                return Promise.resolve(Arguments.localizator!.parsedText("timer.new", Arguments, [
+                return Promise.resolve(Arguments.Services.Locale.parsedText("timer.new", Arguments, [
                     timer_id
                 ]));
             }
 
             case "--ring": {
-                const resp = Arguments.timer!.getTimer(Arguments.target.id, timer_id);
+                const resp = Arguments.Services.Timer.getTimer(Arguments.Target.ID, timer_id);
 
                 if (!resp) {
                     return Promise.resolve("no");
                 }
                 
                 for (const msg of resp.Response) {
-                    Arguments.client!.say(Arguments.target.name, msg);
+                    Arguments.Services.Client.say(Arguments.Target.Username, msg);
                 }
 
                 return Promise.resolve(true);
             }
 
             case "--remove": {
-                const resp = Arguments.timer!.removeTimer(Arguments.target.id, timer_id);
+                const resp = Arguments.Services.Timer.removeTimer(Arguments.Target.ID, timer_id);
 
                 if (!resp) {
                     return Promise.resolve("no");
                 }
-                return Promise.resolve(Arguments.localizator!.parsedText("timer.removed", Arguments, [
+                return Promise.resolve(Arguments.Services.Locale.parsedText("timer.removed", Arguments, [
                     timer_id
                 ]));
             }
 
             case "--disable": {
-                const resp = Arguments.timer!.disableTimer(Arguments.target.id, timer_id);
+                const resp = Arguments.Services.Timer.disableTimer(Arguments.Target.ID, timer_id);
 
                 if (!resp) {
                     return Promise.resolve("no");
                 }
-                return Promise.resolve(Arguments.localizator!.parsedText("timer.disabled", Arguments, [
+                return Promise.resolve(Arguments.Services.Locale.parsedText("timer.disabled", Arguments, [
                     timer_id
                 ]));
             }
 
             case "--enable": {
-                const resp = Arguments.timer!.enableTimer(Arguments.target.id, timer_id, Arguments);
+                const resp = Arguments.Services.Timer.enableTimer(Arguments.Target.ID, timer_id, Arguments);
 
                 if (!resp) {
                     return Promise.resolve("no");
                 }
-                return Promise.resolve(Arguments.localizator!.parsedText("timer.enabled", Arguments, [
+                return Promise.resolve(Arguments.Services.Locale.parsedText("timer.enabled", Arguments, [
                     timer_id
                 ]));
             }
 
             case "--info": {
-                const resp = Arguments.timer!.getTimer(Arguments.target.id, timer_id);
+                const resp = Arguments.Services.Timer.getTimer(Arguments.Target.ID, timer_id);
             
                 if (!resp) {
                     return Promise.resolve("no");
@@ -132,7 +134,7 @@ export default class TimerCreator implements IModule.IModule {
                     _responses.push(`'${response}'`);
                 });
 
-                return Promise.resolve(Arguments.localizator!.parsedText("timer.info", Arguments, [
+                return Promise.resolve(Arguments.Services.Locale.parsedText("timer.info", Arguments, [
                     timer_id,
                     (resp.Value) ? "Enabled" : "Disabled",
                     resp.IntervalMs.toString(),
@@ -142,13 +144,13 @@ export default class TimerCreator implements IModule.IModule {
             }
 
             case "--list": {
-                var timers: string[] = Object.keys(Arguments.timer!.getTimers[Arguments.target.id]);
+                var timers: string[] = Object.keys(Arguments.Services.Timer.getTimers[Arguments.Target.ID]);
 
-                return Promise.resolve(Arguments.localizator!.parsedText("timer.list", Arguments, [
+                return Promise.resolve(Arguments.Services.Locale.parsedText("timer.list", Arguments, [
                     timers.join(', '),
-                    (Arguments.storage!.targets.isValueExists(Arguments.target.id, "Prefix")) ? 
-                    Arguments.storage!.targets.get(Arguments.target.id, "Prefix") as string :
-                    Arguments.storage!.getGlobalPrefix
+                    (Arguments.Services.Storage.Targets.containsKey(Arguments.Target.ID, "Prefix")) ? 
+                    Arguments.Services.Storage.Targets.get(Arguments.Target.ID, "Prefix") as string :
+                    Arguments.Services.Storage.Global.getPrefix
                 ]));
             }
 

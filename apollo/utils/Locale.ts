@@ -103,16 +103,16 @@ class Localizator {
 
         // Set the user ID on useUsername:
         if (useUsername) {
-            if (!(args.target?.name! in this.user_links)) {
-                log.warn("Username", args.target!.name!, "not found in this.user_links.");
+            if (!(args.Target.Username in this.user_links)) {
+                log.warn("Username", args.Target.Username, "not found in this.user_links.");
                 return "";
             }
-            args.target!.id! = this.user_links[args.target?.name!];
+            args.Target.Username = this.user_links[args.Target.Username];
         }
 
         // Getting the user's preferred language:
         for (const l_id of Object.keys(this.preferred_langs)) {
-            if (this.preferred_langs[l_id].includes(args.target?.id!)) {
+            if (this.preferred_langs[l_id].includes(args.Target.ID)) {
                 lang_id = l_id;
             }
         }
@@ -147,7 +147,7 @@ class Localizator {
         return message;
     }
 
-    private replaceDummyValues(text: string, args: IArguments, lang_id?: string | undefined, optional_args?: any[]) {
+    private replaceDummyValues(text: string, args?: IArguments | undefined, lang_id?: string | undefined, optional_args?: any[]) {
         if (text === undefined) return;
         
         var _text = text.split(' ');
@@ -159,27 +159,40 @@ class Localizator {
         if (optional_args === undefined) optional_args = [];
 
         for (const word of _text) {
+            if (args !== undefined) {
+                switch (true) {
+                    // Targets:
+                    case word.includes("${TARGET.NAME}"): {
+                        _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${TARGET.NAME}", args.Target.Username);
+                        break;
+                    }
+                    case word.includes("${TARGET.ID}"): {
+                        _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${TARGET.ID}", args.Target.ID);
+                        break;
+                    }
+    
+                    // User:
+                    case word.includes("${USER.NAME}"): {
+                        _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${USER.NAME}", args.Sender.Username);
+                        break;
+                    }
+                    case word.includes("${USER.ID}"): {
+                        _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${USER.ID}", args.Sender.ID);
+                        break;
+                    }
+                    
+                    // Channel:
+                    case word.includes("${CHANNELS.CLIENT.LENGTH}"): {
+                        _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${CHANNELS.CLIENT.LENGTH}", args.Services.Storage.Global.getClientJoin.length.toString());
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+            }
+            
             switch (true) {
-                // Targets:
-                case word.includes("${TARGET.NAME}"): {
-                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${TARGET.NAME}", args.target?.name!);
-                    break;
-                }
-                case word.includes("${TARGET.ID}"): {
-                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${TARGET.ID}", args.target?.id!);
-                    break;
-                }
-
-                // User:
-                case word.includes("${USER.NAME}"): {
-                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${USER.NAME}", args.user?.name!);
-                    break;
-                }
-                case word.includes("${USER.ID}"): {
-                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${USER.ID}", args.user?.id!);
-                    break;
-                }
-                
                 // Uptime:
                 case word.includes("${UPTIME}"): {
                     _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${UPTIME}", process.uptime().toString());
@@ -202,13 +215,6 @@ class Localizator {
                     _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${UPTIMEF}", formatTime(process.uptime()));
                     break;
                 }
-                
-                // Channel:
-                case word.includes("${CHANNELS.CLIENT.LENGTH}"): {
-                    _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${CHANNELS.CLIENT.LENGTH}", args.storage!.getClientChannelIDs.length.toString());
-                    break;
-                }
-
                 // Package.json:
                 case word.includes("${PCK.NAME}"): {
                     _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${PCK.NAME}", pck.name);

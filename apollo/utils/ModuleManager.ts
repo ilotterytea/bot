@@ -29,44 +29,57 @@ import JoinChat from "../../shared_modules/JoinChat";
 import Settings from "../../shared_modules/Settings";
 import UserLookup from "../../shared_modules/UserData";
 import TimerCreator from "../../shared_modules/TimerCreator";
+import IStorage from "../interfaces/IStorage";
 
 class ModuleManager {
     private modules: {[module_id: string]: IModule.IModule};
     private cooldown: {[module_id: string]: string[]};
 
+    /** Module caller. */
     constructor () {
         this.modules = {};
         this.cooldown = {};
     }
 
+    /**
+     * Call the module.
+     * @param module_id Module ID.
+     * @param args Arguments.
+     * @param optional_args Optional arguments.
+     * @returns response from module.
+     */
     async call(module_id: string, args: IArguments, ...optional_args: any[]) : Promise<string | boolean> {
         if (!(module_id in this.modules)) return Promise.resolve(false);
 
         this.createCooldownArray(module_id);
 
-        if (this.cooldown[module_id].includes(args.user.id)) return Promise.resolve(false);
+        if (this.cooldown[module_id].includes(args.Sender.ID)) return Promise.resolve(false);
 
-        if ((args.user.extRole < this.modules[module_id].permissions!)) {
+        if (args.Sender.extRole === undefined) return Promise.resolve(false);
+        if ((args.Sender.extRole < this.modules[module_id].permissions!)) {
             return Promise.resolve(false);
         }
 
         var response = Promise.resolve(await this.modules[module_id].run(args));
-        this.cooldownUser(args.user.id, module_id, this.modules[module_id].cooldownMs!);
+        this.cooldownUser(args.Sender.ID, module_id, this.modules[module_id].cooldownMs!);
 
         return response;
     }
 
+    /**
+     * Initialize the module caller.
+     */
     init() {
-        this.modules["ping"] = new Ping(5000, IModule.AccessLevels.PUBLIC);
-        this.modules["spam"] = new Spam(30000, IModule.AccessLevels.MOD);
-        this.modules["massping"] = new Massping(60000, IModule.AccessLevels.BROADCASTER);
         this.modules["ecount"] = new EmoteCounter(5000, IModule.AccessLevels.PUBLIC);
-        this.modules["etop"] = new EmoteTop(10000, IModule.AccessLevels.PUBLIC);
-        this.modules["system"] = new SystemProcess(0, IModule.AccessLevels.BROADCASTER);
-        this.modules["join"] = new JoinChat(0, IModule.AccessLevels.PUBLIC);
-        this.modules["set"] = new Settings(5000, IModule.AccessLevels.BROADCASTER);
-        this.modules["user"] = new UserLookup(10000, IModule.AccessLevels.PUBLIC);
+        this.modules["etop"] = new EmoteTop(5000, IModule.AccessLevels.PUBLIC);
+        this.modules["join"] = new JoinChat(120000, IModule.AccessLevels.PUBLIC);
+        this.modules["ping"] = new Ping(5000, IModule.AccessLevels.PUBLIC);
+        this.modules["massping"] = new Massping(60000, IModule.AccessLevels.BROADCASTER);
+        this.modules["spam"] = new Spam(30000, IModule.AccessLevels.MOD);
+        this.modules["set"] = new Settings(10000, IModule.AccessLevels.BROADCASTER);
+        this.modules["system"] = new SystemProcess(30000, IModule.AccessLevels.SUPAUSER);
         this.modules["timer"] = new TimerCreator(10000, IModule.AccessLevels.BROADCASTER);
+        this.modules["user"] = new UserLookup(10000, IModule.AccessLevels.PUBLIC);
     }
 
     private createCooldownArray(module_id: string) {

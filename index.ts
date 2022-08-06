@@ -22,8 +22,8 @@ import Files from "./apollo/files/Files";
 import IConfiguration from "./apollo/interfaces/IConfiguration";
 import CLI from "./apollo/utils/CLI";
 import ServerInit from "./www/ServerInit";
-import StoreManager from "./apollo/files/StoreManager";
 import TwitchApi from "./apollo/clients/ApiClient";
+import LocalStorage from "./apollo/files/LocalStorage";
 
 const log: Logger = new Logger({name: "itb2-main"});
 
@@ -49,10 +49,11 @@ async function Main() {
         cfg.Authorization.AccessToken
     );
     
-    const Datastore: StoreManager = new StoreManager("local/datastore.json", "local/targets", TmiApi);
+    const Storage: LocalStorage = new LocalStorage("local/targets","local/datastore.json");
+    await Storage.Global.convertIDsToUsernames(TmiApi);
 
-    await ServerInit(CLIArguments, Datastore, TmiApi, cfg);
-    if (!CLIArguments["testWebOnly"]) await ApolloInit(CLIArguments, Datastore, TmiApi, cfg);
+    await ServerInit(CLIArguments, Storage, TmiApi, cfg);
+    if (!CLIArguments["testWebOnly"]) await ApolloInit(CLIArguments, Storage, TmiApi, cfg);
 }
 
 Main();

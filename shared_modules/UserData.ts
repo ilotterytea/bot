@@ -31,7 +31,7 @@ export default class UserLookup implements IModule.IModule {
     }
 
     async run(Arguments: IArguments) {
-        var _message: string[] = Arguments.message.raw!.split(' ');
+        var _message: string[] = Arguments.Message.raw.split(' ');
         var username: string = _message[1];
 
         var onlyPfp: boolean = _message.includes('--pic') || _message.includes('-p');
@@ -39,12 +39,15 @@ export default class UserLookup implements IModule.IModule {
 
         var response = await axios.get("https://api.ivr.fi/twitch/resolve/" + username, {responseType: "json"});
 
-        if (response.status != 200) return Promise.resolve(false);
-
         const data = response.data;
 
+        console.log(response.statusText);
+        if (response.status != 200) return Promise.resolve(Arguments.Services.Locale.parsedText("msg.api_error", Arguments, [
+            `${response.status}`
+        ]));
+
         if (onlyRules) {
-            return Promise.resolve(Arguments.localizator!.parsedText("cmd.user.rules", Arguments, [
+            return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.user.rules", Arguments, [
                 data.login,
                 data.id,
                 data.chatSettings.rules.join(', ')
@@ -52,14 +55,14 @@ export default class UserLookup implements IModule.IModule {
         }
 
         if (onlyPfp) {
-            return Promise.resolve(Arguments.localizator!.parsedText("cmd.user.picture", Arguments, [
+            return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.user.picture", Arguments, [
                 data.login,
                 data.id,
                 data.logo
             ]));
         }
 
-        return Promise.resolve(Arguments.localizator!.parsedText("cmd.user.lookup", Arguments, [
+        return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.user.lookup", Arguments, [
             data.displayName,
             data.login,
             data.id,

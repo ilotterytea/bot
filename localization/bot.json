@@ -28,8 +28,8 @@
         "ru_ru": "@${USER.NAME}, ${0} Краткое описание: ${1} Остывание: ${2} Остальные детали: ${3}"
     },
     "msg.api_error": {
-        "en_us": "@${USER.NAME}, The API ${0} returned the status code: ${1}",
-        "ru_ru": "@${USER.NAME}, ${0} API вернул код состояния: ${1}"
+        "en_us": "@${USER.NAME}, The API returned the status code: ${1}",
+        "ru_ru": "@${USER.NAME}, API вернул код состояния: ${1}"
     },
     "msg.wrong_option": {
         "en_us": "@${USER.NAME}, wrong value for option ${0}. Maybe you should try ${0} ${1} ?",

@@ -21,13 +21,13 @@ import http from "http";
 import https from "https";
 import IConfiguration from "../apollo/interfaces/IConfiguration";
 import { readdirSync, readFileSync } from "fs";
-import StoreManager from "../apollo/files/StoreManager";
 import TwitchApi from "../apollo/clients/ApiClient";
 import IStorage from "../apollo/interfaces/IStorage";
+import LocalStorage from "../apollo/files/LocalStorage";
 
 const log: Logger = new Logger({name: "www-serverinit"});
 
-async function ServerInit(opts: {[key: string]: string}, storage: StoreManager, ttvapi: TwitchApi.Client, ssl_certificate: IConfiguration) {
+async function ServerInit(opts: {[key: string]: string}, storage: LocalStorage, ttvapi: TwitchApi.Client, ssl_certificate: IConfiguration) {
     
     try {
         const App = express();
@@ -88,8 +88,8 @@ async function ServerInit(opts: {[key: string]: string}, storage: StoreManager, 
             if (req.query.s == "target") {
                 const users: any[] = [];
 
-                for await (const target of Object.keys(storage.targets.getTargets)) {
-                    await ttvapi.getUserByName(storage.targets.getTargets[target].Name!).then(async (user) => {
+                for await (const target of Object.keys(storage.Targets.getTargets)) {
+                    await ttvapi.getUserByName(storage.Targets.getTargets[target].Name!).then(async (user) => {
                         if (user === undefined) return false;
                         users.push(user);
                     });
@@ -108,8 +108,8 @@ async function ServerInit(opts: {[key: string]: string}, storage: StoreManager, 
             // usernames:
             if (isNaN(parseInt(req.params.id))) {
                 var found: boolean = false;
-                for (const target of Object.keys(storage.targets.getTargets)) {
-                    if (req.params.id.toLowerCase() == storage.targets.getTargets[target].Name!) {
+                for (const target of Object.keys(storage.Targets.getTargets)) {
+                    if (req.params.id.toLowerCase() == storage.Targets.getTargets[target].Name!) {
                         req.params.id = target;
                         found = true;
                     }
@@ -126,7 +126,7 @@ async function ServerInit(opts: {[key: string]: string}, storage: StoreManager, 
             }
 
             // ids:
-            if (!(req.params.id in storage.targets.getTargets) && /^[0-9].*$/.test(req.params.id)) {
+            if (!(req.params.id in storage.Targets.getTargets) && /^[0-9].*$/.test(req.params.id)) {
                 res.render("pages/error", {
                     status: 404,
                     message: "Target with ID " + req.params.id +" not found.",
@@ -135,7 +135,7 @@ async function ServerInit(opts: {[key: string]: string}, storage: StoreManager, 
                 return;
             }
 
-            var itb2data: IStorage.Target = storage.targets.getTargets[req.params.id];
+            var itb2data: IStorage.Target = storage.Targets.getTargets[req.params.id];
             var ttvdata = (isNaN(parseInt(req.params.id))) ? await ttvapi.getUserByName(req.params.id) : await ttvapi.getUserById(parseInt(req.params.id));
 
             res.render("pages/channel", {

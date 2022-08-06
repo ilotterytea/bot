@@ -31,34 +31,34 @@ export default class Massping implements IModule.IModule {
     }
 
     async run(Arguments: IArguments) {
-        const response = await axios.get(`https://tmi.twitch.tv/group/user/${Arguments.target.name.slice(1, Arguments.target.name.length)}/chatters`);
+        const response = await axios.get(`https://tmi.twitch.tv/group/user/${Arguments.Target.Username}/chatters`);
         const chatters: {[role_name: string]: string[]} = response.data.chatters;
-        const message: string[] = Arguments.message.raw!.split(' ');
+        const message: string[] = Arguments.Message.raw.split(' ');
 
         delete message[0];
 
         for (var i = 0; i < chatters.vips.length; i++) {
-            Arguments.client!.say(Arguments.target.name, `@${chatters.vips[i]}, ${message.join(' ').trim()}`);
+            Arguments.Services.Client.say(`#${Arguments.Target.Username}`, `@${chatters.vips[i]}, ${message.join(' ').trim()}`);
         }
 
         for (var i = 0; i < chatters.moderators.length; i++) {
-            Arguments.client!.say(Arguments.target.name, `@${chatters.moderators[i]}, ${message.join(' ').trim()}`);
+            Arguments.Services.Client.say(`#${Arguments.Target.Username}`, `@${chatters.moderators[i]}, ${message.join(' ').trim()}`);
         }
 
         for (var i = 0; i < chatters.staff.length; i++) {
-            Arguments.client!.say(Arguments.target.name, `@${chatters.staff[i]}, ${message.join(' ').trim()}`);
+            Arguments.Services.Client.say(`#${Arguments.Target.Username}`, `@${chatters.staff[i]}, ${message.join(' ').trim()}`);
         }
 
         for (var i = 0; i < chatters.admins.length; i++) {
-            Arguments.client!.say(Arguments.target.name, `@${chatters.admins[i]}, ${message.join(' ').trim()}`);
+            Arguments.Services.Client.say(`#${Arguments.Target.Username}`, `@${chatters.admins[i]}, ${message.join(' ').trim()}`);
         }
 
         for (var i = 0; i < chatters.global_mods.length; i++) {
-            Arguments.client!.say(Arguments.target.name, `@${chatters.global_mods[i]}, ${message.join(' ').trim()}`);
+            Arguments.Services.Client.say(`#${Arguments.Target.Username}`, `@${chatters.global_mods[i]}, ${message.join(' ').trim()}`);
         }
 
         for (var i = 0; i < chatters.viewers.length; i++) {
-            Arguments.client!.say(Arguments.target.name, `@${chatters.viewers[i]}, ${message.join(' ').trim()}`);
+            Arguments.Services.Client.say(`#${Arguments.Target.Username}`, `@${chatters.viewers[i]}, ${message.join(' ').trim()}`);
         }
 
         return Promise.resolve(true);

@@ -21,7 +21,7 @@ import { Logger } from "tslog";
 import TwitchApi from "./clients/ApiClient";
 import ApolloClient from "./clients/ApolloClient";
 import ConfigIni from "./files/ConfigIni";
-import StoreManager from "./files/StoreManager";
+import LocalStorage from "./files/LocalStorage";
 import Messages from "./handlers/MessageHandler";
 import TimerHandler from "./handlers/TimerHandler";
 import IConfiguration from "./interfaces/IConfiguration";
@@ -30,11 +30,12 @@ import Localizator from "./utils/Locale";
 import ModuleManager from "./utils/ModuleManager";
 const log: Logger = new Logger({name: "itb2-main"});
 
-async function ApolloInit(opts: {[key: string]: any}, Datastore: StoreManager, TmiApi: TwitchApi.Client, cfg: IConfiguration) {
-    const Config: IConfiguration = cfg;
-
-    await Datastore.parseChannels(Datastore.getClientChannelIDs);
-
+async function ApolloInit(
+    Opts: {[key: string]: any},
+    Storage: LocalStorage,
+    TmiApi: TwitchApi.Client, 
+    Config: IConfiguration
+) {
     const Locale: Localizator = new Localizator();
 
     Locale.load("localization/bot.json");
@@ -45,30 +46,55 @@ async function ApolloInit(opts: {[key: string]: any}, Datastore: StoreManager, T
         access_token: Config.Authorization.AccessToken
     });
 
-    const Timer: TimerHandler = new TimerHandler(Datastore.targets.getTargets);
+    const Timer: TimerHandler = new TimerHandler(Storage.Targets.getTargets);
     await Timer.IDsToUsernames(TmiApi);
 
-    Locale.setPreferredLanguages(Datastore.targets.getTargets, Datastore.targets.getUserlinks());
+    Locale.setPreferredLanguages(Storage.Targets.getTargets, Storage.Global.getSymlinks);
+
     Modules.init();
 
     const TmiClient: Client = ApolloClient(
         Config.Authorization.Username,
         Config.Authorization.Password,
-        Datastore.getClientChannelNames!,
-        opts["debug"]
+        Object.keys(Storage.Global.getSymlinks),
+        Opts["debug"]
     );
 
-    const STVEmotes: EmoteUpdater.SevenTV = new EmoteUpdater.SevenTV(Emotelib.seventv, Datastore.getClientChannelNames);
+    const Emotes: EmoteUpdater = new EmoteUpdater({
+        identify: {
+            access_token: Config.Authorization.AccessToken,
+            client_id: Config.Authorization.ClientID
+        },
+        services: {
+            client: TmiClient,
+            localizator: Locale,
+            twitch_api: TmiApi
+        }
+    });
 
-    await STVEmotes.load(Datastore.targets.getTargets);
+    await Emotes.load(Storage.Targets.getTargets);
 
-    STVEmotes.subscribeToEmoteUpdates(TmiClient, Locale, Datastore.getClientChannelNames);
     try {
-        await Messages.Handler(TmiClient, TmiApi, Datastore, Locale, Modules, STVEmotes, Timer);
+        for (const name of Object.keys(Storage.Global.getSymlinks)) {
+            await Emotes.sync7TVEmotes(name, false);
+            await Emotes.syncBTTVEmotes(name, false);
+            await Emotes.syncFFZEmotes(name, false);
+            await Emotes.syncTTVEmotes(name, false);
+        }
+
+        await Messages.Handler({
+            Client: TmiClient,
+            Locale: Locale,
+            Storage: Storage,
+            TwitchApi: TmiApi,
+            Timer: Timer,
+            Module: Modules,
+            Emote: Emotes
+        });        
+
     } catch (err) {
         log.error(err);
     }
-
 }
 
 export default ApolloInit;

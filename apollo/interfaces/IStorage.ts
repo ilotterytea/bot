@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
+import { EmoteProviders } from "../types/SmolTypes"
+import IModule from "./IModule"
+
 namespace IStorage {
     /** @deprecated */
     export interface V1Main {
@@ -52,8 +55,8 @@ namespace IStorage {
         },
         Global: {
             Prefix: string,
-            Modules: {[module_id: string]: Module},
-            Users: {[user_extid: string]: User}
+            Modules: Module[],
+            Users: User[]
         }
     }
 
@@ -73,7 +76,7 @@ namespace IStorage {
         SuccessfullyCompletedTests?: number | undefined,
         ExecutedCommands?: number | undefined,
         AuthToken?: string | undefined,
-        Emotes?: {[provider_id: string]: {[emote_id: string]: Emote}}
+        Emotes?: {[provider_id: string]: Emote[]}
     }
 
     export interface Timer{
@@ -82,11 +85,27 @@ namespace IStorage {
         IntervalMs: number
     }
 
+    /**
+     * 7TV/BetterTTV/FrankerFaceZ emote interface.
+     */
     export interface Emote {
-        ID?: string | undefined,
+        /** Name of the emote. */
+        Name: string,
+
+        /** ID of the emote. */
+        ID: string,
+
+        /** History of emote name. */
+        NameHistory?: string[],
+        
+        /** How many times was the emote used? */
         UsedTimes: number,
-        OriginalName?: string | undefined,
-        isDeleted?: boolean | undefined
+        
+        /** Is emote deleted from the chat room? */
+        isDeleted?: boolean | undefined,
+
+        /** Is emote global? */
+        isGlobal?: boolean | undefined
     }
 
     export interface Module {
@@ -97,12 +116,17 @@ namespace IStorage {
     }
 
     export interface User {
-        InternalType?: InternalUserTypes | string | undefined
+        ID: string,
+        InternalType?: InternalRoles | undefined,
+        ExternalType?: IModule.AccessLevels | undefined
     }
 
-    type InternalUserTypes = "" | "suspended" | "special" | "supauser";
+    export enum InternalRoles {
+        SUSPENDED,
+        SUPAUSER
+    }
+
     type ModuleTypes = "scripted" | "static";
-    type EmoteProviderTypes = "ttv" | "bttv" | "ffz" | "stv";
 }
 
 export default IStorage;

@@ -30,21 +30,21 @@ export default class Spam implements IModule.IModule {
     }
 
     async run(Arguments: IArguments) {
-        var count: number = parseInt(Arguments.message.raw!.split(' ')[1]);
+        var count: number = parseInt(Arguments.Message.raw.split(' ')[1]);
 
         if (isNaN(count)) {
-            return Promise.resolve(Arguments.localizator!.parsedText("cmd.spam.unresolved_number", Arguments, [
-                Arguments.message.raw!.split(' ')[1]
+            return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.spam.unresolved_number", Arguments, [
+                Arguments.Message.raw.split(' ')[1]
             ]));
         }
 
         if (count > 32) {
-            return Promise.resolve(Arguments.localizator!.parsedText("cmd.spam.limit_reached", Arguments, [
+            return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.spam.limit_reached", Arguments, [
                 32
             ]));
         }
 
-        var message: string[] = Arguments.message.raw!.split(' ');
+        var message: string[] = Arguments.Message.raw.split(' ');
 
         var useCounter: boolean | undefined = (message.includes("-c") || message.includes("--counter")) ? true : false;
 
@@ -57,11 +57,11 @@ export default class Spam implements IModule.IModule {
         delete message[1];
 
         if (commandRegex.test(message.join(' ').trim())) {
-            return Promise.resolve(Arguments.localizator!.parsedText("cmd.spam.forbidden_symbol", Arguments));
+            return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.spam.forbidden_symbol", Arguments));
         }
 
         for (var index = 0; index < count; index++) {
-            Arguments.client!.say(Arguments.target.name, `${message.join(' ')} ${(useCounter) ? index + 1 : ""}`)
+            Arguments.Services.Client.say(Arguments.Target.Username, `${message.join(' ')} ${(useCounter) ? index + 1 : ""}`)
         }
 
         // 👍:

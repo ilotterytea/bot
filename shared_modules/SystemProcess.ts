@@ -31,14 +31,14 @@ export default class SystemProcess implements IModule.IModule {
     }
 
     async run(Arguments: IArguments) {
-        const turi_ip_ip = Arguments.message.raw!.split(' ')[1];
+        const turi_ip_ip = Arguments.Message.raw.split(' ')[1];
 
         switch (turi_ip_ip) {
             case "pull":
-                await Arguments.client!.say(Arguments.target.name, Arguments.localizator!.parsedText("cmd.system.pull", Arguments));
+                await Arguments.Services.Client.say(Arguments.Target.Username, Arguments.Services.Locale.parsedText("cmd.system.pull", Arguments));
                 child.exec("git pull");
                 // timeout for updating the git message:
-                setTimeout(async () => { await Arguments.client!.say(Arguments.target.name, Arguments.localizator!.parsedText("cmd.system.pulled", Arguments)); }, 1000);
+                setTimeout(async () => { await Arguments.Services.Client.say(Arguments.Target.Username, Arguments.Services.Locale.parsedText("cmd.system.pulled", Arguments)); }, 1000);
                 break;
             default:
                 break;

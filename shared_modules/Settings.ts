@@ -30,37 +30,39 @@ export default class Settings implements IModule.IModule {
     }
 
     async run(Arguments: IArguments) {
-        const _message: string[] = Arguments.message.raw!.split(' ');
+        const _message: string[] = Arguments.Message.raw.split(' ');
 
         switch (true) {
             case (_message.includes("--lang")): {
                 if (_message.indexOf("--lang") + 1 > _message.length - 1) {
-                    return Promise.resolve(Arguments.localizator!.parsedText("cmd.set.language.available", Arguments));
+                    return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.set.language.available", Arguments));
                 }
 
                 const value = _message[_message.indexOf("--lang") + 1];
 
-                if (Arguments.localizator!.getLanguages === undefined) {
+                if (Arguments.Services.Locale.getLanguages === undefined) {
                     return Promise.resolve(false);
                 }
 
-                if (!(value in Arguments.localizator!.getLanguages)) {
-                    return Promise.resolve(Arguments.localizator!.parsedText("cmd.set.language.not_found", Arguments, [value]));
+                if (!(value in Arguments.Services.Locale.getLanguages)) {
+                    return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.set.language.not_found", Arguments, [value]));
                 }
 
-                Arguments.localizator!.addPreferredUser(value, Arguments.target.id);
-                Arguments.storage!.targets.edit(Arguments.target.id, "LanguageId", value);
-                return Promise.resolve(Arguments.localizator!.parsedText("cmd.set.language.success", Arguments));
+                Arguments.Services.Locale.addPreferredUser(value, Arguments.Target.ID);
+                Arguments.Services.Storage.Targets.set(Arguments.Target.ID, "LanguageId", value);
+                return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.set.language.success", Arguments));
             }
             case (_message.includes("--prefix")): {
                 if (_message.indexOf("--prefix") + 1 > _message.length - 1) {
-                    return Promise.resolve(Arguments.localizator!.parsedText("msg.wrong_option", Arguments, ["--prefix", "[STRING]"]));
+                    return Promise.resolve(Arguments.Services.Locale.parsedText("msg.wrong_option", Arguments, ["--prefix", "[STRING]"]));
                 }
 
-                const value = _message[_message.indexOf("--prefix") + 1];
+                var value = _message[_message.indexOf("--prefix") + 1];
 
-                Arguments.storage!.targets.edit(Arguments.target.id, "Prefix", value);
-                return Promise.resolve(Arguments.localizator!.parsedText("cmd.set.prefix.success", Arguments, [value]));
+                value = value.replace("[space]", ' ');
+
+                Arguments.Services.Storage.Targets.set(Arguments.Target.ID, "Prefix", value);
+                return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.set.prefix.success", Arguments, [value]));
             }
             default: {
                 break;

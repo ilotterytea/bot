@@ -62,8 +62,8 @@ namespace Files {
             },
             Global: {
                 Prefix: "!",
-                Modules: {},
-                Users: {}
+                Modules: [],
+                Users: []
             }
         }
 

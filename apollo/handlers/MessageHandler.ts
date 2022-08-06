@@ -21,9 +21,10 @@ import {
     Client
 } from "tmi.js";
 import TwitchApi from "../clients/ApiClient";
-import StoreManager from "../files/StoreManager";
+import LocalStorage from "../files/LocalStorage";
 import IArguments from "../interfaces/IArguments";
 import IModule from "../interfaces/IModule";
+import IServices from "../interfaces/IServices";
 import IStorage from "../interfaces/IStorage";
 import EmoteUpdater from "../utils/emotes/EmoteUpdater";
 import Localizator from "../utils/Locale";
@@ -31,115 +32,120 @@ import ModuleManager from "../utils/ModuleManager";
 import TimerHandler from "./TimerHandler";
 
 namespace Messages {
-    export async function Handler(
-        client: Client,
-        api: TwitchApi.Client,
-        storage: StoreManager,
-        locale: Localizator,
-        module: ModuleManager,
-        stvemotes: EmoteUpdater.SevenTV,
-        timer: TimerHandler
-    ) {
-        client.on("message", async (channel: string, user: ChatUserstate, message: string, self: boolean) => {
+    /**
+     * Twitch TMI message handler.
+     * @param Services services.
+     */
+    export async function Handler(Services: IServices) {
+        Services.Client.on("message", async (channel: string, user: ChatUserstate, message: string, self: boolean) => {
             if (self) return;
-            // Create a new target file if the channel was created recently:
-            if (!storage.targets.isExists(user["room-id"])) storage.targets.add(user["room-id"], {
-                SuccessfullyCompletedTests: 0,
-                ExecutedCommands: 0,
-                ChatLines: 0,
-                Emotes: {},
-                Timers: {},
-                Modules: {},
-                Name: channel.slice(1, channel.length)
-            });
 
-            // +1 chat line to the target's file:
-            storage.targets.edit(user["room-id"], "ChatLines", storage.targets.get(user["room-id"], "ChatLines") as number + 1);
-
-            await stvemotes.levelUpEmote(message, channel.slice(1, channel.length));
-
-            if (message == "test") {
-                storage.targets.edit(user["room-id"], "SuccessfullyCompletedTests", storage.targets.get(user["room-id"], "SuccessfullyCompletedTests") as number + 1);
-                client.say(channel, locale.parsedText("msg.test", {
-                    user: {
-                        extRole: 0,
-                        name: "",
-                        id: ""
-                    },
-                    message: {
-                        command: ""
-                    },
-                    target: {
-                        id: user["room-id"]!,
-                        name: ""
-                    }
-                }, ["test", storage.targets.get(user["room-id"], "SuccessfullyCompletedTests") as number]));
+            // Command prefix:
+            const prefix: string = Services.Storage.Targets.containsKey(user["room-id"]!, "Prefix") ? Services.Storage.Targets.get(user["room-id"]!, "Prefix") as string : Services.Storage.Global.getPrefix;
+            
+            // Arguments:
+            var args: IArguments = {
+                Services: Services,
+                Sender: {
+                    Username: user.username!,
+                    ID: user["user-id"]!,
+                    extRole: IModule.AccessLevels.PUBLIC
+                },
+                Target: {
+                    Username: channel.slice(1, channel.length),
+                    ID: user["room-id"]!,
+                    Emotes: (Services.Emote !== undefined) ? Services.Emote.getEmotes[user["room-id"]!] : undefined
+                },
+                Message: {
+                    raw: message,
+                    command: message.split(' ')[0].split(prefix)[1]
+                }
             }
 
-            const prefix: string = (storage.targets.isValueExists(user["room-id"], "Prefix")) ? storage.targets.get(user["room-id"], "Prefix") as string : storage.getGlobalPrefix
+            // Assigning the roles:
+            if (Services.Storage.Users.contains(args.Sender.ID)) {
+                const role = Services.Storage.Users.get(args.Sender.ID, "InternalType");
+                if (role !== undefined) args.Sender.intRole = role as IStorage.InternalRoles;
+            }
 
+            if (args.Target.ID === args.Sender.ID) args.Sender.extRole = IModule.AccessLevels.BROADCASTER;
+            if (user["badges"]?.moderator === "1") args.Sender.extRole = IModule.AccessLevels.MOD;
+            if (user["badges"]?.vip === "1") args.Sender.extRole = IModule.AccessLevels.VIP;
+
+            // +1 chat line to the target's file:
+            Services.Storage.Targets.set(
+                args.Target.ID,
+                "ChatLines",
+                Services.Storage.Targets.get(args.Target.ID, "ChatLines") as number + 1
+            );
+
+            // +1 used times to the emote:
+            if (Services.Emote !== undefined) Services.Emote.increaseEmoteCount(args.Message.raw, args.Target.ID);
+
+            // Complete a test:
+            if (message == "test") {
+                Services.Storage.Targets.set(
+                    args.Target.ID,
+                    "SuccessfullyCompletedTests",
+                    Services.Storage.Targets.get(args.Target.ID, "SuccessfullyCompletedTests") as number + 1
+                );
+
+                Services.Client.say(
+                    `#${args.Target.Username}`,
+                    Services.Locale.parsedText("msg.test", args, [
+                        "test",
+                        Services.Storage.Targets.get(args.Target.ID, "SuccessfullyCompletedTests") as number
+                    ])
+                );
+            }
+
+            console.log(prefix);
+            // Start processing the commands:
             if (message.startsWith(prefix)) {
-                var args: IArguments = {
-                    client: client,
-                    localizator: locale,
-                    storage: storage,
-                    bot: {
-                        name: ""
-                    },
-                    target: {
-                        id: user["room-id"]!,
-                        name: channel
-                    },
-                    user: {
-                        extRole: IModule.AccessLevels.PUBLIC,
-                        name: user["username"]!,
-                        id: user["user-id"]!
-                    },
-                    message: {
-                        raw: message,
-                        command: message.split(' ')[0].split(prefix)[1]
-                    },
-                    channel_emotes: stvemotes.getAllChannelEmotes(channel.slice(1, channel.length)),
-                    stv: stvemotes,
-                    tapi: api,
-                    timer: timer
-                }
+                console.log(args.Message.command);
 
-                if (storage.users.get(user["user-id"], "InternalType") === "supauser") args.user.extRole = IModule.AccessLevels.SUPAUSER;
-                else {
-                    if (args.user.id === args.target.id) args.user.extRole = IModule.AccessLevels.BROADCASTER;
-                    if (user["badges"]?.moderator === "1") args.user.extRole = IModule.AccessLevels.MOD;
-                    if (user["badges"]?.vip === "1") args.user.extRole = IModule.AccessLevels.VIP;
-                }
+                // Execute command if it exists:
+                if (Services.Module === undefined) throw new Error("Cannot process the commands. No module instances assigned to services.");
+                
+                if (Services.Module.contains(args.Message.command)) {
+                    const response: boolean | string = await Services.Module.call(args.Message.command, args);
 
-                if (module.contains(args.message.command!)) {
-                    var response = await module.call(args.message.command!, args);
+                    if (typeof response === "boolean") return;
 
-                    if (typeof response == "boolean") {
-                        return;
-                    }
-                    
-                    args.storage!.targets.edit(
-                        user["room-id"]!, "ExecutedCommands",
-                        args.storage!.targets.get(user["room-id"]!, "ExecutedCommands") as number + 1
-                    );
-
-                    return client.say(channel, response as string);
+                    Services.Client.say(`#${args.Target.Username}`, response);
                 }
             }
         });
 
         // Save local files:
         setInterval(async () => {
-            await storage.save(stvemotes.getEmotes, timer.getTimers);
-        }, 60000);
+            if (Services.Emote !== undefined && Services.Timer !== undefined) {
+                Services.Storage.save(Services.Emote.getEmotes, Services.Timer.getTimers);
+                return;
+            }
+            Services.Storage.save();
+        }, 3600000);
 
         process.once("SIGHUP", async () => {
-            await client.disconnect();
-            await storage.save(stvemotes.getEmotes, timer.getTimers);
+            await Services.Client.disconnect();
+            
+            if (Services.Emote !== undefined && Services.Timer !== undefined) {
+                Services.Storage.save(Services.Emote.getEmotes, Services.Timer.getTimers);
+                return;
+            }
+            
+            Services.Storage.save();
         });
+        setInterval(async () => {
+            if (Services.Emote === undefined) return;
 
-        timer.tick(client);
+            for (const name of Object.keys(Services.Storage.Global.getSymlinks)) {
+                await Services.Emote.syncBTTVEmotes(name, false);
+                await Services.Emote.syncFFZEmotes(name, false);
+                await Services.Emote.syncTTVEmotes(name, false);
+            }
+        }, 30000);
+        if (Services.Timer !== undefined) Services.Timer.tick(Services.Client);
     }
 
     export async function StaticCommandHandler(args: IArguments) {

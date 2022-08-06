@@ -120,7 +120,7 @@ class TimerHandler {
         if (timer_id in this.tickDict[target_id]) return false;
 
         this.timers[target_id][timer_id].Value = true;
-        this.newTick(target_id, timer_id, args.client!, args.target.name, this.timers[target_id][timer_id].Response, this.timers[target_id][timer_id].IntervalMs);
+        this.newTick(target_id, timer_id, args.Services.Client, args.Target.Username, this.timers[target_id][timer_id].Response, this.timers[target_id][timer_id].IntervalMs);
         return true;
     }
 

@@ -35,31 +35,28 @@ export default class JoinChat implements IModule.IModule {
     }
 
     async run(Arguments: IArguments) {
-        var channel: string = Arguments.user.name;
-        const messages: string[] = Arguments.message.raw!.split(' ');
+        var channel: string = Arguments.Sender.Username;
+        const messages: string[] = Arguments.Message.raw.split(' ');
 
         // if (messages.length > 1) {
         //    channel = messages[1];
         //}
 
-        Arguments.client!.join(`#${Arguments.user.name}`);
-        Arguments.client!.say(`#${Arguments.user.name}`, "FeelsDankMan hello");
+        Arguments.Services.Client.join(`#${Arguments.Sender.Username}`);
+        Arguments.Services.Client.say(`#${Arguments.Sender.Username}`, "FeelsDankMan hello");
 
-        await Arguments.storage!.targets.add(Arguments.user.id, {
+        Arguments.Services.Storage.Targets.create(Arguments.Sender.ID, {
             SuccessfullyCompletedTests: 0,
             ChatLines: 0,
             ExecutedCommands: 0,
             Emotes: {},
             Modules: {},
-            Name: Arguments.user.name
+            Timers: {}
         });
 
-        Arguments.stv?.newTargetEmote(Arguments.user.name);
-        Arguments.stv?.join(Arguments.user.name);
-
-        return Promise.resolve(Arguments.localizator!.parsedText("cmd.join.response", Arguments, [
-            Arguments.user.name,
-            Arguments.user.id
+        return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.join.response", Arguments, [
+            Arguments.Target.Username,
+            Arguments.Target.ID
         ]
         ));
     }

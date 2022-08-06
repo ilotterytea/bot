@@ -15,39 +15,59 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
-import { Client } from "tmi.js";
-import TwitchApi from "../clients/ApiClient";
-import StoreManager from "../files/StoreManager";
-import TimerHandler from "../handlers/TimerHandler";
-import EmoteUpdater from "../utils/emotes/EmoteUpdater";
-import Localizator from "../utils/Locale";
 import IModule from "./IModule";
+import IServices from "./IServices";
 import IStorage from "./IStorage";
 
+/** Arguments. */
 interface IArguments {
-    client?: Client;
-    storage?: StoreManager;
-    localizator?: Localizator;
-    bot?: {
-        name: string
+    /** Services. */
+    Services: IServices
+
+    /** Bot info. */
+    Bot?: {
+        /** Bot's username. */
+        Username: string
     },
-    user: {
-        extRole: IModule.AccessLevels,
-        name: string,
-        id: string
+
+    /** Sender info. */
+    Sender: {
+        /** Sender's username. */
+        Username: string,
+
+        /** Sender's Twitch ID. */
+        ID: string,
+
+        /** Sender's internal role. */
+        intRole?: IStorage.InternalRoles | undefined,
+
+        /** Sender's external role. */
+        extRole?: IModule.AccessLevels | undefined
     },
-    target: {
-        name: string,
-        id: string
+
+    /** Channel info. */
+    Target: {
+        /** Channel's name. */
+        Username: string,
+
+        /** Channel's Twitch ID. */
+        ID: string,
+
+        /** Channel's Emotes. */
+        Emotes?: {[provider_id: string]: IStorage.Emote[]}
     },
-    message: {
-        raw?: string,
-        command: string
-    },
-    channel_emotes?: {[emote_name: string]: IStorage.Emote},
-    stv?: EmoteUpdater.SevenTV | undefined,
-    tapi?: TwitchApi.Client | undefined,
-    timer?: TimerHandler | undefined
+
+    /** Message. */
+    Message: {
+        /** Raw message. */
+        raw: string,
+
+        /** Command. */
+        command: string,
+
+        /** Options. */
+        options?: {option: string, value: string}[] | undefined
+    }
 }
 
 export default IArguments;

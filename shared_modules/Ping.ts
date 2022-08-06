@@ -37,9 +37,9 @@ export default class Ping implements IModule.IModule {
         var totalmem = await (await os.mem.used()).totalMemMb;
         var usedmem = await (await os.mem.used()).usedMemMb;
 
-        var pingms = Math.floor(Math.round((await Arguments.client!.ping())[0] * 1000));
-                
-        return Promise.resolve(Arguments.localizator!.parsedText("cmd.ping.response", Arguments, [
+        var pingms = Math.floor(Math.round((await Arguments.Services.Client.ping())[0] * 1000));
+        
+        return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.ping.response", Arguments, [
             usedmem.toString(),
             totalmem.toString(),
             pingms.toString()
