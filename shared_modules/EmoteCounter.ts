@@ -21,13 +21,11 @@ import IStorage from "../apollo/interfaces/IStorage";
 
 export default class EmoteCounter implements IModule.IModule {
     cooldownMs: number;
-    permissions: IModule.AccessLevels;
-    minPermissions?: IModule.AccessLevels;
+    permissions: number;
 
-    constructor (cooldownMs: number, perms: IModule.AccessLevels, minperms?: IModule.AccessLevels | undefined) {
+    constructor (cooldownMs: number, permissions: number) {
         this.cooldownMs = cooldownMs;
-        this.permissions = perms;
-        this.minPermissions = minperms;
+        this.permissions = permissions;
     }
 
     async run(Arguments: IArguments) {

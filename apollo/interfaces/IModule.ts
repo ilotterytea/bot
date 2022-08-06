@@ -16,12 +16,12 @@
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
 import IArguments from "./IArguments";
+import IStorage from "./IStorage";
 
 namespace IModule {
     export interface IModule {
-        cooldownMs?: number | undefined;
-        permissions?: AccessLevels | undefined;
-        minPermissions?: AccessLevels | undefined;
+        cooldownMs: number;
+        permissions: number;
         run: (Arguments: IArguments, ...args: []) => Promise<string | boolean>;
     }
     
@@ -33,11 +33,10 @@ namespace IModule {
     "supauser";
 
     export enum AccessLevels {
-        PUBLIC,
-        VIP,
-        MOD,
-        BROADCASTER,
-        SUPAUSER
+        PUBLIC = 0,
+        VIP = 1,
+        MOD = 2,
+        BROADCASTER = 3
     }
 }
 

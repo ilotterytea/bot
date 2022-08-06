@@ -56,7 +56,18 @@ class ModuleManager {
         if (this.cooldown[module_id].includes(args.Sender.ID)) return Promise.resolve(false);
 
         if (args.Sender.extRole === undefined) return Promise.resolve(false);
-        if ((args.Sender.extRole < this.modules[module_id].permissions!)) {
+        
+        if (args.Sender.intRole !== undefined) {
+            if (args.Sender.intRole < this.modules[module_id].permissions!) {
+                return Promise.resolve(false);
+            }
+        }
+
+        if (args.Sender.extRole !== undefined) {
+            if (args.Sender.extRole < this.modules[module_id].permissions!) {
+                return Promise.resolve(false);
+            }
+        } else {
             return Promise.resolve(false);
         }
 
@@ -77,7 +88,7 @@ class ModuleManager {
         this.modules["massping"] = new Massping(60000, IModule.AccessLevels.BROADCASTER);
         this.modules["spam"] = new Spam(30000, IModule.AccessLevels.MOD);
         this.modules["set"] = new Settings(10000, IModule.AccessLevels.BROADCASTER);
-        this.modules["system"] = new SystemProcess(30000, IModule.AccessLevels.SUPAUSER);
+        this.modules["system"] = new SystemProcess(30000, IStorage.InternalRoles.SUPAUSER);
         this.modules["timer"] = new TimerCreator(10000, IModule.AccessLevels.BROADCASTER);
         this.modules["user"] = new UserLookup(10000, IModule.AccessLevels.PUBLIC);
     }

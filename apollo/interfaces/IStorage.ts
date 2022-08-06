@@ -122,8 +122,8 @@ namespace IStorage {
     }
 
     export enum InternalRoles {
-        SUSPENDED,
-        SUPAUSER
+        SUSPENDED = -1,
+        SUPAUSER = 99
     }
 
     type ModuleTypes = "scripted" | "static";

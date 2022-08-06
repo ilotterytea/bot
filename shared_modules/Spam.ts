@@ -20,13 +20,10 @@ import IModule from "../apollo/interfaces/IModule";
 
 export default class Spam implements IModule.IModule {
     cooldownMs: number;
-    permissions: IModule.AccessLevels;
-    minPermissions?: IModule.AccessLevels;
-
-    constructor (cooldownMs: number, perms: IModule.AccessLevels, minperms?: IModule.AccessLevels | undefined) {
+    permissions: number;
+    constructor (cooldownMs: number, permissions: number) {
         this.cooldownMs = cooldownMs;
-        this.permissions = perms;
-        this.minPermissions = minperms;
+        this.permissions = permissions;
     }
 
     async run(Arguments: IArguments) {
