@@ -82,8 +82,10 @@ class Localizator {
      * @param optional_args Optional arguments.
      */
     public parsedText(line_id: LineIds, args?: IArguments | undefined, optional_args?: any[], options?: {
-        useUsername?: boolean | undefined
+        username?: string | undefined
     }) {
+        var user_id: string = (args === undefined) ? "" : args.Sender.ID;
+
         // If languages aren't loaded -> return string with error.
         if (this.languages === undefined) {
             return "Line ID " + line_id + " can't be defined because languages aren't loaded.";
@@ -93,26 +95,24 @@ class Localizator {
         var lang_id: string = "en_us";
         var message: string | undefined = "";
 
-        // If arguments isn't set:
-        if (args === undefined) {
-            return this.languages[lang_id][line_id];
-        }
-
         // Use username instead of user ID. Used in 7TV EventAPI notices.
-        var useUsername: boolean = (options !== undefined && options.useUsername !== undefined) ? options.useUsername : false;
+        var useUsername: boolean = (options !== undefined && options.username !== undefined && args === undefined) ? true : false;
 
         // Set the user ID on useUsername:
         if (useUsername) {
-            if (!(args.Target.Username in this.user_links)) {
-                log.warn("Username", args.Target.Username, "not found in this.user_links.");
+            if (options === undefined) return "";
+            if (options.username === undefined) return "";
+            
+            if (!(options.username in this.user_links)) {
+                log.warn("Username", options.username, "not found in this.user_links.");
                 return "";
             }
-            args.Target.Username = this.user_links[args.Target.Username];
+            user_id = this.user_links[options.username];
         }
 
         // Getting the user's preferred language:
         for (const l_id of Object.keys(this.preferred_langs)) {
-            if (this.preferred_langs[l_id].includes(args.Target.ID)) {
+            if (this.preferred_langs[l_id].includes(user_id)) {
                 lang_id = l_id;
             }
         }

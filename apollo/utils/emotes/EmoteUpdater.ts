@@ -237,17 +237,23 @@ class EmoteUpdater {
                             UsedTimes: 0
                         });
 
-                        this.tmi_client.action(`#${emote.channel}`, this.localizator.parsedText("emoteupdater.user_added_emote", undefined, ["[7TV]", emote.actor, emote.name]));
+                        this.tmi_client.action(`#${emote.channel}`, this.localizator.parsedText("emoteupdater.user_added_emote", undefined, ["[7TV]", emote.actor, emote.name], {
+                            username: emote.channel
+                        }));
                         break;
                     case "REMOVE":
                         this.removeEmote(this.symlink[emote.channel], emote.emote_id, "stv", true);
                         
-                        this.tmi_client.action(`#${emote.channel}`, this.localizator.parsedText("emoteupdater.user_deleted_emote", undefined, ["[7TV]", emote.actor, emote.name]));
+                        this.tmi_client.action(`#${emote.channel}`, this.localizator.parsedText("emoteupdater.user_deleted_emote", undefined, ["[7TV]", emote.actor, emote.name], {
+                            username: emote.channel
+                        }));
                         break;
                     case "UPDATE":
                         var _emote: IStorage.Emote | null = this.getEmote(this.symlink[emote.channel], emote.emote_id, "stv");
 
-                        this.tmi_client.action(`#${emote.channel}`, this.localizator.parsedText("emoteupdater.user_updated_emote", undefined, ["[7TV]", emote.actor, (_emote !== null) ? _emote.Name : emote.emote?.name, emote.name]));
+                        this.tmi_client.action(`#${emote.channel}`, this.localizator.parsedText("emoteupdater.user_updated_emote", undefined, ["[7TV]", emote.actor, (_emote !== null) ? _emote.Name : emote.emote?.name, emote.name], {
+                            username: emote.channel
+                        }));
 
                         if (_emote !== null) {
                             if (_emote.NameHistory === undefined) _emote.NameHistory = [];
@@ -268,11 +274,15 @@ class EmoteUpdater {
         if (new_emotes.length > 0) this.tmi_client.say(`#${target_name}`, this.localizator.parsedText("emoteupdater.new_emotes", undefined, [
             provider,
             new_emotes.join(' ')
-        ]));
+        ], {
+            username: target_name
+        }));
         if (deleted_emotes.length > 0) this.tmi_client.say(`#${target_name}`, this.localizator.parsedText("emoteupdater.deleted_emotes", undefined, [
             provider,
             deleted_emotes.join(' ')
-        ]));
+        ], {
+            username: target_name
+        }));
     }
 
     /**
