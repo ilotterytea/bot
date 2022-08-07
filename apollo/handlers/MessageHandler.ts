@@ -158,6 +158,7 @@ namespace Messages {
 
         if (cmd === undefined) return;
         if (cmd.Responses === undefined) return;
+        if (cmd.Value == false) return;
 
         for (const msg of cmd.Responses) {
             args.Services.Client.say(`#${args.Target.Username}`, msg);
