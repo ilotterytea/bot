@@ -29,14 +29,16 @@ class StaticCommandHandler {
 
     public create(target_id: string, data: IStorage.Module) {
         if (!this.contains(target_id)) this.data[target_id] = [];
-        if (this.containsCmd(target_id, data.ID) !== undefined) throw new Error("");
+        if (this.containsCmd(target_id, data.ID) !== undefined) return false;
         this.data[target_id].push(data);
+        return true;
     }
 
     public remove(target_id: string, static_id: string) {
-        if (!this.contains(target_id)) throw new Error("");
+        if (!this.contains(target_id)) return false;
 
         this.data[target_id] = this.data[target_id].filter(e => e.ID !== static_id);
+        return true;
     }
 
     public set<T extends keyof IStorage.Module>(
@@ -68,23 +70,25 @@ class StaticCommandHandler {
     }
 
     public disable(target_id: string, static_id: string) {
-        if (!this.contains(target_id)) throw new Error("");
-        if (this.containsCmd(target_id, static_id) === undefined) throw new Error("");
+        if (!this.contains(target_id)) return false;
+        if (this.containsCmd(target_id, static_id) === undefined) return false;
 
         var _data = this.data[target_id].find(e => e.ID === static_id);
         if (_data === undefined) throw new Error("");
 
         _data.Value = false;
+        return true;
     }
 
     public enable(target_id: string, static_id: string) {
-        if (!this.contains(target_id)) throw new Error("");
-        if (this.containsCmd(target_id, static_id) === undefined) throw new Error("");
+        if (!this.contains(target_id)) return false;
+        if (this.containsCmd(target_id, static_id) === undefined) return false;
 
         var _data = this.data[target_id].find(e => e.ID === static_id);
-        if (_data === undefined) throw new Error("");
+        if (_data === undefined) return false;
 
         _data.Value = true;
+        return true;
     }
 
     public get getCmds() { return this.data; }

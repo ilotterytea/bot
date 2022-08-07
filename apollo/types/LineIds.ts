@@ -49,6 +49,27 @@ type LineIds =
 "timer.incorrect_interval" |
 "timer.info" |
 "timer.list" |
+// Static commands:
+"staticcmd.new" | 
+"staticcmd.already_exists" | 
+"staticcmd.remove" | 
+"staticcmd.not_exists" | 
+"staticcmd.enable" | 
+"staticcmd.disable" | 
+"staticcmd.not_a_line_id" |
+"staticcmd.push" | 
+"staticcmd.push.limit_reached" | 
+"staticcmd.editline" | 
+"staticcmd.line_not_exists" | 
+"staticcmd.rmline" | 
+"staticcmd.copy" | 
+"staticcmd.copy.command_not_specified" |
+"staticcmd.copy.command_not_exists" | 
+"staticcmd.copy.target_not_exists" | 
+"staticcmd.list" | 
+"staticcmd.list.no_cmds" |
+"staticcmd.info" |
+"staticcmd.specify_command" |
 // Ping command:
 "cmd.ping.response" |
 // Ecount command:

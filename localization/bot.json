@@ -103,6 +103,86 @@
         "en_us": "@${USER.NAME}, you tried to set the timer ${0} with incorrect interval: ${1}",
         "ru_ru": "@${USER.NAME}, вы пытались установить таймер ${0} с неправильным интервалом: ${1}"
     },
+    "staticcmd.new": {
+        "en_us": "@${USER.NAME}, Successfully created a new command ${0} for ${1}'s chat room!",
+        "ru_ru": "@${USER.NAME}, Успешно создана новая команда ${0} для канала ${1}!"
+    },
+    "staticcmd.already_exists": {
+        "en_us": "@${USER.NAME}, Name ${0} for commands is already occupied!",
+        "ru_ru": "@${USER.NAME}, Название ${0} для команд уже занято!"
+    },
+    "staticcmd.remove": {
+        "en_us": "@${USER.NAME}, Successfully removed the command ${0} from ${1}'s chat room!",
+        "ru_ru": "@${USER.NAME}, Успешно удалена команда ${0} с канала ${1}!"
+    },
+    "staticcmd.not_exists": {
+        "en_us": "@${USER.NAME}, Command ${0} is not exists!",
+        "ru_ru": "@${USER.NAME}, Команды ${0} не существует!"
+    },
+    "staticcmd.enable": {
+        "en_us": "@${USER.NAME}, Command ${0} is enabled!",
+        "ru_ru": "@${USER.NAME}, Команда ${0} включена!"
+    },
+    "staticcmd.disable": {
+        "en_us": "@${USER.NAME}, Command ${0} is disabled!",
+        "ru_ru": "@${USER.NAME}, Команда ${0} выключена!"
+    },
+    "staticcmd.push": {
+        "en_us": "@${USER.NAME}, Successfully created a new line (${0}) for command ${1} !",
+        "ru_ru": "@${USER.NAME}, Успешно создана новая линия (${0}) для команды ${1} !"
+    },
+    "staticcmd.not_a_line_id": {
+        "en_us": "@${USER.NAME}, Specified line ID is not a number. (${0})",
+        "ru_ru": "@${USER.NAME}, Указанный ID линии - не число. (${0})"
+    },
+    "staticcmd.push.limit_reached": {
+        "en_us": "@${USER.NAME}, Limit is reached! You can create only ${0} lines for one command.",
+        "ru_ru": "@${USER.NAME}, Лимит превышен! Вы можете создавать максимум ${0} линий для одной команды."
+    },
+    "staticcmd.editline": {
+        "en_us": "@${USER.NAME}, The line ${0} is successfully edited for command ${1} !",
+        "ru_ru": "@${USER.NAME}, Линия ${0} успешно отредактирована для команды ${1} !"
+    },
+    "staticcmd.line_not_exists": {
+        "en_us": "@${USER.NAME}, Line ${0} not exists for command ${1} !",
+        "ru_ru": "@${USER.NAME}, Линия ${0} не существует для команды ${1} !"
+    },
+    "staticcmd.rmline": {
+        "en_us": "@${USER.NAME}, Line ${0} \"${1}\" successfully removed from command ${2} !",
+        "ru_ru": "@${USER.NAME}, Линия ${0} \"${1}\" успешно удалена из команды ${2} !"
+    },
+    "staticcmd.copy": {
+        "en_us": "@${USER.NAME}, Successfully copied the command ${0} from channel ${1}!",
+        "ru_ru": "@${USER.NAME}, Успешно скопирована команда ${0} с канала ${1}!"
+    },
+    "staticcmd.copy.command_not_specified": {
+        "en_us": "@${USER.NAME}, Command to copy not specified!",
+        "ru_ru": "@${USER.NAME}, Команда, которую надо скопировать, не указана!"
+    },
+    "staticcmd.copy.command_not_exists": {
+        "en_us": "@${USER.NAME}, Command ${0} not exists in ${1}'s chat room!",
+        "ru_ru": "@${USER.NAME}, Команды ${0} не существует в чате ${1}!"
+    },
+    "staticcmd.copy.target_not_exists": {
+        "en_us": "@${USER.NAME}, Channel ${0} is not registered for bot.",
+        "ru_ru": "@${USER.NAME}, Канал ${0} не зарегистрирован в боте."
+    },
+    "staticcmd.list": {
+        "en_us": "@${USER.NAME}, The list of all ${2}'s static commands (${0}): ${1}",
+        "ru_ru": "@${USER.NAME}, Список всех статических команд ${2} (${0}): ${1}"
+    },
+    "staticcmd.list.no_cmds": {
+        "en_us": "@${USER.NAME}, ${0}'s chat room have no static commands.",
+        "ru_ru": "@${USER.NAME}, В чате ${0} нету никаких команд."
+    },
+    "staticcmd.info": {
+        "en_us": "@${USER.NAME}, ${0} (${1}). Lines (${2}): ${3}",
+        "ru_ru": "@${USER.NAME}, ${0} (${1}). Линии (${2}): ${3}"
+    },
+    "staticcmd.specify_command": {
+        "en_us": "@${USER.NAME}, Please, specify the command.",
+        "ru_ru": "@${USER.NAME}, Пожалуйста, укажите команду."   
+    },
     "cmd.ping.response": {
         "en_us": "@${USER.NAME}, FeelsDankMan 🏓 Pong! Session uptime: ${UPTIMEF}. Landed in ${CHANNELS.CLIENT.LENGTH} channels. Memory usage: ${0} @{MEASURE.MEGABYTES} / ${1} @{MEASURE.MEGABYTES}. Latency to TMI: ${2}ms. Running on version ${PCK.VERSION} (${PCK.NAME}) (Commit ${GIT.SHORT} [${GIT.BRANCH}])",
         "ru_ru": "@${USER.NAME}, FeelsDankMan 🏓 Понг! Сессия активна: ${UPTIMEF}. Приземлён в ${CHANNELS.CLIENT.LENGTH} каналах. Потребление ОЗУ: ${0} @{MEASURE.MEGABYTES} / ${1} @{MEASURE.MEGABYTES}. Задержка до TMI: ${2}ms. Работает на версии ${PCK.VERSION} (${PCK.NAME}) (Фиксация ${GIT.SHORT} [${GIT.BRANCH}])"
