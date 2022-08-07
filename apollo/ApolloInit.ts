@@ -74,6 +74,7 @@ async function ApolloInit(
     });
 
     await Emotes.load(Storage.Targets.getTargets);
+    await Emotes.subscribeTo7TVEventAPI();
 
     const StaticCommands: StaticCommandHandler = new StaticCommandHandler(Storage.Targets.getTargets);
 
