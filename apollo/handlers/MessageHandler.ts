@@ -119,8 +119,8 @@ namespace Messages {
 
         // Save local files:
         setInterval(async () => {
-            if (Services.Emote !== undefined && Services.Timer !== undefined) {
-                Services.Storage.save(Services.Emote.getEmotes, Services.Timer.getTimers);
+            if (Services.Emote !== undefined && Services.Timer !== undefined && Services.StaticCmd !== undefined) {
+                Services.Storage.save(Services.Emote.getEmotes, Services.Timer.getTimers, Services.StaticCmd.getCmds);
                 return;
             }
             Services.Storage.save();
@@ -129,8 +129,8 @@ namespace Messages {
         process.once("SIGHUP", async () => {
             await Services.Client.disconnect();
             
-            if (Services.Emote !== undefined && Services.Timer !== undefined) {
-                Services.Storage.save(Services.Emote.getEmotes, Services.Timer.getTimers);
+            if (Services.Emote !== undefined && Services.Timer !== undefined && Services.StaticCmd !== undefined) {
+                Services.Storage.save(Services.Emote.getEmotes, Services.Timer.getTimers, Services.StaticCmd.getCmds);
                 return;
             }
             

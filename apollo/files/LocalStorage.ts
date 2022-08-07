@@ -212,17 +212,25 @@ class LocalStorage {
      */
     public save(
         emotes?: {[target_id: string]: {[provider_id: string]: IStorage.Emote[]}} | undefined,
-        timers?: {[target_id: string]: {[timer_id: string]: IStorage.Timer}} | undefined
+        timers?: {[target_id: string]: {[timer_id: string]: IStorage.Timer}} | undefined,
+        static_cmds?: {[target_id: string]: IStorage.Module[]} | undefined
     ) {
         var lines: number = 0;
         var characters: number = 0;
         var entries: number = 0;
+
+        if (static_cmds !== undefined) {
+            for (const id of Object.keys(static_cmds)) {
+                this.Targets.set(id, "Modules", static_cmds[id]);
+            }
+        }
 
         if (emotes !== undefined) {
             for (const id of Object.keys(emotes)) {
                 this.Targets.set(id, "Emotes", emotes[id]);
             }
         }
+        
         if (timers !== undefined) {
             for (const id of Object.keys(timers)) {
                 this.Targets.set(id, "Timers", timers[id]);
