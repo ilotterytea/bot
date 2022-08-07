@@ -203,12 +203,23 @@ class EmoteUpdater {
             this.websocket = new WebSocket("wss://events.7tv.app/v1/channel-emotes");
         }
 
-        for (const username of Object.keys(this.symlink)) {
-            this.websocket.send(JSON.stringify({
-                action: "join",
-                payload: username
-            }));
-        }
+        this.websocket.addEventListener("open", (event) => {
+            log.debug("Connection to 7TV EventAPI is open!");
+            for (const username of Object.keys(this.symlink)) {
+                this.websocket!.send(JSON.stringify({
+                    action: "join",
+                    payload: username
+                }));
+            }
+        });
+
+        this.websocket.addEventListener("close", (event) => {
+            log.debug("Connection to 7TV EventAPI is closed!", event.code, event.reason);
+        });
+
+        this.websocket.addEventListener("error", (event) => {
+            log.debug("Error occurred in 7TV connection:", event.message);
+        });
 
         this.websocket.addEventListener("message", (event) => {
             const data: {action: string, payload: string} = JSON.parse(event.data.toString());
