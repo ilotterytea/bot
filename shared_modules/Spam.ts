@@ -30,13 +30,13 @@ export default class Spam implements IModule.IModule {
         var count: number = parseInt(Arguments.Message.raw.split(' ')[1]);
 
         if (isNaN(count)) {
-            return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.spam.unresolved_number", Arguments, [
+            return Promise.resolve(await Arguments.Services.Locale.parsedText("cmd.spam.unresolved_number", Arguments, [
                 Arguments.Message.raw.split(' ')[1]
             ]));
         }
 
         if (count > 32) {
-            return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.spam.limit_reached", Arguments, [
+            return Promise.resolve(await Arguments.Services.Locale.parsedText("cmd.spam.limit_reached", Arguments, [
                 32
             ]));
         }
@@ -54,7 +54,7 @@ export default class Spam implements IModule.IModule {
         delete message[1];
 
         if (commandRegex.test(message.join(' ').trim())) {
-            return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.spam.forbidden_symbol", Arguments));
+            return Promise.resolve(await Arguments.Services.Locale.parsedText("cmd.spam.forbidden_symbol", Arguments));
         }
 
         for (var index = 0; index < count; index++) {

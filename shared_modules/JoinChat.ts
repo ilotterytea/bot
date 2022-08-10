@@ -22,6 +22,7 @@ import { readFileSync } from "fs";
 import { short, branch } from "git-rev-sync";
 import packagejson from "../package.json";
 import { client } from "tmi.js";
+import IStorage from "../apollo/interfaces/IStorage";
 
 export default class JoinChat implements IModule.IModule {
     cooldownMs: number;
@@ -32,29 +33,29 @@ export default class JoinChat implements IModule.IModule {
     }
 
     async run(Arguments: IArguments) {
-        var channel: string = Arguments.Sender.Username;
-        const messages: string[] = Arguments.Message.raw.split(' ');
+        if (!Arguments.Services.TwitchApi) return Promise.resolve(false);
 
-        // if (messages.length > 1) {
-        //    channel = messages[1];
-        //}
+        const _message: string[] = Arguments.Message.raw.split(' ');
+        const channel: string = (_message[1] && Arguments.Sender.intRole == IStorage.InternalRoles.SUPAUSER) ? _message[1] : Arguments.Sender.Username;
+        const user = await Arguments.Services.TwitchApi.getUserByName(channel);
 
-        Arguments.Services.Client.join(`#${Arguments.Sender.Username}`);
-        Arguments.Services.Client.say(`#${Arguments.Sender.Username}`, "FeelsDankMan hello");
+        if (!user) return Promise.resolve(false);
 
-        Arguments.Services.Storage.Targets.create(Arguments.Sender.ID, {
-            SuccessfullyCompletedTests: 0,
-            ChatLines: 0,
-            ExecutedCommands: 0,
-            Emotes: {},
-            Modules: [],
-            Timers: {}
+        await Arguments.Services.DB.target.create({
+            data: {
+                alias_id: parseInt(user.id)
+            }
         });
 
-        return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.join.response", Arguments, [
-            Arguments.Target.Username,
-            Arguments.Target.ID
-        ]
-        ));
+        await Arguments.Services.Symlinks.register(user.id);
+
+        await Arguments.Services.Client.join(`#${user.login}`);
+
+        if (Arguments.Services.Emote) await Arguments.Services.Emote.syncAllEmotes(user.id);
+
+        return Promise.resolve(await Arguments.Services.Locale.parsedText("cmd.join.response", Arguments, [
+            user.login,
+            user.id
+        ]));
     }
 }

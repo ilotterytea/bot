@@ -53,6 +53,7 @@ namespace Files {
         }
     }
 
+
     function generateANewStorageFile(file_path: string) {
         var data: IStorage.Main = {
             Version: "v2",

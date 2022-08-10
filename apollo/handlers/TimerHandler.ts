@@ -15,125 +15,68 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
+import { PrismaClient, Timers } from "@prisma/client";
 import { Client } from "tmi.js";
-import TwitchApi from "../clients/ApiClient";
+import { Logger } from "tslog";
 import IArguments from "../interfaces/IArguments";
-import IStorage from "../interfaces/IStorage";
+
+const log: Logger = new Logger({name: "TimerHandler"});
 
 class TimerHandler {
-    private timers: {[target_id: string]: {[TimerName: string]: IStorage.Timer}};
     private symlink: {[target_id: string]: string};
-    private tickDict: {[target_id: string]: {[timer_id: string]: NodeJS.Timer}};
+    private ticks: {[target_id: string]: {[timer_id: string]: NodeJS.Timer}};
+    private db: PrismaClient;
 
-    constructor (targets: {[target_id: string]: IStorage.Target}) {
-        this.timers = {};
+    constructor (db: PrismaClient) {
         this.symlink = {};
-        this.tickDict = {};
-
-        for (const target of Object.keys(targets)) {
-            this.timers[target] = targets[target].Timers!;
-        }
+        this.ticks = {};
+        this.db = db;        
     }
 
-    public async IDsToUsernames(ttvApi: TwitchApi.Client) {
-        for await (const t_id of Object.keys(this.timers)) {
-            const user = await ttvApi.getUserById(parseInt(t_id));
-            
-            if (user === undefined) return false;
-
-            this.symlink[t_id] = user.login;
+    /**
+     * Initialize the timer handler.
+     * @param symlink Assigned user names to their user IDs.
+     */
+    public async init(symlink: {[target_name: string]: string}) {
+        for (const name of Object.keys(symlink)) {
+            this.symlink[symlink[name]] = name;
         }
+
+        log.debug("Reversed the symlinks for TimerHandler (target_id: target_name).");
+        log.debug("Timer Handler is ready for ticking!");
     }
 
-    public tick(client: Client) {
-        for (const t_id of Object.keys(this.timers)) {
-            this.tickDict[t_id] = {};
+    public async tick(client: Client) {
+        for await (const t_id of await this.db.target.findMany({
+            select: {timers: true, alias_id: true}
+        })) {
+            // Destroy the existing ticking timers:
+            if (t_id.alias_id in this.ticks) {
+                for (const timer of Object.keys(this.ticks[t_id.alias_id])) {
+                    clearInterval(this.ticks[t_id.alias_id][timer]);
+                }
+            }
 
-            for (const timer of Object.keys(this.timers[t_id])) {
-                if (!(t_id in this.symlink)) return false;
+            this.ticks[t_id.alias_id] = {};
 
-                if (this.timers[t_id][timer].Value == false) return false;
-                if (this.timers[t_id][timer].Response === undefined) return false;
+            for (const timer of t_id.timers) {
+                if (!(t_id.alias_id in this.symlink)) return;
 
-                this.tickDict[t_id][timer] = setInterval(() => {
-                    this.timers[t_id][timer].Response.forEach((msg) => {
-                        client.say(`#${this.symlink[t_id]}`, msg);
-                    });
-                }, this.timers[t_id][timer].IntervalMs);
+                if (timer.value == false) return;
+
+                this.ticks[t_id.alias_id][timer.id] = setInterval(() => {
+                    client.say(`#${this.symlink[t_id.alias_id]}`, timer.response);
+                }, timer.interval_ms);
             }
         }
     }
 
-    public async reload(client: Client, ttv_api: TwitchApi.Client, targets: {[target_id: string]: IStorage.Target}) {
-        this.timers = {};
-        this.symlink = {};
+    public disposeTick(target_id: string, timer_id: string): boolean {
+        if (!(target_id in this.ticks)) return false;
+        if (!(timer_id in this.ticks[target_id])) return false;
 
-        // Removing the existing intervals:
-        for (const target of Object.keys(this.tickDict)) {
-            for (const timer of Object.keys(this.tickDict[target])) {
-                this.disposeTick(target, timer);
-            }
-        }
-
-        for (const target of Object.keys(targets)) {
-            this.timers[target] = targets[target].Timers!;
-        }
-
-        await this.IDsToUsernames(ttv_api);
-
-        this.tick(client);
-
-        return true;
-    }
-
-    public disposeTick(target_id: string, timer_id: string) {
-        if (!(target_id in this.tickDict)) return false;
-        if (!(timer_id in this.tickDict[target_id])) return false;
-
-        clearInterval(this.tickDict[target_id][timer_id]);
-        delete this.tickDict[target_id][timer_id];
-
-        return true;
-    }
-
-    public createTimer(target_id: string, timer_id: string, data: IStorage.Timer, client: Client) {
-        if (timer_id in this.timers[target_id]) return false;
-
-        this.timers[target_id][timer_id] = data;
-
-        if (data.Value) this.newTick(target_id, timer_id, client, this.symlink[target_id], data.Response, data.IntervalMs);
-
-        return true;
-    }
-
-    public disableTimer(target_id: string, timer_id: string) {
-        if (!(target_id in this.tickDict)) return false;
-        if (!(timer_id in this.tickDict[target_id])) return false;
-
-        this.timers[target_id][timer_id].Value = false;
-        this.disposeTick(target_id, timer_id);
-        return true;
-    }
-
-    public enableTimer(target_id: string, timer_id: string, args: IArguments) {
-        if (!(target_id in this.tickDict)) return this.tickDict[target_id] = {};
-        if (timer_id in this.tickDict[target_id]) return false;
-
-        this.timers[target_id][timer_id].Value = true;
-        this.newTick(target_id, timer_id, args.Services.Client, args.Target.Username, this.timers[target_id][timer_id].Response, this.timers[target_id][timer_id].IntervalMs);
-        return true;
-    }
-
-    public getTimer(target_id: string, timer_id: string) {
-        if (!(target_id in this.timers)) return false;
-        if (!(timer_id in this.timers[target_id])) return false;
-
-        return this.timers[target_id][timer_id];
-    }
-
-    public removeTimer(target_id: string, timer_id: string) {
-        delete this.timers[target_id][timer_id];
-        this.disposeTick(target_id, timer_id);
+        clearInterval(this.ticks[target_id][timer_id]);
+        delete this.ticks[target_id][timer_id];
 
         return true;
     }
@@ -143,19 +86,21 @@ class TimerHandler {
         timer_id: string,
         client: Client,
         target_name: string,
-        responses: string[],
+        response: string,
         intervalMs: number
-        ) {
+        ): void {
+        if (!(target_id in this.ticks)) this.ticks[target_id] = {};
+        
+        this.disposeTick(target_id, timer_id);
 
-        this.tickDict[target_id][timer_id] = setInterval(() => {
-            for (const msg of responses) {
-                client.say(`#${target_name}`, msg);
-            }
+        this.ticks[target_id][timer_id] = setInterval(() => {
+            client.say(`#${target_name}`, response);
         }, intervalMs);
     }
 
-    public get getTicks() { return this.tickDict; }
-    public get getTimers() { return this.timers; }
+    public containsTick(target_id: string, timer_id: string): boolean { return timer_id in this.ticks[target_id]; }
+
+    public get getTicks() { return this.ticks; }
 }
 
 export default TimerHandler;

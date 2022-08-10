@@ -161,3 +161,6 @@ dist
 local
 *.ini
 test.ts
+
+prisma/local
+prisma/migrations

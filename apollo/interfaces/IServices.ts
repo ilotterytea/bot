@@ -15,10 +15,11 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
+import { PrismaClient } from "@prisma/client";
 import { Client } from "tmi.js";
 import TwitchApi from "../clients/ApiClient";
 import LocalStorage from "../files/LocalStorage";
-import StaticCommandHandler from "../handlers/StaticCommandHandler";
+import Symlinks from "../files/Symlinks";
 import TimerHandler from "../handlers/TimerHandler";
 import EmoteUpdater from "../utils/emotes/EmoteUpdater";
 import Localizator from "../utils/Locale";
@@ -27,12 +28,13 @@ import ModuleManager from "../utils/ModuleManager";
 interface IServices {
     Client: Client,
     TwitchApi?: TwitchApi.Client | undefined,
-    Storage: LocalStorage,
+    Storage?: LocalStorage,
+    DB: PrismaClient,
+    Symlinks: Symlinks
     Locale: Localizator,
     Module?: ModuleManager | undefined,
     Emote?: EmoteUpdater | undefined,
-    Timer?: TimerHandler | undefined,
-    StaticCmd?: StaticCommandHandler | undefined
+    Timer?: TimerHandler | undefined
 }
 
 export default IServices;

@@ -38,12 +38,12 @@ export default class UserLookup implements IModule.IModule {
 
         const data = response.data;
 
-        if (response.status != 200) return Promise.resolve(Arguments.Services.Locale.parsedText("msg.api_error", Arguments, [
+        if (response.status != 200) return Promise.resolve(await Arguments.Services.Locale.parsedText("msg.api_error", Arguments, [
             `${response.status}`
         ]));
 
         if (onlyRules) {
-            return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.user.rules", Arguments, [
+            return Promise.resolve(await Arguments.Services.Locale.parsedText("cmd.user.rules", Arguments, [
                 data.login,
                 data.id,
                 data.chatSettings.rules.join(', ')
@@ -51,14 +51,14 @@ export default class UserLookup implements IModule.IModule {
         }
 
         if (onlyPfp) {
-            return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.user.picture", Arguments, [
+            return Promise.resolve(await Arguments.Services.Locale.parsedText("cmd.user.picture", Arguments, [
                 data.login,
                 data.id,
                 data.logo
             ]));
         }
 
-        return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.user.lookup", Arguments, [
+        return Promise.resolve(await Arguments.Services.Locale.parsedText("cmd.user.lookup", Arguments, [
             data.displayName,
             data.login,
             data.id,

@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
+import { Target } from "@prisma/client";
 import IModule from "./IModule";
 import IServices from "./IServices";
 import IStorage from "./IStorage";
@@ -51,10 +52,7 @@ interface IArguments {
         Username: string,
 
         /** Channel's Twitch ID. */
-        ID: string,
-
-        /** Channel's Emotes. */
-        Emotes?: {[provider_id: string]: IStorage.Emote[]}
+        ID: string
     },
 
     /** Message. */
@@ -67,7 +65,10 @@ interface IArguments {
 
         /** Options. */
         options?: {option: string, value: string}[] | undefined
-    }
+    },
+
+    /** Global settings. */
+    Global?: Target
 }
 
 export default IArguments;

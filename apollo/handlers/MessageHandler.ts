@@ -15,11 +15,13 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
+import { CustomResponses, Target, User } from "@prisma/client";
 import { Argument } from "commander";
 import {
     ChatUserstate,
     Client
 } from "tmi.js";
+import { Logger } from "tslog";
 import TwitchApi from "../clients/ApiClient";
 import LocalStorage from "../files/LocalStorage";
 import IArguments from "../interfaces/IArguments";
@@ -31,6 +33,8 @@ import Localizator from "../utils/Locale";
 import ModuleManager from "../utils/ModuleManager";
 import TimerHandler from "./TimerHandler";
 
+const log: Logger = new Logger({name: "Messages"});
+
 namespace Messages {
     /**
      * Twitch TMI message handler.
@@ -41,8 +45,57 @@ namespace Messages {
             if (self) return;
 
             // Command prefix:
-            const prefix: string = Services.Storage.Targets.containsKey(user["room-id"]!, "Prefix") ? Services.Storage.Targets.get(user["room-id"]!, "Prefix") as string : Services.Storage.Global.getPrefix;
-            
+            const targetDb: Target | null = await Services.DB.target.findFirst({
+                where: {
+                    alias_id: parseInt(user["room-id"]!)
+                }
+            });
+
+            const userDb: User | null = await Services.DB.user.findFirst({
+                where: {alias_id: parseInt(user["user-id"]!)}
+            });
+
+            const globalTarget: Target | null = await Services.DB.target.findFirst({
+                where: {id: -72, alias_id: -71}
+            });
+
+            // Don't continue processing the code if sender is suspended from the bot:
+            if (userDb !== null && userDb.int_role !== null && userDb.int_role == -1) return;
+
+            if (!globalTarget) {
+                log.warn("Global target (ID -72) not found! Creating...");
+                await Services.DB.target.create({
+                    data: {
+                        id: -72,
+                        alias_id: -71,
+                        chat_lines: 0,
+                        exec_cmds: 0,
+                        tests: 0,
+                        language_id: "en_us",
+                        prefix: "!"
+                    }
+                });
+                return;
+            }
+
+            if (!targetDb) {
+                log.warn("Target with ID", user["room-id"]!, "not found in database! Creating a new one...");
+                await Services.DB.target.create({
+                    data: {
+                        alias_id: parseInt(user["room-id"]!)
+                    }
+                });
+                if (Services.Emote) {
+                    await Services.Emote.syncAllEmotes(user["room-id"]!);
+                }
+                await Services.Symlinks.register(user["room-id"]!);
+                return;
+            }
+
+            const prefix: string = (targetDb.prefix) ? targetDb.prefix : (globalTarget.prefix) ? globalTarget.prefix : "!";
+
+            console.log(prefix);
+
             // Arguments:
             var args: IArguments = {
                 Services: Services,
@@ -53,19 +106,17 @@ namespace Messages {
                 },
                 Target: {
                     Username: channel.slice(1, channel.length),
-                    ID: user["room-id"]!,
-                    Emotes: (Services.Emote !== undefined) ? Services.Emote.getEmotes[user["room-id"]!] : undefined
+                    ID: user["room-id"]!
                 },
                 Message: {
                     raw: message,
-                    command: message.split(' ')[0].split(prefix)[1]
+                    command: (message.startsWith(prefix)) ? message.split(prefix)[1].split(' ')[0] : ""
                 }
             }
 
             // Assigning the roles:
-            if (Services.Storage.Users.contains(args.Sender.ID)) {
-                const role = Services.Storage.Users.get(args.Sender.ID, "InternalType");
-                if (role !== undefined) args.Sender.intRole = role as IStorage.InternalRoles;
+            if (userDb !== null && userDb.int_role !== null) {
+                args.Sender.intRole = userDb.int_role;
             }
 
             if (args.Target.ID === args.Sender.ID) args.Sender.extRole = IModule.AccessLevels.BROADCASTER;
@@ -73,35 +124,36 @@ namespace Messages {
             if (user["badges"]?.vip === "1") args.Sender.extRole = IModule.AccessLevels.VIP;
 
             // +1 chat line to the target's file:
-            Services.Storage.Targets.set(
-                args.Target.ID,
-                "ChatLines",
-                Services.Storage.Targets.get(args.Target.ID, "ChatLines") as number + 1
-            );
+            await Services.DB.target.update({
+                where: {id: targetDb.id},
+                data: {
+                    chat_lines: (targetDb.chat_lines === null) ? 1 : targetDb.chat_lines + 1
+                }
+            });
 
             // +1 used times to the emote:
-            if (Services.Emote !== undefined) Services.Emote.increaseEmoteCount(args.Message.raw, args.Target.ID);
+            if (Services.Emote !== undefined) await Services.Emote.increaseEmoteCount(args.Message.raw, args.Target.ID);
 
             // Complete a test:
             if (message == "test") {
-                Services.Storage.Targets.set(
-                    args.Target.ID,
-                    "SuccessfullyCompletedTests",
-                    Services.Storage.Targets.get(args.Target.ID, "SuccessfullyCompletedTests") as number + 1
-                );
+                await Services.DB.target.update({
+                    where: {id: targetDb.id},
+                    data: {
+                        tests: (targetDb.tests === null) ? 1 : targetDb.tests + 1
+                    }
+                });
 
                 Services.Client.say(
                     `#${args.Target.Username}`,
-                    Services.Locale.parsedText("msg.test", args, [
+                    await Services.Locale.parsedText("msg.test", args, [
                         "test",
-                        Services.Storage.Targets.get(args.Target.ID, "SuccessfullyCompletedTests") as number
+                        targetDb.tests
                     ])
                 );
             }
 
             // Start processing the commands:
             if (message.startsWith(prefix)) {
-
                 // Execute command if it exists:
                 if (Services.Module === undefined) throw new Error("Cannot process the commands. No module instances assigned to services.");
                 
@@ -117,52 +169,39 @@ namespace Messages {
             await StaticCommandHandler(args);
         });
 
-        // Save local files:
-        setInterval(async () => {
-            if (Services.Emote !== undefined && Services.Timer !== undefined && Services.StaticCmd !== undefined) {
-                Services.Storage.save(Services.Emote.getEmotes, Services.Timer.getTimers, Services.StaticCmd.getCmds);
-                return;
-            }
-            Services.Storage.save();
-        }, 3600000);
-
         process.once("SIGHUP", async () => {
             await Services.Client.disconnect();
-            
-            if (Services.Emote !== undefined && Services.Timer !== undefined && Services.StaticCmd !== undefined) {
-                Services.Storage.save(Services.Emote.getEmotes, Services.Timer.getTimers, Services.StaticCmd.getCmds);
-                return;
-            }
-            
-            Services.Storage.save();
         });
+
         setInterval(async () => {
             if (Services.Emote === undefined) return;
 
-            for (const name of Object.keys(Services.Storage.Global.getSymlinks)) {
-                await Services.Emote.syncBTTVEmotes(name, false);
-                await Services.Emote.syncFFZEmotes(name, false);
-                await Services.Emote.syncTTVEmotes(name, false);
+            for (const target of await Services.DB.target.findMany()) {
+                await Services.Emote.syncAllEmotes(target.alias_id.toString());
             }
         }, 30000);
         if (Services.Timer !== undefined) Services.Timer.tick(Services.Client);
+        if (Services.Emote) await Services.Emote.subscribeTo7TVEventAPI();
     }
 
     async function StaticCommandHandler(args: IArguments) {
-        if (args.Services.StaticCmd === undefined) return;
+        var target: Target | null = await args.Services.DB.target.findFirst({
+            where: {alias_id: parseInt(args.Target.ID)}
+        });
 
-        var cmd = args.Services.StaticCmd.get(
-            args.Target.ID,
-            args.Message.raw.split(' ')[0]
-        );
+        if (target === null) return;
 
-        if (cmd === undefined) return;
-        if (cmd.Responses === undefined) return;
-        if (cmd.Value == false) return;
+        var cmd: CustomResponses | null = await args.Services.DB.customResponses.findFirst({
+            where: {
+                id: args.Message.raw.split(' ')[0],
+                targetId: target.id
+            }
+        });
 
-        for (const msg of cmd.Responses) {
-            args.Services.Client.say(`#${args.Target.Username}`, msg);
-        }
+        if (cmd === null) return;
+        if (cmd.value == false) return;
+        
+        args.Services.Client.say(`#${args.Target.Username}`, cmd.response);
     }
 }
 

@@ -32,10 +32,10 @@ export default class SystemProcess implements IModule.IModule {
 
         switch (turi_ip_ip) {
             case "pull":
-                await Arguments.Services.Client.say(Arguments.Target.Username, Arguments.Services.Locale.parsedText("cmd.system.pull", Arguments));
+                await Arguments.Services.Client.say(Arguments.Target.Username, await Arguments.Services.Locale.parsedText("cmd.system.pull", Arguments));
                 child.exec("git pull");
                 // timeout for updating the git message:
-                setTimeout(async () => { await Arguments.Services.Client.say(Arguments.Target.Username, Arguments.Services.Locale.parsedText("cmd.system.pulled", Arguments)); }, 1000);
+                setTimeout(async () => { await Arguments.Services.Client.say(Arguments.Target.Username, await Arguments.Services.Locale.parsedText("cmd.system.pulled", Arguments)); }, 1000);
                 break;
             default:
                 break;

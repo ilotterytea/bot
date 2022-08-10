@@ -24,6 +24,7 @@ import CLI from "./apollo/utils/CLI";
 import ServerInit from "./www/ServerInit";
 import TwitchApi from "./apollo/clients/ApiClient";
 import LocalStorage from "./apollo/files/LocalStorage";
+import { PrismaClient } from "@prisma/client";
 
 const log: Logger = new Logger({name: "itb2-main"});
 
@@ -49,11 +50,10 @@ async function Main() {
         cfg.Authorization.AccessToken
     );
     
-    const Storage: LocalStorage = new LocalStorage("local/targets","local/datastore.json");
-    await Storage.Global.convertIDsToUsernames(TmiApi);
+    const Prisma: PrismaClient = new PrismaClient();
 
-    await ServerInit(CLIArguments, Storage, TmiApi, cfg);
-    if (!CLIArguments["testWebOnly"]) await ApolloInit(CLIArguments, Storage, TmiApi, cfg);
+    //await ServerInit(CLIArguments, Storage, TmiApi, cfg, Prisma);
+    if (!CLIArguments["testWebOnly"]) await ApolloInit(CLIArguments, TmiApi, cfg, Prisma);
 }
 
 Main();

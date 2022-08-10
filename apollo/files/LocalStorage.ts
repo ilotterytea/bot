@@ -174,6 +174,7 @@ class GlobalStorage {
     get getGlobalData() { return this.data; }
 }
 
+/** @deprecated */
 class LocalStorage {
     public Targets: TargetStorage;
     public Global: GlobalStorage;

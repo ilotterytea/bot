@@ -96,8 +96,8 @@
         "ru_ru": "@${USER.NAME}, Таймер ${0} (${1}). Интервал: ${2}. Сообщения (${3}): ${4}"
     },
     "timer.list": {
-        "en_us": "@${USER.NAME}, List of ${TARGET.NAME}'s (${TARGET.ID}) chat room timers: ${0} (Pro tip: use command ${1}timer --info [TIMER_NAME] to get more info about timer haHAA )",
-        "ru_ru": "@${USER.NAME}, Список таймеров чата ${TARGET.NAME} (${TARGET.ID}): ${0} (Совет: используй комманду ${1}timer --info [TIMER_NAME] , чтобы узнать больше информации о таймере haHAA )"
+        "en_us": "@${USER.NAME}, List of ${TARGET.NAME}'s (${TARGET.ID}) chat room timers: ${0}",
+        "ru_ru": "@${USER.NAME}, Список таймеров чата ${TARGET.NAME} (${TARGET.ID}): ${0}"
     },
     "timer.incorrect_interval": {
         "en_us": "@${USER.NAME}, you tried to set the timer ${0} with incorrect interval: ${1}",
@@ -184,8 +184,8 @@
         "ru_ru": "@${USER.NAME}, Пожалуйста, укажите команду."   
     },
     "cmd.ping.response": {
-        "en_us": "@${USER.NAME}, FeelsDankMan 🏓 Pong! Session uptime: ${UPTIMEF}. Landed in ${CHANNELS.CLIENT.LENGTH} channels. Memory usage: ${0} @{MEASURE.MEGABYTES} / ${1} @{MEASURE.MEGABYTES}. Latency to TMI: ${2}ms. Running on version ${PCK.VERSION} (${PCK.NAME}) (Commit ${GIT.SHORT} [${GIT.BRANCH}])",
-        "ru_ru": "@${USER.NAME}, FeelsDankMan 🏓 Понг! Сессия активна: ${UPTIMEF}. Приземлён в ${CHANNELS.CLIENT.LENGTH} каналах. Потребление ОЗУ: ${0} @{MEASURE.MEGABYTES} / ${1} @{MEASURE.MEGABYTES}. Задержка до TMI: ${2}ms. Работает на версии ${PCK.VERSION} (${PCK.NAME}) (Фиксация ${GIT.SHORT} [${GIT.BRANCH}])"
+        "en_us": "@${USER.NAME}, FeelsDankMan 🏓 Pong! Session uptime: ${UPTIMEF}. Landed in ${3} channels. Memory usage: ${0} @{MEASURE.MEGABYTES} / ${1} @{MEASURE.MEGABYTES}. Latency to TMI: ${2}ms. Running on version ${PCK.VERSION} (${PCK.NAME}) (Commit ${GIT.SHORT} [${GIT.BRANCH}])",
+        "ru_ru": "@${USER.NAME}, FeelsDankMan 🏓 Понг! Сессия активна: ${UPTIMEF}. Приземлён в ${3} каналах. Потребление ОЗУ: ${0} @{MEASURE.MEGABYTES} / ${1} @{MEASURE.MEGABYTES}. Задержка до TMI: ${2}ms. Работает на версии ${PCK.VERSION} (${PCK.NAME}) (Фиксация ${GIT.SHORT} [${GIT.BRANCH}])"
     },
     "cmd.ecount.response": {
         "en_us": "${0} ${1} has been used ${2} times.",

@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
+import { Target, Timers } from "@prisma/client";
 import IArguments from "../apollo/interfaces/IArguments";
 import IModule from "../apollo/interfaces/IModule";
 
@@ -28,6 +29,11 @@ export default class TimerCreator implements IModule.IModule {
 
     async run(Arguments: IArguments) {
         if (Arguments.Services.Timer === undefined) return Promise.resolve(false);
+        const target: Target | null = await Arguments.Services.DB.target.findFirst({
+            where: {alias_id: parseInt(Arguments.Target.ID)}
+        });
+
+        if (!target) return Promise.resolve(false);
 
         const _message: string[] = Arguments.Message.raw.split(' ');
         const option: string = _message[1];
@@ -42,7 +48,7 @@ export default class TimerCreator implements IModule.IModule {
         switch (option) {
             case "--new": {
                 if (isNaN(intervalsec)) {
-                    return Promise.resolve(Arguments.Services.Locale.parsedText("timer.incorrect_interval", Arguments, [
+                    return Promise.resolve(await Arguments.Services.Locale.parsedText("timer.incorrect_interval", Arguments, [
                         timer_id,
                         intervalsec
                     ]));
@@ -50,104 +56,157 @@ export default class TimerCreator implements IModule.IModule {
                 
                 const msg = _message.join(' ');
 
-                const resp = Arguments.Services.Timer.createTimer(
-                    Arguments.Target.ID,
-                    timer_id,
-                    {
-                        Value: true,
-                        Response: [
-                            msg.trim()
-                        ],
-                        IntervalMs: intervalsec
-                    },
-                    Arguments.Services.Client
-                );
+                const timer: Timers | null = await Arguments.Services.DB.timers.findFirst({
+                    where: {
+                        id: timer_id,
+                        targetId: target.id
+                    }
+                });
                 
-                if (!resp) {
+                if (timer) {
                     return Promise.resolve("no");
                 }
-                return Promise.resolve(Arguments.Services.Locale.parsedText("timer.new", Arguments, [
+
+                await Arguments.Services.DB.timers.create({
+                    data: {
+                        id: timer_id,
+                        targetId: target.id,
+                        response: msg,
+                        interval_ms: intervalsec,
+                        value: true
+                    }
+                });
+
+                if (Arguments.Services.Timer) Arguments.Services.Timer.newTick(
+                    Arguments.Target.ID,
+                    timer_id,
+                    Arguments.Services.Client,
+                    Arguments.Target.Username,
+                    msg,
+                    intervalsec
+                );
+
+                return Promise.resolve(await Arguments.Services.Locale.parsedText("timer.new", Arguments, [
                     timer_id
                 ]));
             }
 
             case "--ring": {
-                const resp = Arguments.Services.Timer.getTimer(Arguments.Target.ID, timer_id);
+                const timer: Timers | null = await Arguments.Services.DB.timers.findFirst({
+                    where: {id: timer_id, targetId: target.id}
+                });
 
-                if (!resp) {
+                if (!timer) {
                     return Promise.resolve("no");
                 }
-                
-                for (const msg of resp.Response) {
-                    Arguments.Services.Client.say(Arguments.Target.Username, msg);
-                }
 
-                return Promise.resolve(true);
+                return Promise.resolve(timer.response);
             }
 
             case "--remove": {
-                const resp = Arguments.Services.Timer.removeTimer(Arguments.Target.ID, timer_id);
+                const timer: Timers | null = await Arguments.Services.DB.timers.findFirst({
+                    where: {id: timer_id, targetId: target.id}
+                });
 
-                if (!resp) {
+                if (!timer) {
                     return Promise.resolve("no");
                 }
-                return Promise.resolve(Arguments.Services.Locale.parsedText("timer.removed", Arguments, [
+
+                await Arguments.Services.DB.timers.delete({
+                    where: {int_id: timer.int_id}
+                });
+
+                if (Arguments.Services.Timer) Arguments.Services.Timer.disposeTick(Arguments.Target.ID, timer_id);
+
+                return Promise.resolve(await Arguments.Services.Locale.parsedText("timer.removed", Arguments, [
                     timer_id
                 ]));
             }
 
             case "--disable": {
-                const resp = Arguments.Services.Timer.disableTimer(Arguments.Target.ID, timer_id);
+                const timer: Timers | null = await Arguments.Services.DB.timers.findFirst({
+                    where: {id: timer_id, targetId: target.id}
+                });
 
-                if (!resp) {
+                if (!timer) {
                     return Promise.resolve("no");
                 }
-                return Promise.resolve(Arguments.Services.Locale.parsedText("timer.disabled", Arguments, [
+
+                await Arguments.Services.DB.timers.update({
+                    where: {int_id: timer.int_id},
+                    data: {
+                        value: false
+                    }
+                });
+
+                if (Arguments.Services.Timer) Arguments.Services.Timer.disposeTick(Arguments.Target.ID, timer_id);
+
+                return Promise.resolve(await Arguments.Services.Locale.parsedText("timer.disabled", Arguments, [
                     timer_id
                 ]));
             }
 
             case "--enable": {
-                const resp = Arguments.Services.Timer.enableTimer(Arguments.Target.ID, timer_id, Arguments);
+                const timer: Timers | null = await Arguments.Services.DB.timers.findFirst({
+                    where: {id: timer_id, targetId: target.id}
+                });
 
-                if (!resp) {
+                if (!timer) {
                     return Promise.resolve("no");
                 }
-                return Promise.resolve(Arguments.Services.Locale.parsedText("timer.enabled", Arguments, [
+
+                await Arguments.Services.DB.timers.update({
+                    where: {int_id: timer.int_id},
+                    data: {
+                        value: true
+                    }
+                });
+
+                if (Arguments.Services.Timer) Arguments.Services.Timer.newTick(
+                    Arguments.Target.ID,
+                    timer_id,
+                    Arguments.Services.Client,
+                    Arguments.Target.Username,
+                    timer.response,
+                    timer.interval_ms
+                );
+
+                return Promise.resolve(await Arguments.Services.Locale.parsedText("timer.enabled", Arguments, [
                     timer_id
                 ]));
             }
 
             case "--info": {
-                const resp = Arguments.Services.Timer.getTimer(Arguments.Target.ID, timer_id);
-            
-                if (!resp) {
+                const timer: Timers | null = await Arguments.Services.DB.timers.findFirst({
+                    where: {id: timer_id, targetId: target.id}
+                });
+
+                if (!timer) {
                     return Promise.resolve("no");
                 }
 
-                var _responses: string[] = [];
-
-                resp.Response.forEach((response) => {
-                    _responses.push(`'${response}'`);
-                });
-
-                return Promise.resolve(Arguments.Services.Locale.parsedText("timer.info", Arguments, [
+                return Promise.resolve(await Arguments.Services.Locale.parsedText("timer.info", Arguments, [
                     timer_id,
-                    (resp.Value) ? "Enabled" : "Disabled",
-                    resp.IntervalMs.toString(),
-                    resp.Response.length.toString(),
-                    _responses.join(', ')
+                    (timer.value) ? "Enabled" : "Disabled",
+                    timer.interval_ms.toString(),
+                    "1",
+                    timer.response
                 ]));
             }
 
             case "--list": {
-                var timers: string[] = Object.keys(Arguments.Services.Timer.getTimers[Arguments.Target.ID]);
+                const timer: Timers[] = await Arguments.Services.DB.timers.findMany({
+                    where: {targetId: target.id}
+                });
 
-                return Promise.resolve(Arguments.Services.Locale.parsedText("timer.list", Arguments, [
-                    timers.join(', '),
-                    (Arguments.Services.Storage.Targets.containsKey(Arguments.Target.ID, "Prefix")) ? 
-                    Arguments.Services.Storage.Targets.get(Arguments.Target.ID, "Prefix") as string :
-                    Arguments.Services.Storage.Global.getPrefix
+                if (timer.length === 0) {
+                    return Promise.resolve("no");
+                }
+
+                return Promise.resolve(await Arguments.Services.Locale.parsedText("timer.list", Arguments, [
+                    timer.map((t) => {
+                        return t.id
+                    }).join(", ")
                 ]));
             }
 

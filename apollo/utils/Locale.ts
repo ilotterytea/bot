@@ -24,55 +24,45 @@ import os from "node-os-utils";
 import git from "git-rev-sync";
 import pck from "../../package.json";
 import { existsSync, readdirSync, readFileSync } from "fs";
+import { PrismaClient, Target } from "@prisma/client";
+import Symlinks from "../files/Symlinks";
 
 const log: Logger = new Logger({name: "Localizator"});
 
 class Localizator {
     private languages: {[lang_id: string]: {[line_id: string]: string}} | undefined;
-    private preferred_langs: {[lang_id: string]: string[]};
-    private user_links: {[target_name: string]: string};
+    private db: PrismaClient;
+    private symlinks: Symlinks;
 
-    constructor () {
+    constructor (db: PrismaClient, symlinks: Symlinks) {
         this.languages = {};
-        this.user_links = {};
-        this.preferred_langs = {};
+        this.symlinks = symlinks;
+        this.db = db;
     }
 
-    public load(localization_file: string) {
+    public async load(localization_file: string): Promise<void> {
         this.languages = {};
 
-        if (!existsSync(localization_file)) {
-            return new Error("Localization file (" + localization_file + ") doesn't exists!");
-        }
+        if (!existsSync(localization_file)) throw new Error("Bot localization file not exists on " + localization_file);
 
-        const lang: {[line_id: string]: {[lang_id: string]: string}} = JSON.parse(readFileSync(localization_file, {encoding: "utf-8"}));
+        const lang: {
+            [line_id: string]: {
+                [lang_id: string]: string
+            }
+        } = JSON.parse(readFileSync(localization_file, {encoding: "utf-8"}));
 
+        // Converting the localization file data type to legacy:
         for (const line_id of Object.keys(lang)) {
             for (const lang_id of Object.keys(lang[line_id])) {
-                if (!(lang_id in this.languages)) {
-                    this.languages[lang_id] = {};
-                }
-
+                if (!(lang_id in this.languages)) this.languages[lang_id] = {};
                 this.languages[lang_id][line_id] = lang[line_id][lang_id];
             }
         }
-    }
-
-    setPreferredLanguages(raw_targets: {[target_id: string]: IStorage.Target}, user_links: {[target_name: string]: string}) {
-        Object.keys(this.languages!).forEach((lang_id) => {
-            Object.keys(raw_targets).forEach((target_id) => {
-                if (raw_targets[target_id].LanguageId === lang_id) {
-                    if (!(lang_id in this.preferred_langs)) this.preferred_langs[lang_id] = [];
-                    this.preferred_langs[lang_id].push(target_id);
-                }
-            });
-        });
-        this.user_links = user_links;
+        log.debug("Languages are packed up!");
     }
 
     get getLanguages() { return this.languages; }
     get getAvailableLangs() { return Object.keys(this.languages!); }
-    get getPreferredLangs() { return this.preferred_langs; }
 
     /**
      * Get the line ID with replaced placeholders.
@@ -81,50 +71,36 @@ class Localizator {
      * @param options Options to parse.
      * @param optional_args Optional arguments.
      */
-    public parsedText(line_id: LineIds, args?: IArguments | undefined, optional_args?: any[], options?: {
-        username?: string | undefined
-    }) {
-        var user_id: string = (args === undefined) ? "" : args.Sender.ID;
-
-        // If languages aren't loaded -> return string with error.
-        if (this.languages === undefined) {
-            return "Line ID " + line_id + " can't be defined because languages aren't loaded.";
-        }
-
-        // Language ID.
-        var lang_id: string = "en_us";
-        var message: string | undefined = "";
-
-        // Use username instead of user ID. Used in 7TV EventAPI notices.
-        var useUsername: boolean = (options !== undefined && options.username !== undefined && args === undefined) ? true : false;
-
-        // Set the user ID on useUsername:
-        if (useUsername) {
-            if (options === undefined) return "";
-            if (options.username === undefined) return "";
-            
-            if (!(options.username in this.user_links)) {
-                log.warn("Username", options.username, "not found in this.user_links.");
-                return "";
+    public async parsedText(line_id: LineIds, args?: IArguments | undefined, optional_args?: any[], options?: {
+        lang_id?: string | undefined,
+        target_name?: string | undefined
+    }): Promise<string> {
+        var target: Target | null = await this.db.target.findFirst({
+            where: {
+                alias_id: (!args) ? (options?.target_name) ? parseInt(this.symlinks.getSymlink(options?.target_name!)!) : NaN : parseInt(args.Target.ID) 
             }
-            user_id = this.user_links[options.username];
-        }
+        });
 
-        // Getting the user's preferred language:
-        for (const l_id of Object.keys(this.preferred_langs)) {
-            if (this.preferred_langs[l_id].includes(user_id)) {
-                lang_id = l_id;
-            }
-        }
+        var globalTarget: Target | null = await this.db.target.findFirst({
+            where: {alias_id: -71}
+        });
 
-        // Replacing the placeholders:
-        message = this.replaceDummyValues(this.languages[lang_id][line_id], args, lang_id, optional_args);
-        
-        if (message === undefined) {
-            message = "";
-        }
+        if (!globalTarget) throw new Error("Cannot find the global target.");
+        if (!target) throw new Error("Cannot parse the line ID! Reason: Target is null.");
+        if (!this.languages) throw new Error("No languages.");
+        if (!target.language_id) target.language_id = globalTarget.language_id!;
 
-        return message;
+        const message: string | undefined = this.replaceDummyValues(
+            this.languages[target.language_id][line_id],
+            args,
+            target.language_id,
+            optional_args
+        );
+
+        if (!message) {
+            return Promise.resolve(this.languages[target.language_id][line_id]);
+        }
+        return Promise.resolve(message);
     }
 
     /**
@@ -178,12 +154,6 @@ class Localizator {
                     }
                     case word.includes("${USER.ID}"): {
                         _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${USER.ID}", args.Sender.ID);
-                        break;
-                    }
-                    
-                    // Channel:
-                    case word.includes("${CHANNELS.CLIENT.LENGTH}"): {
-                        _text[_text.indexOf(word)] = _text[_text.indexOf(word)].replace("${CHANNELS.CLIENT.LENGTH}", args.Services.Storage.Global.getClientJoin.length.toString());
                         break;
                     }
                     default: {
@@ -352,29 +322,6 @@ class Localizator {
         }
 
         return _text.join(' ');
-    }
-
-    addPreferredUser(lang_id: string, target_id: string) {
-        if (!(lang_id in this.preferred_langs)) this.preferred_langs[lang_id] = [];
-
-        Object.keys(this.preferred_langs).forEach((lang_id2) => {
-
-            this.preferred_langs[lang_id2].forEach((user) => {
-                if (user.includes(target_id)) {
-                    this.preferred_langs[lang_id2] = this.preferred_langs[lang_id2].filter(t => t !== user);
-                }
-            });
-        });
-
-        this.preferred_langs[lang_id].push(target_id);
-    }
-
-    removePreferredUser(target_id: string) {
-        Object.keys(this.preferred_langs).forEach((lang_id) => {
-            if (this.preferred_langs[lang_id].includes(target_id)) {
-                this.preferred_langs[lang_id] = this.preferred_langs[lang_id].filter(t => t !== target_id);
-            }
-        });
     }
 }
 

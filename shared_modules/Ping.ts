@@ -36,10 +36,11 @@ export default class Ping implements IModule.IModule {
 
         var pingms = Math.floor(Math.round((await Arguments.Services.Client.ping())[0] * 1000));
         
-        return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.ping.response", Arguments, [
+        return Promise.resolve(await Arguments.Services.Locale.parsedText("cmd.ping.response", Arguments, [
             usedmem.toString(),
             totalmem.toString(),
-            pingms.toString()
+            pingms.toString(),
+            await (await Arguments.Services.DB.target.findMany()).length
         ]));
     }
 }

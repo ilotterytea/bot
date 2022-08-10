@@ -18,6 +18,7 @@
 import { EmoteProviders } from "../types/SmolTypes"
 import IModule from "./IModule"
 
+/** @deprecated */
 namespace IStorage {
     /** @deprecated */
     export interface V1Main {
@@ -60,6 +61,7 @@ namespace IStorage {
         }
     }
 
+    /** @deprecated */
     export interface Target {
         Name?: string,
         LanguageId?: string | undefined,
@@ -73,6 +75,7 @@ namespace IStorage {
         Emotes?: {[provider_id: string]: Emote[]}
     }
 
+    /** @deprecated */
     export interface Timer{
         Value: boolean,
         Response: string[],
@@ -81,6 +84,7 @@ namespace IStorage {
 
     /**
      * 7TV/BetterTTV/FrankerFaceZ emote interface.
+     * @deprecated
      */
     export interface Emote {
         /** Name of the emote. */
@@ -102,6 +106,7 @@ namespace IStorage {
         isGlobal?: boolean | undefined
     }
 
+    /** @deprecated */
     export interface Module {
         Value: boolean,
         ID: string,
@@ -110,6 +115,7 @@ namespace IStorage {
         Responses?: string[] | undefined
     }
 
+    /** @deprecated */
     export interface User {
         ID: string,
         InternalType?: InternalRoles | undefined,
@@ -121,6 +127,7 @@ namespace IStorage {
         SUPAUSER = 99
     }
 
+    /** @deprecated */
     type ModuleTypes = "scripted" | "static";
 }
 

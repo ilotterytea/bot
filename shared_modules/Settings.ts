@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
+import { Target } from "@prisma/client";
 import IArguments from "../apollo/interfaces/IArguments";
 import IModule from "../apollo/interfaces/IModule";
 
@@ -29,10 +30,16 @@ export default class Settings implements IModule.IModule {
     async run(Arguments: IArguments) {
         const _message: string[] = Arguments.Message.raw.split(' ');
 
+        const target: Target | null = await Arguments.Services.DB.target.findFirst({
+            where: {alias_id: parseInt(Arguments.Target.ID)}
+        });
+
+        if (!target) return Promise.resolve(false);
+
         switch (true) {
             case (_message.includes("--lang")): {
                 if (_message.indexOf("--lang") + 1 > _message.length - 1) {
-                    return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.set.language.available", Arguments));
+                    return Promise.resolve(await Arguments.Services.Locale.parsedText("cmd.set.language.available", Arguments));
                 }
 
                 const value = _message[_message.indexOf("--lang") + 1];
@@ -42,24 +49,35 @@ export default class Settings implements IModule.IModule {
                 }
 
                 if (!(value in Arguments.Services.Locale.getLanguages)) {
-                    return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.set.language.not_found", Arguments, [value]));
+                    return Promise.resolve(await Arguments.Services.Locale.parsedText("cmd.set.language.not_found", Arguments, [value]));
                 }
 
-                Arguments.Services.Locale.addPreferredUser(value, Arguments.Target.ID);
-                Arguments.Services.Storage.Targets.set(Arguments.Target.ID, "LanguageId", value);
-                return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.set.language.success", Arguments));
+                await Arguments.Services.DB.target.update({
+                    where: {id: target.id},
+                    data: {
+                        language_id: value
+                    }
+                });
+
+                return Promise.resolve(await Arguments.Services.Locale.parsedText("cmd.set.language.success", Arguments));
             }
             case (_message.includes("--prefix")): {
                 if (_message.indexOf("--prefix") + 1 > _message.length - 1) {
-                    return Promise.resolve(Arguments.Services.Locale.parsedText("msg.wrong_option", Arguments, ["--prefix", "[STRING]"]));
+                    return Promise.resolve(await Arguments.Services.Locale.parsedText("msg.wrong_option", Arguments, ["--prefix", "[STRING]"]));
                 }
 
                 var value = _message[_message.indexOf("--prefix") + 1];
 
                 value = value.replace("[space]", ' ');
 
-                Arguments.Services.Storage.Targets.set(Arguments.Target.ID, "Prefix", value);
-                return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.set.prefix.success", Arguments, [value]));
+                await Arguments.Services.DB.target.update({
+                    where: {id: target.id},
+                    data: {
+                        prefix: value
+                    }
+                });
+
+                return Promise.resolve(await Arguments.Services.Locale.parsedText("cmd.set.prefix.success", Arguments, [value]));
             }
             default: {
                 break;

@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
+import { Emotes, Target } from "@prisma/client";
 import IArguments from "../apollo/interfaces/IArguments";
 import IModule from "../apollo/interfaces/IModule";
 import { EmoteProviders } from "../apollo/types/SmolTypes";
@@ -28,12 +29,17 @@ export default class EmoteTop implements IModule.IModule {
     }
 
     async run(Arguments: IArguments) {
-        if (Arguments.Target.Emotes === undefined) return Promise.resolve(false);
         const _message = Arguments.Message.raw.split(' ');
-        type TopModes = "descending" | "ascending";
+        const target: Target | null = await Arguments.Services.DB.target.findFirst({
+            where: {alias_id: parseInt(Arguments.Target.ID)}
+        });
+
+        if (!target) return Promise.resolve(false);
+
+        type TopModes = "desc" | "asc";
         
         // !etop -m descending/ascending -s 1-15 -p bttv
-        var mode: TopModes = "descending";
+        var mode: TopModes = "desc";
         var show_emotes: number = 10;
 
         var provider: EmoteProviders | string = "stv";
@@ -79,13 +85,13 @@ export default class EmoteTop implements IModule.IModule {
                 const _mode: string = _message[_message.indexOf('-m') + 1].toLowerCase();
                 switch (_mode) {
                     case "descending":
-                        mode = "descending";
+                        mode = "desc";
                         break;
                     case "ascending":
-                        mode = "ascending";
+                        mode = "asc";
                         break;
                     default:
-                        mode = "descending";
+                        mode = "desc";
                         break;
                 }
             }
@@ -93,20 +99,20 @@ export default class EmoteTop implements IModule.IModule {
 
         if (_message.includes('-s')) {
             if ((_message.indexOf('-s') + 1 ) > _message.length - 1) return Promise.resolve(
-                Arguments.Services.Locale.parsedText("msg.wrong_option", Arguments, [
+                await Arguments.Services.Locale.parsedText("msg.wrong_option", Arguments, [
                     "-s",
-                    "[INTEGER]"
+                    "[1-15]"
                 ])
             );
             var _show_emotes: number = parseInt(_message[_message.indexOf('-s') + 1]);
             if (isNaN(_show_emotes)) return Promise.resolve(
-                Arguments.Services.Locale.parsedText("msg.wrong_option", Arguments, [
+                await Arguments.Services.Locale.parsedText("msg.wrong_option", Arguments, [
                     "-s",
-                    "[INTEGER]"
+                    "[1-15]"
                 ])
             );
             if (_show_emotes > 15) {
-                return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.etop.limit_reached", Arguments, [
+                return Promise.resolve(await Arguments.Services.Locale.parsedText("cmd.etop.limit_reached", Arguments, [
                     15,
                     Arguments.Target.ID
                 ]));
@@ -114,48 +120,33 @@ export default class EmoteTop implements IModule.IModule {
             show_emotes = _show_emotes;
         }
 
-        if (show_emotes > Arguments.Target.Emotes[provider].length) {
-            show_emotes = Arguments.Target.Emotes[provider].length;
-        }
-
-        var items = Arguments.Target.Emotes[provider].map((key) => {
-            return [key.Name, key.UsedTimes];
+        const emotes: Emotes[] | null = await Arguments.Services.DB.emotes.findMany({
+            where: {
+                provider: provider,
+                targetId: target.id
+            },
+            orderBy: {
+                used_times: mode
+            }
         });
 
-        var top: (string|number)[][] = [];
+        if (!emotes) return Promise.resolve(false);
 
-        switch (mode) {
-            case "descending":
-                items.sort((f, s) => {
-                    return parseInt(s[1] as string) - parseInt(f[1] as string);
-                });
-                top = items.slice(0, show_emotes);
-                break;
-            case "ascending":
-                items.sort((f, s) => {
-                    return parseInt(f[1] as string) - parseInt(s[1] as string);
-                });
-                top = items.slice(0, show_emotes);
-                break;
-            default:
-                items.sort((f, s) => {
-                    return parseInt(s[1] as string) - parseInt(f[1] as string);
-                });
-                top = items.slice(0, show_emotes);
-                break;
+        if (show_emotes > emotes.length) {
+            show_emotes = emotes.length;
         }
 
         var text: string = ``;
 
         for (var i = 0; i < show_emotes; i++) {
-            text = text + `${top[i][0]} (${top[i][1]})${(i + 1 >= show_emotes) ? "" : ", "}`;
+            text = text + `${emotes[i].name} ${(emotes[i].is_deleted) ? "*" : ""} (${emotes[i].used_times}), `
         }
 
-        return Promise.resolve(Arguments.Services.Locale.parsedText("cmd.etop.response", Arguments, [
+        return Promise.resolve(await Arguments.Services.Locale.parsedText("cmd.etop.response", Arguments, [
             show_emotes.toString(),
             provider_name,
-            Arguments.Services.Locale.parsedText(
-                (mode === "descending") ? "mode.descending" : "mode.ascending",
+            await Arguments.Services.Locale.parsedText(
+                (mode == "desc") ? "mode.descending" : "mode.ascending",
                 Arguments
             ),
             text

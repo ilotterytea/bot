@@ -1,0 +1,102 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./local/database.db"
+}
+
+// Logs:
+model Log {
+  id         Int      @id @default(autoincrement())
+  alias_id   Int
+  message    String
+  channel_id String
+  timestamp  DateTime @default(now())
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  alias_id   Int
+  int_role   Int?
+  auth_token String?
+  timestamp  DateTime @default(now())
+}
+
+// Target:
+model Target {
+  id          Int               @id @default(autoincrement())
+  alias_id    Int
+  language_id String?
+  prefix      String?
+  chat_lines  Int?
+  tests       Int?
+  exec_cmds   Int?
+  timers      Timers[]
+  emotes      Emotes[]
+  stmodules   CustomResponses[]
+  timestamp   DateTime          @default(now())
+}
+
+model CustomResponses {
+  value     Boolean
+  id        String
+  int_id    String   @id @unique @default(uuid())
+  response  String
+  Target    Target?  @relation(fields: [targetId], references: [id])
+  targetId  Int?
+  timestamp DateTime @default(now())
+}
+
+model Emotes {
+  int_id        String    @id @default(cuid())
+  id            String
+  name          String
+  used_times    Int       @default(0)
+  provider      String
+  is_deleted    Boolean?
+  is_global     Boolean?
+  Target        Target?   @relation(fields: [targetId], references: [id])
+  targetId      Int?
+  timestamp     DateTime  @default(now())
+  del_timestamp DateTime?
+}
+
+model Timers {
+  value       Boolean
+  id          String
+  int_id      String   @id @unique @default(uuid())
+  response    String
+  interval_ms Int
+  Target      Target?  @relation(fields: [targetId], references: [id])
+  targetId    Int?
+  timestamp   DateTime @default(now())
+}
+
+model Requests {
+  id          Int       @id @unique @default(autoincrement())
+  alias_id    Int
+  type        String?   @default("SUGGEST")
+  note        String?
+  is_reviewed Boolean   @default(false)
+  is_resolved Boolean   @default(false)
+  timestamp   DateTime  @default(now())
+  r_timestamp DateTime?
+}
+
+// Join lists:
+model JoinAsClient {
+  alias_id Int @id
+}
+
+model EmoteNameHistory {
+  int_id    String   @id @default(uuid())
+  id        String
+  target_id Int
+  name      String
+  timestamp DateTime @default(now())
+}

@@ -43,7 +43,7 @@ function ApolloClient(
         })
         .then(async () => {
             channels.forEach(async (id) => {
-                client.join(`#${id}`);
+                await client.join(`#${id}`);
 
                 if (id == "ilotterytea") {
                     const arrive_emotes: string[] = [

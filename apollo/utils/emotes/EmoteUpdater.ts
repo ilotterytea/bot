@@ -27,6 +27,10 @@ import EmoteLib from "emotelib";
 import TTVProvider from "emotelib/dist/providers/TTVProvider";
 import BTTVProvider from "emotelib/dist/providers/BTTVProvider";
 import FFZProvider from "emotelib/dist/providers/FFZProvider";
+import { Emotes, PrismaClient, Target } from "@prisma/client";
+import IServices from "../../interfaces/IServices";
+import Symlinks from "../../files/Symlinks";
+import IEmoteProvider from "emotelib/dist/interfaces/IEmoteProvider";
 
 const log: Logger = new Logger({name: "EmoteUpdater"});
 
@@ -82,22 +86,13 @@ interface ExtraEmoteData {
 }
 
 class EmoteUpdater {
-    /** Dictionary of all emotes from all provided channels. */
-    private emotes: {
-        [target_id: string]: {
-            [provider_id: string]: IStorage.Emote[]
-        }
-    };
-
-    private symlink: {
-        [target_name: string]: string
-    };
-
     private emotelib: EmoteLib;
     private tmi_client: Client;
     private ttv_api: TwitchApi.Client;
     private websocket: WebSocket | null;
     private localizator: Localizator;
+    private db: PrismaClient;
+    private symlinks: Symlinks;
 
     /**
      * Emote updater for 7TV, BetterTTV, FrankerFaceZ providers.
@@ -111,19 +106,21 @@ class EmoteUpdater {
         services: {
             client: Client,
             twitch_api: TwitchApi.Client,
-            localizator: Localizator
+            localizator: Localizator,
+            db: PrismaClient,
+            symlinks: Symlinks
         }
     }) {
         this.websocket = null;
+        this.symlinks = options.services.symlinks;
         this.localizator = options.services.localizator;
-        this.emotes = {};
-        this.symlink = {};
         this.emotelib = new EmoteLib({
             access_token: options.identify.access_token,
             client_id: options.identify.client_id
         });
         this.ttv_api = options.services.twitch_api;
         this.tmi_client = options.services.client;
+        this.db = options.services.db;
     }
 
     /**
@@ -131,68 +128,81 @@ class EmoteUpdater {
      * @param text Text.
      * @param target_id Channel ID.
      */
-    public increaseEmoteCount(text: string, target_id: string) {
+    public async increaseEmoteCount(text: string, target_id: string) {
         const _text: string[] = text.split(' ');
+        const user: Target | null = await this.db.target.findFirst({
+            where: {
+                alias_id: parseInt(target_id)
+            }
+        });
+
+        if (user === null) return;
 
         for (const word of _text) {
-            const stv_emote: IStorage.Emote | undefined = this.emotes[target_id]["stv"].find(e => e.Name === word);
-            const bttv_emote: IStorage.Emote | undefined = this.emotes[target_id]["bttv"].find(e => e.Name === word);
-            const ffz_emote: IStorage.Emote | undefined = this.emotes[target_id]["ffz"].find(e => e.Name === word);
-            const ttv_emote: IStorage.Emote | undefined = this.emotes[target_id]["ttv"].find(e => e.Name === word);
+            const stv_emote: Emotes | null = await this.db.emotes.findFirst({
+                where: {
+                    targetId: user.id,
+                    name: word,
+                    provider: "stv"
+                }
+            });
 
-            if (stv_emote !== undefined) this.setEmote(target_id, stv_emote.ID, "stv", "UsedTimes", stv_emote.UsedTimes + 1);
-            if (bttv_emote !== undefined) this.setEmote(target_id, bttv_emote.ID, "bttv", "UsedTimes", bttv_emote.UsedTimes + 1);
-            if (ffz_emote !== undefined) this.setEmote(target_id, ffz_emote.ID, "ffz", "UsedTimes", ffz_emote.UsedTimes + 1);
-            if (ttv_emote !== undefined) this.setEmote(target_id, ttv_emote.ID, "ttv", "UsedTimes", ttv_emote.UsedTimes + 1);
+            const bttv_emote: Emotes | null = await this.db.emotes.findFirst({
+                where: {
+                    targetId: user.id,
+                    name: word,
+                    provider: "bttv"
+                }
+            });
+
+            const ffz_emote: Emotes | null = await this.db.emotes.findFirst({
+                where: {
+                    targetId: user.id,
+                    name: word,
+                    provider: "ffz"
+                }
+            });
+
+            const ttv_emote: Emotes | null = await this.db.emotes.findFirst({
+                where: {targetId: user.id,
+                    name: word,
+                    provider: "ttv"
+                }
+            });
+
+            if (stv_emote !== null) {
+                await this.db.emotes.update({
+                    where: {int_id: stv_emote.int_id},
+                    data: {
+                        used_times: stv_emote.used_times + 1
+                    }
+                });
+            }
+            if (bttv_emote !== null) {
+                await this.db.emotes.update({
+                    where: {int_id: bttv_emote.int_id},
+                    data: {
+                        used_times: bttv_emote.used_times + 1
+                    }
+                });
+            }
+            if (ffz_emote !== null) {
+                await this.db.emotes.update({
+                    where: {int_id: ffz_emote.int_id},
+                    data: {
+                        used_times: ffz_emote.used_times + 1
+                    }
+                });
+            }
+            if (ttv_emote !== null) {
+                await this.db.emotes.update({
+                    where: {int_id: ttv_emote.int_id},
+                    data: {
+                        used_times: ttv_emote.used_times + 1
+                    }
+                });
+            }
         }
-    }
-
-    /**
-     * Erase the existed data and load new for the emote updater.
-     * @param targets Channels.
-     */
-    public async load(targets: {[target_id: string]: IStorage.Target}) {
-        // Resetting the exist emotes, channel ids and etc.
-        this.emotes = {};
-        this.symlink = {};
-
-        // Converting user ID to user names. This is needed for 7TV EventAPI.
-        for await (const target_id of Object.keys(targets)) {
-            const user = await this.ttv_api.getUserById(parseInt(target_id));
-            if (user === undefined) return;
-
-            this.symlink[user.login] = target_id;
-            log.debug("ID", target_id, "-> username", user.login);
-        }
-
-        log.debug("Successfully converted user IDs to usernames!");
-
-        // Getting the emotes from raw targets:
-        for (const id of Object.keys(targets)) {
-            // If target don't have any emotes, so just return.
-            if (targets[id].Emotes === undefined) return;
-            
-            // Creating a new target in emote dictionary:
-            this.emotes[id] = {};
-            
-            // Loading the emotes:
-            if (targets[id].Emotes!["stv"] !== undefined) {
-                this.emotes[id]["stv"] = targets[id].Emotes!["stv"];
-            }
-            if (targets[id].Emotes!["bttv"] !== undefined) {
-                this.emotes[id]["bttv"] = targets[id].Emotes!["bttv"];
-            }
-            if (targets[id].Emotes!["ffz"] !== undefined) {
-                this.emotes[id]["ffz"] = targets[id].Emotes!["ffz"];
-            }
-            if (targets[id].Emotes!["ttv"] !== undefined) {
-                this.emotes[id]["ttv"] = targets[id].Emotes!["ttv"];
-            }
-
-            log.debug("Loaded the emotes for ID", id);
-        }
-
-        log.debug("Loaded all the emotes!");
     }
 
     public async subscribeTo7TVEventAPI() {
@@ -205,7 +215,7 @@ class EmoteUpdater {
 
         this.websocket.addEventListener("open", (event) => {
             log.debug("Connection to 7TV EventAPI is open!");
-            for (const username of Object.keys(this.symlink)) {
+            for (const username of Object.keys(this.symlinks.getSymlinks())) {
                 this.websocket!.send(JSON.stringify({
                     action: "join",
                     payload: username
@@ -221,47 +231,120 @@ class EmoteUpdater {
             log.debug("Error occurred in 7TV connection:", event.message);
         });
 
-        this.websocket.addEventListener("message", (event) => {
+        this.websocket.addEventListener("message", async (event) => {
             const data: {action: string, payload: string} = JSON.parse(event.data.toString());
                 
             if (data.action == "ping") return;
 
             if (data.action == "update") {
                 const emote: EmoteEventUpdate = JSON.parse(data.payload);
+                const user: Target | null = await this.db.target.findFirst({
+                    where: {alias_id: parseInt(this.symlinks.getSymlink(emote.channel)!)}
+                });
+
+                if (user === null) return;
 
                 switch (emote.action) {
                     case "ADD":
-                        this.addEmote(this.symlink[emote.channel], emote.emote_id, "stv", {
-                            ID: emote.emote_id,
-                            Name: emote.name,
-                            UsedTimes: 0
+                        const _eemote: Emotes | null = await this.db.emotes.findFirst({
+                            where: {
+                                name: emote.name,
+                                id: emote.emote_id,
+                                provider: "stv",
+                                targetId: user.id
+                            }
                         });
 
-                        this.tmi_client.action(`#${emote.channel}`, this.localizator.parsedText("emoteupdater.user_added_emote", undefined, ["[7TV]", emote.actor, emote.name], {
-                            username: emote.channel
+                        if (_eemote === null) {
+                            await this.db.emotes.create({
+                                data: {
+                                    id: emote.emote_id,
+                                    name: emote.name,
+                                    provider: "stv",
+                                    targetId: user.id
+                                }
+                            });
+                        } else {
+                            await this.db.emotes.update({
+                                where: {int_id: _eemote.int_id},
+                                data: {
+                                    name: emote.name,
+                                    is_deleted: false
+                                }
+                            });
+                        }
+                        
+                        this.tmi_client.action(`#${emote.channel}`,
+                        await this.localizator.parsedText("emoteupdater.user_added_emote", undefined, [
+                            "[7TV]",
+                            emote.actor,
+                            emote.name
+                        ], {
+                            target_name: emote.channel
                         }));
                         break;
                     case "REMOVE":
-                        this.removeEmote(this.symlink[emote.channel], emote.emote_id, "stv", true);
+                        const _emote: Emotes | null = await this.db.emotes.findFirst({
+                            where: {
+                                name: emote.name,
+                                id: emote.emote_id,
+                                provider: "stv",
+                                targetId: user.id
+                            }
+                        });
+
+                        if (_emote === null) return;
+
+                        await this.db.emotes.update({
+                            where: {int_id: _emote.int_id},
+                            data: {
+                                is_deleted: true
+                            }
+                        });
                         
-                        this.tmi_client.action(`#${emote.channel}`, this.localizator.parsedText("emoteupdater.user_deleted_emote", undefined, ["[7TV]", emote.actor, emote.name], {
-                            username: emote.channel
+                        this.tmi_client.action(`#${emote.channel}`,
+                        await this.localizator.parsedText("emoteupdater.user_deleted_emote", undefined, [
+                            "[7TV]",
+                            emote.actor,
+                            emote.name
+                        ], {
+                            target_name: emote.channel
                         }));
                         break;
                     case "UPDATE":
-                        var _emote: IStorage.Emote | null = this.getEmote(this.symlink[emote.channel], emote.emote_id, "stv");
+                        var _emote_: Emotes | null = await this.db.emotes.findFirst({
+                            where: {
+                                id: emote.emote_id,
+                                provider: "stv",
+                                targetId: user.id
+                            }
+                        });
 
-                        this.tmi_client.action(`#${emote.channel}`, this.localizator.parsedText("emoteupdater.user_updated_emote", undefined, ["[7TV]", emote.actor, (_emote !== null) ? _emote.Name : emote.emote?.name, emote.name], {
-                            username: emote.channel
+                        this.tmi_client.action(`#${emote.channel}`,
+                        await this.localizator.parsedText("emoteupdater.user_updated_emote", undefined, [
+                            "[7TV]",
+                            emote.actor,
+                            (_emote_ !== null) ? _emote_.name : emote.emote?.name, emote.name
+                        ], {
+                            target_name: emote.channel
                         }));
 
-                        if (_emote !== null) {
-                            if (_emote.NameHistory === undefined) _emote.NameHistory = [];
-                            _emote.NameHistory.push(_emote.Name);
+                        if (_emote_ !== null) {
+                            await this.db.emoteNameHistory.create({data: {
+                                id: _emote_.id,
+                                target_id: user.id,
+                                name: _emote_.name
+                            }});
 
-                            _emote.Name = emote.name;
+                            await this.db.emotes.update({
+                                where: {
+                                    int_id: _emote_.int_id
+                                },
+                                data: {
+                                    name: emote.name
+                                }
+                            });
                         }
-                        
                         break;
                     default:
                         break;
@@ -270,416 +353,245 @@ class EmoteUpdater {
         });
     }
 
-    private announce(target_name: string, provider: string, new_emotes: string[], deleted_emotes: string[]) {
-        if (new_emotes.length > 0) this.tmi_client.say(`#${target_name}`, this.localizator.parsedText("emoteupdater.new_emotes", undefined, [
-            provider,
-            new_emotes.join(' ')
-        ], {
-            username: target_name
-        }));
-        if (deleted_emotes.length > 0) this.tmi_client.say(`#${target_name}`, this.localizator.parsedText("emoteupdater.deleted_emotes", undefined, [
-            provider,
-            deleted_emotes.join(' ')
-        ], {
-            username: target_name
-        }));
-    }
-
     /**
-     * Synchronize local emotes with channel/global BetterTTV emotes.
-     * @param target_name Channel name.
-     * @param announce Announce changes in the chat room?
+     * Synchronize emotes of all providers.
+     * @param target_id Target ID.
      */
-    public async syncBTTVEmotes(target_name: string, announce?: boolean | undefined) {
-        const provider: BTTVProvider = this.emotelib["betterttv"];
-        if (this.symlink[target_name] === undefined) throw new Error("Username " + target_name + " not found in symlinks.");
-        const channel_emotes: IEmote.BTTV[] | null = await provider.getChannelEmotes(this.symlink[target_name]);
-        const global_emotes: IEmote.BTTV[] | null = await provider.getGlobalEmotes();
-        var new_emotes: string[] = [];
-        var deleted_emotes: string[] = [];
+    public async syncAllEmotes(target_id: string): Promise<void> {
+        if (parseInt(target_id) < 0) return;
 
-        if (channel_emotes === null) throw new Error("Channel ID " + target_name + " don't have any channel emotes.");
-        if (global_emotes === null) throw new Error("No global emotes.");
-        if (this.emotes[this.symlink[target_name]]["bttv"] === undefined) this.emotes[this.symlink[target_name]]["bttv"] = [];
+        const target: Target | null = await this.db.target.findFirst({
+            where: {alias_id: parseInt(target_id)}
+        });
 
-        // New channel emotes:
-        for (const emote of channel_emotes) {
-            const _emote: IStorage.Emote | undefined = this.emotes[this.symlink[target_name]]["bttv"].find(e => e.ID == emote.id!);
+        if (!target) return;
 
-            if (_emote === undefined) {
-                this.addEmote(this.symlink[target_name], emote.id!, "bttv", {
-                    ID: emote.id!,
-                    Name: emote.code!,
-                    UsedTimes: 0
+        const channel_emotes: {
+            bttv: IEmote.BTTV[] | null;
+            ffz: IEmote.FFZ[] | null;
+            stv: IEmote.STV[] | null;
+            ttv: IEmote.TTV[] | null;
+        } = {
+            bttv: await this.emotelib.betterttv.getChannelEmotes(target_id),
+            ffz: await this.emotelib.frankerfacez.getChannelEmotes(target_id),
+            stv: await this.emotelib.seventv.getChannelEmotes(target_id),
+            ttv: await this.emotelib.twitch.getChannelEmotes(target_id)
+        }
+
+        const global_emotes: {
+            bttv: IEmote.BTTV[] | null;
+            ffz: IEmote.FFZ[] | null;
+            stv: IEmote.STV[] | null;
+            ttv: IEmote.TTV[] | null;
+        } = {
+            bttv: await this.emotelib.betterttv.getGlobalEmotes(),
+            ffz: await this.emotelib.frankerfacez.getGlobalEmotes(),
+            stv: await this.emotelib.seventv.getGlobalEmotes(),
+            ttv: await this.emotelib.twitch.getGlobalEmotes()
+        }
+
+        // -- New BTTV channel emotes:
+        if (channel_emotes.bttv) {
+            for (const emote of channel_emotes.bttv) {
+                const _emote = await this.db.emotes.findFirst({
+                    where: {
+                        targetId: target.id,
+                        id: emote.id,
+                        provider: "bttv"
+                    }
                 });
-                new_emotes.push(emote.code!);
+
+                if (!_emote) {
+                    await this.db.emotes.create({
+                        data: {
+                            id: emote.id!,
+                            name: emote.code!,
+                            targetId: target.id,
+                            provider: "bttv"
+                        }
+                    });
+                }
             }
         }
 
-        // New global emotes:
-        for (const emote of global_emotes) {
-            const _emote: IStorage.Emote | undefined = this.emotes[this.symlink[target_name]]["bttv"].find(e => e.ID == emote.id!);
-
-            if (_emote === undefined) {
-                this.addEmote(this.symlink[target_name], emote.id!, "bttv", {
-                    ID: emote.id!,
-                    Name: emote.code!,
-                    UsedTimes: 0,
-                    isGlobal: true
+        // -- New FFZ channel emotes:
+        if (channel_emotes.ffz) {
+            for (const emote of channel_emotes.ffz) {
+                const _emote = await this.db.emotes.findFirst({
+                    where: {
+                        targetId: target.id,
+                        id: emote.id!.toString(),
+                        provider: "ffz"
+                    }
                 });
-                new_emotes.push(emote.code!);
+
+                if (!_emote) {
+                    await this.db.emotes.create({
+                        data: {
+                            id: emote.id!.toString(),
+                            name: emote.name!,
+                            targetId: target.id,
+                            provider: "ffz"
+                        }
+                    });
+                }
             }
         }
 
-        // Deleted global/channel emotes:
-        for (const emote of this.emotes[this.symlink[target_name]]["bttv"]) {
-            const _emote: IEmote.BTTV | undefined = channel_emotes.find(e => e.id === emote.ID);
-            const __emote: IEmote.BTTV | undefined = global_emotes.find(e => e.id === emote.ID);
-
-            if (_emote === undefined && emote.isGlobal != true) {
-                this.removeEmote(this.symlink[target_name], emote.ID, "bttv", true);
-                deleted_emotes.push(emote.Name);
-            }
-
-            if (__emote === undefined && emote.isGlobal == true) {
-                this.removeEmote(this.symlink[target_name], emote.ID, "bttv", true);
-                deleted_emotes.push(emote.Name);
-            }
-        }
-        // Announce changes in the chat:
-        if (announce) {
-            this.announce(target_name, "[BTTV]", new_emotes, deleted_emotes);
-        }
-    }
-
-    /**
-     * Synchronize local emotes with channel/global FrankerFaceZ emotes.
-     * @param target_name Channel name.
-     * @param announce Announce changes in the chat room?
-     */
-     public async syncFFZEmotes(target_name: string, announce?: boolean | undefined) {
-        const provider: FFZProvider = this.emotelib["frankerfacez"];
-        if (this.symlink[target_name] === undefined) throw new Error("Username " + target_name + " not found in symlinks.");
-        const channel_emotes: IEmote.FFZ[] | null = await provider.getChannelEmotes(this.symlink[target_name]);
-        const global_emotes: IEmote.FFZ[] | null = await provider.getGlobalEmotes();
-        var new_emotes: string[] = [];
-        var deleted_emotes: string[] = [];
-
-        if (channel_emotes === null) throw new Error("Channel ID " + target_name + " don't have any channel emotes.");
-        if (global_emotes === null) throw new Error("No global emotes.");
-        if (this.emotes[this.symlink[target_name]]["ffz"] === undefined) this.emotes[this.symlink[target_name]]["ffz"] = [];
-
-        // New channel emotes:
-        for (const emote of channel_emotes) {
-            const _emote: IStorage.Emote | undefined = this.emotes[this.symlink[target_name]]["ffz"].find(e => e.ID == emote.id!.toString());
-
-            if (_emote === undefined) {
-                this.addEmote(this.symlink[target_name], emote.id!.toString(), "ffz", {
-                    ID: emote.id!.toString(),
-                    Name: emote.name!,
-                    UsedTimes: 0
+        // -- New TTV channel emotes:
+        if (channel_emotes.ttv) {
+            for (const emote of channel_emotes.ttv) {
+                const _emote = await this.db.emotes.findFirst({
+                    where: {
+                        targetId: target.id,
+                        id: emote.id,
+                        provider: "ttv"
+                    }
                 });
-                new_emotes.push(emote.name!);
+
+                if (!_emote) {
+                    await this.db.emotes.create({
+                        data: {
+                            id: emote.id!,
+                            name: emote.name!,
+                            targetId: target.id,
+                            provider: "ttv"
+                        }
+                    });
+                }
             }
         }
 
-        // New global emotes:
-        for (const emote of global_emotes) {
-            const _emote: IStorage.Emote | undefined = this.emotes[this.symlink[target_name]]["ffz"].find(e => e.ID == emote.id!.toString());
-
-            if (_emote === undefined) {
-                this.addEmote(this.symlink[target_name], emote.id!.toString(), "ffz", {
-                    ID: emote.id!.toString(),
-                    Name: emote.name!,
-                    UsedTimes: 0,
-                    isGlobal: true
+        // -- New 7TV channel emotes:
+        if (channel_emotes.stv) {
+            for (const emote of channel_emotes.stv) {
+                const _emote = await this.db.emotes.findFirst({
+                    where: {
+                        targetId: target.id,
+                        id: emote.id,
+                        provider: "stv"
+                    }
                 });
-                new_emotes.push(emote.name!);
+
+                if (!_emote) {
+                    await this.db.emotes.create({
+                        data: {
+                            id: emote.id!,
+                            name: emote.name!,
+                            targetId: target.id,
+                            provider: "stv"
+                        }
+                    });
+                }
             }
         }
-
-        // Deleted global/channel emotes:
-        for (const emote of this.emotes[this.symlink[target_name]]["ffz"]) {
-            const _emote: IEmote.FFZ | undefined = channel_emotes.find(e => e.id!.toString() === emote.ID);
-            const __emote: IEmote.FFZ | undefined = global_emotes.find(e => e.id!.toString() === emote.ID);
-
-            if (_emote === undefined && emote.isGlobal != true) {
-                this.removeEmote(this.symlink[target_name], emote.ID, "ffz", true);
-                deleted_emotes.push(emote.Name);
-            }
-
-            if (__emote === undefined && emote.isGlobal == true) {
-                this.removeEmote(this.symlink[target_name], emote.ID, "ffz", true);
-                deleted_emotes.push(emote.Name);
-            }
-        }
-
-        // Announce changes in the chat:
-        if (announce) {
-            this.announce(target_name, "[FFZ]", new_emotes, deleted_emotes);
-        }
-    }
-
-    /**
-     * Synchronize local emotes with channel/global Twitch emotes.
-     * @param target_name Channel name.
-     * @param announce Announce changes in the chat room?
-     */
-     public async syncTTVEmotes(target_name: string, announce?: boolean | undefined) {
-        const provider: TTVProvider = this.emotelib["twitch"];
-        if (this.symlink[target_name] === undefined) throw new Error("Username " + target_name + " not found in symlinks.");
-        const channel_emotes: IEmote.TTV[] | null = await provider.getChannelEmotes(this.symlink[target_name]);
-        const global_emotes: IEmote.TTV[] | null = await provider.getGlobalEmotes();
-        var new_emotes: string[] = [];
-        var deleted_emotes: string[] = [];
-
-        if (channel_emotes === null) throw new Error("Channel ID " + target_name + " don't have any channel emotes.");
-        if (global_emotes === null) throw new Error("No global emotes.");
-        if (this.emotes[this.symlink[target_name]]["ttv"] === undefined) this.emotes[this.symlink[target_name]]["ttv"] = [];
-
-        // New channel emotes:
-        for (const emote of channel_emotes) {
-            const _emote: IStorage.Emote | undefined = this.emotes[this.symlink[target_name]]["ttv"].find(e => e.ID == emote.id!);
-
-            if (_emote === undefined) {
-                this.addEmote(this.symlink[target_name], emote.id!, "ttv", {
-                    ID: emote.id!,
-                    Name: emote.name!,
-                    UsedTimes: 0
+        ///////////////////////////////////////////
+        // -- New BTTV global emotes:
+        if (global_emotes.bttv) {
+            for (const emote of global_emotes.bttv) {
+                const _emote = await this.db.emotes.findFirst({
+                    where: {
+                        targetId: target.id,
+                        id: emote.id,
+                        provider: "bttv",
+                        is_global: true
+                    }
                 });
-                new_emotes.push(emote.name!);
+
+                if (!_emote) {
+                    await this.db.emotes.create({
+                        data: {
+                            id: emote.id!,
+                            name: emote.code!,
+                            targetId: target.id,
+                            provider: "bttv",
+                            is_global: true
+                        }
+                    });
+                }
             }
         }
 
-        // New global emotes:
-        for (const emote of global_emotes) {
-            const _emote: IStorage.Emote | undefined = this.emotes[this.symlink[target_name]]["ttv"].find(e => e.ID == emote.id!);
-
-            if (_emote === undefined) {
-                this.addEmote(this.symlink[target_name], emote.id!, "ttv", {
-                    ID: emote.id!,
-                    Name: emote.name!,
-                    UsedTimes: 0,
-                    isGlobal: true
+        // -- New FFZ global emotes:
+        if (global_emotes.ffz) {
+            for (const emote of global_emotes.ffz) {
+                const _emote = await this.db.emotes.findFirst({
+                    where: {
+                        targetId: target.id,
+                        id: emote.id!.toString(),
+                        provider: "ffz",
+                        is_global: true
+                    }
                 });
-                new_emotes.push(emote.name!);
+
+                if (!_emote) {
+                    await this.db.emotes.create({
+                        data: {
+                            id: emote.id!.toString(),
+                            name: emote.name!,
+                            targetId: target.id,
+                            provider: "ffz",
+                            is_global: true
+                        }
+                    });
+                }
             }
         }
 
-        // Deleted global/channel emotes:
-        for (const emote of this.emotes[this.symlink[target_name]]["ttv"]) {
-            const _emote: IEmote.TTV | undefined = channel_emotes.find(e => e.id! === emote.ID);
-            const __emote: IEmote.TTV | undefined = global_emotes.find(e => e.id! === emote.ID);
-
-            if (_emote === undefined && emote.isGlobal != true) {
-                this.removeEmote(this.symlink[target_name], emote.ID, "ttv", true);
-                deleted_emotes.push(emote.Name);
-            }
-
-            if (__emote === undefined && emote.isGlobal == true) {
-                this.removeEmote(this.symlink[target_name], emote.ID, "ttv", true);
-                deleted_emotes.push(emote.Name);
-            }
-        }
-
-        // Announce changes in the chat:
-        if (announce) {
-            this.announce(target_name, "[Twitch]", new_emotes, deleted_emotes);
-        }
-    }
-
-    /**
-     * Synchronize local emotes with channel/global 7TV emotes.
-     * @param target_name Channel name.
-     * @param announce Announce changes in the chat room?
-     */
-     public async sync7TVEmotes(target_name: string, announce?: boolean | undefined) {
-        const provider: STVProvider = this.emotelib["seventv"];
-        if (this.symlink[target_name] === undefined) throw new Error("Username " + target_name + " not found in symlinks.");
-        const channel_emotes: IEmote.STV[] | null = await provider.getChannelEmotes(this.symlink[target_name]);
-        const global_emotes: IEmote.STV[] | null = await provider.getGlobalEmotes();
-        var new_emotes: string[] = [];
-        var deleted_emotes: string[] = [];
-
-        if (channel_emotes === null) throw new Error("Channel ID " + target_name + " don't have any channel emotes.");
-        if (global_emotes === null) throw new Error("No global emotes.");
-        if (this.emotes[this.symlink[target_name]]["stv"] === undefined) this.emotes[this.symlink[target_name]]["stv"] = [];
-
-        // New channel emotes:
-        for (const emote of channel_emotes) {
-            const _emote: IStorage.Emote | undefined = this.emotes[this.symlink[target_name]]["stv"].find(e => e.ID == emote.id!);
-
-            if (_emote === undefined) {
-                this.addEmote(this.symlink[target_name], emote.id!, "stv", {
-                    ID: emote.id!,
-                    Name: emote.name!,
-                    UsedTimes: 0
+        // -- New TTV global emotes:
+        if (global_emotes.ttv) {
+            for (const emote of global_emotes.ttv) {
+                const _emote = await this.db.emotes.findFirst({
+                    where: {
+                        targetId: target.id,
+                        id: emote.id,
+                        provider: "ttv",
+                        is_global: true
+                    }
                 });
-                new_emotes.push(emote.name!);
+
+                if (!_emote) {
+                    await this.db.emotes.create({
+                        data: {
+                            id: emote.id!,
+                            name: emote.name!,
+                            targetId: target.id,
+                            provider: "ttv",
+                            is_global: true
+                        }
+                    });
+                }
             }
         }
 
-        // New global emotes:
-        for (const emote of global_emotes) {
-            const _emote: IStorage.Emote | undefined = this.emotes[this.symlink[target_name]]["stv"].find(e => e.ID == emote.id!);
-
-            if (_emote === undefined) {
-                this.addEmote(this.symlink[target_name], emote.id!, "stv", {
-                    ID: emote.id!,
-                    Name: emote.name!,
-                    UsedTimes: 0,
-                    isGlobal: true
+        // -- New 7TV global emotes:
+        if (global_emotes.stv) {
+            for (const emote of global_emotes.stv) {
+                const _emote = await this.db.emotes.findFirst({
+                    where: {
+                        targetId: target.id,
+                        id: emote.id,
+                        provider: "stv",
+                        is_global: true
+                    }
                 });
-                new_emotes.push(emote.name!);
+
+                if (!_emote) {
+                    await this.db.emotes.create({
+                        data: {
+                            id: emote.id!,
+                            name: emote.name!,
+                            targetId: target.id,
+                            provider: "stv",
+                            is_global: true
+                        }
+                    });
+                }
             }
         }
 
-        // Deleted global/channel emotes:
-        for (const emote of this.emotes[this.symlink[target_name]]["stv"]) {
-            const _emote: IEmote.STV | undefined = channel_emotes.find(e => e.id === emote.ID);
-            const __emote: IEmote.STV | undefined = global_emotes.find(e => e.id === emote.ID);
-
-            if (_emote === undefined && emote.isGlobal != true) {
-                this.removeEmote(this.symlink[target_name], emote.ID, "stv", true);
-                deleted_emotes.push(emote.Name);
-            }
-
-            if (__emote === undefined && emote.isGlobal == true) {
-                this.removeEmote(this.symlink[target_name], emote.ID, "stv", true);
-                deleted_emotes.push(emote.Name);
-            }
-        }
-
-        // Announce changes in the chat:
-        if (announce) {
-            this.announce(target_name, "[7TV]", new_emotes, deleted_emotes);
-        }
+        log.debug("Synchronized emotes with target ID", target.alias_id);
     }
-
-    /**
-     * Add new emote entry in the dictionary.
-     * @param target_id Channel ID.
-     * @param emote_id Emote ID that provided by Emote Proivder.
-     * @param provider_id Emote provider.
-     * @param data Emote data.
-     */
-    public addEmote(
-        target_id: string,
-        emote_id: string,
-        provider_id: "ttv" | "bttv" | "ffz" | "stv",
-        data: IStorage.Emote
-    ): void {
-        if (!this.containsTarget(target_id)) throw new Error(`Target ID ${target_id} not in emote dictionary.`);
-        if (!this.containsProvider(target_id, provider_id)) throw new Error(`Provider ID ${provider_id} not in ${target_id}'s emote dictionary.`);
-        this.emotes[target_id][provider_id].push(data);
-    }
-
-    /**
-     * Remove the emote entry from the dictionary.
-     * @param target_id Channel ID.
-     * @param emote_id Emote ID that provided by Emote Proivder.
-     * @param provider_id Emote provider.
-     */
-    public removeEmote(
-        target_id: string,
-        emote_id: string,
-        provider_id: "ttv" | "bttv" | "ffz" | "stv",
-        deletionTag?: boolean | undefined
-    ): void {
-        var emote: IStorage.Emote | null = this.getEmote(target_id, emote_id, provider_id);
-
-        if (emote === null) throw new Error(`Emote ID ${emote_id} (${provider_id}) not in ${target_id}'s emote dictionary.`);
-
-        if (deletionTag === undefined) deletionTag = true;
-
-        if (deletionTag) {
-            emote.isDeleted = true;
-        } else {
-            delete this.emotes[target_id][provider_id][this.emotes[target_id][provider_id].indexOf(emote)];
-
-            // Removing the empty items:
-            this.emotes[target_id][provider_id] = this.emotes[target_id][provider_id].filter(e => e !== null);
-        }
-    }
-
-    /**
-     * Set value in emote entry in the dictionary.
-     * @param target_id Channel ID.
-     * @param emote_id Emote ID that provided by Emote Proivder.
-     * @param provider_id Emote provider.
-     * @param key Key to edit.
-     * @param value Value to set for key. If undefined, it will remove the key.
-     */
-    public setEmote<T extends keyof IStorage.Emote>(
-        target_id: string,
-        emote_id: string,
-        provider_id: EmoteProviders,
-        key: T,
-        value: IStorage.Emote[T]
-    ): void {
-        if (!this.containsTarget(target_id)) throw new Error(`Target ID ${target_id} not in emote dictionary.`);
-        if (!this.containsProvider(target_id, provider_id)) throw new Error(`Provider ID ${provider_id} not in ${target_id}'s emote dictionary.`);
-        
-        var emote: IStorage.Emote | null = this.getEmote(target_id, emote_id, provider_id);
-
-        if (emote === null) throw new Error(`Emote ID ${emote_id} (${provider_id}) not in ${target_id}'s emote dictionary.`);
-
-        if (value === undefined) {
-            delete emote[key];
-            return;
-        }
-
-        emote[key] = value;
-    }
-
-    /**
-     * Get an emote.
-     * @param target_id Channel ID.
-     * @param emote_id Emote ID.
-     * @param provider_id Provider ID.
-     * @returns IStorage.Emote if emote found. If not, just returns null.
-     */
-    public getEmote(
-        target_id: string,
-        emote_id: string,
-        provider_id: EmoteProviders
-    ): IStorage.Emote | null {
-        if (!this.containsTarget(target_id)) throw new Error(`Target ID ${target_id} not in emote dictionary.`);
-        if (!this.containsProvider(target_id, provider_id)) throw new Error(`Provider ID ${provider_id} not in ${target_id}'s emote dictionary.`);
-
-        var emote: IStorage.Emote | null = null;
-
-        for (const _emote of this.emotes[target_id][provider_id]) {
-            if (emote_id === _emote.ID || emote_id === _emote.Name) {
-                emote = _emote;
-            }
-        }
-
-        return emote;
-    }
-
-    public containsTarget(target_id: string): boolean {
-        if (!(target_id in this.emotes)) return false;
-        return true;
-    }
-
-    public containsProvider(target_id: string, provider_id: EmoteProviders): boolean {
-        if (!(provider_id in this.emotes[target_id])) return false;
-        return true;
-    }
-
-    /**
-     * Get the all channel emotes.
-     * @param target_id Channel ID.
-     * @param provider_id Provider ID.
-     * @returns emotes of provider if it specified. If not, returns the full list of emotes of every provider.
-     */
-    public getChannelEmotes(target_id: string, provider_id?: EmoteProviders | undefined): IStorage.Emote[] | {[provider_id: string]: IStorage.Emote[]} { 
-        if (provider_id !== undefined) return this.emotes[target_id][provider_id];
-        return this.emotes[target_id];
-    }
-
-    public get getEmotes() { return this.emotes; }
 }
 
 export default EmoteUpdater;

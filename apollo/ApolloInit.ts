@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with itb2.  If not, see <http://www.gnu.org/licenses/>.
 
+import { PrismaClient } from "@prisma/client";
 import EmoteLib from "emotelib";
 import { Client } from "tmi.js";
 import { Logger } from "tslog";
@@ -22,8 +23,8 @@ import TwitchApi from "./clients/ApiClient";
 import ApolloClient from "./clients/ApolloClient";
 import ConfigIni from "./files/ConfigIni";
 import LocalStorage from "./files/LocalStorage";
+import Symlinks from "./files/Symlinks";
 import Messages from "./handlers/MessageHandler";
-import StaticCommandHandler from "./handlers/StaticCommandHandler";
 import TimerHandler from "./handlers/TimerHandler";
 import IConfiguration from "./interfaces/IConfiguration";
 import EmoteUpdater from "./utils/emotes/EmoteUpdater";
@@ -33,31 +34,33 @@ const log: Logger = new Logger({name: "itb2-main"});
 
 async function ApolloInit(
     Opts: {[key: string]: any},
-    Storage: LocalStorage,
     TmiApi: TwitchApi.Client, 
-    Config: IConfiguration
+    Config: IConfiguration,
+    Prisma: PrismaClient,
+    Storage?: LocalStorage
 ) {
-    const Locale: Localizator = new Localizator();
+    // User IDs and their usernames:
+    const symlinks: Symlinks = new Symlinks(TmiApi);
+    
+    // Convert User ID to username:
+    for await (const trg of await Prisma.target.findMany()) {
+        await symlinks.register(trg.alias_id.toString());
+    }
 
-    Locale.load("localization/bot.json");
+    const Locale: Localizator = new Localizator(Prisma, symlinks);
+    await Locale.load("localization/bot.json");
 
     const Modules: ModuleManager = new ModuleManager();
-    const Emotelib: EmoteLib = new EmoteLib({
-        client_id: Config.Authorization.ClientID,
-        access_token: Config.Authorization.AccessToken
-    });
 
-    const Timer: TimerHandler = new TimerHandler(Storage.Targets.getTargets);
-    await Timer.IDsToUsernames(TmiApi);
-
-    Locale.setPreferredLanguages(Storage.Targets.getTargets, Storage.Global.getSymlinks);
+    const Timer: TimerHandler = new TimerHandler(Prisma);
+    await Timer.init(symlinks.getSymlinks());
 
     Modules.init();
 
     const TmiClient: Client = ApolloClient(
         Config.Authorization.Username,
         Config.Authorization.Password,
-        Object.keys(Storage.Global.getSymlinks),
+        Object.keys(symlinks.getSymlinks()),
         Opts["debug"]
     );
 
@@ -69,33 +72,29 @@ async function ApolloInit(
         services: {
             client: TmiClient,
             localizator: Locale,
-            twitch_api: TmiApi
+            twitch_api: TmiApi,
+            db: Prisma,
+            symlinks: symlinks
         }
     });
 
-    await Emotes.load(Storage.Targets.getTargets);
     await Emotes.subscribeTo7TVEventAPI();
 
-    const StaticCommands: StaticCommandHandler = new StaticCommandHandler(Storage.Targets.getTargets);
-
     try {
-        for (const name of Object.keys(Storage.Global.getSymlinks)) {
-            await Emotes.sync7TVEmotes(name, false);
-            await Emotes.syncBTTVEmotes(name, false);
-            await Emotes.syncFFZEmotes(name, false);
-            await Emotes.syncTTVEmotes(name, false);
+        for (const target of await Prisma.target.findMany()) {
+            await Emotes.syncAllEmotes(target.alias_id.toString());
         }
 
         await Messages.Handler({
             Client: TmiClient,
             Locale: Locale,
-            Storage: Storage,
+            Emote: Emotes,
+            Module: Modules,
+            DB: Prisma,
             TwitchApi: TmiApi,
             Timer: Timer,
-            Module: Modules,
-            Emote: Emotes,
-            StaticCmd: StaticCommands
-        });        
+            Symlinks: symlinks
+        });
 
     } catch (err) {
         log.error(err);
