@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./local/database.db"
+    provider = "sqlite"
+    url      = "file:database.db"
 }
 
 // Logs:
@@ -24,6 +24,7 @@ model User {
   alias_id   Int
   int_role   Int?
   auth_token String?
+  tea_key    String?
   timestamp  DateTime @default(now())
 }
 
