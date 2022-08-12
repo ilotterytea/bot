@@ -166,3 +166,4 @@ prisma/local
 prisma/migrations
 
 *.db
+*.db-journal

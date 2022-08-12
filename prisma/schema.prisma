@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
-    url      = "file:database.db"
+  provider          = "sqlite"
+  url = "file:monkeos.db"
 }
 
 // Logs:

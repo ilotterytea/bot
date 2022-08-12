@@ -390,6 +390,12 @@ class EmoteUpdater {
             ttv: await this.emotelib.twitch.getGlobalEmotes()
         }
 
+        const emotes: Emotes[] | null = await this.db.emotes.findMany({
+            where: {
+                targetId: target.id
+            }
+        });
+
         // -- New BTTV channel emotes:
         if (channel_emotes.bttv) {
             for (const emote of channel_emotes.bttv) {
@@ -410,6 +416,22 @@ class EmoteUpdater {
                             provider: "bttv"
                         }
                     });
+                }
+            }
+
+            if (emotes) {
+                for (const emote of emotes.filter(e => e.provider === "bttv")) {
+                    if (emote.is_global) return;
+                    const __emote: IEmote.BTTV | undefined = channel_emotes.bttv.find(e => e.id === emote.id);
+                    
+                    if (!__emote) {
+                        await this.db.emotes.update({
+                            where: {int_id: emote.int_id},
+                            data: {
+                                is_deleted: true
+                            }
+                        });
+                    }
                 }
             }
         }
@@ -436,6 +458,22 @@ class EmoteUpdater {
                     });
                 }
             }
+
+            if (emotes) {
+                for (const emote of emotes.filter(e => e.provider === "ffz")) {
+                    if (emote.is_global) return;
+                    const __emote: IEmote.FFZ | undefined = channel_emotes.ffz.find(e => e.id === parseInt(emote.id));
+                    
+                    if (!__emote) {
+                        await this.db.emotes.update({
+                            where: {int_id: emote.int_id},
+                            data: {
+                                is_deleted: true
+                            }
+                        });
+                    }
+                }
+            }
         }
 
         // -- New TTV channel emotes:
@@ -460,6 +498,21 @@ class EmoteUpdater {
                     });
                 }
             }
+
+            if (emotes) {
+                for (const emote of emotes.filter(e => e.provider === "ttv")) {
+                    if (emote.is_global) return;
+                    const __emote: IEmote.TTV | undefined = channel_emotes.ttv.find(e => e.id === emote.id);
+                    if (!__emote) {
+                        await this.db.emotes.update({
+                            where: {int_id: emote.int_id},
+                            data: {
+                                is_deleted: true
+                            }
+                        });
+                    }
+                }
+            }
         }
 
         // -- New 7TV channel emotes:
@@ -482,6 +535,22 @@ class EmoteUpdater {
                             provider: "stv"
                         }
                     });
+                }
+            }
+
+            if (emotes) {
+                for (const emote of emotes.filter(e => e.provider === "stv")) {
+                    if (emote.is_global) return;
+                    const __emote: IEmote.STV | undefined = channel_emotes.stv.find(e => e.id === emote.id);
+                    
+                    if (!__emote) {
+                        await this.db.emotes.update({
+                            where: {int_id: emote.int_id},
+                            data: {
+                                is_deleted: true
+                            }
+                        });
+                    }
                 }
             }
         }
@@ -510,6 +579,22 @@ class EmoteUpdater {
                     });
                 }
             }
+
+            if (emotes) {
+                for (const emote of emotes.filter(e => e.provider === "bttv")) {
+                    if (!emote.is_global) return;
+                    const __emote: IEmote.BTTV | undefined = global_emotes.bttv.find(e => e.id === emote.id);
+                    
+                    if (!__emote) {
+                        await this.db.emotes.update({
+                            where: {int_id: emote.int_id},
+                            data: {
+                                is_deleted: true
+                            }
+                        });
+                    }
+                }
+            }
         }
 
         // -- New FFZ global emotes:
@@ -534,6 +619,22 @@ class EmoteUpdater {
                             is_global: true
                         }
                     });
+                }
+            }
+
+            if (emotes) {
+                for (const emote of emotes.filter(e => e.provider === "ffz")) {
+                    if (!emote.is_global) return;
+                    const __emote: IEmote.FFZ | undefined = global_emotes.ffz.find(e => e.id === parseInt(emote.id));
+                    
+                    if (!__emote) {
+                        await this.db.emotes.update({
+                            where: {int_id: emote.int_id},
+                            data: {
+                                is_deleted: true
+                            }
+                        });
+                    }
                 }
             }
         }
@@ -562,6 +663,22 @@ class EmoteUpdater {
                     });
                 }
             }
+
+            if (emotes) {
+                for (const emote of emotes.filter(e => e.provider === "ttv")) {
+                    if (!emote.is_global) return;
+                    const __emote: IEmote.TTV | undefined = global_emotes.ttv.find(e => e.id === emote.id);
+                    
+                    if (!__emote) {
+                        await this.db.emotes.update({
+                            where: {int_id: emote.int_id},
+                            data: {
+                                is_deleted: true
+                            }
+                        });
+                    }
+                }
+            }
         }
 
         // -- New 7TV global emotes:
@@ -586,6 +703,22 @@ class EmoteUpdater {
                             is_global: true
                         }
                     });
+                }
+            }
+
+            if (emotes) {
+                for (const emote of emotes.filter(e => e.provider === "stv")) {
+                    if (!emote.is_global) return;
+                    const __emote: IEmote.STV | undefined = global_emotes.stv.find(e => e.id === emote.id);
+                    
+                    if (!__emote) {
+                        await this.db.emotes.update({
+                            where: {int_id: emote.int_id},
+                            data: {
+                                is_deleted: true
+                            }
+                        });
+                    }
                 }
             }
         }
