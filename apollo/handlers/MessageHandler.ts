@@ -94,8 +94,6 @@ namespace Messages {
 
             const prefix: string = (targetDb.prefix) ? targetDb.prefix : (globalTarget.prefix) ? globalTarget.prefix : "!";
 
-            console.log(prefix);
-
             // Arguments:
             var args: IArguments = {
                 Services: Services,
