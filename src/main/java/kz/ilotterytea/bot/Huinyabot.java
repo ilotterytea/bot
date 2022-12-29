@@ -4,6 +4,7 @@ import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
 import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
+import kz.ilotterytea.bot.api.commands.CommandLoader;
 import kz.ilotterytea.bot.storage.PropLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,15 +19,18 @@ import java.util.Properties;
 public class Huinyabot extends Bot {
     private static Properties properties;
     private static TwitchClient client;
+    private static CommandLoader loader;
 
     private final Logger LOGGER = LoggerFactory.getLogger(Huinyabot.class);
 
     public static TwitchClient getClient() { return client; }
     public static Properties getProperties() { return properties; }
+    public static CommandLoader getLoader() { return loader; }
 
     @Override
     public void init() {
         properties = new PropLoader(SharedConstants.PROPERTIES_PATH);
+        loader = new CommandLoader();
 
         // - - -  T W I T C H  C L I E N T  - - - :
         OAuth2Credential credential = new OAuth2Credential("twitch", properties.getProperty("OAUTH2_TOKEN", ""));
