@@ -20,12 +20,13 @@ public class MessageHandlerSamples {
     public static void ircMessageEvent(IRCMessageEvent e) {
         if (!e.getMessage().isPresent()) return;
 
-        final String MSG = e.getMessage().get();
+        String MSG = e.getMessage().get();
         final String PREFIX = Huinyabot.getProperties().getProperty("PREFIX", SharedConstants.DEFAULT_PREFIX);
 
         // Command processing:
         if (MSG.startsWith(PREFIX)) {
-            String cmdNameId = MSG.substring(PREFIX.length(), MSG.split(" ")[0].length());
+            MSG = MSG.substring(PREFIX.length());
+            String cmdNameId = MSG.split(" ")[0];
 
             if (Huinyabot.getLoader().getCommands().containsKey(cmdNameId)) {
                 String response = Huinyabot.getLoader().call(cmdNameId, e);
