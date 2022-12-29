@@ -4,6 +4,8 @@ import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.SharedConstants;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * The samples for Twitch4j events
  * @author ilotterytea
@@ -29,7 +31,11 @@ public class MessageHandlerSamples {
                 String response = Huinyabot.getLoader().call(cmdNameId, e);
 
                 if (response != null) {
-                    Huinyabot.getClient().getChat().sendMessage(e.getChannel().getName(), response);
+                    Huinyabot.getClient().getChat().sendMessage(
+                            e.getChannel().getName(),
+                            // idk why just a string is not encoded utf-8
+                            new String(response.getBytes(), StandardCharsets.UTF_8)
+                    );
                 }
             }
         }
