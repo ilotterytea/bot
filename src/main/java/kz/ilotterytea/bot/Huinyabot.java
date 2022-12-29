@@ -6,6 +6,7 @@ import com.github.twitch4j.TwitchClientBuilder;
 import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 import kz.ilotterytea.bot.api.commands.CommandLoader;
 import kz.ilotterytea.bot.api.delay.DelayManager;
+import kz.ilotterytea.bot.handlers.MessageHandlerSamples;
 import kz.ilotterytea.bot.storage.PropLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,11 +53,7 @@ public class Huinyabot extends Bot {
         }
         client.getChat().joinChannel("ilotterytea");
 
-        client.getEventManager().onEvent(IRCMessageEvent.class, e -> {
-            if (e.getMessage().isPresent() && e.getMessage().get().equals("test")) {
-                client.getChat().sendMessage(e.getChannel().getName(), "test successfully completed");
-            }
-        });
+        client.getEventManager().onEvent(IRCMessageEvent.class, MessageHandlerSamples::ircMessageEvent);
     }
 
     @Override
