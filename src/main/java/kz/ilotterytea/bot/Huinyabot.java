@@ -9,6 +9,7 @@ import kz.ilotterytea.bot.api.commands.CommandLoader;
 import kz.ilotterytea.bot.api.delay.DelayManager;
 import kz.ilotterytea.bot.handlers.MessageHandlerSamples;
 import kz.ilotterytea.bot.storage.PropLoader;
+import kz.ilotterytea.bot.utils.StorageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +42,8 @@ public class Huinyabot extends Bot {
 
     @Override
     public void init() {
+        StorageUtils.checkIntegrity();
+
         properties = new PropLoader(SharedConstants.PROPERTIES_PATH);
         loader = new CommandLoader();
         delayer = new DelayManager();
