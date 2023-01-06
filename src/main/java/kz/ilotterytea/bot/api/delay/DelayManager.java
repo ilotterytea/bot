@@ -28,7 +28,7 @@ public class DelayManager {
      * @param userId User ID.
      */
     public void delay(String nameId, String userId) {
-        Command cmd = Huinyabot.getLoader().getCommands().get(nameId);
+        Command cmd = Huinyabot.getInstance().getLoader().getCommands().get(nameId);
 
         if (cmd == null) {
             LOGGER.warn("No command with ID " + nameId + " found!");

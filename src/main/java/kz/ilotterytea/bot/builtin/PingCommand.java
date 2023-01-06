@@ -30,7 +30,7 @@ public class PingCommand extends Command {
                 ev.getUser().getName(),
                 System.getProperty("java.version"),
                 ut,
-                Huinyabot.getClient().getChat().getLatency()
+                Huinyabot.getInstance().getClient().getChat().getLatency()
         );
     }
 }

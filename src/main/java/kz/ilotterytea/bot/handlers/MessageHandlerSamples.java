@@ -10,6 +10,8 @@ import kz.ilotterytea.bot.SharedConstants;
  * @since 1.0
  */
 public class MessageHandlerSamples {
+    private static final Huinyabot bot = Huinyabot.getInstance();
+
     /**
      * Message handler sample for IRC message events.
      * @author ilotterytea
@@ -19,18 +21,18 @@ public class MessageHandlerSamples {
         if (!e.getMessage().isPresent()) return;
 
         String MSG = e.getMessage().get();
-        final String PREFIX = Huinyabot.getProperties().getProperty("PREFIX", SharedConstants.DEFAULT_PREFIX);
+        final String PREFIX = bot.getProperties().getProperty("PREFIX", SharedConstants.DEFAULT_PREFIX);
 
         // Command processing:
         if (MSG.startsWith(PREFIX)) {
             MSG = MSG.substring(PREFIX.length());
             String cmdNameId = MSG.split(" ")[0];
 
-            if (Huinyabot.getLoader().getCommands().containsKey(cmdNameId)) {
-                String response = Huinyabot.getLoader().call(cmdNameId, e);
+            if (bot.getLoader().getCommands().containsKey(cmdNameId)) {
+                String response = bot.getLoader().call(cmdNameId, e);
 
                 if (response != null) {
-                    Huinyabot.getClient().getChat().sendMessage(
+                    bot.getClient().getChat().sendMessage(
                             e.getChannel().getName(),
                             response
                     );

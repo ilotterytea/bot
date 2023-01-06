@@ -23,17 +23,21 @@ import java.util.stream.Collectors;
  * @since 1.0
  */
 public class Huinyabot extends Bot {
-    private static Properties properties;
-    private static TwitchClient client;
-    private static CommandLoader loader;
-    private static DelayManager delayer;
+    private Properties properties;
+    private TwitchClient client;
+    private CommandLoader loader;
+    private DelayManager delayer;
 
     private final Logger LOGGER = LoggerFactory.getLogger(Huinyabot.class);
 
-    public static TwitchClient getClient() { return client; }
-    public static Properties getProperties() { return properties; }
-    public static CommandLoader getLoader() { return loader; }
-    public static DelayManager getDelayer() { return delayer; }
+    public TwitchClient getClient() { return client; }
+    public Properties getProperties() { return properties; }
+    public CommandLoader getLoader() { return loader; }
+    public DelayManager getDelayer() { return delayer; }
+
+    private static Huinyabot instance;
+    public static Huinyabot getInstance() { return instance; }
+    public Huinyabot() { instance = this; }
 
     @Override
     public void init() {
