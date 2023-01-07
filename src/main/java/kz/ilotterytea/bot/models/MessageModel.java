@@ -1,5 +1,8 @@
 package kz.ilotterytea.bot.models;
 
+import kz.ilotterytea.bot.Huinyabot;
+import kz.ilotterytea.bot.api.commands.Command;
+
 import java.util.*;
 
 /**
@@ -35,11 +38,32 @@ public class MessageModel {
         String sc = null;
         ArrayList<String> o = new ArrayList<>();
         String m;
+        Command cmd = null;
+
+        // Command:
+        if (s.get(0) != null) {
+            c = s.get(0).substring(prefix.length());
+            s.remove(0);
+            if (Huinyabot.getInstance().getLoader().getCommands().containsKey(c)) {
+                cmd = Huinyabot.getInstance().getLoader().getCommands().get(c);
+            } else {
+                for (Command cmd2 : Huinyabot.getInstance().getLoader().getCommands().values()) {
+                    for (String alias : cmd2.getAliases()) {
+                        if (Objects.equals(alias, c)) {
+                            cmd = cmd2;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
 
         // Options:
         for (String w : s) {
             if (w.startsWith("--") && w.length() > 2) {
-                o.add(w.substring("--".length()));
+                if (cmd != null && cmd.getOptions().contains(w.substring("--".length()))) {
+                    o.add(w.substring("--".length()));
+                }
             }
         }
 
@@ -48,16 +72,12 @@ public class MessageModel {
             s.remove("--" + w);
         }
 
-        // Command:
-        if (s.get(0) != null) {
-            c = s.get(0).substring(prefix.length());
-            s.remove(0);
-        }
-
         // Subcommand:
         if (s.size() >= 1 && s.get(0) != null && !s.get(0).startsWith("--")) {
-            sc = s.get(0);
-            s.remove(0);
+            if (cmd != null && cmd.getSubcommands().contains(s.get(0))) {
+                sc = s.get(0);
+                s.remove(0);
+            }
         }
 
         // Building the clear message:
