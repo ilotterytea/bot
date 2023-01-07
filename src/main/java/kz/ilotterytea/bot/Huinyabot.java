@@ -15,10 +15,9 @@ import kz.ilotterytea.bot.utils.StorageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 /**
  * Bot.
@@ -71,10 +70,10 @@ public class Huinyabot extends Bot {
         if (credential.getUserName() != null) {
             client.getChat().joinChannel(credential.getUserName());
         }
-        if (client.getHelix() != null && properties.getProperty("ACCESS_TOKEN") != null && properties.getProperty("INITIAL_CHANNEL_IDS") != null) {
+        if (client.getHelix() != null && properties.getProperty("ACCESS_TOKEN") != null && targets.getAll().keySet().size() > 0) {
             List<User> userList = client.getHelix().getUsers(
                     properties.getProperty("ACCESS_TOKEN"),
-                    Arrays.stream(properties.getProperty("INITIAL_CHANNEL_IDS").split(",")).collect(Collectors.toList()),
+                    new ArrayList<>(targets.getAll().keySet()),
                     null
             ).execute().getUsers();
 
