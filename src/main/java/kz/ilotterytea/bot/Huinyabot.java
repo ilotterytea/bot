@@ -18,10 +18,8 @@ import kz.ilotterytea.bot.utils.StorageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.net.URISyntaxException;
-import java.util.Properties;
 
 /**
  * Bot.
@@ -36,6 +34,7 @@ public class Huinyabot extends Bot {
     private TargetController targets;
     private UserController users;
     private SevenTVWebsocketClient sevenTV;
+    private Map<String, String> targetLinks;
 
     private final Logger LOGGER = LoggerFactory.getLogger(Huinyabot.class);
 
@@ -46,6 +45,7 @@ public class Huinyabot extends Bot {
     public TargetController getTargetCtrl() { return targets; }
     public UserController getUserCtrl() { return users; }
     public SevenTVWebsocketClient getSevenTVWSClient() { return sevenTV; }
+    public Map<String, String> getTargetLinks() { return targetLinks; }
 
     private static Huinyabot instance;
     public static Huinyabot getInstance() { return instance; }
@@ -60,6 +60,7 @@ public class Huinyabot extends Bot {
         properties = new PropLoader(SharedConstants.PROPERTIES_PATH);
         loader = new CommandLoader();
         delayer = new DelayManager();
+        targetLinks = new HashMap<>();
 
         try {
             sevenTV = new SevenTVWebsocketClient();
@@ -94,6 +95,8 @@ public class Huinyabot extends Bot {
 
             for (User u : userList) {
                 client.getChat().joinChannel(u.getLogin());
+
+                targetLinks.put(u.getLogin(), u.getId());
             }
         }
 
