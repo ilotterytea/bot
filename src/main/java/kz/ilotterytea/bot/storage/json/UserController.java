@@ -3,7 +3,6 @@ package kz.ilotterytea.bot.storage.json;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import kz.ilotterytea.bot.SharedConstants;
-import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.models.UserModel;
 
 import java.io.*;
@@ -99,7 +98,7 @@ public class UserController implements JsonController<UserModel> {
     private UserModel genDefault(String aliasId) {
         return new UserModel(
                 aliasId,
-                Permissions.USER
+                false
         );
     }
 }

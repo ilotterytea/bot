@@ -4,8 +4,13 @@ import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.api.commands.Command;
+import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.models.MessageModel;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * The samples for Twitch4j events
@@ -27,9 +32,21 @@ public class MessageHandlerSamples {
         final String PREFIX = bot.getProperties().getProperty("PREFIX", SharedConstants.DEFAULT_PREFIX);
         final ArgumentsModel args = new ArgumentsModel(
                 bot.getUserCtrl().getOrDefault(e.getUserId()),
+                Permissions.USER,
                 MessageModel.create(e.getMessage().get(), PREFIX),
                 e
         );
+
+        // Set the user's current permissions:
+        if (new ArrayList<>(List.of(bot.getProperties().getProperty("SUPER_USER_IDS", "").split(","))).contains(e.getUserId())) {
+            args.setCurrentPermissions(Permissions.SUPAUSER);
+        } else if (Objects.equals(e.getChannel().getId(), e.getUser().getId())) {
+            args.setCurrentPermissions(Permissions.BROADCASTER);
+        } else if (e.getBadges().containsKey("moderator")) {
+            args.setCurrentPermissions(Permissions.MOD);
+        } else if (e.getBadges().containsKey("vip")) {
+            args.setCurrentPermissions(Permissions.VIP);
+        }
 
         // Command processing:
         if (MSG.startsWith(PREFIX)) {

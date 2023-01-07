@@ -74,7 +74,7 @@ public class CommandLoader extends ClassLoader {
 
         if (COMMANDS.containsKey(nameId)) {
             Command cmd = COMMANDS.get(nameId);
-            if (args.getSender().getPermissions().getId() >= cmd.getPermissions().getId()) {
+            if (args.getCurrentPermissions().getId() >= cmd.getPermissions().getId()) {
                 try {
                     response = cmd.run(args);
                 } catch (Exception e) {

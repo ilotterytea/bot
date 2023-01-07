@@ -1,7 +1,5 @@
 package kz.ilotterytea.bot.models;
 
-import kz.ilotterytea.bot.api.permissions.Permissions;
-
 /**
  * User (chatter) model.
  * @author ilotterytea
@@ -9,17 +7,17 @@ import kz.ilotterytea.bot.api.permissions.Permissions;
  */
 public class UserModel {
     private final String aliasId;
-    private Permissions permissions;
+    private boolean isSuperuser;
 
     public UserModel(
             String aliasId,
-            Permissions permissions
+            boolean isSuperuser
     ) {
         this.aliasId = aliasId;
-        this.permissions = permissions;
+        this.isSuperuser = isSuperuser;
     }
 
     public String getAliasId() { return aliasId; }
-    public Permissions getPermissions() { return permissions; }
-    public void setPermissions(Permissions permissions) { this.permissions = permissions; }
+    public boolean isSuperUser() { return isSuperuser; }
+    public void setSuperuser(boolean isSuperuser) { this.isSuperuser = isSuperuser; }
 }
