@@ -1,8 +1,9 @@
 package kz.ilotterytea.bot.builtin;
 
-import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.api.commands.Command;
+import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.utils.StringUtils;
 
 import java.lang.management.ManagementFactory;
@@ -20,14 +21,17 @@ public class PingCommand extends Command {
     public int getDelay() { return 5000; }
 
     @Override
-    public String run(IRCMessageEvent ev) {
+    public Permissions getPermissions() { return Permissions.USER; }
+
+    @Override
+    public String run(ArgumentsModel m) {
         long uptime = ManagementFactory.getRuntimeMXBean().getUptime();
 
         String ut = StringUtils.formatTimestamp(uptime / 1000);
 
         return String.format(
                 "%s: DankCrouching \u2615 Java %s \u00b7 Uptime: %s \u00b7 TMI: %sms",
-                ev.getUser().getName(),
+                m.getEvent().getUser().getName(),
                 System.getProperty("java.version"),
                 ut,
                 Huinyabot.getInstance().getClient().getChat().getLatency()

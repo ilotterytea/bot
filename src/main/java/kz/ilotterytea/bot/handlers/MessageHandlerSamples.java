@@ -3,6 +3,8 @@ package kz.ilotterytea.bot.handlers;
 import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.SharedConstants;
+import kz.ilotterytea.bot.models.ArgumentsModel;
+import kz.ilotterytea.bot.models.MessageModel;
 
 /**
  * The samples for Twitch4j events
@@ -22,6 +24,11 @@ public class MessageHandlerSamples {
 
         String MSG = e.getMessage().get();
         final String PREFIX = bot.getProperties().getProperty("PREFIX", SharedConstants.DEFAULT_PREFIX);
+        final ArgumentsModel args = new ArgumentsModel(
+                bot.getUserCtrl().getOrDefault(e.getUserId()),
+                MessageModel.create(e.getMessage().get(), PREFIX),
+                e
+        );
 
         // Command processing:
         if (MSG.startsWith(PREFIX)) {
@@ -29,7 +36,7 @@ public class MessageHandlerSamples {
             String cmdNameId = MSG.split(" ")[0];
 
             if (bot.getLoader().getCommands().containsKey(cmdNameId)) {
-                String response = bot.getLoader().call(cmdNameId, e);
+                String response = bot.getLoader().call(cmdNameId, args);
 
                 if (response != null) {
                     bot.getClient().getChat().sendMessage(

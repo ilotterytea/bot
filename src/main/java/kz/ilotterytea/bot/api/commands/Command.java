@@ -1,6 +1,7 @@
 package kz.ilotterytea.bot.api.commands;
 
-import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
+import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.models.ArgumentsModel;
 
 /**
  * Command.
@@ -23,10 +24,15 @@ public abstract class Command {
      */
     public abstract int getDelay();
     /**
+     * Get the ID of minimal permissions to run the command.
+     * @return permission ID.
+     */
+    public abstract Permissions getPermissions();
+    /**
      * Run the command.
      * @since 1.0
      * @author ilotterytea
      * @return response.
      */
-    public abstract String run(IRCMessageEvent ev);
+    public abstract String run(ArgumentsModel args);
 }

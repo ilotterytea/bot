@@ -1,6 +1,6 @@
 package kz.ilotterytea.bot.api.commands;
 
-import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
+import kz.ilotterytea.bot.models.ArgumentsModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,17 +66,20 @@ public class CommandLoader extends ClassLoader {
      * @since 1.0
      * @author ilotterytea
      * @param nameId Command name ID.
-     * @param ev Event
+     * @param args Arguments.
      * @return response
      */
-    public String call(String nameId, IRCMessageEvent ev) {
+    public String call(String nameId, ArgumentsModel args) {
         String response = null;
 
         if (COMMANDS.containsKey(nameId)) {
-            try {
-                response = COMMANDS.get(nameId).run(ev);
-            } catch (Exception e) {
-                LOGGER.error(String.format("Error occurred while running the %s command", nameId), e);
+            Command cmd = COMMANDS.get(nameId);
+            if (args.getSender().getPermissions().getId() >= cmd.getPermissions().getId()) {
+                try {
+                    response = cmd.run(args);
+                } catch (Exception e) {
+                    LOGGER.error(String.format("Error occurred while running the %s command", nameId), e);
+                }
             }
         }
 
