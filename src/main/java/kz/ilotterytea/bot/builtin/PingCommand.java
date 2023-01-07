@@ -8,7 +8,7 @@ import kz.ilotterytea.bot.utils.StringUtils;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * Ping command.
@@ -32,7 +32,7 @@ public class PingCommand extends Command {
     public ArrayList<String> getSubcommands() { return new ArrayList<>(); }
 
     @Override
-    public ArrayList<String> getAliases() { return new ArrayList<>(List.of(new String[]{"pong", "пинг", "понг"})); }
+    public ArrayList<String> getAliases() { return new ArrayList<>(Arrays.asList("pong", "пинг", "понг")); }
 
     @Override
     public String run(ArgumentsModel m) {

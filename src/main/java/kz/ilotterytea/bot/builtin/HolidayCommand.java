@@ -14,7 +14,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * Holiday command.
@@ -32,13 +32,13 @@ public class HolidayCommand extends Command {
     public Permissions getPermissions() { return Permissions.USER; }
 
     @Override
-    public ArrayList<String> getOptions() { return new ArrayList<>(List.of(new String[]{"тык", "massping", "all", "все"})); }
+    public ArrayList<String> getOptions() { return new ArrayList<>(Arrays.asList("тык", "massping", "all", "все")); }
 
     @Override
     public ArrayList<String> getSubcommands() { return new ArrayList<>(); }
 
     @Override
-    public ArrayList<String> getAliases() { return new ArrayList<>(List.of(new String[]{"праздник"})); }
+    public ArrayList<String> getAliases() { return new ArrayList<>(Arrays.asList("праздник")); }
 
     @Override
     public String run(ArgumentsModel m) {

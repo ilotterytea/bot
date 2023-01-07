@@ -6,7 +6,7 @@ import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.models.ArgumentsModel;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * Spam command.
@@ -24,18 +24,18 @@ public class SpamCommand extends Command {
     public Permissions getPermissions() { return Permissions.MOD; }
 
     @Override
-    public ArrayList<String> getOptions() { return new ArrayList<>(List.of(new String[]{"count"})); }
+    public ArrayList<String> getOptions() { return new ArrayList<>(Arrays.asList("count")); }
 
     @Override
     public ArrayList<String> getSubcommands() { return new ArrayList<>(); }
 
     @Override
-    public ArrayList<String> getAliases() { return new ArrayList<>(List.of(new String[]{"спам", "насрать", "repeat", "cv", "paste", "cvpaste"})); }
+    public ArrayList<String> getAliases() { return new ArrayList<>(Arrays.asList("спам", "насрать", "repeat", "cv", "paste", "cvpaste")); }
 
     @Override
     public String run(ArgumentsModel m) {
         final int MAX_COUNT = 8;
-        ArrayList<String> s = new ArrayList<>(List.of(m.getMessage().getMessage().split(" ")));
+        ArrayList<String> s = new ArrayList<>(Arrays.asList(m.getMessage().getMessage().split(" ")));
 
         if (s.size() <= 1) {
             return "No message found.";

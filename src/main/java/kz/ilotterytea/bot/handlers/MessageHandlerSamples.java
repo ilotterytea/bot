@@ -25,7 +25,7 @@ public class MessageHandlerSamples {
      */
     public static void ircMessageEvent(IRCMessageEvent e) {
         if (
-                e.getMessage().isEmpty() ||
+                !e.getMessage().isPresent() ||
                 bot.getUserCtrl().getOrDefault(e.getUserId()).isSuspended()
         ) {
             return;
@@ -64,7 +64,7 @@ public class MessageHandlerSamples {
                             e.getChannel().getName(),
                             response,
                             null,
-                            (e.getMessageId().isEmpty()) ? null : e.getMessageId().get()
+                            (!e.getMessageId().isPresent()) ? null : e.getMessageId().get()
                     );
                 }
             } else {
@@ -78,7 +78,7 @@ public class MessageHandlerSamples {
                                         e.getChannel().getName(),
                                         response,
                                         null,
-                                        (e.getMessageId().isEmpty()) ? null : e.getMessageId().get()
+                                        (!e.getMessageId().isPresent()) ? null : e.getMessageId().get()
                                 );
                             }
                         }

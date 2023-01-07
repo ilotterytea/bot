@@ -7,7 +7,7 @@ import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.models.ArgumentsModel;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * Ping em, Fors! LUL
@@ -31,11 +31,11 @@ public class MasspingCommand extends Command {
     public ArrayList<String> getSubcommands() { return new ArrayList<>(); }
 
     @Override
-    public ArrayList<String> getAliases() { return new ArrayList<>(List.of(new String[]{"mp", "масспинг", "мп"})); }
+    public ArrayList<String> getAliases() { return new ArrayList<>(Arrays.asList("mp", "масспинг", "мп")); }
 
     @Override
     public String run(ArgumentsModel m) {
-        if (m.getEvent().getChannelName().isEmpty()) return null;
+        if (!m.getEvent().getChannelName().isPresent()) return null;
 
         Chatters chatters = Huinyabot.getInstance().getClient().getMessagingInterface().getChatters(m.getEvent().getChannelName().get()).execute();
 
