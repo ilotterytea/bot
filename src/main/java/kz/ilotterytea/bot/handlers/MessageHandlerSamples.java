@@ -3,6 +3,7 @@ package kz.ilotterytea.bot.handlers;
 import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.SharedConstants;
+import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.models.MessageModel;
 
@@ -43,6 +44,23 @@ public class MessageHandlerSamples {
                             e.getChannel().getName(),
                             response
                     );
+                }
+            } else {
+                for (Command cmd : bot.getLoader().getCommands().values()) {
+                    for (String alias : cmd.getAliases()) {
+                        if (alias.equals(cmdNameId)) {
+                            String response = bot.getLoader().call(cmd.getNameId(), args);
+
+                            if (response != null) {
+                                bot.getClient().getChat().sendMessage(
+                                        e.getChannel().getName(),
+                                        response,
+                                        null,
+                                        (e.getMessageId().isEmpty()) ? null : e.getMessageId().get()
+                                );
+                            }
+                        }
+                    }
                 }
             }
         }

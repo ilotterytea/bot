@@ -7,6 +7,8 @@ import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.utils.StringUtils;
 
 import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Ping command.
@@ -22,6 +24,15 @@ public class PingCommand extends Command {
 
     @Override
     public Permissions getPermissions() { return Permissions.USER; }
+
+    @Override
+    public ArrayList<String> getOptions() { return new ArrayList<>(); }
+
+    @Override
+    public ArrayList<String> getSubcommands() { return new ArrayList<>(); }
+
+    @Override
+    public ArrayList<String> getAliases() { return new ArrayList<>(List.of(new String[]{"pong", "пинг", "понг"})); }
 
     @Override
     public String run(ArgumentsModel m) {
