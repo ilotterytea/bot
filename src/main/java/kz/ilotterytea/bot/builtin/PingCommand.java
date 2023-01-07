@@ -41,8 +41,7 @@ public class PingCommand extends Command {
         String ut = StringUtils.formatTimestamp(uptime / 1000);
 
         return String.format(
-                "%s: DankCrouching \u2615 Java %s \u00b7 Uptime: %s \u00b7 TMI: %sms",
-                m.getEvent().getUser().getName(),
+                "DankCrouching \u2615 Java %s \u00b7 Uptime: %s \u00b7 TMI: %sms",
                 System.getProperty("java.version"),
                 ut,
                 Huinyabot.getInstance().getClient().getChat().getLatency()
