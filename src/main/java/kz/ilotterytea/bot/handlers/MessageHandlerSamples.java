@@ -26,7 +26,12 @@ public class MessageHandlerSamples {
      * @since 1.0
      */
     public static void ircMessageEvent(IRCMessageEvent e) {
-        if (!e.getMessage().isPresent()) return;
+        if (
+                e.getMessage().isEmpty() &&
+                new ArrayList<>(List.of(bot.getProperties().getProperty("SUSPENDED_USER_IDS", "").split(","))).contains(e.getUser().getId())
+        ) {
+            return;
+        }
 
         String MSG = e.getMessage().get();
         final String PREFIX = bot.getProperties().getProperty("PREFIX", SharedConstants.DEFAULT_PREFIX);
