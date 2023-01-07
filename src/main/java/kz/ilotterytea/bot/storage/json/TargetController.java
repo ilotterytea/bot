@@ -37,15 +37,15 @@ public class TargetController implements JsonController<TargetModel> {
     }
 
     private void processFile(File file) {
-        try {
-            FileInputStream fis = new FileInputStream(file);
-            ObjectInputStream ois = new ObjectInputStream(fis);
+        try (Reader reader = new FileReader(file)){
+            TargetModel model = new Gson().fromJson(reader, TargetModel.class);
 
-            TargetModel model = new Gson().fromJson(ois.readUTF(), TargetModel.class);
+            if (model == null) {
+                model = genDefault(file.getName().split("\\.")[0]);
+                saveFile(model);
+            }
+
             models.put(model.getAliasId(), model);
-
-            ois.close();
-            fis.close();
         } catch (IOException e) {
             e.printStackTrace();
 
@@ -83,14 +83,9 @@ public class TargetController implements JsonController<TargetModel> {
     }
 
     private void saveFile(TargetModel model) {
-        try {
-            FileOutputStream fos = new FileOutputStream(String.format("%s/%s.json", SharedConstants.TARGET_SAVE_PATH, model.getAliasId()));
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-
-            oos.writeUTF(new GsonBuilder().setPrettyPrinting().create().toJson(model, TargetModel.class));
-
-            oos.close();
-            fos.close();
+        System.out.println(model);
+        try (Writer writer = new FileWriter(String.format("%s/%s.json", SharedConstants.TARGET_SAVE_PATH, model.getAliasId()))) {
+            writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(model, TargetModel.class));
         } catch (IOException e) {
             e.printStackTrace();
         }

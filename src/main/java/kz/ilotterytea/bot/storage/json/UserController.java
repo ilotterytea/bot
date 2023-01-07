@@ -36,15 +36,15 @@ public class UserController implements JsonController<UserModel> {
     }
 
     private void processFile(File file) {
-        try {
-            FileInputStream fis = new FileInputStream(file);
-            ObjectInputStream ois = new ObjectInputStream(fis);
+        try (Reader reader = new FileReader(file)){
+            UserModel model = new Gson().fromJson(reader, UserModel.class);
 
-            UserModel model = new Gson().fromJson(ois.readUTF(), UserModel.class);
+            if (model == null) {
+                model = genDefault(file.getName().split("\\.")[0]);
+                saveFile(model);
+            }
+
             models.put(model.getAliasId(), model);
-
-            ois.close();
-            fis.close();
         } catch (IOException e) {
             e.printStackTrace();
 
@@ -82,14 +82,8 @@ public class UserController implements JsonController<UserModel> {
     }
 
     private void saveFile(UserModel model) {
-        try {
-            FileOutputStream fos = new FileOutputStream(String.format("%s/%s.json", SharedConstants.USER_SAVE_PATH, model.getAliasId()));
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-
-            oos.writeUTF(new GsonBuilder().setPrettyPrinting().create().toJson(model, UserModel.class));
-
-            oos.close();
-            fos.close();
+        try (Writer writer = new FileWriter(String.format("%s/%s.json", SharedConstants.USER_SAVE_PATH, model.getAliasId()))) {
+            writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(model, UserModel.class));
         } catch (IOException e) {
             e.printStackTrace();
         }
