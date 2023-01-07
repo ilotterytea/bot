@@ -27,4 +27,6 @@ public class SharedConstants {
     public static final String DEFAULT_PREFIX = "!";
 
     public static final String USER_AGENT = String.format("%s/%s", APP_NAME, getVersion());
+
+    public static final String HOLIDAY_URL = "https://my-calend.ru/holidays";
 }
