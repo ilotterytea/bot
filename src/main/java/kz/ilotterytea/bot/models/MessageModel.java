@@ -41,7 +41,7 @@ public class MessageModel {
         Command cmd = null;
 
         // Command:
-        if (s.get(0) != null) {
+        if (s.get(0) != null && s.get(0).length() > prefix.length()) {
             c = s.get(0).substring(prefix.length());
             s.remove(0);
             if (Huinyabot.getInstance().getLoader().getCommands().containsKey(c)) {
@@ -73,7 +73,7 @@ public class MessageModel {
         }
 
         // Subcommand:
-        if (s.size() >= 1 && s.get(0) != null && !s.get(0).startsWith("--")) {
+        if (s.size() >= 1 && s.get(0) != null &&!s.get(0).startsWith("--")) {
             if (cmd != null && cmd.getSubcommands().contains(s.get(0))) {
                 sc = s.get(0);
                 s.remove(0);
