@@ -8,8 +8,6 @@ import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.models.MessageModel;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -43,7 +41,7 @@ public class MessageHandlerSamples {
         );
 
         // Set the user's current permissions:
-        if (new ArrayList<>(List.of(bot.getProperties().getProperty("SUPER_USER_IDS", "").split(","))).contains(e.getUserId())) {
+        if (bot.getUserCtrl().getOrDefault(e.getUserId()).isSuperUser()) {
             args.setCurrentPermissions(Permissions.SUPAUSER);
         } else if (Objects.equals(e.getChannel().getId(), e.getUser().getId())) {
             args.setCurrentPermissions(Permissions.BROADCASTER);
