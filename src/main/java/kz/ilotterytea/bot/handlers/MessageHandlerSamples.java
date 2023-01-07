@@ -7,6 +7,9 @@ import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.models.MessageModel;
+import kz.ilotterytea.bot.models.TargetModel;
+import kz.ilotterytea.bot.models.emotes.Emote;
+import kz.ilotterytea.bot.models.emotes.Provider;
 
 import java.util.Objects;
 
@@ -49,6 +52,27 @@ public class MessageHandlerSamples {
             args.setCurrentPermissions(Permissions.MOD);
         } else if (e.getBadges().containsKey("vip")) {
             args.setCurrentPermissions(Permissions.VIP);
+        }
+
+        TargetModel target = bot.getTargetCtrl().get(e.getChannel().getId());
+
+        if (target != null) {
+            // Emote counter update:
+            if (target.getEmotes().containsKey(Provider.SEVENTV)) {
+                boolean isFound = false;
+                for (String word : MSG.split(" ")) {
+                    for (Emote em : target.getEmotes().get(Provider.SEVENTV).values()) {
+                        if (Objects.equals(word, em.getName())) {
+                            em.setCount(em.getCount() + 1);
+                            isFound = true;
+                            break;
+                        }
+                    }
+                    if (isFound) {
+                        break;
+                    }
+                }
+            }
         }
 
         // Command processing:
