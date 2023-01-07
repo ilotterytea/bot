@@ -42,7 +42,9 @@ public class MessageHandlerSamples {
                 if (response != null) {
                     bot.getClient().getChat().sendMessage(
                             e.getChannel().getName(),
-                            response
+                            response,
+                            null,
+                            (e.getMessageId().isEmpty()) ? null : e.getMessageId().get()
                     );
                 }
             } else {
