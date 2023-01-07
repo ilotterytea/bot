@@ -9,6 +9,8 @@ import kz.ilotterytea.bot.api.commands.CommandLoader;
 import kz.ilotterytea.bot.api.delay.DelayManager;
 import kz.ilotterytea.bot.handlers.MessageHandlerSamples;
 import kz.ilotterytea.bot.storage.PropLoader;
+import kz.ilotterytea.bot.storage.json.TargetController;
+import kz.ilotterytea.bot.storage.json.UserController;
 import kz.ilotterytea.bot.utils.StorageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +30,8 @@ public class Huinyabot extends Bot {
     private TwitchClient client;
     private CommandLoader loader;
     private DelayManager delayer;
+    private TargetController targets;
+    private UserController users;
 
     private final Logger LOGGER = LoggerFactory.getLogger(Huinyabot.class);
 
@@ -35,6 +39,8 @@ public class Huinyabot extends Bot {
     public Properties getProperties() { return properties; }
     public CommandLoader getLoader() { return loader; }
     public DelayManager getDelayer() { return delayer; }
+    public TargetController getTargetCtrl() { return targets; }
+    public UserController getUserCtrl() { return users; }
 
     private static Huinyabot instance;
     public static Huinyabot getInstance() { return instance; }
@@ -43,6 +49,8 @@ public class Huinyabot extends Bot {
     @Override
     public void init() {
         StorageUtils.checkIntegrity();
+        targets = new TargetController(SharedConstants.TARGETS_DIR);
+        users = new UserController(SharedConstants.USERS_DIR);
 
         properties = new PropLoader(SharedConstants.PROPERTIES_PATH);
         loader = new CommandLoader();
@@ -81,5 +89,7 @@ public class Huinyabot extends Bot {
     @Override
     public void dispose() {
         client.close();
+        targets.save();
+        users.save();
     }
 }
