@@ -92,6 +92,7 @@ public class UserController implements JsonController<UserModel> {
     private UserModel genDefault(String aliasId) {
         return new UserModel(
                 aliasId,
+                false,
                 false
         );
     }

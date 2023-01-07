@@ -8,16 +8,21 @@ package kz.ilotterytea.bot.models;
 public class UserModel {
     private final String aliasId;
     private boolean isSuperuser;
+    private boolean isSuspended;
 
     public UserModel(
             String aliasId,
-            boolean isSuperuser
+            boolean isSuperuser,
+            boolean isSuspended
     ) {
         this.aliasId = aliasId;
         this.isSuperuser = isSuperuser;
+        this.isSuspended = isSuspended;
     }
 
     public String getAliasId() { return aliasId; }
     public boolean isSuperUser() { return isSuperuser; }
     public void setSuperuser(boolean isSuperuser) { this.isSuperuser = isSuperuser; }
+    public boolean isSuspended() { return isSuspended; }
+    public void setSuspend(boolean isSuspended) { this.isSuspended = isSuspended; }
 }
