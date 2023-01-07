@@ -27,8 +27,8 @@ public class MessageHandlerSamples {
      */
     public static void ircMessageEvent(IRCMessageEvent e) {
         if (
-                e.getMessage().isEmpty() &&
-                new ArrayList<>(List.of(bot.getProperties().getProperty("SUSPENDED_USER_IDS", "").split(","))).contains(e.getUser().getId())
+                e.getMessage().isEmpty() ||
+                bot.getUserCtrl().getOrDefault(e.getUserId()).isSuspended()
         ) {
             return;
         }
