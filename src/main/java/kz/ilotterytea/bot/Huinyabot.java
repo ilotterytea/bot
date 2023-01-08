@@ -67,6 +67,14 @@ public class Huinyabot extends Bot {
         delayer = new DelayManager();
         targetLinks = new HashMap<>();
 
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                targets.save();
+                users.save();
+            }
+        }, 300000, 300000);
+
         try {
             sevenTV = new SevenTVWebsocketClient();
             sevenTV.connectBlocking();
