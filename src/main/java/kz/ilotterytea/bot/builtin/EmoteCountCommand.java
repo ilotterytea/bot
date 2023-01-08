@@ -11,6 +11,7 @@ import kz.ilotterytea.bot.models.emotes.Provider;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Emote count command.
@@ -53,14 +54,17 @@ public class EmoteCountCommand extends Command {
 
         Map<String, Emote> emotes = target.getEmotes().get(Provider.SEVENTV);
 
-        if (!emotes.containsKey(name)) {
-            return "[7TV] Emote \""+name+"\" is not found in the database.";
+        for (Emote em : emotes.values()) {
+            if (Objects.equals(em.getName(), name)) {
+                return String.format(
+                        "[7TV] %s%s has been used %s times.",
+                        em.getName(),
+                        (em.isDeleted()) ? "*" : "",
+                        em.getCount()
+                );
+            }
         }
 
-        return String.format(
-                "[7TV] %s has been used %s times.",
-                emotes.get(name).getName(),
-                emotes.get(name).getCount()
-        );
+        return "[7TV] Emote \""+name+"\" is not found in the database.";
     }
 }
