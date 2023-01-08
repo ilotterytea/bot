@@ -37,6 +37,10 @@ public class MessageHandlerSamples {
 
         TargetModel target = bot.getTargetCtrl().get(e.getChannel().getId());
 
+        bot.getTargetCtrl().get(e.getChannel().getId()).getStats().setChatLines(
+                target.getStats().getChatLines() + 1
+        );
+
         if (target.getListeningMode()) {
             return;
         }
@@ -75,6 +79,21 @@ public class MessageHandlerSamples {
             }
         }
 
+        if (Objects.equals(MSG, "test")) {
+            bot.getTargetCtrl().get(e.getChannel().getId()).getStats().setSuccessfulTests(
+                    target.getStats().getSuccessfulTests() + 1
+            );
+
+            bot.getClient().getChat().sendMessage(
+                    e.getChannel().getName(),
+                    String.format(
+                            "test %s successfully completed!",
+                            bot.getTargetCtrl().get(e.getChannel().getId()).getStats().getSuccessfulTests()
+                    )
+            );
+            return;
+        }
+
         // Command processing:
         if (MSG.startsWith(PREFIX)) {
             final String MSG2 = MSG.substring(PREFIX.length());
@@ -89,6 +108,9 @@ public class MessageHandlerSamples {
                             response,
                             null,
                             (!e.getMessageId().isPresent()) ? null : e.getMessageId().get()
+                    );
+                    bot.getTargetCtrl().get(e.getChannel().getId()).getStats().setExecutedCommandsCount(
+                            target.getStats().getExecutedCommandsCount() + 1
                     );
                 }
             } else {
@@ -121,6 +143,9 @@ public class MessageHandlerSamples {
                         cmd.getResponse(),
                         null,
                         (!e.getMessageId().isPresent()) ? null : e.getMessageId().get()
+                );
+                bot.getTargetCtrl().get(e.getChannel().getId()).getStats().setExecutedCommandsCount(
+                        target.getStats().getExecutedCommandsCount() + 1
                 );
             }
         }
