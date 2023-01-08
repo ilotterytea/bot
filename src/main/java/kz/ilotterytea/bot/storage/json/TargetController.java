@@ -83,7 +83,6 @@ public class TargetController implements JsonController<TargetModel> {
     }
 
     private void saveFile(TargetModel model) {
-        System.out.println(model);
         try (Writer writer = new FileWriter(String.format("%s/%s.json", SharedConstants.TARGET_SAVE_PATH, model.getAliasId()))) {
             writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(model, TargetModel.class));
         } catch (IOException e) {
