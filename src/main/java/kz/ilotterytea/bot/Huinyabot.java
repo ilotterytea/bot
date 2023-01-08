@@ -9,10 +9,15 @@ import com.google.gson.Gson;
 import kz.ilotterytea.bot.api.commands.CommandLoader;
 import kz.ilotterytea.bot.api.delay.DelayManager;
 import kz.ilotterytea.bot.handlers.MessageHandlerSamples;
+import kz.ilotterytea.bot.models.TargetModel;
+import kz.ilotterytea.bot.models.emotes.Emote;
+import kz.ilotterytea.bot.models.emotes.Provider;
 import kz.ilotterytea.bot.storage.PropLoader;
 import kz.ilotterytea.bot.storage.json.TargetController;
 import kz.ilotterytea.bot.storage.json.UserController;
+import kz.ilotterytea.bot.thirdpartythings.seventv.v1.SevenTVEmoteLoader;
 import kz.ilotterytea.bot.thirdpartythings.seventv.v1.SevenTVWebsocketClient;
+import kz.ilotterytea.bot.thirdpartythings.seventv.v1.models.EmoteAPIData;
 import kz.ilotterytea.bot.thirdpartythings.seventv.v1.models.Message;
 import kz.ilotterytea.bot.utils.StorageUtils;
 import org.slf4j.Logger;
@@ -102,6 +107,56 @@ public class Huinyabot extends Bot {
 
         for (User user : userList) {
             sevenTV.send(new Gson().toJson(new Message("join", user.getLogin())));
+
+            if (!targets.get(user.getId()).getEmotes().containsKey(Provider.SEVENTV)) {
+                targets.get(user.getId()).getEmotes().put(Provider.SEVENTV, new HashMap<>());
+            }
+
+            // Update the channel emotes:
+            ArrayList<EmoteAPIData> channelEmotes = new SevenTVEmoteLoader().getChannelEmotes(user.getLogin());
+            if (channelEmotes != null) {
+                for (EmoteAPIData emote : channelEmotes) {
+                    if (!targets.get(user.getId()).getEmotes().get(Provider.SEVENTV).containsKey(emote.getId())) {
+                        targets.get(user.getId()).getEmotes().get(Provider.SEVENTV).put(
+                                emote.getId(),
+                                new Emote(
+                                        emote.getId(),
+                                        Provider.SEVENTV,
+                                        emote.getName(),
+                                        0,
+                                        false,
+                                        false
+                                )
+                        );
+                    }
+                }
+            }
+        }
+
+        ArrayList<EmoteAPIData> globalEmotes = new SevenTVEmoteLoader().getGlobalEmotes();
+
+        if (globalEmotes != null) {
+            for (EmoteAPIData emote : globalEmotes) {
+                for (TargetModel target : targets.getAll().values()) {
+                    if (!targets.get(target.getAliasId()).getEmotes().containsKey(Provider.SEVENTV)) {
+                        targets.get(target.getAliasId()).getEmotes().put(Provider.SEVENTV, new HashMap<>());
+                    }
+
+                    if (!targets.get(target.getAliasId()).getEmotes().get(Provider.SEVENTV).containsKey(emote.getId())) {
+                        targets.get(target.getAliasId()).getEmotes().get(Provider.SEVENTV).put(
+                                emote.getId(),
+                                new Emote(
+                                        emote.getId(),
+                                        Provider.SEVENTV,
+                                        emote.getName(),
+                                        0,
+                                        true,
+                                        false
+                                )
+                        );
+                    }
+                }
+            }
         }
 
         client.getEventManager().onEvent(IRCMessageEvent.class, MessageHandlerSamples::ircMessageEvent);
