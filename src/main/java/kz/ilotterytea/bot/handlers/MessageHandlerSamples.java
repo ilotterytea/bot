@@ -35,6 +35,12 @@ public class MessageHandlerSamples {
             return;
         }
 
+        TargetModel target = bot.getTargetCtrl().get(e.getChannel().getId());
+
+        if (target.getListeningMode()) {
+            return;
+        }
+
         String MSG = e.getMessage().get();
         final String PREFIX = bot.getProperties().getProperty("PREFIX", SharedConstants.DEFAULT_PREFIX);
         final ArgumentsModel args = new ArgumentsModel(
@@ -54,8 +60,6 @@ public class MessageHandlerSamples {
         } else if (e.getBadges().containsKey("vip")) {
             args.setCurrentPermissions(Permissions.VIP);
         }
-
-        TargetModel target = bot.getTargetCtrl().get(e.getChannel().getId());
 
         if (target != null) {
             // Emote counter update:

@@ -6,6 +6,7 @@ import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.models.ArgumentsModel;
+import kz.ilotterytea.bot.models.TargetModel;
 import kz.ilotterytea.bot.models.emotes.Emote;
 import kz.ilotterytea.bot.models.emotes.Provider;
 import kz.ilotterytea.bot.thirdpartythings.seventv.v1.SevenTVEmoteLoader;
@@ -30,7 +31,7 @@ public class JoinCommand extends Command {
     public Permissions getPermissions() { return Permissions.USER; }
 
     @Override
-    public ArrayList<String> getOptions() { return new ArrayList<>(Arrays.asList("silent", "тихо")); }
+    public ArrayList<String> getOptions() { return new ArrayList<>(Arrays.asList("silent", "тихо", "only-listen")); }
 
     @Override
     public ArrayList<String> getSubcommands() { return new ArrayList<>(); }
@@ -67,7 +68,10 @@ public class JoinCommand extends Command {
             return "The user "+name+" is already in!";
         }
 
-        Huinyabot.getInstance().getTargetCtrl().set(id, Huinyabot.getInstance().getTargetCtrl().getOrDefault(id));
+        TargetModel targetModel = Huinyabot.getInstance().getTargetCtrl().getOrDefault(id);
+        targetModel.setListeningMode(m.getMessage().getOptions().contains("only-listen"));
+
+        Huinyabot.getInstance().getTargetCtrl().set(id, targetModel);
 
         ArrayList<EmoteAPIData> channelEmotes = new SevenTVEmoteLoader().getChannelEmotes(name);
 
@@ -122,7 +126,7 @@ public class JoinCommand extends Command {
         }
 
         Huinyabot.getInstance().getClient().getChat().joinChannel(name);
-        if (!m.getMessage().getOptions().contains("silent") || !m.getMessage().getOptions().contains("тихо")) {
+        if (!m.getMessage().getOptions().contains("silent") || !m.getMessage().getOptions().contains("тихо") || !m.getMessage().getOptions().contains("only-listen")) {
             Huinyabot.getInstance().getClient().getChat().sendMessage(
                     name,
                     String.format("@%s, FeelsDankMan \uD83D\uDC4B joined your chat room!", name)
