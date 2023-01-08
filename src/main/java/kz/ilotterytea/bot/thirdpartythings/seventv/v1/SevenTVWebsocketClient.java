@@ -48,16 +48,14 @@ public class SevenTVWebsocketClient extends WebSocketClient {
             EmoteEventUpdate update = new Gson().fromJson(msg.getPayload(), EmoteEventUpdate.class);
 
             TargetModel target = bot.getTargetCtrl().get(
-                    bot.getTargetLinks().getOrDefault(update.getChannel() , null)
+                    bot.getTargetLinks().get(update.getChannel())
             );
 
-            Map<String, Emote> emotes = null;
-
-            if (target != null && !target.getEmotes().containsKey(Provider.SEVENTV)) {
-                emotes = target.getEmotes().put(Provider.SEVENTV, new HashMap<>());
+            if (!target.getEmotes().containsKey(Provider.SEVENTV)) {
+                target.getEmotes().put(Provider.SEVENTV, new HashMap<>());
             }
 
-            assert emotes != null;
+            Map<String, Emote> emotes = target.getEmotes().get(Provider.SEVENTV);
 
             switch (update.getAction()) {
                 case "ADD": {
@@ -70,11 +68,9 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                             )
                     );
 
-                    Emote iEmote = emotes.getOrDefault(update.getEmoteId(), null);
-
-                    if (iEmote != null) {
-                        if (iEmote.isDeleted()) {
-                            iEmote.setDeleted(!iEmote.isDeleted());
+                    if (emotes.containsKey(update.getEmoteId())) {
+                        if (emotes.get(update.getEmoteId()).isDeleted()) {
+                            emotes.get(update.getEmoteId()).setDeleted(false);
                         }
                         break;
                     }
@@ -101,36 +97,33 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                                     update.getName()
                             )
                     );
-
-                    Emote iEmote = emotes.getOrDefault(update.getEmoteId(), null);
-
-                    if (iEmote != null) {
-                        if (!iEmote.isDeleted()) {
-                            iEmote.setDeleted(!iEmote.isDeleted());
-                        }
+                    if (emotes.containsKey(update.getEmoteId())) {
+                        emotes.get(update.getEmoteId()).setDeleted(true);
                     }
                     break;
                 }
                 case "UPDATE": {
-                    Emote iEmote = emotes.getOrDefault(update.getEmoteId(), null);
-
                     bot.getClient().getChat().sendActionMessage(
                             update.getChannel(),
                             String.format(
                                     "[7TV] %s changed the emote name from %s to %s !",
                                     update.getActor(),
-                                    (iEmote != null) ? iEmote.getName() : update.getEmote().getName(),
+                                    (emotes.containsKey(update.getEmoteId())) ? emotes.get(update.getEmoteId()).getName() : update.getEmote().getName(),
                                     update.getName()
                             )
                     );
 
-                    if (iEmote != null) {
-                        iEmote.setName(update.getName());
+                    if (emotes.containsKey(update.getEmoteId())) {
+                        emotes.get(update.getEmoteId()).setName(update.getName());
                     }
                     break;
                 }
                 default: break;
             }
+
+            bot.getTargetCtrl().get(
+                    bot.getTargetLinks().get(update.getChannel())
+            ).setEmotes(Provider.SEVENTV, emotes);
         } else {
             LOGGER.debug(String.format("MESSAGE: Action: %s; Payload: %s", msg.getAction(), msg.getPayload()));
         }
