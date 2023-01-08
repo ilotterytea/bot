@@ -59,17 +59,12 @@ public class MessageHandlerSamples {
         if (target != null) {
             // Emote counter update:
             if (target.getEmotes().containsKey(Provider.SEVENTV)) {
-                boolean isFound = false;
                 for (String word : MSG.split(" ")) {
                     for (Emote em : target.getEmotes().get(Provider.SEVENTV).values()) {
                         if (Objects.equals(word, em.getName())) {
                             em.setCount(em.getCount() + 1);
-                            isFound = true;
                             break;
                         }
-                    }
-                    if (isFound) {
-                        break;
                     }
                 }
             }
