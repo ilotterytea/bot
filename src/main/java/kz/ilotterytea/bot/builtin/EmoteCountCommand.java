@@ -59,7 +59,7 @@ public class EmoteCountCommand extends Command {
                 return String.format(
                         "[7TV] %s%s has been used %s times.",
                         em.getName(),
-                        (em.isDeleted()) ? "*" : "",
+                        (em.isDeleted()) ? "*" : ((em.isGlobal()) ? " ^" : ""),
                         em.getCount()
                 );
             }

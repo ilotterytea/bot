@@ -99,7 +99,7 @@ public class EmoteTopCommand extends Command {
                             .append(i + 1)
                             .append(". ")
                             .append(em.getName())
-                            .append((em.isDeleted()) ? "*" : "")
+                            .append((em.isDeleted()) ? "*" : ((em.isGlobal()) ? " ^" : ""))
                             .append(" (")
                             .append(em.getCount())
                             .append("); ")
@@ -109,7 +109,7 @@ public class EmoteTopCommand extends Command {
                         .append(i + 1)
                         .append(". ")
                         .append(em.getName())
-                        .append((em.isDeleted()) ? "*" : "")
+                        .append((em.isDeleted()) ? "*" : ((em.isGlobal()) ? " ^" : ""))
                         .append(" (")
                         .append(em.getCount())
                         .append("); ");
