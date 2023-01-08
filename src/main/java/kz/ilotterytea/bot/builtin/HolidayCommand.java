@@ -6,6 +6,8 @@ import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.models.ArgumentsModel;
+import kz.ilotterytea.bot.models.emotes.Emote;
+import kz.ilotterytea.bot.models.emotes.Provider;
 import kz.ilotterytea.bot.net.HttpFactory;
 import kz.ilotterytea.bot.net.models.Response;
 import org.jsoup.Jsoup;
@@ -15,6 +17,7 @@ import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Holiday command.
@@ -32,7 +35,7 @@ public class HolidayCommand extends Command {
     public Permissions getPermissions() { return Permissions.USER; }
 
     @Override
-    public ArrayList<String> getOptions() { return new ArrayList<>(Arrays.asList("тык", "massping", "all", "все")); }
+    public ArrayList<String> getOptions() { return new ArrayList<>(Arrays.asList("тык", "massping", "all", "все", "no-emotes", "без-эмоутов")); }
 
     @Override
     public ArrayList<String> getSubcommands() { return new ArrayList<>(); }
@@ -87,18 +90,28 @@ public class HolidayCommand extends Command {
             for (String uName : chatters.getAllViewers()) {
                 StringBuilder sb = new StringBuilder();
 
+                if (!m.getMessage().getOptions().contains("no-emotes") || !m.getMessage().getOptions().contains("без-эмоутов")) {
+                    if (Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getEmotes().containsKey(Provider.SEVENTV)) {
+                        for (Emote emote : Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getEmotes().get(Provider.SEVENTV).values()) {
+                            if (Objects.equals(emote.getName().toLowerCase(), uName.toLowerCase())) {
+                                uName = emote.getName();
+                                break;
+                            }
+                        }
+                    }
+                }
+
                 if (
                         new StringBuilder()
                                 .append(msgs.get(index))
-                                .append("@")
                                 .append(uName)
-                                .append(", ")
+                                .append(" ")
                                 .append("Today's holiday: ")
                                 .append(name)
                                 .append(" HolidayPresent")
                                 .length() < 500
                 ) {
-                    sb.append(msgs.get(index)).append("@").append(uName).append(", ");
+                    sb.append(msgs.get(index)).append(uName).append(" ");
                     msgs.remove(index);
                     msgs.add(index, sb.toString());
                 } else {
