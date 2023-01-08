@@ -41,10 +41,11 @@ public class PingCommand extends Command {
         String ut = StringUtils.formatTimestamp(uptime / 1000);
 
         return String.format(
-                "DankCrouching \u2615 Java %s \u00b7 Uptime: %s \u00b7 TMI: %sms",
+                "DankCrouching \u2615 Java %s \u00b7 Uptime: %s \u00b7 TMI: %sms \u00b7 7TV EventAPI: %s",
                 System.getProperty("java.version"),
                 ut,
-                Huinyabot.getInstance().getClient().getChat().getLatency()
+                Huinyabot.getInstance().getClient().getChat().getLatency(),
+                (Huinyabot.getInstance().getSevenTVWSClient().isClosed()) ? "DISCONNECTED" : "CONNECTED"
         );
     }
 }
