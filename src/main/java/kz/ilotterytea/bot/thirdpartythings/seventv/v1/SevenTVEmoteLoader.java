@@ -13,8 +13,9 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 
 /**
+ * The 7TV emote loader.
  * @author ilotterytea
- * @since 1.0
+ * @since 1.1
  */
 public class SevenTVEmoteLoader implements EmoteLoader<EmoteAPIData> {
     private final Logger LOGGER = LoggerFactory.getLogger(SevenTVEmoteLoader.class);
@@ -28,13 +29,7 @@ public class SevenTVEmoteLoader implements EmoteLoader<EmoteAPIData> {
             return null;
         }
 
-        ArrayList<EmoteAPIData> data = new Gson().fromJson(response.getResponse(), new TypeToken<ArrayList<EmoteAPIData>>(){}.getType());
-
-        for (EmoteAPIData emote : data) {
-            System.out.println(emote.getName());
-        }
-
-        return data;
+        return new Gson().fromJson(response.getResponse(), new TypeToken<ArrayList<EmoteAPIData>>(){}.getType());
     }
 
     @Override
@@ -46,12 +41,6 @@ public class SevenTVEmoteLoader implements EmoteLoader<EmoteAPIData> {
             return null;
         }
 
-        ArrayList<EmoteAPIData> data = new Gson().fromJson(response.getResponse(), new TypeToken<ArrayList<EmoteAPIData>>(){}.getType());
-
-        for (EmoteAPIData emote : data) {
-            System.out.println(emote.getName());
-        }
-
-        return data;
+        return new Gson().fromJson(response.getResponse(), new TypeToken<ArrayList<EmoteAPIData>>(){}.getType());
     }
 }
