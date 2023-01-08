@@ -74,6 +74,8 @@ public class Huinyabot extends Bot {
             throw new RuntimeException(e);
         }
 
+        ArrayList<EmoteAPIData> globalEmotes = new SevenTVEmoteLoader().getGlobalEmotes();
+
         // - - -  T W I T C H  C L I E N T  - - - :
         OAuth2Credential credential = new OAuth2Credential("twitch", properties.getProperty("OAUTH2_TOKEN"));
 
@@ -86,8 +88,62 @@ public class Huinyabot extends Bot {
                 .build();
 
         client.getChat().connect();
-        if (credential.getUserName() != null) {
+        if (credential.getUserName() != null && credential.getUserId() != null) {
             client.getChat().joinChannel(credential.getUserName());
+
+            if (!Huinyabot.getInstance().targets.getAll().containsKey(credential.getUserId())) {
+                Huinyabot.getInstance().targets.set(credential.getUserId(), Huinyabot.getInstance().targets.getOrDefault(credential.getUserId()));
+            }
+
+            ArrayList<EmoteAPIData> channelEmotes = new SevenTVEmoteLoader().getChannelEmotes(credential.getUserName());
+
+            if (channelEmotes != null) {
+                if (!Huinyabot.getInstance().getTargetCtrl().get(credential.getUserId()).getEmotes().containsKey(Provider.SEVENTV)) {
+                    Huinyabot.getInstance().getTargetCtrl().get(credential.getUserId()).getEmotes().put(Provider.SEVENTV, new HashMap<>());
+                }
+
+                for (EmoteAPIData emote : channelEmotes) {
+                    if (!Huinyabot.getInstance().getTargetCtrl().get(credential.getUserId()).getEmotes().get(Provider.SEVENTV).containsKey(emote.getId())) {
+                        Huinyabot.getInstance().getTargetCtrl().get(credential.getUserId()).getEmotes().get(Provider.SEVENTV).put(
+                                emote.getId(),
+                                new Emote(
+                                        emote.getId(),
+                                        Provider.SEVENTV,
+                                        emote.getName(),
+                                        0,
+                                        false,
+                                        false
+                                )
+                        );
+                    }
+                }
+
+                Huinyabot.getInstance().getSevenTVWSClient().send(
+                        new Gson().toJson(new Message("join", credential.getUserName()))
+                );
+            }
+
+            if (globalEmotes != null) {
+                if (!Huinyabot.getInstance().getTargetCtrl().get(credential.getUserId()).getEmotes().containsKey(Provider.SEVENTV)) {
+                    Huinyabot.getInstance().getTargetCtrl().get(credential.getUserId()).getEmotes().put(Provider.SEVENTV, new HashMap<>());
+                }
+
+                for (EmoteAPIData emote : globalEmotes) {
+                    if (!Huinyabot.getInstance().getTargetCtrl().get(credential.getUserId()).getEmotes().get(Provider.SEVENTV).containsKey(emote.getId())) {
+                        Huinyabot.getInstance().getTargetCtrl().get(credential.getUserId()).getEmotes().get(Provider.SEVENTV).put(
+                                emote.getId(),
+                                new Emote(
+                                        emote.getId(),
+                                        Provider.SEVENTV,
+                                        emote.getName(),
+                                        0,
+                                        true,
+                                        false
+                                )
+                        );
+                    }
+                }
+            }
         }
 
         List<User> userList = new ArrayList<>();
@@ -99,7 +155,9 @@ public class Huinyabot extends Bot {
             ).execute().getUsers();
 
             for (User u : userList) {
-                client.getChat().joinChannel(u.getLogin());
+                if (!client.getChat().isChannelJoined(u.getLogin())) {
+                    client.getChat().joinChannel(u.getLogin());
+                }
 
                 targetLinks.put(u.getLogin(), u.getId());
             }
@@ -132,8 +190,6 @@ public class Huinyabot extends Bot {
                 }
             }
         }
-
-        ArrayList<EmoteAPIData> globalEmotes = new SevenTVEmoteLoader().getGlobalEmotes();
 
         if (globalEmotes != null) {
             for (EmoteAPIData emote : globalEmotes) {
