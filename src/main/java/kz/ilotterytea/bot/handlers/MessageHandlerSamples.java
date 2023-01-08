@@ -6,6 +6,7 @@ import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.models.ArgumentsModel;
+import kz.ilotterytea.bot.models.CustomCommand;
 import kz.ilotterytea.bot.models.MessageModel;
 import kz.ilotterytea.bot.models.TargetModel;
 import kz.ilotterytea.bot.models.emotes.Emote;
@@ -72,8 +73,8 @@ public class MessageHandlerSamples {
 
         // Command processing:
         if (MSG.startsWith(PREFIX)) {
-            MSG = MSG.substring(PREFIX.length());
-            String cmdNameId = MSG.split(" ")[0];
+            final String MSG2 = MSG.substring(PREFIX.length());
+            String cmdNameId = MSG2.split(" ")[0];
 
             if (bot.getLoader().getCommands().containsKey(cmdNameId)) {
                 String response = bot.getLoader().call(cmdNameId, args);
@@ -103,6 +104,20 @@ public class MessageHandlerSamples {
                         }
                     }
                 }
+            }
+        }
+
+        // Custom command processing:
+        if (bot.getTargetCtrl().get(e.getChannel().getId()).getCustomCommands().containsKey(MSG)) {
+            CustomCommand cmd = bot.getTargetCtrl().get(e.getChannel().getId()).getCustomCommands().get(MSG);
+
+            if (cmd.getValue()) {
+                bot.getClient().getChat().sendMessage(
+                        e.getChannel().getName(),
+                        cmd.getResponse(),
+                        null,
+                        (!e.getMessageId().isPresent()) ? null : e.getMessageId().get()
+                );
             }
         }
     }
