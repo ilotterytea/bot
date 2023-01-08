@@ -98,6 +98,7 @@ public class Huinyabot extends Bot {
         client.getChat().connect();
         if (credential.getUserName() != null && credential.getUserId() != null) {
             client.getChat().joinChannel(credential.getUserName());
+            targetLinks.put(credential.getUserName(), credential.getUserId());
 
             if (!Huinyabot.getInstance().targets.getAll().containsKey(credential.getUserId())) {
                 Huinyabot.getInstance().targets.set(credential.getUserId(), Huinyabot.getInstance().targets.getOrDefault(credential.getUserId()));
