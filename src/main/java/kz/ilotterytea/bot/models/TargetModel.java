@@ -19,7 +19,7 @@ public class TargetModel {
     /** Target's chat statistics. */
     private final StatsModel stats;
     /** Target's emotes. */
-    private final Map<Provider, Map<String, Emote>> emotes;
+    private Map<Provider, Map<String, Emote>> emotes;
 
     public TargetModel(
             String aliasId,
@@ -34,4 +34,5 @@ public class TargetModel {
     public StatsModel getStats() { return stats; }
     public String getAliasId() { return aliasId; }
     public Map<Provider, Map<String, Emote>> getEmotes() { return emotes; }
+    public void setEmotes(Provider provider, Map<String, Emote> emotes) { this.emotes.put(provider, emotes); }
 }
