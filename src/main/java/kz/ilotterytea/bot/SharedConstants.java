@@ -29,5 +29,8 @@ public class SharedConstants {
     public static final String USER_AGENT = String.format("%s/%s", APP_NAME, getVersion());
 
     public static final String HOLIDAY_URL = "https://my-calend.ru/holidays";
+
     public static final String STV_EVENTAPI_ENDPOINT_URL = "wss://events.7tv.app/v1/channel-emotes";
+    public static final String STV_CHANNEL_EMOTES_URL = "https://api.7tv.app/v2/users/%s/emotes";
+    public static final String STV_GLOBAL_EMOTES_URL = "https://api.7tv.app/v2/emotes/global";
 }

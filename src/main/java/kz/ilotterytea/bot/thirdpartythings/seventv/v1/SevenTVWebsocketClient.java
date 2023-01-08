@@ -3,6 +3,9 @@ package kz.ilotterytea.bot.thirdpartythings.seventv.v1;
 import com.google.gson.Gson;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.SharedConstants;
+import kz.ilotterytea.bot.models.TargetModel;
+import kz.ilotterytea.bot.models.emotes.Emote;
+import kz.ilotterytea.bot.models.emotes.Provider;
 import kz.ilotterytea.bot.thirdpartythings.seventv.v1.models.EmoteEventUpdate;
 import kz.ilotterytea.bot.thirdpartythings.seventv.v1.models.Message;
 import org.java_websocket.client.WebSocketClient;
@@ -12,9 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 /**
  * The websocket client for SevenTV connections.
@@ -40,14 +41,25 @@ public class SevenTVWebsocketClient extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
+        Huinyabot bot = Huinyabot.getInstance();
         Message msg = new Gson().fromJson(message, Message.class);
 
         if (Objects.equals(msg.getAction(), "update")) {
             EmoteEventUpdate update = new Gson().fromJson(msg.getPayload(), EmoteEventUpdate.class);
 
+            TargetModel target = bot.getTargetCtrl().get(
+                    bot.getTargetLinks().get(update.getChannel())
+            );
+
+            if (!target.getEmotes().containsKey(Provider.SEVENTV)) {
+                target.getEmotes().put(Provider.SEVENTV, new HashMap<>());
+            }
+
+            Map<String, Emote> emotes = target.getEmotes().get(Provider.SEVENTV);
+
             switch (update.getAction()) {
                 case "ADD": {
-                    Huinyabot.getInstance().getClient().getChat().sendActionMessage(
+                    bot.getClient().getChat().sendActionMessage(
                             update.getChannel(),
                             String.format(
                                     "[7TV] %s added the %s emote!",
@@ -55,10 +67,29 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                                     update.getName()
                             )
                     );
+
+                    if (emotes.containsKey(update.getEmoteId())) {
+                        if (emotes.get(update.getEmoteId()).isDeleted()) {
+                            emotes.get(update.getEmoteId()).setDeleted(false);
+                        }
+                        break;
+                    }
+
+                    emotes.put(
+                            update.getEmoteId(),
+                            new Emote(
+                                    update.getEmoteId(),
+                                    Provider.SEVENTV,
+                                    update.getName(),
+                                    0,
+                                    false,
+                                    false
+                            )
+                    );
                     break;
                 }
                 case "REMOVE": {
-                    Huinyabot.getInstance().getClient().getChat().sendActionMessage(
+                    bot.getClient().getChat().sendActionMessage(
                             update.getChannel(),
                             String.format(
                                     "[7TV] %s removed the %s emote!",
@@ -66,22 +97,33 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                                     update.getName()
                             )
                     );
+                    if (emotes.containsKey(update.getEmoteId())) {
+                        emotes.get(update.getEmoteId()).setDeleted(true);
+                    }
                     break;
                 }
                 case "UPDATE": {
-                    Huinyabot.getInstance().getClient().getChat().sendActionMessage(
+                    bot.getClient().getChat().sendActionMessage(
                             update.getChannel(),
                             String.format(
                                     "[7TV] %s changed the emote name from %s to %s !",
                                     update.getActor(),
-                                    update.getEmote().getName(),
+                                    (emotes.containsKey(update.getEmoteId())) ? emotes.get(update.getEmoteId()).getName() : update.getEmote().getName(),
                                     update.getName()
                             )
                     );
+
+                    if (emotes.containsKey(update.getEmoteId())) {
+                        emotes.get(update.getEmoteId()).setName(update.getName());
+                    }
                     break;
                 }
                 default: break;
             }
+
+            bot.getTargetCtrl().get(
+                    bot.getTargetLinks().get(update.getChannel())
+            ).setEmotes(Provider.SEVENTV, emotes);
         } else {
             LOGGER.debug(String.format("MESSAGE: Action: %s; Payload: %s", msg.getAction(), msg.getPayload()));
         }
