@@ -8,6 +8,7 @@ import com.github.twitch4j.helix.domain.User;
 import com.google.gson.Gson;
 import kz.ilotterytea.bot.api.commands.CommandLoader;
 import kz.ilotterytea.bot.api.delay.DelayManager;
+import kz.ilotterytea.bot.fun.markov.MarkovChainHandler;
 import kz.ilotterytea.bot.handlers.MessageHandlerSamples;
 import kz.ilotterytea.bot.models.TargetModel;
 import kz.ilotterytea.bot.models.emotes.Emote;
@@ -40,6 +41,8 @@ public class Huinyabot extends Bot {
     private UserController users;
     private SevenTVWebsocketClient sevenTV;
     private Map<String, String> targetLinks;
+    private MarkovChainHandler markov;
+    private OAuth2Credential credential;
 
     private final Logger LOGGER = LoggerFactory.getLogger(Huinyabot.class);
 
@@ -51,6 +54,8 @@ public class Huinyabot extends Bot {
     public UserController getUserCtrl() { return users; }
     public SevenTVWebsocketClient getSevenTVWSClient() { return sevenTV; }
     public Map<String, String> getTargetLinks() { return targetLinks; }
+    public MarkovChainHandler getMarkov() { return markov; }
+    public OAuth2Credential getCredential() { return credential; }
 
     private static Huinyabot instance;
     public static Huinyabot getInstance() { return instance; }
@@ -67,11 +72,14 @@ public class Huinyabot extends Bot {
         delayer = new DelayManager();
         targetLinks = new HashMap<>();
 
+        markov = new MarkovChainHandler(SharedConstants.CHAINS_FILE);
+
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
                 targets.save();
                 users.save();
+                markov.save();
             }
         }, 300000, 300000);
 
@@ -85,7 +93,7 @@ public class Huinyabot extends Bot {
         ArrayList<EmoteAPIData> globalEmotes = new SevenTVEmoteLoader().getGlobalEmotes();
 
         // - - -  T W I T C H  C L I E N T  - - - :
-        OAuth2Credential credential = new OAuth2Credential("twitch", properties.getProperty("OAUTH2_TOKEN"));
+        credential = new OAuth2Credential("twitch", properties.getProperty("OAUTH2_TOKEN"));
 
         client = TwitchClientBuilder.builder()
                 .withChatAccount(credential)
@@ -233,5 +241,6 @@ public class Huinyabot extends Bot {
         sevenTV.close();
         targets.save();
         users.save();
+        markov.save();
     }
 }

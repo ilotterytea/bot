@@ -13,6 +13,7 @@ import kz.ilotterytea.bot.models.emotes.Emote;
 import kz.ilotterytea.bot.models.emotes.Provider;
 
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * The samples for Twitch4j events
@@ -21,6 +22,14 @@ import java.util.Objects;
  */
 public class MessageHandlerSamples {
     private static final Huinyabot bot = Huinyabot.getInstance();
+    private static final Pattern markovUsernamePattern = Pattern.compile(
+            "((@)?"+Huinyabot.getInstance().getCredential().getUserName().toLowerCase()+"(,)?)",
+            Pattern.CASE_INSENSITIVE
+    );
+    private static final Pattern markovMessagePattern = Pattern.compile(
+            "^" + markovUsernamePattern.pattern() + ".*",
+            Pattern.MULTILINE | Pattern.CASE_INSENSITIVE
+    );
 
     /**
      * Message handler sample for IRC message events.
@@ -41,7 +50,25 @@ public class MessageHandlerSamples {
                 target.getStats().getChatLines() + 1
         );
 
+        // Emote counter update:
+        if (target.getEmotes().containsKey(Provider.SEVENTV)) {
+            for (String word : e.getMessage().get().split(" ")) {
+                for (Emote em : target.getEmotes().get(Provider.SEVENTV).values()) {
+                    if (Objects.equals(word, em.getName())) {
+                        em.setCount(em.getCount() + 1);
+                        break;
+                    }
+                }
+            }
+        }
+
         if (target.getListeningMode()) {
+            bot.getMarkov().scanText(
+                    e.getMessage().get(),
+                    (e.getMessageId().isPresent()) ? e.getMessageId().get() : null,
+                    e.getChannel().getId(),
+                    e.getUser().getId()
+            );
             return;
         }
 
@@ -63,20 +90,6 @@ public class MessageHandlerSamples {
             args.setCurrentPermissions(Permissions.MOD);
         } else if (e.getBadges().containsKey("vip")) {
             args.setCurrentPermissions(Permissions.VIP);
-        }
-
-        if (target != null) {
-            // Emote counter update:
-            if (target.getEmotes().containsKey(Provider.SEVENTV)) {
-                for (String word : MSG.split(" ")) {
-                    for (Emote em : target.getEmotes().get(Provider.SEVENTV).values()) {
-                        if (Objects.equals(word, em.getName())) {
-                            em.setCount(em.getCount() + 1);
-                            break;
-                        }
-                    }
-                }
-            }
         }
 
         if (Objects.equals(MSG, "test")) {
@@ -148,6 +161,31 @@ public class MessageHandlerSamples {
                         target.getStats().getExecutedCommandsCount() + 1
                 );
             }
+        }
+
+        // Markov processing:
+        if (markovMessagePattern.matcher(MSG).find()) {
+            MSG = markovUsernamePattern.matcher(MSG).replaceAll("");
+            String generatedText = Huinyabot.getInstance().getMarkov().generateText(MSG);
+            generatedText = markovUsernamePattern.matcher(generatedText).replaceAll("");
+
+            if (generatedText.length() > 500) {
+                generatedText = generatedText.substring(0, 497) + "...";
+            }
+
+            bot.getClient().getChat().sendMessage(
+                    e.getChannel().getName(),
+                    generatedText,
+                    null,
+                    (!e.getMessageId().isPresent()) ? null : e.getMessageId().get()
+            );
+        } else {
+            Huinyabot.getInstance().getMarkov().scanText(
+                    MSG,
+                    (e.getMessageId().isPresent()) ? e.getMessageId().get() : null,
+                    e.getChannel().getId(),
+                    e.getUser().getId()
+            );
         }
     }
 }
