@@ -126,7 +126,7 @@ public class JoinCommand extends Command {
         }
 
         Huinyabot.getInstance().getClient().getChat().joinChannel(name);
-        if (!m.getMessage().getOptions().contains("silent") || !m.getMessage().getOptions().contains("тихо") || !m.getMessage().getOptions().contains("only-listen")) {
+        if (!m.getMessage().getOptions().contains("silent") && !m.getMessage().getOptions().contains("тихо") && !m.getMessage().getOptions().contains("only-listen")) {
             Huinyabot.getInstance().getClient().getChat().sendMessage(
                     name,
                     String.format("@%s, FeelsDankMan \uD83D\uDC4B joined your chat room!", name)
