@@ -59,14 +59,18 @@ public class SevenTVWebsocketClient extends WebSocketClient {
 
             switch (update.getAction()) {
                 case "ADD": {
-                    bot.getClient().getChat().sendActionMessage(
-                            update.getChannel(),
-                            String.format(
-                                    "[7TV] %s added the %s emote!",
-                                    update.getActor(),
-                                    update.getName()
-                            )
-                    );
+                    if (!Huinyabot.getInstance().getTargetCtrl().getOrDefault(
+                            Huinyabot.getInstance().getTargetLinks().get(update.getChannel())
+                    ).getListeningMode()) {
+                        bot.getClient().getChat().sendActionMessage(
+                                update.getChannel(),
+                                String.format(
+                                        "[7TV] %s added the %s emote!",
+                                        update.getActor(),
+                                        update.getName()
+                                )
+                        );
+                    }
 
                     if (emotes.containsKey(update.getEmoteId())) {
                         if (emotes.get(update.getEmoteId()).isDeleted()) {
@@ -89,29 +93,37 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                     break;
                 }
                 case "REMOVE": {
-                    bot.getClient().getChat().sendActionMessage(
-                            update.getChannel(),
-                            String.format(
-                                    "[7TV] %s removed the %s emote!",
-                                    update.getActor(),
-                                    update.getName()
-                            )
-                    );
+                    if (!Huinyabot.getInstance().getTargetCtrl().getOrDefault(
+                            Huinyabot.getInstance().getTargetLinks().get(update.getChannel())
+                    ).getListeningMode()) {
+                        bot.getClient().getChat().sendActionMessage(
+                                update.getChannel(),
+                                String.format(
+                                        "[7TV] %s removed the %s emote!",
+                                        update.getActor(),
+                                        update.getName()
+                                )
+                        );
+                    }
                     if (emotes.containsKey(update.getEmoteId())) {
                         emotes.get(update.getEmoteId()).setDeleted(true);
                     }
                     break;
                 }
                 case "UPDATE": {
-                    bot.getClient().getChat().sendActionMessage(
-                            update.getChannel(),
-                            String.format(
-                                    "[7TV] %s changed the emote name from %s to %s !",
-                                    update.getActor(),
-                                    (emotes.containsKey(update.getEmoteId())) ? emotes.get(update.getEmoteId()).getName() : update.getEmote().getName(),
-                                    update.getName()
-                            )
-                    );
+                    if (!Huinyabot.getInstance().getTargetCtrl().getOrDefault(
+                            Huinyabot.getInstance().getTargetLinks().get(update.getChannel())
+                    ).getListeningMode()) {
+                        bot.getClient().getChat().sendActionMessage(
+                                update.getChannel(),
+                                String.format(
+                                        "[7TV] %s changed the emote name from %s to %s !",
+                                        update.getActor(),
+                                        (emotes.containsKey(update.getEmoteId())) ? emotes.get(update.getEmoteId()).getName() : update.getEmote().getName(),
+                                        update.getName()
+                                )
+                        );
+                    }
 
                     if (emotes.containsKey(update.getEmoteId())) {
                         emotes.get(update.getEmoteId()).setName(update.getName());
