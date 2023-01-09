@@ -1,5 +1,6 @@
 package kz.ilotterytea.bot.models;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -16,16 +17,20 @@ public class CustomCommand {
     private String response;
     /** Command status: enabled or disabled. */
     private boolean value;
+    /** The flags of the custom command. */
+    private final ArrayList<String> flags;
 
     public CustomCommand(
             String id,
             String response,
-            boolean value
+            boolean value,
+            ArrayList<String> flags
     ) {
         this.id = id;
         this.response = response;
         this.value = value;
         this.uuid = UUID.randomUUID().toString();
+        this.flags = flags;
     }
 
     public String getUUID() { return uuid; }
@@ -38,4 +43,17 @@ public class CustomCommand {
 
     public boolean getValue() { return value; }
     public void setValue(boolean value) { this.value = value; }
+
+    public ArrayList<String> getFlags() { return flags; }
+    public boolean getFlag(String id) {
+        return flags.contains(id);
+    }
+    public void setFlag(String id) {
+        if (!flags.contains(id)) {
+            flags.add(id);
+        }
+    }
+    public void removeFlag(String id) {
+        flags.remove(id);
+    }
 }

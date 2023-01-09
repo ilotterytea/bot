@@ -4,11 +4,13 @@
 |----|-------------|-----------|---------|-------------|---------|----------------------|
 | ping | Checking if it's alive, and a bunch of other data. | iLotterytea | 🚫 | 🚫 | `pong`, `пинг`, `понг` | Everyone. |
 | holiday | Check today's holidays. The Russian site is used, so these holidays are in Russian. | iLotterytea, GreDDySS, Fedotir | !massping with today's holiday: `--massping, --тык`; Get all the holidays: `--all, --все`; Don't replace the username with the emote: `--no-emotes, --без-эмоутов` | 🚫 | `праздник` | Everyone. |
-| join | Join the chat room! | iLotterytea | The chat room: `VALID TWITCH USERNAME` | Join without notifying chat: `--silent, --тихо` | `зайти` | Everyone if used without the `THE CHAT ROOM` option, otherwise ![Superuser permissions](https://cdn.frankerfacez.com/emote/674595/1) are required. |
+| join | Join the chat room! | iLotterytea | Join without notifying chat: `--silent, --тихо`, The 'Listening only' mode: `--only-listen` | The chat room: `VALID TWITCH USERNAME` | `зайти` | Everyone if used without the `THE CHAT ROOM` option, otherwise ![Superuser permissions](https://cdn.frankerfacez.com/emote/674595/1) are required. |
 | ecount | How many times has this emote been used? | iLotterytea | 🚫 | 🚫 | `count`, `emote`, `кол-во`, `колво`, `эмоут` | Everyone. |
 | etop | Emote leaderboard. | iLotterytea | 🚫 | 🚫 | `emotetop`, `топэмоутов` | Everyone. |
 | massping | Ping em, Fors! 💪 ![LUL](https://static-cdn.jtvnw.net/emoticons/v2/425618/default/dark/1.0) | iLotterytea | 🚫  | 🚫 | `mp`, `масспинг`, `massping` | ![Broadcaster](https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/1) |
 | spam | Spam the message a certain number of times. | iLotterytea | Show the count: `--count`. | The spam count: `ANY NUMBER (exactly)` | `repeat`, `cvpaste`, `cv`, `paste`, `насрать`, `спам` | ![Moderator](https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/1) |
+| cmd | Create your own user commands! | iLotterytea | No mention of the user when executing: `--no-mention` | Create a new command: `new`; Edit the command response: `edit`; Remove the command: `rename`; Copy the command from other chat room: `copy`; Toggle the command: `toggle`; List of all user commands: `list` | `scmd`, `custom`, `command`, `команда` | ![Broadcaster](https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/1); For the `list` subcommand, everyone. |
+
 
 ## Usage
 To use these commands, you must send a message to a chat room that has Huinyabot with this pattern: `![ID OR ALIAS] [OPTIONS..., SUBCOMMAND...] ...`.
@@ -17,3 +19,4 @@ It does not matter where you place the options and subcommands. Of course, you s
 + `!holiday --massping`
 + `!праздник --тык` *(the same as above, but with aliases)*
 + `!spam 6 Hello, world! --count` *("6" is how much to spam)*
++ `!cmd new hello Hello, world!` *(The first "hello" is the command ID)*

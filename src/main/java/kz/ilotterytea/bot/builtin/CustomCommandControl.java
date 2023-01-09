@@ -26,7 +26,7 @@ public class CustomCommandControl extends Command {
     public Permissions getPermissions() { return Permissions.USER; }
 
     @Override
-    public ArrayList<String> getOptions() { return new ArrayList<>(); }
+    public ArrayList<String> getOptions() { return new ArrayList<>(Arrays.asList("no-mention")); }
 
     @Override
     public ArrayList<String> getSubcommands() { return new ArrayList<>(Arrays.asList("new", "edit", "delete", "rename", "copy", "toggle", "list")); }
@@ -90,11 +90,16 @@ public class CustomCommandControl extends Command {
                     CustomCommand cmd = new CustomCommand(
                             name,
                             response,
-                            true
+                            true,
+                            new ArrayList<>()
                     );
 
                     if (Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().containsKey(cmd.getId()) || Huinyabot.getInstance().getLoader().getCommands().containsKey(cmd.getId())) {
                         return "The command "+cmd.getId()+" already exists!";
+                    }
+
+                    if (m.getMessage().getOptions().contains("no-mention")) {
+                        cmd.setFlag("no-mention");
                     }
 
                     Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().put(cmd.getId(), cmd);
@@ -109,7 +114,8 @@ public class CustomCommandControl extends Command {
                     CustomCommand cmd = new CustomCommand(
                             name,
                             response,
-                            true
+                            true,
+                            new ArrayList<>()
                     );
 
                     if (!Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().containsKey(cmd.getId())) {
@@ -125,7 +131,8 @@ public class CustomCommandControl extends Command {
                     CustomCommand cmd = new CustomCommand(
                             name,
                             response,
-                            true
+                            true,
+                            new ArrayList<>()
                     );
 
                     if (!Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().containsKey(cmd.getId())) {

@@ -142,7 +142,7 @@ public class MessageHandlerSamples {
                         e.getChannel().getName(),
                         cmd.getResponse(),
                         null,
-                        (!e.getMessageId().isPresent()) ? null : e.getMessageId().get()
+                        (!e.getMessageId().isPresent() || cmd.getFlag("no-mention")) ? null : e.getMessageId().get()
                 );
                 bot.getTargetCtrl().get(e.getChannel().getId()).getStats().setExecutedCommandsCount(
                         target.getStats().getExecutedCommandsCount() + 1
