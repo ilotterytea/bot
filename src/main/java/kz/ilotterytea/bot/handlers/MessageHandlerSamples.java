@@ -30,6 +30,10 @@ public class MessageHandlerSamples {
             "^" + markovUsernamePattern.pattern() + ".*",
             Pattern.MULTILINE | Pattern.CASE_INSENSITIVE
     );
+    private static final Pattern markovURLPattern = Pattern.compile(
+            "([A-Za-z]+:\\/\\/)?[A-Za-z0-9\\-_]+\\.[A-Za-z0-9\\-_:%&;\\?\\#\\/.=]+",
+            Pattern.CASE_INSENSITIVE
+    );
 
     /**
      * Message handler sample for IRC message events.
@@ -166,8 +170,10 @@ public class MessageHandlerSamples {
         // Markov processing:
         if (markovMessagePattern.matcher(MSG).find()) {
             MSG = markovUsernamePattern.matcher(MSG).replaceAll("");
+            MSG = markovURLPattern.matcher(MSG).replaceAll("");
             String generatedText = Huinyabot.getInstance().getMarkov().generateText(MSG);
             generatedText = markovUsernamePattern.matcher(generatedText).replaceAll("");
+            generatedText = markovURLPattern.matcher(generatedText).replaceAll("");
 
             if (generatedText.length() > 500) {
                 generatedText = generatedText.substring(0, 497) + "...";
