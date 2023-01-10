@@ -3,7 +3,9 @@ package kz.ilotterytea.bot;
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
+import com.github.twitch4j.chat.events.channel.DeleteMessageEvent;
 import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
+import com.github.twitch4j.chat.events.channel.UserBanEvent;
 import com.github.twitch4j.helix.domain.User;
 import com.google.gson.Gson;
 import kz.ilotterytea.bot.api.commands.CommandLoader;
@@ -233,6 +235,8 @@ public class Huinyabot extends Bot {
         }
 
         client.getEventManager().onEvent(IRCMessageEvent.class, MessageHandlerSamples::ircMessageEvent);
+        client.getEventManager().onEvent(DeleteMessageEvent.class, MessageHandlerSamples::deleteMessageEvent);
+        client.getEventManager().onEvent(UserBanEvent.class, MessageHandlerSamples::userBanEvent);
     }
 
     @Override

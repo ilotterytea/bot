@@ -1,10 +1,13 @@
 package kz.ilotterytea.bot.handlers;
 
+import com.github.twitch4j.chat.events.channel.DeleteMessageEvent;
 import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
+import com.github.twitch4j.chat.events.channel.UserBanEvent;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.fun.markov.ChatChain;
 import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.models.CustomCommand;
 import kz.ilotterytea.bot.models.MessageModel;
@@ -12,8 +15,10 @@ import kz.ilotterytea.bot.models.TargetModel;
 import kz.ilotterytea.bot.models.emotes.Emote;
 import kz.ilotterytea.bot.models.emotes.Provider;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * The samples for Twitch4j events
@@ -192,6 +197,60 @@ public class MessageHandlerSamples {
                     e.getChannel().getId(),
                     e.getUser().getId()
             );
+        }
+    }
+
+    /**
+     * Message handler sample for delete message events.
+     * @author ilotterytea
+     * @since 1.2.2
+     */
+    public static void deleteMessageEvent(DeleteMessageEvent e) {
+        List<ChatChain> chains = bot.getMarkov().getRecords()
+                .stream()
+                .filter(c -> Objects.equals(c.getToWordAuthor().getMsgId(), e.getMsgId()))
+                .collect(Collectors.toList());
+
+        chains.addAll(
+                bot.getMarkov().getRecords()
+                        .stream()
+                        .filter(c -> Objects.equals(c.getFromWordAuthor().getMsgId(), e.getMsgId()))
+                        .collect(Collectors.toList())
+        );
+
+        for (ChatChain chain : chains) {
+            int i = bot.getMarkov().getRecords().indexOf(chain);
+
+            if (i > -1) {
+                bot.getMarkov().getRecords().remove(i);
+            }
+        }
+    }
+
+    /**
+     * Message handler sample for user ban events.
+     * @author ilotterytea
+     * @since 1.2.2
+     */
+    public static void userBanEvent(UserBanEvent e) {
+        List<ChatChain> chains = bot.getMarkov().getRecords()
+                .stream()
+                .filter(c -> Objects.equals(c.getToWordAuthor().getChannelId(), e.getChannel().getId()) && Objects.equals(c.getToWordAuthor().getUserId(), e.getUser().getId()))
+                .collect(Collectors.toList());
+
+        chains.addAll(
+                bot.getMarkov().getRecords()
+                        .stream()
+                        .filter(c -> Objects.equals(c.getFromWordAuthor().getChannelId(), e.getChannel().getId()) && Objects.equals(c.getFromWordAuthor().getUserId(), e.getUser().getId()))
+                        .collect(Collectors.toList())
+        );
+
+        for (ChatChain chain : chains) {
+            int i = bot.getMarkov().getRecords().indexOf(chain);
+
+            if (i > -1) {
+                bot.getMarkov().getRecords().remove(i);
+            }
         }
     }
 }
