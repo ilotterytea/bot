@@ -150,7 +150,7 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                 (remote) ? "by the remote host" : "by the client"
         ));
 
-        // Try to reconnect once after 2 minutes:
+        // Try to reconnect after 2 minutes:
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
@@ -159,8 +159,18 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
+
+                if (SevenTVWebsocketClient.super.isOpen()) {
+                    for (String username : Huinyabot.getInstance().getTargetLinks().keySet()) {
+                        SevenTVWebsocketClient.super.send(
+                                new Gson().toJson(new Message("join", username))
+                        );
+                    }
+
+                    super.cancel();
+                }
             }
-        }, 120000);
+        }, 120000, 120000);
     }
 
     @Override
