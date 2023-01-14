@@ -99,6 +99,7 @@ public class TargetController implements JsonController<TargetModel> {
                         0
                 ),
                 false,
+                SharedConstants.DEFAULT_LOCALE_ID,
                 new HashMap<>(),
                 new HashMap<>()
         );

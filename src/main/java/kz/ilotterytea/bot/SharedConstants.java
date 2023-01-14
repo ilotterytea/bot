@@ -28,6 +28,7 @@ public class SharedConstants {
     public static final File CHAINS_FILE = new File(CHAIN_SAVE_PATH);
 
     public static final String DEFAULT_PREFIX = "!";
+    public static final String DEFAULT_LOCALE_ID = "en_us";
 
     public static final String USER_AGENT = String.format("%s/%s", APP_NAME, getVersion());
 

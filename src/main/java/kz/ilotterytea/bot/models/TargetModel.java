@@ -20,6 +20,8 @@ public class TargetModel {
     private final StatsModel stats;
     /** The listening only mode. */
     private boolean listeningOnlyMode;
+    /** The chat language. */
+    private String language;
     /** Target's emotes. */
     private Map<Provider, Map<String, Emote>> emotes;
     /** Target's custom commands. */
@@ -29,12 +31,14 @@ public class TargetModel {
             String aliasId,
             StatsModel stats,
             boolean listeningOnlyMode,
+            String language,
             Map<Provider, Map<String, Emote>> emotes,
             Map<String, CustomCommand> customCommands
     ) {
         this.aliasId = aliasId;
         this.stats = stats;
         this.listeningOnlyMode = listeningOnlyMode;
+        this.language = language;
         this.emotes = emotes;
         this.custom = customCommands;
     }
@@ -47,4 +51,6 @@ public class TargetModel {
     public void setCustomCommands(Map<String, CustomCommand> commands) { this.custom = commands; }
     public boolean getListeningMode() { return listeningOnlyMode; }
     public void setListeningMode(boolean mode) { this.listeningOnlyMode = mode; }
+    public String getLanguage() { return language; }
+    public void setLanguage(String language) { this.language = language; }
 }
