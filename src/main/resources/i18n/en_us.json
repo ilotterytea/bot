@@ -1,0 +1,75 @@
+{
+  "test.test": "test %s successfully completed!",
+
+  "msg.not_enough_arguments": "Not enough arguments!",
+  "msg.no_subcommand": "No subcommand!",
+  "msg.not_enough_rights": "Not enough rights to perform this action.",
+  "msg.http_response_error": "Received the %s status code while processing the %s request!",
+  "msg.something_went_wrong": "Something went wrong!",
+
+  "providers.7tv": "7TV",
+  "providers.bttv": "BTTV",
+  "providers.ffz": "FFZ",
+  "provider.ttv": "Twitch",
+
+  "placeholders.disconnected": "DISCONNECTED",
+  "placeholders.connected": "CONNECTED",
+
+  "cmd.ping.name": "Ping!",
+  "cmd.ping.desc": "Check if this bot alive",
+  "cmd.ping.response.success": "DankCrouching \u2615 Java %s \u00b7 Uptime: %s \u00b7 Used memory: %s% (%sMB) of %sMB \u00b7 TMI: %sms \u00b7 7TV EventAPI: %s",
+
+  "emoteupdater.new_emote_with_author": "(%s) %s added the %s emote!",
+  "emoteupdater.removed_emote_with_author": "(%s) %s removed the %s emote!",
+  "emoteupdater.updated_emote_with_author": "(%s) %s updated the emote name from %s to %s !",
+  "emoteupdater.new_emote": "(%s) Added the %s emote!",
+  "emoteupdater.removed_emote": "(%s) Removed the %s emote!",
+  "emoteupdater.updated_emote": "(%s) Updated the emote name from %s to %s !",
+
+  "cmd.spam.name": "Spam",
+  "cmd.spam.desc": "Spam",
+  "cmd.spam.response.no_msg": "No message found.",
+  "cmd.spam.response.no_count": "No spam count found.",
+
+  "cmd.massping.name": "Ping em, Fors!",
+  "cmd.massping.desc": "",
+
+  "cmd.join.name": "Join",
+  "cmd.join.desc": "join",
+  "cmd.join.response.not_found": "User with username %s is not found!",
+  "cmd.join.response.already_in": "The user %s is already in!",
+  "cmd.join.response.success": "Successfully joined to the %s's chat room!",
+  "cmd.join.response.success_to_joined_chat": "@%s, FeelsDankMan \uD83D\uDC4B joined your chat room!",
+
+  "cmd.holiday.name": "Holiday!",
+  "cmd.holiday.desc": "holiday!",
+  "cmd.holiday.response.success": "HolidayPresent %s Today's holiday: %s",
+
+  "cmd.ecount.name": "Emote count!",
+  "cmd.ecount.desc": "emote count",
+  "cmd.ecount.response.no_emote_provided": "(%s) No emote provided.",
+  "cmd.ecount.response.no_emote_found": "(%s) Emote %s is not found in the database.",
+  "cmd.ecount.response.no_channel_emotes": "(%s) The %s emotes were not detected.",
+  "cmd.ecount.response.success": "(%s) %s%s has been used %s times.",
+
+  "cmd.etop.name": "Emote top",
+  "cmd.etop.desc": "emote top",
+  "cmd.etop.response.no_channel_emotes": "(%s) The %s emotes were not detected.",
+  "cmd.etop.response.success": "(%s) %s",
+
+  "cmd.cmd.name": "Custom commands!",
+  "cmd.cmd.desc": "custom commands",
+  "cmd.cmd.response.no_second_arg": "The second argument was not found.",
+  "cmd.cmd.response.already_exists": "The command %s already exists!",
+  "cmd.cmd.response.does_not_exists": "The command %s doesn't exists!",
+  "cmd.cmd.response.no_cmds": "There are no custom commands in %s's chat room.",
+  "cmd.cmd.response.not_found": "The user with the name %s is not found!",
+  "cmd.cmd.response.success.list": "Available %s's chat room custom commands: %s",
+  "cmd.cmd.response.success.new": "A new command was successfully created (%s)!",
+  "cmd.cmd.response.success.edit": "Successfully edited command response %s!",
+  "cmd.cmd.response.success.delete": "The command %s has been successfully deleted!",
+  "cmd.cmd.response.success.rename": "Successfully renamed the command from %s to %s",
+  "cmd.cmd.response.success.copy": "Successfully copied the command %s from %s's chat room!",
+  "cmd.cmd.response.success.disable": "Successfully disabled the command %s",
+  "cmd.cmd.response.success.enable": "Successfully enabled the command %s"
+}
