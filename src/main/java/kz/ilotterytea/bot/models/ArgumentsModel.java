@@ -11,17 +11,20 @@ import kz.ilotterytea.bot.api.permissions.Permissions;
 public class ArgumentsModel {
     private final UserModel sender;
     private Permissions currentPermissions;
+    private String language;
     private final MessageModel msg;
     private final IRCMessageEvent event;
 
     public ArgumentsModel(
             UserModel sender,
             Permissions currentPermissions,
+            String language,
             MessageModel msg,
             IRCMessageEvent event
     ) {
         this.sender = sender;
         this.currentPermissions = currentPermissions;
+        this.language = language;
         this.msg = msg;
         this.event = event;
     }
@@ -29,6 +32,8 @@ public class ArgumentsModel {
     public UserModel getSender() { return sender; }
     public Permissions getCurrentPermissions() { return currentPermissions; }
     public void setCurrentPermissions(Permissions currentPermissions) { this.currentPermissions = currentPermissions; }
+    public String getLanguage() { return language; }
+    public void setLanguage(String language) { this.language = language; }
     public MessageModel getMessage() { return msg; }
     public IRCMessageEvent getEvent() { return event; }
 }
