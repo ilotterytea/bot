@@ -3,6 +3,7 @@ package kz.ilotterytea.bot.builtin;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.utils.StringUtils;
 
@@ -45,15 +46,23 @@ public class PingCommand extends Command {
         double totalMemMb = (rt.totalMemory() / 1024.0) / 1024.0;
         double percentMemUsage = Math.round((usedMemMb / totalMemMb) * 100.0);
 
-        return String.format(
-                "DankCrouching \u2615 Java %s \u00b7 Uptime: %s \u00b7 Used memory: %s%% (%sMB) of %sMB \u00b7 TMI: %sms \u00b7 7TV EventAPI: %s",
+        return Huinyabot.getInstance().getLocale().formattedText(
+                m.getLanguage(),
+                LineIds.C_PING_SUCCESS,
                 System.getProperty("java.version"),
                 ut,
-                Math.round(percentMemUsage),
-                Math.round(usedMemMb),
-                Math.round(totalMemMb),
-                Huinyabot.getInstance().getClient().getChat().getLatency(),
-                (Huinyabot.getInstance().getSevenTVWSClient().isClosed()) ? "DISCONNECTED" : "CONNECTED"
+                String.valueOf(Math.round(percentMemUsage)),
+                String.valueOf(Math.round(usedMemMb)),
+                String.valueOf(Math.round(totalMemMb)),
+                String.valueOf(Huinyabot.getInstance().getClient().getChat().getLatency()),
+                (Huinyabot.getInstance().getSevenTVWSClient().isClosed()) ?
+        Huinyabot.getInstance().getLocale().literalText(
+                m.getLanguage(),
+                LineIds.DISCON
+        ):Huinyabot.getInstance().getLocale().literalText(
+                        m.getLanguage(),
+                        LineIds.CON
+                )
         );
     }
 }

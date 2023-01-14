@@ -3,6 +3,7 @@ package kz.ilotterytea.bot.builtin;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.models.TargetModel;
 import kz.ilotterytea.bot.models.emotes.Emote;
@@ -41,30 +42,61 @@ public class EmoteCountCommand extends Command {
     public String run(ArgumentsModel m) {
         String[] s = m.getMessage().getMessage().split(" ");
 
-        if (s.length == 0) {
-            return "[7TV] No emote provided.";
+        if (s[0].length() == 0) {
+            return Huinyabot.getInstance().getLocale().formattedText(
+                    m.getLanguage(),
+                    LineIds.C_ECOUNT_NOEMOTEPROVIDED,
+                    Huinyabot.getInstance().getLocale().literalText(
+                            m.getLanguage(),
+                            LineIds.STV
+                    )
+            );
         }
 
         String name = s[0];
         TargetModel target = Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId());
 
         if (!target.getEmotes().containsKey(Provider.SEVENTV)) {
-            return "[7TV] The 7TV emotes were not detected.";
+            return Huinyabot.getInstance().getLocale().formattedText(
+                    m.getLanguage(),
+                    LineIds.C_ECOUNT_NOCHANNELEMOTES,
+                    Huinyabot.getInstance().getLocale().literalText(
+                            m.getLanguage(),
+                            LineIds.STV
+                    ),
+                    Huinyabot.getInstance().getLocale().literalText(
+                            m.getLanguage(),
+                            LineIds.STV
+                    )
+            );
         }
 
         Map<String, Emote> emotes = target.getEmotes().get(Provider.SEVENTV);
 
         for (Emote em : emotes.values()) {
             if (Objects.equals(em.getName(), name)) {
-                return String.format(
-                        "[7TV] %s%s has been used %s times.",
+                return Huinyabot.getInstance().getLocale().formattedText(
+                        m.getLanguage(),
+                        LineIds.C_ECOUNT_SUCCESS,
+                        Huinyabot.getInstance().getLocale().literalText(
+                                m.getLanguage(),
+                                LineIds.STV
+                        ),
                         em.getName(),
                         (em.isDeleted()) ? "*" : ((em.isGlobal()) ? " ^" : ""),
-                        em.getCount()
+                        String.valueOf(em.getCount())
                 );
             }
         }
 
-        return "[7TV] Emote \""+name+"\" is not found in the database.";
+        return Huinyabot.getInstance().getLocale().formattedText(
+                m.getLanguage(),
+                LineIds.C_ECOUNT_NOEMOTEFOUND,
+                Huinyabot.getInstance().getLocale().literalText(
+                        m.getLanguage(),
+                        LineIds.STV
+                ),
+                name
+        );
     }
 }
