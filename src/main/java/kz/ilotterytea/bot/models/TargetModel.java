@@ -2,6 +2,7 @@ package kz.ilotterytea.bot.models;
 
 import kz.ilotterytea.bot.models.emotes.Emote;
 import kz.ilotterytea.bot.models.emotes.Provider;
+import kz.ilotterytea.bot.models.notify.NotifyListener;
 
 import java.util.Map;
 
@@ -26,6 +27,7 @@ public class TargetModel {
     private Map<Provider, Map<String, Emote>> emotes;
     /** Target's custom commands. */
     private Map<String, CustomCommand> custom;
+    private final Map<String, NotifyListener> listeners;
 
     public TargetModel(
             String aliasId,
@@ -33,7 +35,8 @@ public class TargetModel {
             boolean listeningOnlyMode,
             String language,
             Map<Provider, Map<String, Emote>> emotes,
-            Map<String, CustomCommand> customCommands
+            Map<String, CustomCommand> customCommands,
+            Map<String, NotifyListener> listeners
     ) {
         this.aliasId = aliasId;
         this.stats = stats;
@@ -41,6 +44,7 @@ public class TargetModel {
         this.language = language;
         this.emotes = emotes;
         this.custom = customCommands;
+        this.listeners = listeners;
     }
 
     public StatsModel getStats() { return stats; }
@@ -53,4 +57,5 @@ public class TargetModel {
     public void setListeningMode(boolean mode) { this.listeningOnlyMode = mode; }
     public String getLanguage() { return language; }
     public void setLanguage(String language) { this.language = language; }
+    public Map<String, NotifyListener> getListeners() { return listeners; }
 }
