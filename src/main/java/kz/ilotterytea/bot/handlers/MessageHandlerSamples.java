@@ -87,7 +87,8 @@ public class MessageHandlerSamples {
         }
 
         String MSG = e.getMessage().get();
-        final String PREFIX = bot.getProperties().getProperty("PREFIX", SharedConstants.DEFAULT_PREFIX);
+        final String PREFIX = (Huinyabot.getInstance().getTargetCtrl().get(e.getChannel().getId()).getPrefix() == null) ?
+                bot.getProperties().getProperty("PREFIX", SharedConstants.DEFAULT_PREFIX) : Huinyabot.getInstance().getTargetCtrl().get(e.getChannel().getId()).getPrefix();
         final ArgumentsModel args = new ArgumentsModel(
                 bot.getUserCtrl().getOrDefault(e.getUserId()),
                 Permissions.USER,
