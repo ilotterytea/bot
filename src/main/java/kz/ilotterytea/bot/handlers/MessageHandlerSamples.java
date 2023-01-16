@@ -3,17 +3,24 @@ package kz.ilotterytea.bot.handlers;
 import com.github.twitch4j.chat.events.channel.DeleteMessageEvent;
 import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 import com.github.twitch4j.chat.events.channel.UserBanEvent;
+import com.github.twitch4j.events.ChannelChangeGameEvent;
+import com.github.twitch4j.events.ChannelChangeTitleEvent;
+import com.github.twitch4j.events.ChannelGoLiveEvent;
+import com.github.twitch4j.events.ChannelGoOfflineEvent;
+import com.github.twitch4j.helix.domain.User;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.fun.markov.ChatChain;
+import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.*;
 import kz.ilotterytea.bot.models.emotes.Emote;
 import kz.ilotterytea.bot.models.emotes.Provider;
+import kz.ilotterytea.bot.models.notify.NotifyListener;
+import kz.ilotterytea.bot.models.notify.NotifySubscriber;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -255,6 +262,539 @@ public class MessageHandlerSamples {
 
             if (i > -1) {
                 bot.getMarkov().getRecords().remove(i);
+            }
+        }
+    }
+
+    public static void goLiveEvent(ChannelGoLiveEvent e) {
+        Map<String, String> revLinks = Huinyabot.getInstance().getTargetLinks()
+                .entrySet()
+                .stream()
+                .collect(
+                        Collectors.toMap(
+                                Map.Entry::getValue,
+                                Map.Entry::getKey,
+                                (l, r) -> l,
+                                LinkedHashMap::new
+                        )
+                );
+
+
+        for (TargetModel target : Huinyabot.getInstance().getTargetCtrl().getAll().values()
+                .stream()
+                .filter(t->t.getListeners().containsKey(e.getChannel().getId()) && t.getListeners().get(e.getChannel().getId()).getEvents().contains("live"))
+                .collect(Collectors.toList())
+        ) {
+            NotifyListener listener = target.getListeners().get(e.getStream().getUserId());
+
+            ArrayList<String> msgs = new ArrayList<>();
+            int index = 1;
+            msgs.add(listener.getMessages().getOrDefault(
+                    "live",
+                    bot.getLocale().literalText(
+                            target.getLanguage(),
+                            LineIds.WENT_LIVE_NOTIFICATION
+                    )
+            ).replaceAll(
+                    "%\\{name}",
+                    e.getChannel().getName()
+            ).replaceAll(
+                    "%\\{title}",
+                    (Objects.equals(e.getStream().getTitle(), "")) ? "N/A" : e.getStream().getTitle()
+            ).replaceAll(
+                    "%\\{game}",
+                    (Objects.equals(e.getStream().getGameName(), "")) ? "N/A" : e.getStream().getGameName()
+            ));
+            msgs.add("");
+
+            if (listener.getFlags().containsKey("live") && listener.getFlags().get("live").contains("massping")) {
+                List<String> chatters = bot.getClient().getMessagingInterface().getChatters(
+                        revLinks.get(target.getAliasId())
+                ).execute().getAllViewers();
+
+                for (String chatter : chatters) {
+                    StringBuilder sb = new StringBuilder();
+
+                    if (
+                            (
+                                    listener.getIcons().getOrDefault("live", "") +
+                                            " " +
+                                            msgs.get(index) +
+                                            "@" +
+                                            chatter +
+                                            " " +
+                                            listener.getIcons().getOrDefault("live", "")
+                            ).length() < 500
+                    ) {
+                        sb
+                                .append(msgs.get(index))
+                                .append("@")
+                                .append(chatter)
+                                .append(" ");
+
+                        msgs.remove(index);
+                        msgs.add(index, sb.toString());
+                    } else {
+                        msgs.add("");
+                        index++;
+                    }
+                }
+            } else {
+                List<User> subUsers = bot.getClient().getHelix().getUsers(
+                        bot.getProperties().getProperty("ACCESS_TOKEN", null),
+                        listener.getSubscribers().stream().map(NotifySubscriber::getAliasId).collect(Collectors.toList()),
+                        null
+                ).execute().getUsers();
+
+                for (NotifySubscriber subscriber : listener.getSubscribers()
+                        .stream().filter(sub->sub.getSubscribedEvents().contains("live")).collect(Collectors.toList())) {
+                    User user = subUsers
+                            .stream()
+                            .filter(sub->Objects.equals(sub.getId(), subscriber.getAliasId()))
+                            .findFirst().orElse(null);
+
+                    if (user != null) {
+                        StringBuilder sb = new StringBuilder();
+
+                        if (
+                                (
+                                        listener.getIcons().getOrDefault("live", "") +
+                                                " " +
+                                                msgs.get(index) +
+                                                "@" +
+                                                user.getLogin() +
+                                                " " +
+                                                listener.getIcons().getOrDefault("live", "")
+                                ).length() < 500
+                        ) {
+                            sb
+                                    .append(msgs.get(index))
+                                    .append("@")
+                                    .append(user.getLogin())
+                                    .append(" ");
+
+                            msgs.remove(index);
+                            msgs.add(index, sb.toString());
+                        } else {
+                            msgs.add("");
+                            index++;
+                        }
+                    }
+                }
+            }
+
+            index = 0;
+
+            for (String msg : msgs) {
+                if (Objects.equals(msg, "")) continue;
+
+                if (index == 0 && listener.getFlags().containsKey("live") && listener.getFlags().get("live").contains("announce")) {
+                    msg = "/announce " + listener.getIcons().getOrDefault("live", "") + " " + msg + " " + listener.getIcons().getOrDefault("live", "");
+                } else {
+                    msg = listener.getIcons().getOrDefault("live", "") + " " + msg + " " + listener.getIcons().getOrDefault("live", "");
+                }
+
+                bot.getClient().getChat().sendMessage(
+                        revLinks.get(target.getAliasId()),
+                        msg
+                );
+                index++;
+            }
+        }
+    }
+    public static void goOfflineEvent(ChannelGoOfflineEvent e) {
+        Map<String, String> revLinks = Huinyabot.getInstance().getTargetLinks()
+                .entrySet()
+                .stream()
+                .collect(
+                        Collectors.toMap(
+                                Map.Entry::getValue,
+                                Map.Entry::getKey,
+                                (l, r) -> l,
+                                LinkedHashMap::new
+                        )
+                );
+
+
+        for (TargetModel target : Huinyabot.getInstance().getTargetCtrl().getAll().values()
+                .stream()
+                .filter(t->t.getListeners().containsKey(e.getChannel().getId()) && t.getListeners().get(e.getChannel().getId()).getEvents().contains("offline"))
+                .collect(Collectors.toList())
+        ) {
+            NotifyListener listener = target.getListeners().get(e.getChannel().getId());
+
+            ArrayList<String> msgs = new ArrayList<>();
+            int index = 1;
+            msgs.add(listener.getMessages().getOrDefault(
+                    "offline",
+                    bot.getLocale().literalText(
+                            target.getLanguage(),
+                            LineIds.WENT_OFFLINE_NOTIFICATION
+                    )
+            ).replaceAll(
+                    "%\\{name}",
+                    e.getChannel().getName()
+            ));
+            msgs.add("");
+
+            if (listener.getFlags().containsKey("offline") && listener.getFlags().get("offline").contains("massping")) {
+                List<String> chatters = bot.getClient().getMessagingInterface().getChatters(
+                        revLinks.get(target.getAliasId())
+                ).execute().getAllViewers();
+
+                for (String chatter : chatters) {
+                    StringBuilder sb = new StringBuilder();
+
+                    if (
+                            (
+                                    listener.getIcons().getOrDefault("offline", "") +
+                                            " " +
+                                            msgs.get(index) +
+                                            "@" +
+                                            chatter +
+                                            " " +
+                                            listener.getIcons().getOrDefault("offline", "")
+                            ).length() < 500
+                    ) {
+                        sb
+                                .append(msgs.get(index))
+                                .append("@")
+                                .append(chatter)
+                                .append(" ");
+
+                        msgs.remove(index);
+                        msgs.add(index, sb.toString());
+                    } else {
+                        msgs.add("");
+                        index++;
+                    }
+                }
+            } else {
+                List<User> subUsers = bot.getClient().getHelix().getUsers(
+                        bot.getProperties().getProperty("ACCESS_TOKEN", null),
+                        listener.getSubscribers().stream().map(NotifySubscriber::getAliasId).collect(Collectors.toList()),
+                        null
+                ).execute().getUsers();
+
+                for (NotifySubscriber subscriber : listener.getSubscribers()
+                        .stream().filter(sub->sub.getSubscribedEvents().contains("offline")).collect(Collectors.toList())) {
+                    User user = subUsers
+                            .stream()
+                            .filter(sub->Objects.equals(sub.getId(), subscriber.getAliasId()))
+                            .findFirst().orElse(null);
+
+                    if (user != null) {
+                        StringBuilder sb = new StringBuilder();
+
+                        if (
+                                (
+                                        listener.getIcons().getOrDefault("offline", "") +
+                                                " " +
+                                                msgs.get(index) +
+                                                "@" +
+                                                user.getLogin() +
+                                                " " +
+                                                listener.getIcons().getOrDefault("offline", "")
+                                ).length() < 500
+                        ) {
+                            sb
+                                    .append(msgs.get(index))
+                                    .append("@")
+                                    .append(user.getLogin())
+                                    .append(" ");
+
+                            msgs.remove(index);
+                            msgs.add(index, sb.toString());
+                        } else {
+                            msgs.add("");
+                            index++;
+                        }
+                    }
+                }
+            }
+
+            index = 0;
+
+            for (String msg : msgs) {
+                if (Objects.equals(msg, "")) continue;
+
+                if (index == 0 && listener.getFlags().containsKey("offline") && listener.getFlags().get("offline").contains("announce")) {
+                    msg = "/announce " + listener.getIcons().getOrDefault("offline", "") + " " + msg + " " + listener.getIcons().getOrDefault("offline", "");
+                } else {
+                    msg = listener.getIcons().getOrDefault("offline", "") + " " + msg + " " + listener.getIcons().getOrDefault("offline", "");
+                }
+
+                bot.getClient().getChat().sendMessage(
+                        revLinks.get(target.getAliasId()),
+                        msg
+                );
+                index++;
+            }
+        }
+    }
+    public static void changeTitleEvent(ChannelChangeTitleEvent e) {
+        Map<String, String> revLinks = Huinyabot.getInstance().getTargetLinks()
+                .entrySet()
+                .stream()
+                .collect(
+                        Collectors.toMap(
+                                Map.Entry::getValue,
+                                Map.Entry::getKey,
+                                (l, r) -> l,
+                                LinkedHashMap::new
+                        )
+                );
+
+
+        for (TargetModel target : Huinyabot.getInstance().getTargetCtrl().getAll().values()
+                .stream()
+                .filter(t->t.getListeners().containsKey(e.getChannel().getId()) && t.getListeners().get(e.getChannel().getId()).getEvents().contains("title"))
+                .collect(Collectors.toList())
+        ) {
+            NotifyListener listener = target.getListeners().get(e.getStream().getUserId());
+
+            ArrayList<String> msgs = new ArrayList<>();
+            int index = 1;
+            msgs.add(listener.getMessages().getOrDefault(
+                    "title",
+                    bot.getLocale().literalText(
+                            target.getLanguage(),
+                            LineIds.TITLE_CHANGE_NOTIFICATION
+                    )
+            ).replaceAll(
+                    "%\\{name}",
+                    e.getChannel().getName()
+            ).replaceAll(
+                    "%\\{title}",
+                    (Objects.equals(e.getStream().getTitle(), "")) ? "N/A" : e.getStream().getTitle()
+            ));
+            msgs.add("");
+
+            if (listener.getFlags().containsKey("title") && listener.getFlags().get("title").contains("massping")) {
+                List<String> chatters = bot.getClient().getMessagingInterface().getChatters(
+                        revLinks.get(target.getAliasId())
+                ).execute().getAllViewers();
+
+                for (String chatter : chatters) {
+                    StringBuilder sb = new StringBuilder();
+
+                    if (
+                            (
+                                    listener.getIcons().getOrDefault("title", "") +
+                                            " " +
+                                            msgs.get(index) +
+                                            "@" +
+                                            chatter +
+                                            " " +
+                                            listener.getIcons().getOrDefault("title", "")
+                            ).length() < 500
+                    ) {
+                        sb
+                                .append(msgs.get(index))
+                                .append("@")
+                                .append(chatter)
+                                .append(" ");
+
+                        msgs.remove(index);
+                        msgs.add(index, sb.toString());
+                    } else {
+                        msgs.add("");
+                        index++;
+                    }
+                }
+            } else {
+                List<User> subUsers = bot.getClient().getHelix().getUsers(
+                        bot.getProperties().getProperty("ACCESS_TOKEN", null),
+                        listener.getSubscribers().stream().map(NotifySubscriber::getAliasId).collect(Collectors.toList()),
+                        null
+                ).execute().getUsers();
+
+                for (NotifySubscriber subscriber : listener.getSubscribers()
+                        .stream().filter(sub->sub.getSubscribedEvents().contains("title")).collect(Collectors.toList())) {
+                    User user = subUsers
+                            .stream()
+                            .filter(sub->Objects.equals(sub.getId(), subscriber.getAliasId()))
+                            .findFirst().orElse(null);
+
+                    if (user != null) {
+                        StringBuilder sb = new StringBuilder();
+
+                        if (
+                                (
+                                        listener.getIcons().getOrDefault("title", "") +
+                                                " " +
+                                                msgs.get(index) +
+                                                "@" +
+                                                user.getLogin() +
+                                                " " +
+                                                listener.getIcons().getOrDefault("title", "")
+                                ).length() < 500
+                        ) {
+                            sb
+                                    .append(msgs.get(index))
+                                    .append("@")
+                                    .append(user.getLogin())
+                                    .append(" ");
+
+                            msgs.remove(index);
+                            msgs.add(index, sb.toString());
+                        } else {
+                            msgs.add("");
+                            index++;
+                        }
+                    }
+                }
+            }
+
+            index = 0;
+
+            for (String msg : msgs) {
+                if (Objects.equals(msg, "")) continue;
+
+                if (index == 0 && listener.getFlags().containsKey("title") && listener.getFlags().get("title").contains("announce")) {
+                    msg = "/announce " + listener.getIcons().getOrDefault("title", "") + " " + msg + " " + listener.getIcons().getOrDefault("title", "");
+                } else {
+                    msg = listener.getIcons().getOrDefault("title", "") + " " + msg + " " + listener.getIcons().getOrDefault("title", "");
+                }
+
+                bot.getClient().getChat().sendMessage(
+                        revLinks.get(target.getAliasId()),
+                        msg
+                );
+                index++;
+            }
+        }
+    }
+    public static void changeGameEvent(ChannelChangeGameEvent e) {
+        Map<String, String> revLinks = Huinyabot.getInstance().getTargetLinks()
+                .entrySet()
+                .stream()
+                .collect(
+                        Collectors.toMap(
+                                Map.Entry::getValue,
+                                Map.Entry::getKey,
+                                (l, r) -> l,
+                                LinkedHashMap::new
+                        )
+                );
+
+
+        for (TargetModel target : Huinyabot.getInstance().getTargetCtrl().getAll().values()
+                .stream()
+                .filter(t->t.getListeners().containsKey(e.getChannel().getId()) && t.getListeners().get(e.getChannel().getId()).getEvents().contains("game"))
+                .collect(Collectors.toList())
+        ) {
+            NotifyListener listener = target.getListeners().get(e.getChannel().getId());
+
+            ArrayList<String> msgs = new ArrayList<>();
+            int index = 1;
+            msgs.add(listener.getMessages().getOrDefault(
+                    "game",
+                    bot.getLocale().literalText(
+                            target.getLanguage(),
+                            LineIds.GAME_CHANGE_NOTIFICATION
+                    )
+            ).replaceAll(
+                    "%\\{name}",
+                    e.getChannel().getName()
+            ).replaceAll(
+                    "%\\{game}",
+                    (Objects.equals(e.getStream().getGameName(), "")) ? "N/A" : e.getStream().getGameName()
+            ));
+            msgs.add("");
+
+            if (listener.getFlags().containsKey("game") && listener.getFlags().get("game").contains("massping")) {
+                List<String> chatters = bot.getClient().getMessagingInterface().getChatters(
+                        revLinks.get(target.getAliasId())
+                ).execute().getAllViewers();
+
+                for (String chatter : chatters) {
+                    StringBuilder sb = new StringBuilder();
+
+                    if (
+                            (
+                                    listener.getIcons().getOrDefault("game", "") +
+                                            " " +
+                                            msgs.get(index) +
+                                            "@" +
+                                            chatter +
+                                            " " +
+                                            listener.getIcons().getOrDefault("game", "")
+                            ).length() < 500
+                    ) {
+                        sb
+                                .append(msgs.get(index))
+                                .append("@")
+                                .append(chatter)
+                                .append(" ");
+
+                        msgs.remove(index);
+                        msgs.add(index, sb.toString());
+                    } else {
+                        msgs.add("");
+                        index++;
+                    }
+                }
+            } else {
+                List<User> subUsers = bot.getClient().getHelix().getUsers(
+                        bot.getProperties().getProperty("ACCESS_TOKEN", null),
+                        listener.getSubscribers().stream().map(NotifySubscriber::getAliasId).collect(Collectors.toList()),
+                        null
+                ).execute().getUsers();
+
+                for (NotifySubscriber subscriber : listener.getSubscribers()
+                        .stream().filter(sub->sub.getSubscribedEvents().contains("game")).collect(Collectors.toList())) {
+                    User user = subUsers
+                            .stream()
+                            .filter(sub->Objects.equals(sub.getId(), subscriber.getAliasId()))
+                            .findFirst().orElse(null);
+
+                    if (user != null) {
+                        StringBuilder sb = new StringBuilder();
+
+                        if (
+                                (
+                                        listener.getIcons().getOrDefault("game", "") +
+                                                " " +
+                                                msgs.get(index) +
+                                                "@" +
+                                                user.getLogin() +
+                                                " " +
+                                                listener.getIcons().getOrDefault("game", "")
+                                ).length() < 500
+                        ) {
+                            sb
+                                    .append(msgs.get(index))
+                                    .append("@")
+                                    .append(user.getLogin())
+                                    .append(" ");
+
+                            msgs.remove(index);
+                            msgs.add(index, sb.toString());
+                        } else {
+                            msgs.add("");
+                            index++;
+                        }
+                    }
+                }
+            }
+
+            index = 0;
+
+            for (String msg : msgs) {
+                if (Objects.equals(msg, "")) continue;
+
+                if (index == 0 && listener.getFlags().containsKey("game") && listener.getFlags().get("game").contains("announce")) {
+                    msg = "/announce " + listener.getIcons().getOrDefault("game", "") + " " + msg + " " + listener.getIcons().getOrDefault("game", "");
+                } else {
+                    msg = listener.getIcons().getOrDefault("game", "") + " " + msg + " " + listener.getIcons().getOrDefault("game", "");
+                }
+
+                bot.getClient().getChat().sendMessage(
+                        revLinks.get(target.getAliasId()),
+                        msg
+                );
+                index++;
             }
         }
     }

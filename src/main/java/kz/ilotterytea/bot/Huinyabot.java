@@ -6,6 +6,10 @@ import com.github.twitch4j.TwitchClientBuilder;
 import com.github.twitch4j.chat.events.channel.DeleteMessageEvent;
 import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 import com.github.twitch4j.chat.events.channel.UserBanEvent;
+import com.github.twitch4j.events.ChannelChangeGameEvent;
+import com.github.twitch4j.events.ChannelChangeTitleEvent;
+import com.github.twitch4j.events.ChannelGoLiveEvent;
+import com.github.twitch4j.events.ChannelGoOfflineEvent;
 import com.github.twitch4j.helix.domain.User;
 import com.google.gson.Gson;
 import kz.ilotterytea.bot.api.commands.CommandLoader;
@@ -104,6 +108,7 @@ public class Huinyabot extends Bot {
 
         client = TwitchClientBuilder.builder()
                 .withChatAccount(credential)
+                .withDefaultAuthToken(credential)
                 .withEnableTMI(true)
                 .withEnableChat(true)
                 .withClientId(properties.getProperty("CLIENT_ID"))
@@ -239,9 +244,34 @@ public class Huinyabot extends Bot {
             }
         }
 
+        ArrayList<String> listeningNow = new ArrayList<>();
+
+        for (TargetModel target : targets.getAll().values()) {
+            if (target.getListeners().keySet().size() != 0) {
+                List<User> users = client.getHelix().getUsers(
+                        properties.getProperty("ACCESS_TOKEN", null),
+                        new ArrayList<>(target.getListeners().keySet()),
+                        null
+                ).execute().getUsers();
+
+                for (User user : users) {
+                    if (!listeningNow.contains(user.getLogin())) {
+                        client.getClientHelper().enableStreamEventListener(user.getId(), user.getLogin());
+                        listeningNow.add(user.getLogin());
+                        LOGGER.debug("Listening for stream events for user " + user.getLogin());
+                    }
+                }
+            }
+        }
+
         client.getEventManager().onEvent(IRCMessageEvent.class, MessageHandlerSamples::ircMessageEvent);
         client.getEventManager().onEvent(DeleteMessageEvent.class, MessageHandlerSamples::deleteMessageEvent);
         client.getEventManager().onEvent(UserBanEvent.class, MessageHandlerSamples::userBanEvent);
+
+        client.getEventManager().onEvent(ChannelGoLiveEvent.class, MessageHandlerSamples::goLiveEvent);
+        client.getEventManager().onEvent(ChannelGoOfflineEvent.class, MessageHandlerSamples::goOfflineEvent);
+        client.getEventManager().onEvent(ChannelChangeGameEvent.class, MessageHandlerSamples::changeGameEvent);
+        client.getEventManager().onEvent(ChannelChangeTitleEvent.class, MessageHandlerSamples::changeTitleEvent);
     }
 
     @Override

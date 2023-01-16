@@ -21,6 +21,15 @@ public enum LineIds {
 
     DISCON("placeholders.disconnected"),
     CON("placeholders.connected"),
+    TITLE_CHANGE("placeholders.title_change"),
+    WENT_LIVE("placeholders.went_live"),
+    WENT_OFFLINE("placeholders.went_offline"),
+    GAME_CHANGE("placeholders.game_change"),
+
+    TITLE_CHANGE_NOTIFICATION("notification.title"),
+    WENT_LIVE_NOTIFICATION("notification.live"),
+    WENT_OFFLINE_NOTIFICATION("notification.offline"),
+    GAME_CHANGE_NOTIFICATION("notification.game"),
 
     NEW_EMOTE_WITH_AUTHOR("emoteupdater.new_emote_with_author"),
     REMOVED_EMOTE_WITH_AUTHOR("emoteupdater.removed_emote_with_author"),
@@ -61,7 +70,41 @@ public enum LineIds {
     C_CMD_SUCCESS_RENAME("cmd.cmd.response.success.rename"),
     C_CMD_SUCCESS_COPY("cmd.cmd.response.success.copy"),
     C_CMD_SUCCESS_DISABLE("cmd.cmd.response.success.disable"),
-    C_CMD_SUCCESS_ENABLE("cmd.cmd.response.success.enable");
+    C_CMD_SUCCESS_ENABLE("cmd.cmd.response.success.enable"),
+
+    C_NOTIFY_NOTHINGCHANGED("cmd.notify.response.nothing_changed"),
+    C_NOTIFY_NOLISTENINGCHANNELS("cmd.notify.response.no_listening_channels"),
+    C_NOTIFY_NOUSERNAME("cmd.notify.response.no_username_provided"),
+    C_NOTIFY_USERNOTFOUND("cmd.notify.response.user_not_found"),
+    C_NOTIFY_NOEVENTSPROVIDED("cmd.notify.response.no_events_provided"),
+    C_NOTIFY_ALREADYSUB("cmd.notify.response.already_subscribed"),
+    C_NOTIFY_NOTSUB("cmd.notify.response.not_subscribed"),
+    C_NOTIFY_EXCEEDEDLIMIT("cmd.notify.response.exceeded_limit"),
+    C_NOTIFY_ALREADYLISTENING("cmd.notify.response.already_listening"),
+    C_NOTIFY_NOMSG("cmd.notify.response.no_message"),
+    C_NOTIFY_NOFLAG("cmd.notify.response.no_flags"),
+    C_NOTIFY_DOESNOTLISTENING("cmd.notify.response.does_not_listening"),
+    C_NOTIFY_SUCCESS_SUBS("cmd.notify.response.success.subs"),
+    C_NOTIFY_SUCCESS_SUBSNOONE("cmd.notify.response.success.subs_no_one"),
+    C_NOTIFY_SUCCESS_LIST("cmd.notify.response.success.list"),
+    C_NOTIFY_SUCCESS_SUB("cmd.notify.response.success.sub"),
+    C_NOTIFY_SUCCESS_UNSUB("cmd.notify.response.success.unsub"),
+    C_NOTIFY_SUCCESS_UNSUBFULL("cmd.notify.response.success.unsub_full"),
+    C_NOTIFY_SUCCESS_ON("cmd.notify.response.success.on"),
+    C_NOTIFY_SUCCESS_OFF("cmd.notify.response.success.off"),
+    C_NOTIFY_SUCCESS_OFFFULL("cmd.notify.response.success.off_full"),
+    C_NOTIFY_SUCCESS_COMMENT_UPDATED("cmd.notify.response.success.comment.updated"),
+    C_NOTIFY_SUCCESS_COMMENT_UPDATEDALL("cmd.notify.response.success.comment.updated_all"),
+    C_NOTIFY_SUCCESS_COMMENT_REMOVED("cmd.notify.response.success.comment.removed"),
+    C_NOTIFY_SUCCESS_COMMENT_REMOVEDALL("cmd.notify.response.success.comment.removed_all"),
+    C_NOTIFY_SUCCESS_ICON_UPDATED("cmd.notify.response.success.icon.updated"),
+    C_NOTIFY_SUCCESS_ICON_UPDATEDALL("cmd.notify.response.success.icon.updated_all"),
+    C_NOTIFY_SUCCESS_ICON_REMOVED("cmd.notify.response.success.icon.removed"),
+    C_NOTIFY_SUCCESS_ICON_REMOVEDALL("cmd.notify.response.success.icon.removed_all"),
+    C_NOTIFY_SUCCESS_FLAG("cmd.notify.response.success.flag"),
+    C_NOTIFY_SUCCESS_FLAGALL("cmd.notify.response.success.flag_all"),
+    C_NOTIFY_SUCCESS_UNFLAG("cmd.notify.response.success.unflag"),
+    C_NOTIFY_SUCCESS_UNFLAGALL("cmd.notify.response.success.unflag_all");
 
     private final String id;
     LineIds(String id) {
