@@ -116,5 +116,14 @@
   "cmd.notify.response.success.flag": "Successfully added %s flag(s) for %s event(s) for %s's channel.",
   "cmd.notify.response.success.flag_all": "Successfully added %s flag(s) for all events for %s's channel.",
   "cmd.notify.response.success.unflag": "Successfully removed %s flag(s) from %s event(s) for %s's channel.",
-  "cmd.notify.response.success.unflag_all": "Successfully removed %s flag(s) from all events for %s's channel."
+  "cmd.notify.response.success.unflag_all": "Successfully removed %s flag(s) from all events for %s's channel.",
+
+  "cmd.set.name": "Settings",
+  "cmd.set.desc": "settings",
+  "cmd.set.response.success.prefix.info": "The bot prefix for this chat: \"%s\"",
+  "cmd.set.response.success.prefix.set": "I will now respond to ALL commands with the prefix \"%s\" in this chat",
+  "cmd.set.response.success.locale.info": "The bot language for this chat: \"%s\"",
+  "cmd.set.response.success.locale.list": "Available localizations: %s",
+  "cmd.set.response.success.locale.set": "I now speak English in this chat KKona",
+  "cmd.set.response.success.locale.set.user": "I now speak English to you KKona"
 }
