@@ -92,7 +92,8 @@ public class MessageHandlerSamples {
         final ArgumentsModel args = new ArgumentsModel(
                 bot.getUserCtrl().getOrDefault(e.getUserId()),
                 Permissions.USER,
-                bot.getProperties().getProperty("DEFAULT_LANGUAGE", SharedConstants.DEFAULT_LOCALE_ID),
+                (Huinyabot.getInstance().getTargetCtrl().get(e.getChannel().getId()).getLanguage() == null) ?
+                        bot.getProperties().getProperty("DEFAULT_LANGUAGE", SharedConstants.DEFAULT_LOCALE_ID) : Huinyabot.getInstance().getTargetCtrl().get(e.getChannel().getId()).getLanguage(),
                 MessageModel.create(e.getMessage().get(), PREFIX),
                 e
         );
