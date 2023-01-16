@@ -104,7 +104,14 @@ public enum LineIds {
     C_NOTIFY_SUCCESS_FLAG("cmd.notify.response.success.flag"),
     C_NOTIFY_SUCCESS_FLAGALL("cmd.notify.response.success.flag_all"),
     C_NOTIFY_SUCCESS_UNFLAG("cmd.notify.response.success.unflag"),
-    C_NOTIFY_SUCCESS_UNFLAGALL("cmd.notify.response.success.unflag_all");
+    C_NOTIFY_SUCCESS_UNFLAGALL("cmd.notify.response.success.unflag_all"),
+
+    C_SET_SUCCESS_PREFIX_INFO("cmd.set.response.success.prefix.info"),
+    C_SET_SUCCESS_PREFIX_SET("cmd.set.response.success.prefix.set"),
+    C_SET_SUCCESS_LOCALE_INFO("cmd.set.response.success.locale.info"),
+    C_SET_SUCCESS_LOCALE_LIST("cmd.set.response.success.locale.list"),
+    C_SET_SUCCESS_LOCALE_SET("cmd.set.response.success.locale.set"),
+    C_SET_SUCCESS_LOCALE_SET_USER("cmd.set.response.success.locale.set.user");
 
     private final String id;
     LineIds(String id) {

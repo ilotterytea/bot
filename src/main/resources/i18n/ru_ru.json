@@ -116,5 +116,14 @@
   "cmd.notify.response.success.flag": "Успешно добавил флажки %s для событий %s канала %s.",
   "cmd.notify.response.success.flag_all": "Успешно добавил флажки %s для всех событий канала %s.",
   "cmd.notify.response.success.unflag": "Успешно удалил флажки %s с событий %s канала %s.",
-  "cmd.notify.response.success.unflag_all": "Успешно удалил флажки %s со всех событий канала %s."
+  "cmd.notify.response.success.unflag_all": "Успешно удалил флажки %s со всех событий канала %s.",
+
+  "cmd.set.name": "Настройки",
+  "cmd.set.desc": "settings",
+  "cmd.set.response.success.prefix.info": "Префикс бота в этом чате: \"%s\".",
+  "cmd.set.response.success.prefix.set": "Теперь я буду отвечать на все команды с префиксом \"%s\" этого чата.",
+  "cmd.set.response.success.locale.info": "Язык бота в этом чате: \"%s\".",
+  "cmd.set.response.success.locale.list": "Доступные локализации: %s",
+  "cmd.set.response.success.locale.set": "Теперь я буду говорить на русском в этом чате KKomrade",
+  "cmd.set.response.success.locale.set.user": "Теперь я буду говорить на русском с Вами KKomrade"
 }
