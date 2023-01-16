@@ -87,4 +87,6 @@ public class I18N {
 
         return String.join(" ", s);
     }
+
+    public ArrayList<String> getLocaleIds() { return new ArrayList<>(this.maps.keySet()); }
 }
