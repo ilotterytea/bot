@@ -3,6 +3,7 @@ package kz.ilotterytea.bot.builtin;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.ArgumentsModel;
 
 import java.util.ArrayList;
@@ -38,7 +39,10 @@ public class SpamCommand extends Command {
         ArrayList<String> s = new ArrayList<>(Arrays.asList(m.getMessage().getMessage().split(" ")));
 
         if (s.size() <= 1) {
-            return "No message found.";
+            return Huinyabot.getInstance().getLocale().literalText(
+                    m.getLanguage(),
+                    LineIds.C_SPAM_NOMSG
+            );
         }
         int count;
 
@@ -46,7 +50,10 @@ public class SpamCommand extends Command {
             count = Integer.parseInt(s.get(0));
             s.remove(0);
         } catch (NumberFormatException e) {
-            return "No spam count found.";
+            return Huinyabot.getInstance().getLocale().literalText(
+                    m.getLanguage(),
+                    LineIds.C_SPAM_NOCOUNT
+            );
         }
 
         if (count > MAX_COUNT) {

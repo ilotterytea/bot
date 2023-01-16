@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.models.TargetModel;
 import kz.ilotterytea.bot.models.emotes.Emote;
@@ -46,7 +47,10 @@ public class JoinCommand extends Command {
         if (Objects.equals(s.get(0), "")) {
             s.add(0, m.getEvent().getUserName());
         } else if (m.getCurrentPermissions().getId() < Permissions.SUPAUSER.getId()) {
-            return "Not enough rights to perform this action.";
+            return Huinyabot.getInstance().getLocale().literalText(
+                    m.getLanguage(),
+                    LineIds.NO_RIGHTS
+            );
         }
 
         List<User> users = Huinyabot.getInstance().getClient().getHelix().getUsers(
@@ -56,7 +60,11 @@ public class JoinCommand extends Command {
         ).execute().getUsers();
 
         if (users.size() == 0) {
-            return "User with username "+s.get(0)+" is not found!";
+            return Huinyabot.getInstance().getLocale().formattedText(
+                    m.getLanguage(),
+                    LineIds.C_JOIN_NOTFOUND,
+                    s.get(0)
+            );
         }
 
         User user = users.get(0);
@@ -65,7 +73,11 @@ public class JoinCommand extends Command {
         final String name = user.getLogin();
 
         if (Huinyabot.getInstance().getTargetCtrl().get(id) != null) {
-            return "The user "+name+" is already in!";
+            return Huinyabot.getInstance().getLocale().formattedText(
+                    m.getLanguage(),
+                    LineIds.C_JOIN_ALREADYIN,
+                    name
+            );
         }
 
         TargetModel targetModel = Huinyabot.getInstance().getTargetCtrl().getOrDefault(id);
@@ -129,14 +141,19 @@ public class JoinCommand extends Command {
         if (!m.getMessage().getOptions().contains("silent") && !m.getMessage().getOptions().contains("тихо") && !m.getMessage().getOptions().contains("only-listen")) {
             Huinyabot.getInstance().getClient().getChat().sendMessage(
                     name,
-                    String.format("@%s, FeelsDankMan \uD83D\uDC4B joined your chat room!", name)
+                    Huinyabot.getInstance().getLocale().formattedText(
+                            m.getLanguage(),
+                            LineIds.C_JOIN_SUCCESSCHAT,
+                            name
+                    )
             );
         }
 
         Huinyabot.getInstance().getTargetLinks().put(user.getLogin(), user.getId());
 
-        return String.format(
-                "Successfully joined to the %s's chat room!",
+        return Huinyabot.getInstance().getLocale().formattedText(
+                m.getLanguage(),
+                LineIds.C_JOIN_SUCCESS,
                 name
         );
     }

@@ -93,7 +93,8 @@ public class UserController implements JsonController<UserModel> {
         return new UserModel(
                 aliasId,
                 false,
-                false
+                false,
+                SharedConstants.DEFAULT_LOCALE_ID
         );
     }
 }

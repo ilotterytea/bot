@@ -3,6 +3,7 @@ package kz.ilotterytea.bot.thirdpartythings.seventv.v1;
 import com.google.gson.Gson;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.SharedConstants;
+import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.TargetModel;
 import kz.ilotterytea.bot.models.emotes.Emote;
 import kz.ilotterytea.bot.models.emotes.Provider;
@@ -64,8 +65,13 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                     ).getListeningMode()) {
                         bot.getClient().getChat().sendActionMessage(
                                 update.getChannel(),
-                                String.format(
-                                        "[7TV] %s added the %s emote!",
+                                bot.getLocale().formattedText(
+                                        target.getLanguage(),
+                                        LineIds.NEW_EMOTE_WITH_AUTHOR,
+                                        bot.getLocale().literalText(
+                                                target.getLanguage(),
+                                                LineIds.STV
+                                        ),
                                         update.getActor(),
                                         update.getName()
                                 )
@@ -98,8 +104,13 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                     ).getListeningMode()) {
                         bot.getClient().getChat().sendActionMessage(
                                 update.getChannel(),
-                                String.format(
-                                        "[7TV] %s removed the %s emote!",
+                                bot.getLocale().formattedText(
+                                        target.getLanguage(),
+                                        LineIds.REMOVED_EMOTE_WITH_AUTHOR,
+                                        bot.getLocale().literalText(
+                                                target.getLanguage(),
+                                                LineIds.STV
+                                        ),
                                         update.getActor(),
                                         update.getName()
                                 )
@@ -116,8 +127,13 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                     ).getListeningMode()) {
                         bot.getClient().getChat().sendActionMessage(
                                 update.getChannel(),
-                                String.format(
-                                        "[7TV] %s changed the emote name from %s to %s !",
+                                bot.getLocale().formattedText(
+                                        target.getLanguage(),
+                                        LineIds.UPDATED_EMOTE_WITH_AUTHOR,
+                                        bot.getLocale().literalText(
+                                                target.getLanguage(),
+                                                LineIds.STV
+                                        ),
                                         update.getActor(),
                                         (emotes.containsKey(update.getEmoteId())) ? emotes.get(update.getEmoteId()).getName() : update.getEmote().getName(),
                                         update.getName()

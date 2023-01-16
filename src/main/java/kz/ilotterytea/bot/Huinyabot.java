@@ -12,6 +12,7 @@ import kz.ilotterytea.bot.api.commands.CommandLoader;
 import kz.ilotterytea.bot.api.delay.DelayManager;
 import kz.ilotterytea.bot.fun.markov.MarkovChainHandler;
 import kz.ilotterytea.bot.handlers.MessageHandlerSamples;
+import kz.ilotterytea.bot.i18n.I18N;
 import kz.ilotterytea.bot.models.TargetModel;
 import kz.ilotterytea.bot.models.emotes.Emote;
 import kz.ilotterytea.bot.models.emotes.Provider;
@@ -45,6 +46,7 @@ public class Huinyabot extends Bot {
     private Map<String, String> targetLinks;
     private MarkovChainHandler markov;
     private OAuth2Credential credential;
+    private I18N i18N;
 
     private final Logger LOGGER = LoggerFactory.getLogger(Huinyabot.class);
 
@@ -58,6 +60,7 @@ public class Huinyabot extends Bot {
     public Map<String, String> getTargetLinks() { return targetLinks; }
     public MarkovChainHandler getMarkov() { return markov; }
     public OAuth2Credential getCredential() { return credential; }
+    public I18N getLocale() { return i18N; }
 
     private static Huinyabot instance;
     public static Huinyabot getInstance() { return instance; }
@@ -73,6 +76,8 @@ public class Huinyabot extends Bot {
         loader = new CommandLoader();
         delayer = new DelayManager();
         targetLinks = new HashMap<>();
+
+        i18N = new I18N(new StorageUtils().getFileFromResource("i18n"));
 
         markov = new MarkovChainHandler(SharedConstants.CHAINS_FILE);
 

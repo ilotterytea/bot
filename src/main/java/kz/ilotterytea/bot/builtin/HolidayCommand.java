@@ -5,6 +5,7 @@ import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.models.emotes.Emote;
 import kz.ilotterytea.bot.models.emotes.Provider;
@@ -48,11 +49,19 @@ public class HolidayCommand extends Command {
         Response response = HttpFactory.sendGETRequest(SharedConstants.HOLIDAY_URL);
 
         if (response == null) {
-            return "Something went wrong!";
+            return Huinyabot.getInstance().getLocale().literalText(
+                    m.getLanguage(),
+                    LineIds.SOMETHING_WENT_WRONG
+            );
         }
 
         if (response.getResponse() == null ){
-            return "Received the "+response.getCode()+" status code while processing the "+response.getMethod()+" request!";
+            return Huinyabot.getInstance().getLocale().formattedText(
+                    m.getLanguage(),
+                    LineIds.HTTP_ERROR,
+                    String.valueOf(response.getCode()),
+                    response.getMethod()
+            );
         }
 
         Document doc = Jsoup.parse(response.getResponse());
@@ -102,14 +111,14 @@ public class HolidayCommand extends Command {
                 }
 
                 if (
-                        new StringBuilder()
-                                .append(msgs.get(index))
-                                .append(uName)
-                                .append(" ")
-                                .append("Today's holiday: ")
-                                .append(name)
-                                .append(" HolidayPresent")
-                                .length() < 500
+                        Huinyabot.getInstance().getLocale().formattedText(
+                                m.getLanguage(),
+                                LineIds.C_HOLIDAY_SUCCESS,
+                                msgs.get(index) + uName + " ",
+                                String.valueOf(names.indexOf(name) + 1),
+                                String.valueOf(names.size()),
+                                name
+                        ).length() < 500
                 ) {
                     sb.append(msgs.get(index)).append(uName).append(" ");
                     msgs.remove(index);
@@ -123,13 +132,27 @@ public class HolidayCommand extends Command {
             for (String msg : msgs) {
                 Huinyabot.getInstance().getClient().getChat().sendMessage(
                         m.getEvent().getChannel().getName(),
-                        msg + "Today's holiday: " + name + " HolidayPresent"
+                        Huinyabot.getInstance().getLocale().formattedText(
+                                m.getLanguage(),
+                                LineIds.C_HOLIDAY_SUCCESS,
+                                msg,
+                                String.valueOf(names.indexOf(name) + 1),
+                                String.valueOf(names.size()),
+                                name
+                        )
                 );
             }
 
             return null;
         }
 
-        return name;
+        return Huinyabot.getInstance().getLocale().formattedText(
+                m.getLanguage(),
+                LineIds.C_HOLIDAY_SUCCESS,
+                "",
+                String.valueOf(names.indexOf(name) + 1),
+                String.valueOf(names.size()),
+                name
+        );
     }
 }

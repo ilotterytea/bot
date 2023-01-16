@@ -8,10 +8,7 @@ import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.fun.markov.ChatChain;
-import kz.ilotterytea.bot.models.ArgumentsModel;
-import kz.ilotterytea.bot.models.CustomCommand;
-import kz.ilotterytea.bot.models.MessageModel;
-import kz.ilotterytea.bot.models.TargetModel;
+import kz.ilotterytea.bot.models.*;
 import kz.ilotterytea.bot.models.emotes.Emote;
 import kz.ilotterytea.bot.models.emotes.Provider;
 
@@ -54,6 +51,7 @@ public class MessageHandlerSamples {
         }
 
         TargetModel target = bot.getTargetCtrl().get(e.getChannel().getId());
+        UserModel user = bot.getUserCtrl().get(e.getUser().getId());
 
         bot.getTargetCtrl().get(e.getChannel().getId()).getStats().setChatLines(
                 target.getStats().getChatLines() + 1
@@ -86,12 +84,13 @@ public class MessageHandlerSamples {
         final ArgumentsModel args = new ArgumentsModel(
                 bot.getUserCtrl().getOrDefault(e.getUserId()),
                 Permissions.USER,
+                bot.getProperties().getProperty("DEFAULT_LANGUAGE", SharedConstants.DEFAULT_LOCALE_ID),
                 MessageModel.create(e.getMessage().get(), PREFIX),
                 e
         );
 
         // Set the user's current permissions:
-        if (bot.getUserCtrl().getOrDefault(e.getUserId()).isSuperUser()) {
+        if (user != null && user.isSuperUser()) {
             args.setCurrentPermissions(Permissions.SUPAUSER);
         } else if (Objects.equals(e.getChannel().getId(), e.getUser().getId())) {
             args.setCurrentPermissions(Permissions.BROADCASTER);
@@ -99,6 +98,12 @@ public class MessageHandlerSamples {
             args.setCurrentPermissions(Permissions.MOD);
         } else if (e.getBadges().containsKey("vip")) {
             args.setCurrentPermissions(Permissions.VIP);
+        }
+
+        if (user != null && user.getLanguage() != null) {
+            args.setLanguage(user.getLanguage());
+        } else if (target.getLanguage() != null){
+            args.setLanguage(target.getLanguage());
         }
 
         if (Objects.equals(MSG, "test")) {

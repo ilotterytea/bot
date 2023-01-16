@@ -3,6 +3,7 @@ package kz.ilotterytea.bot.builtin;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.models.TargetModel;
 import kz.ilotterytea.bot.models.emotes.Emote;
@@ -58,7 +59,18 @@ public class EmoteTopCommand extends Command {
         TargetModel target = Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId());
 
         if (!target.getEmotes().containsKey(Provider.SEVENTV)) {
-            return "[7TV] The 7TV emotes were not detected.";
+            return Huinyabot.getInstance().getLocale().formattedText(
+                    m.getLanguage(),
+                    LineIds.C_ETOP_NOCHANNELEMOTES,
+                    Huinyabot.getInstance().getLocale().literalText(
+                            m.getLanguage(),
+                            LineIds.STV
+                    ),
+                    Huinyabot.getInstance().getLocale().literalText(
+                            m.getLanguage(),
+                            LineIds.STV
+                    )
+            );
         }
 
         Map<String, Emote> emotes = target.getEmotes().get(Provider.SEVENTV)
@@ -93,17 +105,17 @@ public class EmoteTopCommand extends Command {
             StringBuilder sb = new StringBuilder();
 
             if (
-                    new StringBuilder()
-                            .append("[7TV] ")
-                            .append(msgs.get(index))
-                            .append(i + 1)
-                            .append(". ")
-                            .append(em.getName())
-                            .append((em.isDeleted()) ? "*" : ((em.isGlobal()) ? " ^" : ""))
-                            .append(" (")
-                            .append(em.getCount())
-                            .append("); ")
-                            .length() < 500
+                    Huinyabot.getInstance().getLocale().formattedText(
+                            m.getLanguage(),
+                            LineIds.C_ETOP_SUCCESS,
+                            Huinyabot.getInstance().getLocale().literalText(
+                                    m.getLanguage(),
+                                    LineIds.STV
+                            ),
+                            msgs.get(index) + (i + 1) + ". " + em.getName()
+                            + (em.isDeleted() ? "*" : ((em.isGlobal() ? " ^" : "")))
+                            + " (" + em.getCount() + "); "
+                    ).length() < 500
             ) {
                 sb.append(msgs.get(index))
                         .append(i + 1)
@@ -125,7 +137,15 @@ public class EmoteTopCommand extends Command {
         for (String msg : msgs) {
             Huinyabot.getInstance().getClient().getChat().sendMessage(
                     m.getEvent().getChannel().getName(),
-                    "[7TV] " + msg,
+                    Huinyabot.getInstance().getLocale().formattedText(
+                            m.getLanguage(),
+                            LineIds.C_ETOP_SUCCESS,
+                            Huinyabot.getInstance().getLocale().literalText(
+                                    m.getLanguage(),
+                                    LineIds.STV
+                            ),
+                            msg
+                    ),
                     null,
                     (m.getEvent().getMessageId().isPresent()) ? m.getEvent().getMessageId().get() : null
             );

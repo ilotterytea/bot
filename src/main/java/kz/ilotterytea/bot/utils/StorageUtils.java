@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 /**
  * Storage utilities.
@@ -40,5 +42,20 @@ public class StorageUtils {
                     )
             );
         }
+    }
+
+    public File getFileFromResource(String file_path) {
+        try {
+            ClassLoader classLoader = getClass().getClassLoader();
+            URL resource = classLoader.getResource(file_path);
+
+            if (resource != null) {
+                return new File(resource.toURI());
+            }
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
+        return null;
     }
 }

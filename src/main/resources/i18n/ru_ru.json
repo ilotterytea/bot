@@ -1,0 +1,75 @@
+{
+  "test.test": "test %s успешно завершен!",
+
+  "msg.not_enough_arguments": "Недостаточно данных!",
+  "msg.no_subcommand": "Не указана подкоманда!",
+  "msg.not_enough_rights": "Недостаточно прав для выполнения данного действия.",
+  "msg.http_response_error": "Получен код статуса %s, пока обрабатывал %s запрос!",
+  "msg.something_went_wrong": "Что-то пошло не так!",
+
+  "providers.7tv": "7TV",
+  "providers.bttv": "BTTV",
+  "providers.ffz": "FFZ",
+  "provider.ttv": "Twitch",
+
+  "placeholders.disconnected": "ОТКЛЮЧЕН",
+  "placeholders.connected": "ПОДКЛЮЧЕН",
+
+  "cmd.ping.name": "Пинг!",
+  "cmd.ping.desc": "Check if this bot alive",
+  "cmd.ping.response.success": "DankCrouching \u2615 Java %s \u00b7 Время работы: %s \u00b7 Потребление ОЗУ: %s% (%sMB) из %sMB \u00b7 TMI: %sмс \u00b7 7TV EventAPI: %s",
+
+  "emoteupdater.new_emote_with_author": "(%s) %s добавил эмоут %s",
+  "emoteupdater.removed_emote_with_author": "(%s) %s удалил эмоут %s",
+  "emoteupdater.updated_emote_with_author": "(%s) %s обновил имя эмоута %s на %s",
+  "emoteupdater.new_emote": "(%s) Добавлен эмоут %s",
+  "emoteupdater.removed_emote": "(%s) Удалён эмоут %s",
+  "emoteupdater.updated_emote": "(%s) Обновлено имя эмоута %s на %s",
+
+  "cmd.spam.name": "Спам",
+  "cmd.spam.desc": "Spam",
+  "cmd.spam.response.no_msg": "Сообщение для спама не найдено!",
+  "cmd.spam.response.no_count": "Не указано число, которое нужно проспамить.",
+
+  "cmd.massping.name": "Ping em, Fors!",
+  "cmd.massping.desc": "",
+
+  "cmd.join.name": "Join",
+  "cmd.join.desc": "join",
+  "cmd.join.response.not_found": "Пользователь с никнеймом %s не найден!",
+  "cmd.join.response.already_in": "Пользователь %s уже зарегестрирован!",
+  "cmd.join.response.success": "Успешно зашёл в чат %s!",
+  "cmd.join.response.success_to_joined_chat": "@%s, FeelsDankMan \uD83D\uDC4B",
+
+  "cmd.holiday.name": "Праздник!",
+  "cmd.holiday.desc": "holiday!",
+  "cmd.holiday.response.success": "HolidayPresent %s Сегодняшний праздник (%s из %s): %s",
+
+  "cmd.ecount.name": "Emote count!",
+  "cmd.ecount.desc": "emote count",
+  "cmd.ecount.response.no_emote_provided": "(%s) Эмоут не указан.",
+  "cmd.ecount.response.no_emote_found": "(%s) Эмоут %s не найден в базе данных.",
+  "cmd.ecount.response.no_channel_emotes": "(%s) Эмоуты %s не были замечены здесь.",
+  "cmd.ecount.response.success": "(%s) %s %s был использован %s раз.",
+
+  "cmd.etop.name": "Emote top",
+  "cmd.etop.desc": "emote top",
+  "cmd.etop.response.no_channel_emotes": "(%s) Эмоуты %s не были замечены здесь.",
+  "cmd.etop.response.success": "(%s) %s",
+
+  "cmd.cmd.name": "Custom commands!",
+  "cmd.cmd.desc": "custom commands",
+  "cmd.cmd.response.no_second_arg": "Второй аргумент не был найден!",
+  "cmd.cmd.response.already_exists": "Команда %s уже существует!",
+  "cmd.cmd.response.does_not_exists": "Команды %s не существует!",
+  "cmd.cmd.response.no_cmds": "В чате %s нет пользовательских команд.",
+  "cmd.cmd.response.not_found": "Пользователь с никнеймом %s не был найден!",
+  "cmd.cmd.response.success.list": "Доступные пользовательские команды чата %s: %s",
+  "cmd.cmd.response.success.new": "Новая пользовательская команда успешно создана (%s)!",
+  "cmd.cmd.response.success.edit": "Успешно отредактировал ответ пользовательской команды %s!",
+  "cmd.cmd.response.success.delete": "Пользовательская команда %s успешно удалена!",
+  "cmd.cmd.response.success.rename": "Успешно переименовал пользовательскую команду %s в %s",
+  "cmd.cmd.response.success.copy": "Успешно скопировал пользовательскую команду %s из чата %s!",
+  "cmd.cmd.response.success.disable": "Успешно выключил пользовательскую команду %s",
+  "cmd.cmd.response.success.enable": "Успешно включил пользовательскую команду %s"
+}
