@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'application'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'io.micronaut.application' version '3.7.0'
 }
 
 group 'kz.ilotterytea'
@@ -21,6 +22,14 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.10'
     implementation 'org.jsoup:jsoup:1.15.3'
     implementation 'org.java-websocket:Java-WebSocket:1.5.3'
+
+    annotationProcessor 'io.micronaut:micronaut-http-validation'
+    implementation 'io.micronaut:micronaut-http-client'
+    implementation 'io.micronaut:micronaut-jackson-databind'
+    implementation 'io.micronaut.views:micronaut-views-handlebars'
+    implementation 'io.micronaut.rxjava2:micronaut-rxjava2'
+    implementation 'io.micronaut.rxjava2:micronaut-rxjava2-http-server-netty'
+    implementation 'io.micronaut:micronaut-validation'
 }
 
 test {
@@ -37,4 +46,13 @@ application {
 
 shadowJar {
     archiveFileName = "${artifact}.jar"
+}
+
+micronaut {
+    runtime("netty")
+    testRuntime("junit5")
+    processing {
+        incremental(true)
+        annotations("kz.ilotterytea.bot.*")
+    }
 }

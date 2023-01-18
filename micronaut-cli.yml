@@ -1,0 +1,6 @@
+applicationType: default
+defaultPackage: kz.ilotterytea.bot
+testFramework: junit
+sourceLanguage: java
+buildTool: gradle
+features: [app-name, gradle, http-client, jackson-databind, java, java-application, junit, log4j2, micronaut-build, netty-server, readme, shade, views-handlebars, yaml]
