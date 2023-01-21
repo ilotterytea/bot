@@ -24,6 +24,8 @@
   "notification.title": "%{name} сменил название потоковой трансляции на \"%{title}\"",
   "notification.game": "%{name} сменил категорию потоковой трансляции на \"%{game}\"",
 
+  "github.push": "[GitHub] %s сделал изменения в %s (%s): %s [+%s -%s *%s]",
+
   "cmd.ping.name": "Пинг!",
   "cmd.ping.desc": "Check if this bot alive",
   "cmd.ping.response.success": "DankCrouching \u2615 Java %s \u00b7 Время работы: %s \u00b7 Потребление ОЗУ: %s% (%sMB) из %sMB \u00b7 TMI: %sмс \u00b7 7TV EventAPI: %s",

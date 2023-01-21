@@ -24,6 +24,8 @@
   "notification.title": "%{name} changed the stream title to \"%{title}\"",
   "notification.game": "%{name} changed the game to \"%{game}\"",
 
+  "github.push": "[GitHub] %s made changes to %s (%s): %s [ %s %s %s ]",
+
   "cmd.ping.name": "Ping!",
   "cmd.ping.desc": "Check if this bot alive",
   "cmd.ping.response.success": "DankCrouching \u2615 Java %s \u00b7 Uptime: %s \u00b7 Used memory: %s% (%sMB) of %sMB \u00b7 TMI: %sms \u00b7 7TV EventAPI: %s",

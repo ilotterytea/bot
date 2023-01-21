@@ -38,6 +38,8 @@ public enum LineIds {
     REMOVED_EMOTE("emoteupdater.removed_emote"),
     UPDATED_EMOTE("emoteupdater.updated_emote"),
 
+    GITHUB_PUSH("github.push"),
+
     C_PING_SUCCESS("cmd.ping.response.success"),
 
     C_SPAM_NOMSG("cmd.spam.response.no_msg"),
