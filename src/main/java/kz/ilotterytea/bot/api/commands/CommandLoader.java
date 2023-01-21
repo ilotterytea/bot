@@ -1,16 +1,11 @@
 package kz.ilotterytea.bot.api.commands;
 
 import kz.ilotterytea.bot.models.ArgumentsModel;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * Command loader.
@@ -28,16 +23,16 @@ public class CommandLoader extends ClassLoader {
     }
 
     private void init() {
-        InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream("kz/ilotterytea/bot/builtin");
-        assert stream != null;
-        BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+        Reflections reflections = new Reflections("kz.ilotterytea.bot.builtin");
 
-        Set<String> set = br.lines()
-                .filter(line -> line.endsWith(".class"))
-                .map(l -> l.substring(0, l.lastIndexOf('.')))
-                .collect(Collectors.toSet());
-        for (String clazz : set) {
-            register(clazz);
+        Set<Class<? extends Command>> classes = reflections.getSubTypesOf(Command.class);
+
+        for (Class<? extends Command> clazz : classes) {
+            try {
+                register(clazz.newInstance());
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -45,20 +40,11 @@ public class CommandLoader extends ClassLoader {
      * Register the command.
      * @since 1.0
      * @author ilotterytea
-     * @param nameId Command name ID.
+     * @param command Command.
      */
-    public void register(String nameId) {
-        try {
-            Class<Command> c = (Class<Command>) Class.forName("kz.ilotterytea.bot.builtin." + nameId, true, super.getParent());
-            Command cmd = c.newInstance();
-
-            COMMANDS.put(cmd.getNameId(), cmd);
-            LOGGER.debug(String.format("Successfully loaded the %s command!", cmd.getNameId()));
-        } catch (ClassNotFoundException e) {
-            LOGGER.error(String.format("Error occurred while registering the %s command: ", nameId), e);
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+    public void register(Command command) {
+        COMMANDS.put(command.getNameId(), command);
+        LOGGER.debug(String.format("Successfully loaded the %s command!", command.getNameId()));
     }
 
     /**
