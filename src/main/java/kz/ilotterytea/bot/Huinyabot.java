@@ -81,7 +81,7 @@ public class Huinyabot extends Bot {
         delayer = new DelayManager();
         targetLinks = new HashMap<>();
 
-        i18N = new I18N(new StorageUtils().getFileFromResource("i18n"));
+        i18N = new I18N(StorageUtils.getFileFromResource("i18n"));
 
         markov = new MarkovChainHandler(SharedConstants.CHAINS_FILE);
 

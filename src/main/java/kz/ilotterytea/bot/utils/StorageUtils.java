@@ -44,16 +44,12 @@ public class StorageUtils {
         }
     }
 
-    public File getFileFromResource(String file_path) {
-        try {
-            ClassLoader classLoader = getClass().getClassLoader();
-            URL resource = classLoader.getResource(file_path);
+    public static File getFileFromResource(String file_path) {
+        ClassLoader classLoader = StorageUtils.class.getClassLoader();
+        URL resource = classLoader.getResource(file_path);
 
-            if (resource != null) {
-                return new File(resource.toURI());
-            }
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+        if (resource != null) {
+            return new File(resource.getFile());
         }
 
         return null;
