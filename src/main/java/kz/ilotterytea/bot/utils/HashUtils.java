@@ -13,7 +13,7 @@ import java.security.NoSuchAlgorithmException;
  */
 public class HashUtils {
     public static String generateHmac256(String key, String data) {
-        return generateHmac("sha256", data, key);
+        return generateHmac("HmacSHA256", data, key);
     }
 
     private static String generateHmac(
