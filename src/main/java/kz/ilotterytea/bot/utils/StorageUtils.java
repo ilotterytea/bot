@@ -1,12 +1,22 @@
 package kz.ilotterytea.bot.utils;
 
+import com.google.common.io.Resources;
 import kz.ilotterytea.bot.SharedConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Storage utilities.
@@ -44,14 +54,35 @@ public class StorageUtils {
         }
     }
 
-    public static File getFileFromResource(String file_path) {
-        ClassLoader classLoader = StorageUtils.class.getClassLoader();
-        URL resource = classLoader.getResource(file_path);
+    public static List<String> getFilepathsFromResource(String folder_path) {
+        List<String> paths = new ArrayList<>();
 
-        if (resource != null) {
-            return new File(resource.getFile());
+
+        try {
+            URI uri = StorageUtils.class.getResource(folder_path).toURI();
+
+            try (FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
+                Path folder = fs.getPath(folder_path);
+                List<Path> pathz = Files.walk(folder, 1).collect(Collectors.toList());
+                pathz.remove(0);
+                pathz.forEach(p -> {
+                    paths.add(folder_path + "/" + p.getFileName().toString());
+                });
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
 
-        return null;
+        return paths;
+    }
+
+    public static String readFileFromResources(String filepath) {
+        try {
+            return Resources.toString(Resources.getResource(filepath), Charset.defaultCharset());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
