@@ -56,7 +56,22 @@ public class StorageUtils {
 
     public static List<String> getFilepathsFromResource(String folder_path) {
         List<String> paths = new ArrayList<>();
+        ClassLoader classLoader = StorageUtils.class.getClassLoader();
+        URL resource = classLoader.getResource(folder_path.substring(1));
 
+        // run in ide
+        if(resource != null && Objects.equals(resource.getProtocol(), "file")){
+            try {
+                paths.addAll(
+                        Arrays.stream(Objects.requireNonNull(new File(resource.toURI()).list())).map(p->folder_path + "/" + p)
+                                .collect(Collectors.toList())
+                );
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+
+            return paths;
+        }
 
         try {
             URI uri = StorageUtils.class.getResource(folder_path).toURI();
