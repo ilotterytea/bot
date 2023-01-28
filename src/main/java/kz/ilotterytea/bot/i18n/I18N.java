@@ -2,12 +2,9 @@ package kz.ilotterytea.bot.i18n;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import kz.ilotterytea.bot.utils.StorageUtils;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Localization manager.
@@ -17,31 +14,30 @@ import java.util.Objects;
 public class I18N {
     private final Map<String, Map<String, String>> maps;
 
-    public I18N(File directory) {
+    public I18N(List<String> filepaths) {
         this.maps = new HashMap<>();
 
-        load(directory);
+        load(filepaths);
     }
 
-    private void load(File directory) {
-        if (directory.isDirectory()) {
-            for (File file : Objects.requireNonNull(directory.listFiles())) {
-                processFile(file);
-            }
+    private void load(List<String> filepaths) {
+
+        for (String filepath : filepaths) {
+            processFile(filepath);
         }
     }
 
-    private void processFile(File file) {
-        if (file.isDirectory()) return;
+    private void processFile(String filepath) {
+        if (filepath.startsWith("/")) {
+            filepath = filepath.substring(1);
+        }
 
-        try (Reader reader = new FileReader(file)) {
-            Map<String, String> l = new Gson().fromJson(reader, new TypeToken<Map<String, String>>(){}.getType());
+        String string = StorageUtils.readFileFromResources(filepath);
 
-            if (l != null) {
-                maps.put(file.getName().split("\\.")[0], l);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        Map<String, String> l = new Gson().fromJson(string, new TypeToken<Map<String, String>>(){}.getType());
+
+        if (l != null) {
+            maps.put(filepath.split("/")[1].split("\\.")[0], l);
         }
     }
 

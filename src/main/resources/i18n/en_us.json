@@ -52,14 +52,14 @@
 
   "cmd.holiday.name": "Holiday!",
   "cmd.holiday.desc": "holiday!",
-  "cmd.holiday.response.success": "HolidayPresent %s Today's holiday: %s",
+  "cmd.holiday.response.success": "HolidayPresent %s Today's holiday (%s of %s): %s",
 
   "cmd.ecount.name": "Emote count!",
   "cmd.ecount.desc": "emote count",
   "cmd.ecount.response.no_emote_provided": "(%s) No emote provided.",
   "cmd.ecount.response.no_emote_found": "(%s) Emote %s is not found in the database.",
   "cmd.ecount.response.no_channel_emotes": "(%s) The %s emotes were not detected.",
-  "cmd.ecount.response.success": "(%s) %s%s has been used %s times.",
+  "cmd.ecount.response.success": "(%s) %s %s has been used %s times.",
 
   "cmd.etop.name": "Emote top",
   "cmd.etop.desc": "emote top",
