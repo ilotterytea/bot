@@ -59,7 +59,7 @@
   "cmd.ecount.response.no_emote_provided": "(%s) No emote provided.",
   "cmd.ecount.response.no_emote_found": "(%s) Emote %s is not found in the database.",
   "cmd.ecount.response.no_channel_emotes": "(%s) The %s emotes were not detected.",
-  "cmd.ecount.response.success": "(%s) %s %s has been used %s times.",
+  "cmd.ecount.response.success": "(%s) %s %s has been used %s times, ranking #%s among %s emotes.",
 
   "cmd.etop.name": "Emote top",
   "cmd.etop.desc": "emote top",

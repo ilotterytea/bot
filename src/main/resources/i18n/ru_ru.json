@@ -59,7 +59,7 @@
   "cmd.ecount.response.no_emote_provided": "(%s) Эмоут не указан.",
   "cmd.ecount.response.no_emote_found": "(%s) Эмоут %s не найден в базе данных.",
   "cmd.ecount.response.no_channel_emotes": "(%s) Эмоуты %s не были замечены здесь.",
-  "cmd.ecount.response.success": "(%s) %s %s был использован %s раз.",
+  "cmd.ecount.response.success": "(%s) %s %s был использован %s раз, заняв %s место среди %s эмоутов.",
 
   "cmd.etop.name": "Emote top",
   "cmd.etop.desc": "emote top",

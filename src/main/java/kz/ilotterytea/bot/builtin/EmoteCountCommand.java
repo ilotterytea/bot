@@ -9,10 +9,8 @@ import kz.ilotterytea.bot.models.TargetModel;
 import kz.ilotterytea.bot.models.emotes.Emote;
 import kz.ilotterytea.bot.models.emotes.Provider;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Emote count command.
@@ -71,9 +69,23 @@ public class EmoteCountCommand extends Command {
             );
         }
 
-        Map<String, Emote> emotes = target.getEmotes().get(Provider.SEVENTV);
+        Map<String, Emote> emotes = target.getEmotes().get(Provider.SEVENTV)
+                .entrySet()
+                .stream()
+                .sorted(Collections.reverseOrder(Comparator.comparingInt(e -> e.getValue().getCount())))
+                .collect(
+                        Collectors.toMap(
+                                Map.Entry::getKey,
+                                Map.Entry::getValue,
+                                (l, r) -> l,
+                                LinkedHashMap::new
+                        )
+                );
+
+        int place = 0;
 
         for (Emote em : emotes.values()) {
+            place++;
             if (Objects.equals(em.getName(), name)) {
                 return Huinyabot.getInstance().getLocale().formattedText(
                         m.getLanguage(),
@@ -84,7 +96,9 @@ public class EmoteCountCommand extends Command {
                         ),
                         em.getName(),
                         (em.isDeleted()) ? "*" : ((em.isGlobal()) ? " ^" : ""),
-                        String.valueOf(em.getCount())
+                        String.valueOf(em.getCount()),
+                        String.valueOf(place),
+                        String.valueOf(emotes.values().size())
                 );
             }
         }
