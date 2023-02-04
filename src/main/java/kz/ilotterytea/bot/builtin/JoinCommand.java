@@ -81,7 +81,10 @@ public class JoinCommand extends Command {
         }
 
         TargetModel targetModel = Huinyabot.getInstance().getTargetCtrl().getOrDefault(id);
-        targetModel.setListeningMode(m.getMessage().getOptions().contains("only-listen"));
+
+        if (m.getMessage().getOptions().contains("only-listen") && !targetModel.getFlags().contains("listen-only")) {
+            targetModel.getFlags().add("listen-only");
+        }
 
         Huinyabot.getInstance().getTargetCtrl().set(id, targetModel);
 

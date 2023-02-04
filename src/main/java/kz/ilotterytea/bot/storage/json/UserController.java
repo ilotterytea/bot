@@ -6,6 +6,7 @@ import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.models.UserModel;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -92,8 +93,7 @@ public class UserController implements JsonController<UserModel> {
     private UserModel genDefault(String aliasId) {
         return new UserModel(
                 aliasId,
-                false,
-                false,
+                new ArrayList<>(),
                 null
         );
     }

@@ -52,7 +52,7 @@ public class MessageHandlerSamples {
     public static void ircMessageEvent(IRCMessageEvent e) {
         if (
                 !e.getMessage().isPresent() ||
-                bot.getUserCtrl().getOrDefault(e.getUserId()).isSuspended()
+                bot.getUserCtrl().getOrDefault(e.getUserId()).getFlags().contains("suspended")
         ) {
             return;
         }
@@ -76,7 +76,7 @@ public class MessageHandlerSamples {
             }
         }
 
-        if (target.getListeningMode()) {
+        if (target.getFlags().contains("listen-only")) {
             bot.getMarkov().scanText(
                     e.getMessage().get(),
                     (e.getMessageId().isPresent()) ? e.getMessageId().get() : null,
@@ -99,7 +99,7 @@ public class MessageHandlerSamples {
         );
 
         // Set the user's current permissions:
-        if (user != null && user.isSuperUser()) {
+        if (user != null && user.getFlags().contains("superuser")) {
             args.setCurrentPermissions(Permissions.SUPAUSER);
         } else if (Objects.equals(e.getChannel().getId(), e.getUser().getId())) {
             args.setCurrentPermissions(Permissions.BROADCASTER);

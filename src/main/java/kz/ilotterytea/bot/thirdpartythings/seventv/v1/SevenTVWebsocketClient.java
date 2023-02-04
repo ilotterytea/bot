@@ -62,7 +62,7 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                 case "ADD": {
                     if (!Huinyabot.getInstance().getTargetCtrl().getOrDefault(
                             Huinyabot.getInstance().getTargetLinks().get(update.getChannel())
-                    ).getListeningMode()) {
+                    ).getFlags().contains("listen-only")) {
                         bot.getClient().getChat().sendActionMessage(
                                 update.getChannel(),
                                 bot.getLocale().formattedText(
@@ -101,7 +101,7 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                 case "REMOVE": {
                     if (!Huinyabot.getInstance().getTargetCtrl().getOrDefault(
                             Huinyabot.getInstance().getTargetLinks().get(update.getChannel())
-                    ).getListeningMode()) {
+                    ).getFlags().contains("listen-only")) {
                         bot.getClient().getChat().sendActionMessage(
                                 update.getChannel(),
                                 bot.getLocale().formattedText(
@@ -124,7 +124,7 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                 case "UPDATE": {
                     if (!Huinyabot.getInstance().getTargetCtrl().getOrDefault(
                             Huinyabot.getInstance().getTargetLinks().get(update.getChannel())
-                    ).getListeningMode()) {
+                    ).getFlags().contains("listen-only")) {
                         bot.getClient().getChat().sendActionMessage(
                                 update.getChannel(),
                                 bot.getLocale().formattedText(

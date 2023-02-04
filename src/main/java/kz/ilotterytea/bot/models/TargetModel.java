@@ -4,6 +4,7 @@ import kz.ilotterytea.bot.models.emotes.Emote;
 import kz.ilotterytea.bot.models.emotes.Provider;
 import kz.ilotterytea.bot.models.notify.NotifyListener;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -19,8 +20,6 @@ public class TargetModel {
     private final String aliasId;
     /** Target's chat statistics. */
     private final StatsModel stats;
-    /** The listening only mode. */
-    private boolean listeningOnlyMode;
     /** The chat language. */
     private String language;
     /** Target's emotes. */
@@ -30,12 +29,14 @@ public class TargetModel {
     private final Map<String, NotifyListener> listeners;
     /** Command prefix. */
     private String prefix;
+    /** Target flags. */
+    private final ArrayList<String> flags;
 
     public TargetModel(
             String aliasId,
             StatsModel stats,
-            boolean listeningOnlyMode,
             String language,
+            ArrayList<String> flags,
             Map<Provider, Map<String, Emote>> emotes,
             Map<String, CustomCommand> customCommands,
             Map<String, NotifyListener> listeners,
@@ -43,7 +44,7 @@ public class TargetModel {
     ) {
         this.aliasId = aliasId;
         this.stats = stats;
-        this.listeningOnlyMode = listeningOnlyMode;
+        this.flags = flags;
         this.language = language;
         this.emotes = emotes;
         this.custom = customCommands;
@@ -57,8 +58,7 @@ public class TargetModel {
     public void setEmotes(Provider provider, Map<String, Emote> emotes) { this.emotes.put(provider, emotes); }
     public Map<String, CustomCommand> getCustomCommands() { return custom; }
     public void setCustomCommands(Map<String, CustomCommand> commands) { this.custom = commands; }
-    public boolean getListeningMode() { return listeningOnlyMode; }
-    public void setListeningMode(boolean mode) { this.listeningOnlyMode = mode; }
+    public ArrayList<String> getFlags() { return flags; }
     public String getLanguage() { return language; }
     public void setLanguage(String language) { this.language = language; }
     public Map<String, NotifyListener> getListeners() { return listeners; }

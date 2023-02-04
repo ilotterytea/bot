@@ -7,6 +7,7 @@ import kz.ilotterytea.bot.models.StatsModel;
 import kz.ilotterytea.bot.models.TargetModel;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -98,8 +99,8 @@ public class TargetController implements JsonController<TargetModel> {
                         0,
                         0
                 ),
-                false,
-                null,
+                SharedConstants.DEFAULT_LOCALE_ID,
+                new ArrayList<>(),
                 new HashMap<>(),
                 new HashMap<>(),
                 new HashMap<>(),
