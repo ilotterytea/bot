@@ -46,7 +46,9 @@ public class SetterCommand extends Command {
             );
         }
 
-        if (Objects.equals(m.getMessage().getMessage(), "") || m.getCurrentPermissions().getId() < Permissions.BROADCASTER.getId()) {
+        final ArrayList<String> NULLABLE_SUBCMDS = new ArrayList<>(Arrays.asList("prefix", "locale"));
+
+        if ((Objects.equals(m.getMessage().getMessage(), "") && NULLABLE_SUBCMDS.contains(m.getMessage().getSubCommand())) || m.getCurrentPermissions().getId() < Permissions.BROADCASTER.getId()) {
             switch (m.getMessage().getSubCommand()) {
                 case "prefix": {
                     return Huinyabot.getInstance().getLocale().formattedText(
