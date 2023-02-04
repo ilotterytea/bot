@@ -12,6 +12,7 @@ import com.github.twitch4j.events.ChannelGoLiveEvent;
 import com.github.twitch4j.events.ChannelGoOfflineEvent;
 import com.github.twitch4j.helix.domain.User;
 import com.google.gson.Gson;
+import jdash.client.GDClient;
 import kz.ilotterytea.bot.api.commands.CommandLoader;
 import kz.ilotterytea.bot.api.delay.DelayManager;
 import kz.ilotterytea.bot.fun.markov.MarkovChainHandler;
@@ -51,6 +52,7 @@ public class Huinyabot extends Bot {
     private MarkovChainHandler markov;
     private OAuth2Credential credential;
     private I18N i18N;
+    private GDClient gdClient;
 
     private final Logger LOGGER = LoggerFactory.getLogger(Huinyabot.class);
 
@@ -65,6 +67,7 @@ public class Huinyabot extends Bot {
     public MarkovChainHandler getMarkov() { return markov; }
     public OAuth2Credential getCredential() { return credential; }
     public I18N getLocale() { return i18N; }
+    public GDClient getGDClient() { return gdClient; }
 
     private static Huinyabot instance;
     public static Huinyabot getInstance() { return instance; }
@@ -93,6 +96,8 @@ public class Huinyabot extends Bot {
                 markov.save();
             }
         }, 300000, 300000);
+
+        gdClient = GDClient.create();
 
         try {
             sevenTV = new SevenTVWebsocketClient();
