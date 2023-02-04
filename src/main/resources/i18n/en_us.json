@@ -125,5 +125,7 @@
   "cmd.set.response.success.locale.info": "The bot language for this chat: \"%s\"",
   "cmd.set.response.success.locale.list": "Available localizations: %s",
   "cmd.set.response.success.locale.set": "I now speak English in this chat KKona",
-  "cmd.set.response.success.locale.set.user": "I now speak English to you KKona"
+  "cmd.set.response.success.locale.set.user": "I now speak English to you KKona",
+  "cmd.set.response.success.7tv.enabled": "(7TV) This chat will receive notifications about 7TV events!",
+  "cmd.set.response.success.7tv.disabled": "(7TV) This chat will no longer receive notifications about 7TV events!"
 }

@@ -32,7 +32,7 @@ public class SetterCommand extends Command {
     public ArrayList<String> getOptions() { return new ArrayList<>(Collections.singletonList("self")); }
 
     @Override
-    public ArrayList<String> getSubcommands() { return new ArrayList<>(Arrays.asList("prefix", "locale")); }
+    public ArrayList<String> getSubcommands() { return new ArrayList<>(Arrays.asList("prefix", "locale", "notify-7tv")); }
 
     @Override
     public ArrayList<String> getAliases() { return new ArrayList<>(); }
@@ -114,6 +114,20 @@ public class SetterCommand extends Command {
                 return Huinyabot.getInstance().getLocale().literalText(
                         Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getLanguage(),
                         LineIds.C_SET_SUCCESS_LOCALE_SET
+                );
+            }
+            case "notify-7tv": {
+                boolean isEnabled = Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getFlags().contains("notify-7tv");
+
+                if (isEnabled) {
+                    Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getFlags().remove("notify-7tv");
+                } else {
+                    Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getFlags().add("notify-7tv");
+                }
+
+                return Huinyabot.getInstance().getLocale().literalText(
+                        Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getLanguage(),
+                        (isEnabled) ? LineIds.C_SET_SUCCESS_NOTIFY7TV_DISABLED : LineIds.C_SET_SUCCESS_NOTIFY7TV_ENABLED
                 );
             }
             default: return null;

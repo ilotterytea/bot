@@ -111,7 +111,9 @@ public enum LineIds {
     C_SET_SUCCESS_LOCALE_INFO("cmd.set.response.success.locale.info"),
     C_SET_SUCCESS_LOCALE_LIST("cmd.set.response.success.locale.list"),
     C_SET_SUCCESS_LOCALE_SET("cmd.set.response.success.locale.set"),
-    C_SET_SUCCESS_LOCALE_SET_USER("cmd.set.response.success.locale.set.user");
+    C_SET_SUCCESS_LOCALE_SET_USER("cmd.set.response.success.locale.set.user"),
+    C_SET_SUCCESS_NOTIFY7TV_ENABLED("cmd.set.response.success.7tv.enabled"),
+    C_SET_SUCCESS_NOTIFY7TV_DISABLED("cmd.set.response.success.7tv.disabled");
 
     private final String id;
     LineIds(String id) {

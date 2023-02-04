@@ -60,9 +60,7 @@ public class SevenTVWebsocketClient extends WebSocketClient {
 
             switch (update.getAction()) {
                 case "ADD": {
-                    if (!Huinyabot.getInstance().getTargetCtrl().getOrDefault(
-                            Huinyabot.getInstance().getTargetLinks().get(update.getChannel())
-                    ).getFlags().contains("listen-only")) {
+                    if (!target.getFlags().contains("listen-only") && target.getFlags().contains("notify-7tv")) {
                         bot.getClient().getChat().sendActionMessage(
                                 update.getChannel(),
                                 bot.getLocale().formattedText(
@@ -99,9 +97,7 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                     break;
                 }
                 case "REMOVE": {
-                    if (!Huinyabot.getInstance().getTargetCtrl().getOrDefault(
-                            Huinyabot.getInstance().getTargetLinks().get(update.getChannel())
-                    ).getFlags().contains("listen-only")) {
+                    if (!target.getFlags().contains("listen-only") && target.getFlags().contains("notify-7tv")) {
                         bot.getClient().getChat().sendActionMessage(
                                 update.getChannel(),
                                 bot.getLocale().formattedText(
@@ -122,9 +118,7 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                     break;
                 }
                 case "UPDATE": {
-                    if (!Huinyabot.getInstance().getTargetCtrl().getOrDefault(
-                            Huinyabot.getInstance().getTargetLinks().get(update.getChannel())
-                    ).getFlags().contains("listen-only")) {
+                    if (!target.getFlags().contains("listen-only") && target.getFlags().contains("notify-7tv")) {
                         bot.getClient().getChat().sendActionMessage(
                                 update.getChannel(),
                                 bot.getLocale().formattedText(

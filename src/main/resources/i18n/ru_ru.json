@@ -125,5 +125,7 @@
   "cmd.set.response.success.locale.info": "Язык бота в этом чате: \"%s\".",
   "cmd.set.response.success.locale.list": "Доступные локализации: %s",
   "cmd.set.response.success.locale.set": "Теперь я буду говорить на русском в этом чате KKomrade",
-  "cmd.set.response.success.locale.set.user": "Теперь я буду говорить на русском с Вами KKomrade"
+  "cmd.set.response.success.locale.set.user": "Теперь я буду говорить на русском с Вами KKomrade",
+  "cmd.set.response.success.7tv.enabled": "(7TV) Этот чат будет получать уведомления о 7TV событиях!",
+  "cmd.set.response.success.7tv.disabled": "(7TV) Этот чат больше не будет получать уведомления о 7TV событиях!"
 }
