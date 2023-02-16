@@ -1,16 +1,34 @@
+use storage::config::Config;
+use tokio::fs;
 use twitch_irc::login::StaticLoginCredentials;
 use twitch_irc::message::ServerMessage;
 use twitch_irc::TwitchIRCClient;
 use twitch_irc::{ClientConfig, SecureTCPTransport};
 
 mod handlers;
+mod storage;
 
 #[tokio::main]
 async fn main() {
-    let config = ClientConfig::default();
+    let config: Config = toml::from_str(
+        fs::read_to_string("./config.toml")
+            .await
+            .expect("Configuration file does not exist or cannot be read.")
+            .as_str(),
+    )
+    .unwrap();
 
     let (mut incoming_messages, client) =
-        TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(config);
+        TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(
+            if config.credentials.bot_name.is_none() || config.credentials.oauth_token.is_none() {
+                ClientConfig::default()
+            } else {
+                ClientConfig::new_simple(StaticLoginCredentials::new(
+                    config.credentials.bot_name.unwrap(),
+                    Some(config.credentials.oauth_token.unwrap()),
+                ))
+            },
+        );
 
     client.join("ilotterytea".to_owned()).unwrap();
 
@@ -20,7 +38,7 @@ async fn main() {
 
             match message {
                 ServerMessage::Privmsg(msg) => {
-                    handlers::irc_message_handler(&client, msg);
+                    handlers::irc_message_handler(&client, msg).await;
                 }
                 _ => {}
             }
