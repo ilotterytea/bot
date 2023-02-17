@@ -1,3 +1,4 @@
+use managers::command_loader::CommandLoader;
 use storage::config::Config;
 use tokio::fs;
 use twitch_irc::login::StaticLoginCredentials;
@@ -5,7 +6,10 @@ use twitch_irc::message::ServerMessage;
 use twitch_irc::TwitchIRCClient;
 use twitch_irc::{ClientConfig, SecureTCPTransport};
 
+mod builtin_commands;
+mod commands;
 mod handlers;
+mod managers;
 mod storage;
 
 #[tokio::main]
@@ -17,6 +21,8 @@ async fn main() {
             .as_str(),
     )
     .unwrap();
+
+    let cmdloader = CommandLoader::new();
 
     let (mut incoming_messages, client) =
         TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(
@@ -38,7 +44,7 @@ async fn main() {
 
             match message {
                 ServerMessage::Privmsg(msg) => {
-                    handlers::irc_message_handler(&client, msg).await;
+                    handlers::irc_message_handler(&client, msg, &cmdloader).await;
                 }
                 _ => {}
             }
