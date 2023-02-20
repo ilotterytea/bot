@@ -6,6 +6,9 @@ use twitch_irc::message::ServerMessage;
 use twitch_irc::TwitchIRCClient;
 use twitch_irc::{ClientConfig, SecureTCPTransport};
 
+use crate::arguments::Arguments;
+
+mod arguments;
 mod builtin_commands;
 mod commands;
 mod handlers;
@@ -41,10 +44,14 @@ async fn main() {
     let join_handle = tokio::spawn(async move {
         while let Some(message) = incoming_messages.recv().await {
             println!("Received message: {:?}", message);
-
             match message {
                 ServerMessage::Privmsg(msg) => {
-                    handlers::irc_message_handler(&client, msg, &cmdloader).await;
+                    handlers::irc_message_handler(Arguments {
+                        message: msg,
+                        client: &client,
+                        loader: &cmdloader,
+                    })
+                    .await;
                 }
                 _ => {}
             }
