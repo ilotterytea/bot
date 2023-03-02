@@ -49,6 +49,7 @@ public enum LineIds {
     C_JOIN_SUCCESSCHAT("cmd.join.response.success_to_joined_chat"),
 
     C_HOLIDAY_SUCCESS("cmd.holiday.response.success"),
+    C_HOLIDAY_NOHOLIDAYS("cmd.holiday.response.no_holidays"),
 
     C_ECOUNT_NOEMOTEPROVIDED("cmd.ecount.response.no_emote_provided"),
     C_ECOUNT_NOEMOTEFOUND("cmd.ecount.response.no_emote_found"),
