@@ -52,7 +52,8 @@
 
   "cmd.holiday.name": "Праздник!",
   "cmd.holiday.desc": "holiday!",
-  "cmd.holiday.response.success": "HolidayPresent %s Сегодняшний праздник (%s из %s): %s",
+  "cmd.holiday.response.success": "HolidayPresent %s Праздник на %s (%s из %s): %s",
+  "cmd.holiday.response.no_holidays": "Нет праздников на %s!",
 
   "cmd.ecount.name": "Emote count!",
   "cmd.ecount.desc": "emote count",

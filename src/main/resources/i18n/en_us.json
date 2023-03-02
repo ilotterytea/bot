@@ -52,7 +52,8 @@
 
   "cmd.holiday.name": "Holiday!",
   "cmd.holiday.desc": "holiday!",
-  "cmd.holiday.response.success": "HolidayPresent %s Today's holiday (%s of %s): %s",
+  "cmd.holiday.response.success": "HolidayPresent %s Holiday on %s (%s of %s): %s",
+  "cmd.holiday.response.no_holidays": "No holidays on %s!",
 
   "cmd.ecount.name": "Emote count!",
   "cmd.ecount.desc": "emote count",
