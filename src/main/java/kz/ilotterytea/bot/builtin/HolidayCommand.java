@@ -1,6 +1,8 @@
 package kz.ilotterytea.bot.builtin;
 
 import com.github.twitch4j.tmi.domain.Chatters;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.api.commands.Command;
@@ -9,15 +11,15 @@ import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.models.emotes.Emote;
 import kz.ilotterytea.bot.models.emotes.Provider;
-import kz.ilotterytea.bot.net.HttpFactory;
-import kz.ilotterytea.bot.net.models.Response;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import kz.ilotterytea.bot.utils.StringUtils;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Objects;
 
 /**
@@ -42,51 +44,76 @@ public class HolidayCommand extends Command {
     public ArrayList<String> getSubcommands() { return new ArrayList<>(); }
 
     @Override
-    public ArrayList<String> getAliases() { return new ArrayList<>(Arrays.asList("праздник")); }
+    public ArrayList<String> getAliases() { return new ArrayList<>(Arrays.asList("праздник", "hld")); }
 
     @Override
     public String run(ArgumentsModel m) {
-        Response response = HttpFactory.sendGETRequest(SharedConstants.HOLIDAY_URL);
+        int month;
+        int day;
 
-        if (response == null) {
-            return Huinyabot.getInstance().getLocale().literalText(
-                    m.getLanguage(),
-                    LineIds.SOMETHING_WENT_WRONG
-            );
+        ArrayList<String> s = new ArrayList<>(Arrays.asList(m.getMessage().getMessage().split(" ")));
+
+        if (s.size() == 0) {
+            month = Calendar.getInstance().get(Calendar.MONTH) + 1;
+            day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+        } else {
+            ArrayList<String> date = new ArrayList<>(Arrays.asList(s.get(0).split("/")));
+
+            if (date.size() >= 2) {
+                try {
+                    month = Integer.parseInt(date.get(1));
+                    day = Integer.parseInt(date.get(0));
+                } catch (NumberFormatException e) {
+                    month = Calendar.getInstance().get(Calendar.MONTH) + 1;
+                    day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+                }
+            } else {
+                try {
+                    day = Integer.parseInt(date.get(0));
+                    month = Calendar.getInstance().get(Calendar.MONTH) + 1;
+                } catch (NumberFormatException e) {
+                    month = Calendar.getInstance().get(Calendar.MONTH) + 1;
+                    day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+                }
+            }
         }
 
-        if (response.getResponse() == null ){
+        Request request = new Request.Builder()
+                .url(String.format(SharedConstants.HOLIDAY_URL, month, day))
+                .build();
+
+        ArrayList<String> holidays;
+
+        try {
+            Response response = new OkHttpClient().newCall(request).execute();
+
+            if (response.code() == 200) {
+                assert response.body() != null;
+                holidays = new Gson().fromJson(response.body().string(), new TypeToken<ArrayList<String>>(){}.getType());
+            } else {
+                return Huinyabot.getInstance().getLocale().formattedText(
+                        m.getLanguage(),
+                        LineIds.HTTP_ERROR,
+                        String.valueOf(response.code()),
+                        "Holiday"
+                );
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (holidays.size() == 0) {
             return Huinyabot.getInstance().getLocale().formattedText(
                     m.getLanguage(),
-                    LineIds.HTTP_ERROR,
-                    String.valueOf(response.getCode()),
-                    response.getMethod()
+                    LineIds.C_HOLIDAY_NOHOLIDAYS,
+                    StringUtils.pad(day) + "/" + StringUtils.pad(month)
             );
         }
 
-        Document doc = Jsoup.parse(response.getResponse());
-        Element hdaylist = doc.getElementsByClass("holidays-items").get(0);
-
-        Elements holidays = hdaylist.getElementsByTag("li");
-        ArrayList<String> names = new ArrayList<>();
-
-        for (Element e : holidays) {
-
-            Elements anchors = e.getElementsByTag("a");
-
-            if (anchors.size() > 0 && anchors.get(0) != null) {
-                names.add(anchors.get(0).ownText());
-            } else {
-                Element span = e.getElementsByTag("span").get(0);
-                names.add(span.ownText());
-            }
-
-        }
-
-        String name = names.get((int) Math.floor(Math.random() * names.size() - 1));
+        String name = holidays.get((int) Math.floor(Math.random() * holidays.size() - 1));
 
         if (m.getMessage().getOptions().contains("all") || m.getMessage().getOptions().contains("все")) {
-            return String.join(", ", names);
+            return String.join(", ", holidays);
         }
 
         if (m.getMessage().getOptions().contains("massping") || m.getMessage().getOptions().contains("тык")) {
@@ -115,8 +142,9 @@ public class HolidayCommand extends Command {
                                 m.getLanguage(),
                                 LineIds.C_HOLIDAY_SUCCESS,
                                 msgs.get(index) + uName + " ",
-                                String.valueOf(names.indexOf(name) + 1),
-                                String.valueOf(names.size()),
+                                StringUtils.pad(day) + "/" + StringUtils.pad(month),
+                                String.valueOf(holidays.indexOf(name) + 1),
+                                String.valueOf(holidays.size()),
                                 name
                         ).length() < 500
                 ) {
@@ -136,8 +164,9 @@ public class HolidayCommand extends Command {
                                 m.getLanguage(),
                                 LineIds.C_HOLIDAY_SUCCESS,
                                 msg,
-                                String.valueOf(names.indexOf(name) + 1),
-                                String.valueOf(names.size()),
+                                StringUtils.pad(day) + "/" + StringUtils.pad(month),
+                                String.valueOf(holidays.indexOf(name) + 1),
+                                String.valueOf(holidays.size()),
                                 name
                         )
                 );
@@ -150,8 +179,9 @@ public class HolidayCommand extends Command {
                 m.getLanguage(),
                 LineIds.C_HOLIDAY_SUCCESS,
                 "",
-                String.valueOf(names.indexOf(name) + 1),
-                String.valueOf(names.size()),
+                StringUtils.pad(day) + "/" + StringUtils.pad(month),
+                String.valueOf(holidays.indexOf(name) + 1),
+                String.valueOf(holidays.size()),
                 name
         );
     }
