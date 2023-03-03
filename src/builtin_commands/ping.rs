@@ -7,7 +7,7 @@ impl CommandBehavior for Ping {
     fn new() -> Self {
         Ping(CommandData {
             id: String::from("ping"),
-            delay: 1000,
+            delay: 5,
             options: vec![],
             subcommands: vec![],
             permissions: Permissions::USER,
