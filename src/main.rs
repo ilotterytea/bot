@@ -1,7 +1,6 @@
 use diesel::{Connection, SqliteConnection};
 use managers::command_loader::CommandLoader;
-use storage::config::Config;
-use tokio::fs;
+use std::env;
 use twitch_irc::login::StaticLoginCredentials;
 use twitch_irc::message::ServerMessage;
 use twitch_irc::TwitchIRCClient;
@@ -18,24 +17,18 @@ mod schema;
 
 #[tokio::main]
 async fn main() {
-    let config: Config = toml::from_str(
-        fs::read_to_string("./config.toml")
-            .await
-            .expect("Configuration file does not exist or cannot be read.")
-            .as_str(),
-    )
-    .unwrap();
+    dotenvy::dotenv().ok();
 
     let cmdloader = CommandLoader::new();
 
     let (mut incoming_messages, client) =
         TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(
-            if config.credentials.bot_name.is_none() || config.credentials.oauth_token.is_none() {
+            if env::var("BOT_NAME").is_err() || env::var("OAUTH2_TOKEN").is_err() {
                 ClientConfig::default()
             } else {
                 ClientConfig::new_simple(StaticLoginCredentials::new(
-                    config.credentials.bot_name.unwrap(),
-                    Some(config.credentials.oauth_token.unwrap()),
+                    env::var("BOT_NAME").unwrap(),
+                    Some(env::var("OAUTH2_TOKEN").unwrap()),
                 ))
             },
         );
