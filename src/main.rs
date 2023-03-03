@@ -6,14 +6,14 @@ use twitch_irc::message::ServerMessage;
 use twitch_irc::TwitchIRCClient;
 use twitch_irc::{ClientConfig, SecureTCPTransport};
 
-use crate::arguments::Arguments;
+use crate::services::Services;
 
-mod arguments;
 mod builtin_commands;
 mod commands;
 mod handlers;
 mod managers;
 mod schema;
+mod services;
 
 #[tokio::main]
 async fn main() {
@@ -40,12 +40,7 @@ async fn main() {
             println!("Received message: {:?}", message);
             match message {
                 ServerMessage::Privmsg(msg) => {
-                    handlers::irc_message_handler(Arguments {
-                        message: msg,
-                        client: &client,
-                        loader: &cmdloader,
-                    })
-                    .await;
+                    handlers::irc_message_handler(&client, &cmdloader, msg).await;
                 }
                 _ => {}
             }
