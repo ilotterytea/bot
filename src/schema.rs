@@ -5,6 +5,7 @@ diesel::table! {
         id -> Integer,
         alias_id -> Integer,
         referred_from -> Nullable<Integer>,
+        creation_timestamp -> Integer,
     }
 }
 
@@ -23,10 +24,10 @@ diesel::table! {
         id -> Integer,
         alias_id -> Integer,
         channel_id -> Integer,
-        user_ids -> Text,
-        message -> Text,
-        icon -> Text,
+        messages -> Text,
+        icons -> Text,
         flags -> Text,
+        enabled -> Integer,
     }
 }
 
@@ -45,6 +46,16 @@ diesel::table! {
         chat_lines -> Integer,
         successful_tests -> Integer,
         executed_commands -> Integer,
+    }
+}
+
+diesel::table! {
+    subscribers (id) {
+        id -> Integer,
+        user_id -> Integer,
+        listenable_id -> Integer,
+        events -> Text,
+        enabled -> Integer,
     }
 }
 
@@ -69,5 +80,6 @@ diesel::allow_tables_to_appear_in_same_query!(
     listenable,
     preferences,
     stats,
+    subscribers,
     users,
 );

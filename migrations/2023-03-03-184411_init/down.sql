@@ -5,3 +5,4 @@ DROP TABLE stats;
 DROP TABLE custom_commands;
 DROP TABLE users;
 DROP TABLE listenable;
+DROP TABLE subscribers;

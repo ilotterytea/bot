@@ -3,6 +3,7 @@ CREATE TABLE "channels" (
 	"id"	INTEGER NOT NULL,
 	"alias_id"	INTEGER NOT NULL UNIQUE,
 	"referred_from" INTEGER,
+	"creation_timestamp" INTEGER NOT NULL,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
 
@@ -49,9 +50,18 @@ CREATE TABLE "listenable" (
 	"id"	INTEGER NOT NULL,
 	"alias_id"	INTEGER NOT NULL,
 	"channel_id"	INTEGER NOT NULL,
-	"user_ids"	TEXT NOT NULL DEFAULT '[]',
-	"message"	TEXT NOT NULL,
-	"icon"	TEXT NOT NULL,
+	"messages"	TEXT NOT NULL DEFAULT '{}',
+	"icons"	TEXT NOT NULL DEFAULT '{}',
 	"flags"	TEXT NOT NULL DEFAULT '[]',
+	"enabled" INTEGER NOT NULL DEFAULT 1,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
+
+CREATE TABLE "subscribers" (
+	"id" INTEGER NOT NULL,
+	"user_id" INTEGER NOT NULL,
+	"listenable_id" INTEGER NOT NULL,
+	"events" TEXT NOT NULL DEFAULT '["title", "game", "live", "offline"]',
+	"enabled" INTEGER NOT NULL DEFAULT 1,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
