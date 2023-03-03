@@ -6,14 +6,12 @@ use twitch_irc::message::ServerMessage;
 use twitch_irc::TwitchIRCClient;
 use twitch_irc::{ClientConfig, SecureTCPTransport};
 
-use crate::services::Services;
-
 mod builtin_commands;
 mod commands;
 mod handlers;
 mod managers;
+mod models;
 mod schema;
-mod services;
 
 #[tokio::main]
 async fn main() {
