@@ -14,6 +14,7 @@ mod commands;
 mod handlers;
 mod managers;
 mod storage;
+mod schema;
 
 #[tokio::main]
 async fn main() {

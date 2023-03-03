@@ -13,5 +13,8 @@ Cargo.lock
 # MSVC Windows builds of rustc generate these, which store debugging information
 *.pdb
 
-# Bot configuration
-config.toml
+# Environment variables
+*.env
+
+# Database
+*.db
