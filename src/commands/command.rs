@@ -6,6 +6,7 @@ pub struct CommandData {
     pub permissions: Permissions,
     pub options: Vec<String>,
     pub subcommands: Vec<String>,
+    pub aliases: Vec<String>,
     pub run: fn() -> Option<String>,
 }
 
