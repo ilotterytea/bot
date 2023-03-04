@@ -153,4 +153,7 @@ impl CommandLoader {
 
         false
     }
+    pub fn get_loaded_commands(&self) -> &Vec<CommandData> {
+        &self.commands
+    }
 }
