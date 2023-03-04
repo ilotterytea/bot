@@ -80,7 +80,7 @@ impl Arguments {
         if user.is_err() {
             insert_into(users::dsl::users)
                 .values(vec![NewUser {
-                    alias_id: channel_id.parse::<i32>().unwrap(),
+                    alias_id: user_id.parse::<i32>().unwrap(),
                     created_timestamp: i32::try_from(chrono::Utc::now().timestamp()).unwrap(),
                     last_timestamp: i32::try_from(chrono::Utc::now().timestamp()).unwrap(),
                 }])
