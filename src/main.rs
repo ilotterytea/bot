@@ -6,6 +6,7 @@ use twitch_irc::message::ServerMessage;
 use twitch_irc::TwitchIRCClient;
 use twitch_irc::{ClientConfig, SecureTCPTransport};
 
+mod arguments;
 mod builtin_commands;
 mod commands;
 mod handlers;
