@@ -1,6 +1,8 @@
 use diesel::{insert_into, update, ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection};
 
+use crate::arguments::Arguments;
 use crate::commands::command::{CommandBehavior, CommandData};
+use crate::commands::MessageCommandArguments;
 
 use crate::builtin_commands::ping::Ping;
 use crate::models::{NewUser, RecentActivity, User};
@@ -20,17 +22,18 @@ impl CommandLoader {
     pub fn run(
         &self,
         conn: &mut SqliteConnection,
-        id: &str,
+        cmd_args: MessageCommandArguments,
+        data_args: Arguments,
         user_id: &str,
         channel_id: &str,
-    ) -> Option<String> {
-        let mut response: Option<String> = None;
+    ) -> Option<Vec<String>> {
+        let mut response: Option<Vec<String>> = None;
 
         for cid in &self.commands {
-            if (&cid).id.eq(id) {
+            if (&cid).id.eq(&cmd_args.command_id) {
                 if self.is_delayed(
                     conn,
-                    id,
+                    cmd_args.command_id.as_str(),
                     user_id,
                     channel_id,
                     i32::try_from(cid.delay).unwrap(),
@@ -38,8 +41,8 @@ impl CommandLoader {
                     break;
                 }
 
-                response = ((&cid).run)();
-                self.delay(conn, id, user_id, channel_id);
+                response = ((&cid).run)(&cmd_args, &data_args);
+                self.delay(conn, cmd_args.command_id.as_str(), user_id, channel_id);
             }
         }
 

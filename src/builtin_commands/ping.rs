@@ -17,7 +17,7 @@ impl CommandBehavior for Ping {
             run: Self::run,
         })
     }
-    fn run(cmd_args: &MessageCommandArguments, data_args: &Arguments) -> Option<String> {
-        Some(String::from("Pong!"))
+    fn run(cmd_args: &MessageCommandArguments, data_args: &Arguments) -> Option<Vec<String>> {
+        Some(vec!["Pong!".to_string()])
     }
 }

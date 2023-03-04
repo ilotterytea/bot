@@ -9,10 +9,10 @@ pub struct CommandData {
     pub options: Vec<String>,
     pub subcommands: Vec<String>,
     pub aliases: Vec<String>,
-    pub run: fn(cmd_args: &MessageCommandArguments, data_args: &Arguments) -> Option<String>,
+    pub run: fn(cmd_args: &MessageCommandArguments, data_args: &Arguments) -> Option<Vec<String>>,
 }
 
 pub trait CommandBehavior {
     fn new() -> Self;
-    fn run(cmd_args: &MessageCommandArguments, data_args: &Arguments) -> Option<String>;
+    fn run(cmd_args: &MessageCommandArguments, data_args: &Arguments) -> Option<Vec<String>>;
 }

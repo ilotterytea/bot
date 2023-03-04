@@ -41,13 +41,12 @@ pub async fn irc_message_handler(
             );
 
             if !&response.is_none() {
-                client
-                    .say(
-                        message.channel_login.to_owned(),
-                        response.unwrap().to_owned(),
-                    )
-                    .await
-                    .expect("Unable to send a message to chat!");
+                for msg in response.unwrap() {
+                    client
+                        .say(message.channel_login.to_owned(), msg.to_owned())
+                        .await
+                        .expect("Unable to send a message to chat!");
+                }
             }
         }
     }
