@@ -1,4 +1,6 @@
-use super::permissions::Permissions;
+use crate::arguments::Arguments;
+
+use super::{permissions::Permissions, MessageCommandArguments};
 
 pub struct CommandData {
     pub id: String,
@@ -7,10 +9,10 @@ pub struct CommandData {
     pub options: Vec<String>,
     pub subcommands: Vec<String>,
     pub aliases: Vec<String>,
-    pub run: fn() -> Option<String>,
+    pub run: fn(cmd_args: &MessageCommandArguments, data_args: &Arguments) -> Option<String>,
 }
 
 pub trait CommandBehavior {
     fn new() -> Self;
-    fn run() -> Option<String>;
+    fn run(cmd_args: &MessageCommandArguments, data_args: &Arguments) -> Option<String>;
 }
