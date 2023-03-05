@@ -1,6 +1,7 @@
 use diesel::{insert_into, update, ExpressionMethods, QueryDsl, RunQueryDsl, SqliteConnection};
 
 use crate::arguments::Arguments;
+use crate::builtin_commands::spam::Spam;
 use crate::commands::command::{CommandBehavior, CommandData};
 use crate::commands::MessageCommandArguments;
 
@@ -16,6 +17,7 @@ impl CommandLoader {
         let mut commands: Vec<CommandData> = vec![];
 
         commands.push(Ping::new().0);
+        commands.push(Spam::new().0);
 
         CommandLoader { commands }
     }
