@@ -9,6 +9,7 @@ import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.ArgumentsModel;
+import kz.ilotterytea.bot.models.HolidayModel;
 import kz.ilotterytea.bot.models.emotes.Emote;
 import kz.ilotterytea.bot.models.emotes.Provider;
 import kz.ilotterytea.bot.utils.StringUtils;
@@ -17,10 +18,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Holiday command.
@@ -41,13 +39,99 @@ public class HolidayCommand extends Command {
     public ArrayList<String> getOptions() { return new ArrayList<>(Arrays.asList("тык", "massping", "all", "все", "no-emotes", "без-эмоутов")); }
 
     @Override
-    public ArrayList<String> getSubcommands() { return new ArrayList<>(); }
+    public ArrayList<String> getSubcommands() { return new ArrayList<>(Collections.singletonList("search")); }
 
     @Override
     public ArrayList<String> getAliases() { return new ArrayList<>(Arrays.asList("праздник", "hld")); }
 
     @Override
     public String run(ArgumentsModel m) {
+        if (m.getMessage().getSubCommand() != null && m.getMessage().getSubCommand().equals("search")) {
+            if (m.getMessage().getMessage() == null || m.getMessage().getMessage().equals("")) {
+                return Huinyabot.getInstance().getLocale().literalText(
+                        m.getLanguage(),
+                        LineIds.C_HOLIDAY_NOSEARCHQUERY
+                );
+            }
+
+            Request request = new Request.Builder()
+                    .url(String.format(SharedConstants.HOLIDAY_SEARCH_URL, m.getMessage().getMessage()))
+                    .build();
+
+            ArrayList<HolidayModel> holidays;
+
+            try {
+                Response response = new OkHttpClient().newCall(request).execute();
+
+                if (response.code() == 200) {
+                    assert response.body() != null;
+                    holidays = new Gson().fromJson(response.body().string(), new TypeToken<ArrayList<HolidayModel>>(){}.getType());
+                } else {
+                    return Huinyabot.getInstance().getLocale().formattedText(
+                            m.getLanguage(),
+                            LineIds.HTTP_ERROR,
+                            String.valueOf(response.code()),
+                            "Holiday"
+                    );
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            if (holidays.isEmpty()) {
+                return Huinyabot.getInstance().getLocale().formattedText(
+                        m.getLanguage(),
+                        LineIds.C_HOLIDAY_QUERYNOTFOUND,
+                        m.getMessage().getMessage()
+                );
+            }
+
+            ArrayList<String> _holidays = new ArrayList<>();
+
+            for (HolidayModel model : holidays) {
+                _holidays.add(String.format("%s (%s/%s)", model.getName(), model.getDate().get(1), model.getDate().get(0)));
+            }
+
+            ArrayList<String> msgs = new ArrayList<>();
+            msgs.add("");
+            int index = 0;
+
+            for (String hol : _holidays) {
+                if (
+                        Huinyabot.getInstance().getLocale().formattedText(
+                                m.getLanguage(),
+                                LineIds.C_HOLIDAY_QUERYSUCCESS,
+                                String.valueOf(holidays.size()),
+                                m.getMessage().getMessage(),
+                                msgs.get(index) + hol + ", "
+                        ).length() > 500
+                ) {
+                    index++;
+                    msgs.add(hol + ", ");
+                } else {
+                    String c = msgs.get(index);
+
+                    msgs.remove(index);
+                    msgs.add(index, c + hol + ", ");
+                }
+            }
+
+            for (String msg : msgs) {
+                Huinyabot.getInstance().getClient().getChat().sendMessage(
+                        m.getEvent().getChannel().getName(),
+                        Huinyabot.getInstance().getLocale().formattedText(
+                                m.getLanguage(),
+                                LineIds.C_HOLIDAY_QUERYSUCCESS,
+                                String.valueOf(holidays.size()),
+                                m.getMessage().getMessage(),
+                                msg
+                        )
+                );
+            }
+
+            return null;
+        }
+
         int month;
         int day;
 
