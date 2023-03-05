@@ -54,6 +54,9 @@
   "cmd.holiday.desc": "holiday!",
   "cmd.holiday.response.success": "HolidayPresent %s Holiday on %s (%s of %s): %s",
   "cmd.holiday.response.no_holidays": "No holidays on %s!",
+  "cmd.holiday.response.no_search_query": "No search query!",
+  "cmd.holiday.response.query_success": "HolidayPresent %s holidays on query \"%s\": %s",
+  "cmd.holiday.response.query_not_found": "There are no holidays for the query \"%s\"!",
 
   "cmd.ecount.name": "Emote count!",
   "cmd.ecount.desc": "emote count",

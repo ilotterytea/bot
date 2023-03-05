@@ -54,6 +54,9 @@
   "cmd.holiday.desc": "holiday!",
   "cmd.holiday.response.success": "HolidayPresent %s Праздник на %s (%s из %s): %s",
   "cmd.holiday.response.no_holidays": "Нет праздников на %s!",
+  "cmd.holiday.response.no_search_query": "Нет поискового запроса!",
+  "cmd.holiday.response.query_success": "HolidayPresent %s праздников по запросу \"%s\": %s",
+  "cmd.holiday.response.query_not_found": "Нет праздников по запросу \"%s\"!",
 
   "cmd.ecount.name": "Emote count!",
   "cmd.ecount.desc": "emote count",

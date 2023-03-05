@@ -50,6 +50,9 @@ public enum LineIds {
 
     C_HOLIDAY_SUCCESS("cmd.holiday.response.success"),
     C_HOLIDAY_NOHOLIDAYS("cmd.holiday.response.no_holidays"),
+    C_HOLIDAY_NOSEARCHQUERY("cmd.holiday.response.no_search_query"),
+    C_HOLIDAY_QUERYSUCCESS("cmd.holiday.response.query_success"),
+    C_HOLIDAY_QUERYNOTFOUND("cmd.holiday.response.query_not_found"),
 
     C_ECOUNT_NOEMOTEPROVIDED("cmd.ecount.response.no_emote_provided"),
     C_ECOUNT_NOEMOTEFOUND("cmd.ecount.response.no_emote_found"),
