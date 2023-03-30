@@ -42,6 +42,7 @@
 
   "cmd.massping.name": "Ping em, Fors!",
   "cmd.massping.desc": "",
+  "cmd.massping.response.not_a_moderator": "Couldn't get a list of chatters. Did you make me a moderator? \uD83E\uDD14 ",
 
   "cmd.join.name": "Join",
   "cmd.join.desc": "join",

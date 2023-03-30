@@ -42,6 +42,7 @@
 
   "cmd.massping.name": "Ping em, Fors!",
   "cmd.massping.desc": "",
+  "cmd.massping.response.not_a_moderator": "Не удалось получить список зрителей. Вы сделали меня модератором? \uD83E\uDD14 ",
 
   "cmd.join.name": "Join",
   "cmd.join.desc": "join",

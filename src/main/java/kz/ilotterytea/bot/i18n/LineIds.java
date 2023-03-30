@@ -40,6 +40,8 @@ public enum LineIds {
 
     C_PING_SUCCESS("cmd.ping.response.success"),
 
+    C_MASSPING_NOTMOD("cmd.massping.response.not_a_moderator"),
+
     C_SPAM_NOMSG("cmd.spam.response.no_msg"),
     C_SPAM_NOCOUNT("cmd.spam.response.no_count"),
 
