@@ -147,9 +147,13 @@ public class Huinyabot extends Bot {
                     }
                 }
 
-                Huinyabot.getInstance().getSevenTVWSClient().send(
-                        new Gson().toJson(new Message("join", credential.getUserName()))
-                );
+                try {
+                    Huinyabot.getInstance().getSevenTVWSClient().send(
+                            new Gson().toJson(new Message("join", credential.getUserName()))
+                    );
+                } catch (Exception e) {
+                    LOGGER.error("Couldn't subscribe to " + credential.getUserName() + "'s 7TV EventAPI!");
+                }
             }
 
             if (globalEmotes != null) {
@@ -193,7 +197,12 @@ public class Huinyabot extends Bot {
         }
 
         for (User user : userList) {
-            sevenTV.send(new Gson().toJson(new Message("join", user.getLogin())));
+            try {
+                sevenTV.send(new Gson().toJson(new Message("join", user.getLogin())));
+            } catch (Exception e) {
+                LOGGER.error("Couldn't subscribe to " + user.getLogin() + "'s 7TV EventAPI!");
+            }
+
 
             if (!targets.get(user.getId()).getEmotes().containsKey(Provider.SEVENTV)) {
                 targets.get(user.getId()).getEmotes().put(Provider.SEVENTV, new HashMap<>());
