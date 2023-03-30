@@ -1,4 +1,4 @@
-package kz.ilotterytea.bot.entities.channels;
+package kz.ilotterytea.bot.entities;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;

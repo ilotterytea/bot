@@ -1,7 +1,6 @@
 package kz.ilotterytea.bot.utils;
 
-import jakarta.persistence.EntityManager;
-import kz.ilotterytea.bot.entities.channels.Channel;
+import kz.ilotterytea.bot.entities.Channel;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
