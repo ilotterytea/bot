@@ -1,13 +1,15 @@
 package kz.ilotterytea.bot.builtin;
 
-import com.github.twitch4j.tmi.domain.Chatters;
+import com.github.twitch4j.helix.domain.Chatter;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.ArgumentsModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Ping em, Fors! LUL
@@ -37,24 +39,40 @@ public class MasspingCommand extends Command {
     public String run(ArgumentsModel m) {
         if (!m.getEvent().getChannelName().isPresent()) return null;
 
-        Chatters chatters = Huinyabot.getInstance().getClient().getMessagingInterface().getChatters(m.getEvent().getChannelName().get()).execute();
+        List<Chatter> chatters;
+
+        try {
+            chatters = Huinyabot.getInstance().getClient().getHelix().getChatters(
+                    Huinyabot.getInstance().getProperties().getProperty("ACCESS_TOKEN"),
+                    m.getEvent().getChannel().getId(),
+                    Huinyabot.getInstance().getCredential().getUserId(),
+                    null,
+                    null
+            ).execute().getChatters();
+        } catch (Exception e) {
+            return Huinyabot.getInstance().getLocale().literalText(
+                    m.getLanguage(),
+                    LineIds.C_MASSPING_NOTMOD
+            );
+        }
+
 
         ArrayList<String> msgs = new ArrayList<>();
         msgs.add("");
         int index = 0;
 
-        for (String name : chatters.getAllViewers()) {
+        for (Chatter chatter : chatters) {
             StringBuilder sb = new StringBuilder();
 
             if (new StringBuilder()
                     .append(msgs.get(index))
                     .append("@")
-                    .append(name)
+                    .append(chatter.getUserLogin())
                     .append(", ")
                     .append(m.getMessage().getMessage())
                     .length() < 500
             ) {
-                sb.append(msgs.get(index)).append("@").append(name).append(", ");
+                sb.append(msgs.get(index)).append("@").append(chatter.getUserLogin()).append(", ");
                 msgs.remove(index);
                 msgs.add(index, sb.toString());
             } else {
