@@ -37,3 +37,11 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+
+# Configuration properties
+config.properties
+hibernate.cfg.xml
+
+# Legacy JSON files
+*.json
