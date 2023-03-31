@@ -1,8 +1,6 @@
 package kz.ilotterytea.bot.handlers;
 
-import com.github.twitch4j.chat.events.channel.DeleteMessageEvent;
 import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
-import com.github.twitch4j.chat.events.channel.UserBanEvent;
 import com.github.twitch4j.events.ChannelChangeGameEvent;
 import com.github.twitch4j.events.ChannelChangeTitleEvent;
 import com.github.twitch4j.events.ChannelGoLiveEvent;
@@ -12,14 +10,15 @@ import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
-import kz.ilotterytea.bot.fun.markov.ChatChain;
 import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.*;
 import kz.ilotterytea.bot.models.emotes.Emote;
 import kz.ilotterytea.bot.models.emotes.Provider;
 import kz.ilotterytea.bot.models.notify.NotifyListener;
 import kz.ilotterytea.bot.models.notify.NotifySubscriber;
+import okhttp3.*;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -74,16 +73,6 @@ public class MessageHandlerSamples {
                     }
                 }
             }
-        }
-
-        if (target.getFlags().contains("listen-only")) {
-            bot.getMarkov().scanText(
-                    e.getMessage().get(),
-                    (e.getMessageId().isPresent()) ? e.getMessageId().get() : null,
-                    e.getChannel().getId(),
-                    e.getUser().getId()
-            );
-            return;
         }
 
         String MSG = e.getMessage().get();
@@ -190,81 +179,84 @@ public class MessageHandlerSamples {
         if (markovMessagePattern.matcher(MSG).find()) {
             MSG = markovUsernamePattern.matcher(MSG).replaceAll("");
             MSG = markovURLPattern.matcher(MSG).replaceAll("");
-            String generatedText = Huinyabot.getInstance().getMarkov().generateText(MSG);
-            generatedText = markovUsernamePattern.matcher(generatedText).replaceAll("");
-            generatedText = markovURLPattern.matcher(generatedText).replaceAll("");
 
-            if (generatedText.length() > 500) {
-                generatedText = generatedText.substring(0, 497) + "...";
+            MSG = MSG.trim();
+
+            OkHttpClient client = new OkHttpClient.Builder().build();
+            String url = Objects.requireNonNull(
+                        HttpUrl.parse(SharedConstants.NEUROBAJ_URL + "/api/v1/gen")
+                    )
+                    .newBuilder()
+                    .addQueryParameter("message", MSG)
+                    .addQueryParameter("nsfw", "0")
+                    .build()
+                    .toString();
+
+
+            Request request = new Request.Builder()
+                    .get()
+                    .url(url)
+                    .build();
+
+            Call call = client.newCall(request);
+            Response response;
+
+            try {
+                response = call.execute();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                bot.getClient().getChat().sendMessage(
+                        e.getChannel().getName(),
+                        bot.getLocale().literalText(
+                                args.getLanguage(),
+                                LineIds.SOMETHING_WENT_WRONG
+                        ),
+                        null,
+                        (e.getMessageId().isPresent()) ? null : e.getMessageId().get()
+                );
+                return;
+            }
+
+            if (response.code() != 200) {
+                bot.getClient().getChat().sendMessage(
+                        e.getChannel().getName(),
+                        bot.getLocale().formattedText(
+                                args.getLanguage(),
+                                LineIds.HTTP_ERROR,
+                                String.valueOf(response.code()),
+                                "Neurobaj"
+                        ),
+                        null,
+                        (e.getMessageId().isPresent()) ? null : e.getMessageId().get()
+                );
+                return;
+            }
+
+            String generatedText;
+
+            try {
+                assert response.body() != null;
+                generatedText = response.body().string();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                bot.getClient().getChat().sendMessage(
+                        e.getChannel().getName(),
+                        bot.getLocale().literalText(
+                                args.getLanguage(),
+                                LineIds.SOMETHING_WENT_WRONG
+                        ),
+                        null,
+                        (e.getMessageId().isPresent()) ? null : e.getMessageId().get()
+                );
+                return;
             }
 
             bot.getClient().getChat().sendMessage(
                     e.getChannel().getName(),
                     generatedText,
                     null,
-                    (!e.getMessageId().isPresent()) ? null : e.getMessageId().get()
+                    (e.getMessageId().isEmpty()) ? null : e.getMessageId().get()
             );
-        } else {
-            Huinyabot.getInstance().getMarkov().scanText(
-                    MSG,
-                    (e.getMessageId().isPresent()) ? e.getMessageId().get() : null,
-                    e.getChannel().getId(),
-                    e.getUser().getId()
-            );
-        }
-    }
-
-    /**
-     * Message handler sample for delete message events.
-     * @author ilotterytea
-     * @since 1.2.2
-     */
-    public static void deleteMessageEvent(DeleteMessageEvent e) {
-        List<ChatChain> chains = bot.getMarkov().getRecords()
-                .stream()
-                .filter(c -> Objects.equals(c.getToWordAuthor().getMsgId(), e.getMsgId()))
-                .collect(Collectors.toList());
-
-        chains.addAll(
-                bot.getMarkov().getRecords()
-                        .stream()
-                        .filter(c -> Objects.equals(c.getFromWordAuthor().getMsgId(), e.getMsgId()))
-                        .collect(Collectors.toList())
-        );
-
-        for (ChatChain chain : chains) {
-            int i = bot.getMarkov().getRecords().indexOf(chain);
-
-            if (i > -1) {
-                bot.getMarkov().getRecords().remove(i);
-            }
-        }
-    }
-
-    /**
-     * Message handler sample for user ban events.
-     * @author ilotterytea
-     * @since 1.2.2
-     */
-    public static void userBanEvent(UserBanEvent e) {
-        List<ChatChain> chains = bot.getMarkov().getRecords()
-                .stream()
-                .filter(c -> Objects.equals(c.getToWordAuthor().getChannelId(), e.getChannel().getId()) && Objects.equals(c.getToWordAuthor().getUserId(), e.getUser().getId()))
-                .collect(Collectors.toList());
-
-        chains.addAll(
-                bot.getMarkov().getRecords()
-                        .stream()
-                        .filter(c -> Objects.equals(c.getFromWordAuthor().getChannelId(), e.getChannel().getId()) && Objects.equals(c.getFromWordAuthor().getUserId(), e.getUser().getId()))
-                        .collect(Collectors.toList())
-        );
-
-        for (ChatChain chain : chains) {
-            int i = bot.getMarkov().getRecords().indexOf(chain);
-
-            if (i > -1) {
-                bot.getMarkov().getRecords().remove(i);
-            }
         }
     }
 

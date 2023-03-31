@@ -14,7 +14,6 @@ import com.github.twitch4j.helix.domain.User;
 import com.google.gson.Gson;
 import kz.ilotterytea.bot.api.commands.CommandLoader;
 import kz.ilotterytea.bot.api.delay.DelayManager;
-import kz.ilotterytea.bot.fun.markov.MarkovChainHandler;
 import kz.ilotterytea.bot.handlers.MessageHandlerSamples;
 import kz.ilotterytea.bot.i18n.I18N;
 import kz.ilotterytea.bot.models.TargetModel;
@@ -48,7 +47,6 @@ public class Huinyabot extends Bot {
     private UserController users;
     private SevenTVWebsocketClient sevenTV;
     private Map<String, String> targetLinks;
-    private MarkovChainHandler markov;
     private OAuth2Credential credential;
     private I18N i18N;
 
@@ -62,7 +60,6 @@ public class Huinyabot extends Bot {
     public UserController getUserCtrl() { return users; }
     public SevenTVWebsocketClient getSevenTVWSClient() { return sevenTV; }
     public Map<String, String> getTargetLinks() { return targetLinks; }
-    public MarkovChainHandler getMarkov() { return markov; }
     public OAuth2Credential getCredential() { return credential; }
     public I18N getLocale() { return i18N; }
 
@@ -83,14 +80,11 @@ public class Huinyabot extends Bot {
 
         i18N = new I18N(StorageUtils.getFilepathsFromResource("/i18n"));
 
-        markov = new MarkovChainHandler(SharedConstants.CHAINS_FILE);
-
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
                 targets.save();
                 users.save();
-                markov.save();
             }
         }, 300000, 300000);
 
@@ -265,8 +259,6 @@ public class Huinyabot extends Bot {
         }
 
         client.getEventManager().onEvent(IRCMessageEvent.class, MessageHandlerSamples::ircMessageEvent);
-        client.getEventManager().onEvent(DeleteMessageEvent.class, MessageHandlerSamples::deleteMessageEvent);
-        client.getEventManager().onEvent(UserBanEvent.class, MessageHandlerSamples::userBanEvent);
 
         client.getEventManager().onEvent(ChannelGoLiveEvent.class, MessageHandlerSamples::goLiveEvent);
         client.getEventManager().onEvent(ChannelGoOfflineEvent.class, MessageHandlerSamples::goOfflineEvent);
@@ -280,6 +272,5 @@ public class Huinyabot extends Bot {
         sevenTV.close();
         targets.save();
         users.save();
-        markov.save();
     }
 }
