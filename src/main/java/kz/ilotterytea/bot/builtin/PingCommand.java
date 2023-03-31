@@ -1,12 +1,18 @@
 package kz.ilotterytea.bot.builtin;
 
 import kz.ilotterytea.bot.Huinyabot;
+import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.utils.StringUtils;
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,6 +52,34 @@ public class PingCommand extends Command {
         double totalMemMb = (rt.totalMemory() / 1024.0) / 1024.0;
         double percentMemUsage = Math.round((usedMemMb / totalMemMb) * 100.0);
 
+        String neurobajStatus;
+
+        OkHttpClient client = new OkHttpClient.Builder().build();
+
+        Request request = new Request.Builder()
+                .get()
+                .url(SharedConstants.NEUROBAJ_URL + "/api/v1/status")
+                .build();
+
+        Call call = client.newCall(request);
+
+        Response response;
+
+        try {
+            response = call.execute();
+
+            long ping = response.receivedResponseAtMillis() - response.sentRequestAtMillis();
+
+            if (response.code() == 200) {
+                neurobajStatus = "OK (" + ping + "ms)";
+            } else {
+                neurobajStatus = "NOT OK (" + response.code() + ")";
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            neurobajStatus = "NOT OK";
+        }
+
         return Huinyabot.getInstance().getLocale().formattedText(
                 m.getLanguage(),
                 LineIds.C_PING_SUCCESS,
@@ -62,7 +96,8 @@ public class PingCommand extends Command {
         ):Huinyabot.getInstance().getLocale().literalText(
                         m.getLanguage(),
                         LineIds.CON
-                )
+                ),
+                neurobajStatus
         );
     }
 }
