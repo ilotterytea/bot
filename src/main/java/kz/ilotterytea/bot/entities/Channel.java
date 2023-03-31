@@ -21,6 +21,10 @@ public class Channel {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
+    @OneToOne(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.LAZY, optional = false)
+    @PrimaryKeyJoinColumn
+    private Preferences preferences;
+
     public Channel(Integer aliasId) {
         this.aliasId = aliasId;
     }
@@ -35,5 +39,10 @@ public class Channel {
 
     public Date getCreatedAt() {
         return createdAt;
+    }
+
+    public void setPreferences(Preferences preferences) {
+        this.preferences = preferences;
+        this.preferences.setChannel(this);
     }
 }
