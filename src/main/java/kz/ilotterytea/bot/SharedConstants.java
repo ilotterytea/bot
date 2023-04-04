@@ -35,7 +35,8 @@ public class SharedConstants {
     public static final String HOLIDAY_URL = "https://hol.ilotterytea.kz/api/v1/%s/%s";
     public static final String HOLIDAY_SEARCH_URL = "https://hol.ilotterytea.kz/api/v1/search?q=%s";
 
-    public static final String STV_EVENTAPI_ENDPOINT_URL = "wss://events.7tv.app/v1/channel-emotes";
+    public static final String STV_EVENTAPI_ENDPOINT_URL = "wss://events.7tv.io/v3";
+    public static final String STV_USER_ENDPOINT_URL = "https://7tv.io/v3/users/twitch/%s";
     public static final String STV_CHANNEL_EMOTES_URL = "https://api.7tv.app/v2/users/%s/emotes";
     public static final String STV_GLOBAL_EMOTES_URL = "https://api.7tv.app/v2/emotes/global";
 }
