@@ -103,7 +103,6 @@ public class TargetController implements JsonController<TargetModel> {
                 new ArrayList<>(),
                 new HashMap<>(),
                 new HashMap<>(),
-                new HashMap<>(),
                 null
         );
     }
