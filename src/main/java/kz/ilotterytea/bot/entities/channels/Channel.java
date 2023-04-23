@@ -1,6 +1,7 @@
 package kz.ilotterytea.bot.entities.channels;
 
 import jakarta.persistence.*;
+import kz.ilotterytea.bot.entities.CustomCommand;
 import kz.ilotterytea.bot.entities.listenables.Listenable;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -47,10 +48,14 @@ public class Channel {
     @OneToMany(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private Set<Listenable> listenables;
 
+    @OneToMany(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    private Set<CustomCommand> commands;
+
     public Channel(Integer aliasId, String aliasName) {
         this.aliasId = aliasId;
         this.aliasName = aliasName;
         this.listenables = new HashSet<>();
+        this.commands = new HashSet<>();
     }
 
     public Channel() {}
@@ -130,5 +135,25 @@ public class Channel {
 
     public void removeListenable(Listenable listenable) {
         this.listenables.remove(listenable);
+    }
+
+    public Set<CustomCommand> getCommands() {
+        return commands;
+    }
+
+    public void setCommands(Set<CustomCommand> commands) {
+        for (CustomCommand command : commands) {
+            command.setChannel(this);
+        }
+        this.commands = commands;
+    }
+
+    public void addCommand(CustomCommand command) {
+        command.setChannel(this);
+        this.commands.add(command);
+    }
+
+    public void removeCommand(CustomCommand command) {
+        this.commands.remove(command);
     }
 }

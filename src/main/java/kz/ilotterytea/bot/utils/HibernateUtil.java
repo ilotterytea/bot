@@ -1,5 +1,6 @@
 package kz.ilotterytea.bot.utils;
 
+import kz.ilotterytea.bot.entities.CustomCommand;
 import kz.ilotterytea.bot.entities.channels.Channel;
 import kz.ilotterytea.bot.entities.channels.ChannelPreferences;
 import kz.ilotterytea.bot.entities.listenables.Listenable;
@@ -26,6 +27,7 @@ public class HibernateUtil {
             .addAnnotatedClass(ListenableMessages.class)
             .addAnnotatedClass(ListenableIcons.class)
             .addAnnotatedClass(Subscriber.class)
+            .addAnnotatedClass(CustomCommand.class)
             .buildSessionFactory();
 
     public static SessionFactory getSessionFactory() {
