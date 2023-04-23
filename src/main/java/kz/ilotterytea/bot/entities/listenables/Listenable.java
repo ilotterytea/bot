@@ -2,6 +2,7 @@ package kz.ilotterytea.bot.entities.listenables;
 
 import jakarta.persistence.*;
 import kz.ilotterytea.bot.entities.channels.Channel;
+import kz.ilotterytea.bot.entities.subscribers.Subscriber;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -35,12 +36,16 @@ public class Listenable {
     @Column(name = "is_enabled", nullable = false)
     private Boolean isEnabled;
 
+    @OneToMany(mappedBy = "listenable", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    private Set<Subscriber> subscribers;
+
     public Listenable(Integer aliasId, ListenableMessages messages, ListenableIcons icons) {
         this.aliasId = aliasId;
         this.messages = messages;
         this.icons = icons;
         this.flags = new HashSet<>();
         this.isEnabled = true;
+        this.subscribers = new HashSet<>();
     }
 
     public Listenable() {}
@@ -107,5 +112,25 @@ public class Listenable {
 
     public void setEnabled(Boolean enabled) {
         isEnabled = enabled;
+    }
+
+    public Set<Subscriber> getSubscribers() {
+        return subscribers;
+    }
+
+    public void setSubscribers(Set<Subscriber> subscribers) {
+        for (Subscriber subscriber : subscribers) {
+            subscriber.setListenable(this);
+        }
+        this.subscribers = subscribers;
+    }
+
+    public void addSubscriber(Subscriber subscriber) {
+        subscriber.setListenable(this);
+        this.subscribers.add(subscriber);
+    }
+
+    public void removeSubscriber(Subscriber subscriber) {
+        this.subscribers.remove(subscriber);
     }
 }

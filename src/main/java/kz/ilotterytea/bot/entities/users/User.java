@@ -1,10 +1,13 @@
 package kz.ilotterytea.bot.entities.users;
 
 import jakarta.persistence.*;
+import kz.ilotterytea.bot.entities.subscribers.Subscriber;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author ilotterytea
@@ -41,9 +44,13 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private UserPreferences preferences;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    private Set<Subscriber> subscribers;
+
     public User(Integer aliasId, String aliasName) {
         this.aliasId = aliasId;
         this.aliasName = aliasName;
+        this.subscribers = new HashSet<>();
     }
 
     public User() {}
@@ -103,5 +110,25 @@ public class User {
     public void setPreferences(UserPreferences preferences) {
         preferences.setUser(this);
         this.preferences = preferences;
+    }
+
+    public Set<Subscriber> getSubscribers() {
+        return subscribers;
+    }
+
+    public void setSubscribers(Set<Subscriber> subscribers) {
+        for (Subscriber subscriber : subscribers) {
+            subscriber.setUser(this);
+        }
+        this.subscribers = subscribers;
+    }
+
+    public void addSubscriber(Subscriber subscriber) {
+        subscriber.setUser(this);
+        this.subscribers.add(subscriber);
+    }
+
+    public void removeSubscriber(Subscriber subscriber) {
+        this.subscribers.remove(subscriber);
     }
 }
