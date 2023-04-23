@@ -5,8 +5,6 @@ import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.TargetModel;
-import kz.ilotterytea.bot.models.emotes.Emote;
-import kz.ilotterytea.bot.models.emotes.Provider;
 import kz.ilotterytea.bot.thirdpartythings.seventv.v1.models.EmoteEventUpdate;
 import kz.ilotterytea.bot.thirdpartythings.seventv.v1.models.Message;
 import org.java_websocket.client.WebSocketClient;
@@ -52,12 +50,6 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                     bot.getTargetLinks().get(update.getChannel())
             );
 
-            if (!target.getEmotes().containsKey(Provider.SEVENTV)) {
-                target.getEmotes().put(Provider.SEVENTV, new HashMap<>());
-            }
-
-            Map<String, Emote> emotes = target.getEmotes().get(Provider.SEVENTV);
-
             switch (update.getAction()) {
                 case "ADD": {
                     if (!target.getFlags().contains("listen-only") && target.getFlags().contains("notify-7tv")) {
@@ -75,25 +67,6 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                                 )
                         );
                     }
-
-                    if (emotes.containsKey(update.getEmoteId())) {
-                        if (emotes.get(update.getEmoteId()).isDeleted()) {
-                            emotes.get(update.getEmoteId()).setDeleted(false);
-                        }
-                        break;
-                    }
-
-                    emotes.put(
-                            update.getEmoteId(),
-                            new Emote(
-                                    update.getEmoteId(),
-                                    Provider.SEVENTV,
-                                    update.getName(),
-                                    0,
-                                    false,
-                                    false
-                            )
-                    );
                     break;
                 }
                 case "REMOVE": {
@@ -112,11 +85,11 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                                 )
                         );
                     }
-                    if (emotes.containsKey(update.getEmoteId())) {
-                        emotes.get(update.getEmoteId()).setDeleted(true);
-                    }
                     break;
                 }
+                /** TODO: Fix update clause.
+                 * This clause is not possible because there is no past information about the emote.
+                 * Perhaps this will be fixed with 7TV EventAPI V3, where the requests contain information about the past emote.
                 case "UPDATE": {
                     if (!target.getFlags().contains("listen-only") && target.getFlags().contains("notify-7tv")) {
                         bot.getClient().getChat().sendActionMessage(
@@ -134,18 +107,10 @@ public class SevenTVWebsocketClient extends WebSocketClient {
                                 )
                         );
                     }
-
-                    if (emotes.containsKey(update.getEmoteId())) {
-                        emotes.get(update.getEmoteId()).setName(update.getName());
-                    }
                     break;
-                }
+                }*/
                 default: break;
             }
-
-            bot.getTargetCtrl().get(
-                    bot.getTargetLinks().get(update.getChannel())
-            ).setEmotes(Provider.SEVENTV, emotes);
         } else {
             LOGGER.debug(String.format("MESSAGE: Action: %s; Payload: %s", msg.getAction(), msg.getPayload()));
         }
