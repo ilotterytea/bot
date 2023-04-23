@@ -38,6 +38,9 @@ public class User {
     @Column(name = "opt_outed_at")
     private Date optOutTimestamp;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    private UserPreferences preferences;
+
     public User(Integer aliasId, String aliasName) {
         this.aliasId = aliasId;
         this.aliasName = aliasName;
@@ -93,4 +96,12 @@ public class User {
         this.optOutTimestamp = optOutTimestamp;
     }
 
+    public UserPreferences getPreferences() {
+        return preferences;
+    }
+
+    public void setPreferences(UserPreferences preferences) {
+        preferences.setUser(this);
+        this.preferences = preferences;
+    }
 }
