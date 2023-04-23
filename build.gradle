@@ -24,6 +24,8 @@ dependencies {
     implementation 'org.reflections:reflections:0.10.2'
     implementation 'com.google.guava:guava:31.1-android'
     implementation 'com.squareup.okhttp3:okhttp'
+    implementation 'org.hibernate.orm:hibernate-core:6.2.0.Final'
+    implementation 'org.postgresql:postgresql:42.6.0'
 }
 
 test {
