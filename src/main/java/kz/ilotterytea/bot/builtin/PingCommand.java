@@ -6,6 +6,7 @@ import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.ArgumentsModel;
+import kz.ilotterytea.bot.thirdpartythings.seventv.eventapi.SevenTVEventAPIClient;
 import kz.ilotterytea.bot.utils.StringUtils;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
@@ -99,7 +100,7 @@ public class PingCommand extends Command {
                 String.valueOf(Math.round(usedMemMb)),
                 String.valueOf(Math.round(totalMemMb)),
                 String.valueOf(Huinyabot.getInstance().getClient().getChat().getLatency()),
-                (Huinyabot.getInstance().getSevenTVWSClient().isClosed()) ?
+                (SevenTVEventAPIClient.getInstance().isClosed()) ?
         Huinyabot.getInstance().getLocale().literalText(
                 m.getLanguage(),
                 LineIds.DISCON

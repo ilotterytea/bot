@@ -20,10 +20,7 @@ import kz.ilotterytea.bot.models.TargetModel;
 import kz.ilotterytea.bot.storage.PropLoader;
 import kz.ilotterytea.bot.storage.json.TargetController;
 import kz.ilotterytea.bot.storage.json.UserController;
-import kz.ilotterytea.bot.thirdpartythings.seventv.v1.SevenTVEmoteLoader;
-import kz.ilotterytea.bot.thirdpartythings.seventv.v1.SevenTVWebsocketClient;
-import kz.ilotterytea.bot.thirdpartythings.seventv.v1.models.EmoteAPIData;
-import kz.ilotterytea.bot.thirdpartythings.seventv.v1.models.Message;
+import kz.ilotterytea.bot.thirdpartythings.seventv.eventapi.SevenTVEventAPIClient;
 import kz.ilotterytea.bot.utils.StorageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +40,7 @@ public class Huinyabot extends Bot {
     private DelayManager delayer;
     private TargetController targets;
     private UserController users;
-    private SevenTVWebsocketClient sevenTV;
+    private SevenTVEventAPIClient sevenTV;
     private Map<String, String> targetLinks;
     private OAuth2Credential credential;
     private I18N i18N;
@@ -56,7 +53,6 @@ public class Huinyabot extends Bot {
     public DelayManager getDelayer() { return delayer; }
     public TargetController getTargetCtrl() { return targets; }
     public UserController getUserCtrl() { return users; }
-    public SevenTVWebsocketClient getSevenTVWSClient() { return sevenTV; }
     public Map<String, String> getTargetLinks() { return targetLinks; }
     public OAuth2Credential getCredential() { return credential; }
     public I18N getLocale() { return i18N; }
@@ -87,13 +83,11 @@ public class Huinyabot extends Bot {
         }, 300000, 300000);
 
         try {
-            sevenTV = new SevenTVWebsocketClient();
+            sevenTV = new SevenTVEventAPIClient();
             sevenTV.connectBlocking();
         } catch (URISyntaxException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-
-        ArrayList<EmoteAPIData> globalEmotes = new SevenTVEmoteLoader().getGlobalEmotes();
 
         // - - -  T W I T C H  C L I E N T  - - - :
         credential = new OAuth2Credential("twitch", properties.getProperty("OAUTH2_TOKEN"));
@@ -115,18 +109,6 @@ public class Huinyabot extends Bot {
             if (!Huinyabot.getInstance().targets.getAll().containsKey(credential.getUserId())) {
                 Huinyabot.getInstance().targets.set(credential.getUserId(), Huinyabot.getInstance().targets.getOrDefault(credential.getUserId()));
             }
-
-            ArrayList<EmoteAPIData> channelEmotes = new SevenTVEmoteLoader().getChannelEmotes(credential.getUserName());
-
-            if (channelEmotes != null) {
-                try {
-                    Huinyabot.getInstance().getSevenTVWSClient().send(
-                            new Gson().toJson(new Message("join", credential.getUserName()))
-                    );
-                } catch (Exception e) {
-                    LOGGER.error("Couldn't subscribe to " + credential.getUserName() + "'s 7TV EventAPI!");
-                }
-            }
         }
 
         List<User> userList = new ArrayList<>();
@@ -143,14 +125,6 @@ public class Huinyabot extends Bot {
                 }
 
                 targetLinks.put(u.getLogin(), u.getId());
-            }
-        }
-
-        for (User user : userList) {
-            try {
-                sevenTV.send(new Gson().toJson(new Message("join", user.getLogin())));
-            } catch (Exception e) {
-                LOGGER.error("Couldn't subscribe to " + user.getLogin() + "'s 7TV EventAPI!");
             }
         }
 
