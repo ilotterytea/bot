@@ -38,6 +38,9 @@ public class Channel {
     @Column(name = "opt_outed_at")
     private Date optOutTimestamp;
 
+    @OneToOne(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    private ChannelPreferences preferences;
+
     public Channel(Integer aliasId, String aliasName) {
         this.aliasId = aliasId;
         this.aliasName = aliasName;
@@ -91,5 +94,14 @@ public class Channel {
 
     public void setOptOutTimestamp(Date optOutTimestamp) {
         this.optOutTimestamp = optOutTimestamp;
+    }
+
+    public ChannelPreferences getPreferences() {
+        return preferences;
+    }
+
+    public void setPreferences(ChannelPreferences preferences) {
+        preferences.setChannel(this);
+        this.preferences = preferences;
     }
 }
