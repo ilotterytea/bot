@@ -17,8 +17,6 @@ import kz.ilotterytea.bot.api.delay.DelayManager;
 import kz.ilotterytea.bot.handlers.MessageHandlerSamples;
 import kz.ilotterytea.bot.i18n.I18N;
 import kz.ilotterytea.bot.models.TargetModel;
-import kz.ilotterytea.bot.models.emotes.Emote;
-import kz.ilotterytea.bot.models.emotes.Provider;
 import kz.ilotterytea.bot.storage.PropLoader;
 import kz.ilotterytea.bot.storage.json.TargetController;
 import kz.ilotterytea.bot.storage.json.UserController;
@@ -121,54 +119,12 @@ public class Huinyabot extends Bot {
             ArrayList<EmoteAPIData> channelEmotes = new SevenTVEmoteLoader().getChannelEmotes(credential.getUserName());
 
             if (channelEmotes != null) {
-                if (!Huinyabot.getInstance().getTargetCtrl().get(credential.getUserId()).getEmotes().containsKey(Provider.SEVENTV)) {
-                    Huinyabot.getInstance().getTargetCtrl().get(credential.getUserId()).getEmotes().put(Provider.SEVENTV, new HashMap<>());
-                }
-
-                for (EmoteAPIData emote : channelEmotes) {
-                    if (!Huinyabot.getInstance().getTargetCtrl().get(credential.getUserId()).getEmotes().get(Provider.SEVENTV).containsKey(emote.getId())) {
-                        Huinyabot.getInstance().getTargetCtrl().get(credential.getUserId()).getEmotes().get(Provider.SEVENTV).put(
-                                emote.getId(),
-                                new Emote(
-                                        emote.getId(),
-                                        Provider.SEVENTV,
-                                        emote.getName(),
-                                        0,
-                                        false,
-                                        false
-                                )
-                        );
-                    }
-                }
-
                 try {
                     Huinyabot.getInstance().getSevenTVWSClient().send(
                             new Gson().toJson(new Message("join", credential.getUserName()))
                     );
                 } catch (Exception e) {
                     LOGGER.error("Couldn't subscribe to " + credential.getUserName() + "'s 7TV EventAPI!");
-                }
-            }
-
-            if (globalEmotes != null) {
-                if (!Huinyabot.getInstance().getTargetCtrl().get(credential.getUserId()).getEmotes().containsKey(Provider.SEVENTV)) {
-                    Huinyabot.getInstance().getTargetCtrl().get(credential.getUserId()).getEmotes().put(Provider.SEVENTV, new HashMap<>());
-                }
-
-                for (EmoteAPIData emote : globalEmotes) {
-                    if (!Huinyabot.getInstance().getTargetCtrl().get(credential.getUserId()).getEmotes().get(Provider.SEVENTV).containsKey(emote.getId())) {
-                        Huinyabot.getInstance().getTargetCtrl().get(credential.getUserId()).getEmotes().get(Provider.SEVENTV).put(
-                                emote.getId(),
-                                new Emote(
-                                        emote.getId(),
-                                        Provider.SEVENTV,
-                                        emote.getName(),
-                                        0,
-                                        true,
-                                        false
-                                )
-                        );
-                    }
                 }
             }
         }
@@ -195,55 +151,6 @@ public class Huinyabot extends Bot {
                 sevenTV.send(new Gson().toJson(new Message("join", user.getLogin())));
             } catch (Exception e) {
                 LOGGER.error("Couldn't subscribe to " + user.getLogin() + "'s 7TV EventAPI!");
-            }
-
-
-            if (!targets.get(user.getId()).getEmotes().containsKey(Provider.SEVENTV)) {
-                targets.get(user.getId()).getEmotes().put(Provider.SEVENTV, new HashMap<>());
-            }
-
-            // Update the channel emotes:
-            ArrayList<EmoteAPIData> channelEmotes = new SevenTVEmoteLoader().getChannelEmotes(user.getLogin());
-            if (channelEmotes != null) {
-                for (EmoteAPIData emote : channelEmotes) {
-                    if (!targets.get(user.getId()).getEmotes().get(Provider.SEVENTV).containsKey(emote.getId())) {
-                        targets.get(user.getId()).getEmotes().get(Provider.SEVENTV).put(
-                                emote.getId(),
-                                new Emote(
-                                        emote.getId(),
-                                        Provider.SEVENTV,
-                                        emote.getName(),
-                                        0,
-                                        false,
-                                        false
-                                )
-                        );
-                    }
-                }
-            }
-        }
-
-        if (globalEmotes != null) {
-            for (EmoteAPIData emote : globalEmotes) {
-                for (TargetModel target : targets.getAll().values()) {
-                    if (!targets.get(target.getAliasId()).getEmotes().containsKey(Provider.SEVENTV)) {
-                        targets.get(target.getAliasId()).getEmotes().put(Provider.SEVENTV, new HashMap<>());
-                    }
-
-                    if (!targets.get(target.getAliasId()).getEmotes().get(Provider.SEVENTV).containsKey(emote.getId())) {
-                        targets.get(target.getAliasId()).getEmotes().get(Provider.SEVENTV).put(
-                                emote.getId(),
-                                new Emote(
-                                        emote.getId(),
-                                        Provider.SEVENTV,
-                                        emote.getName(),
-                                        0,
-                                        true,
-                                        false
-                                )
-                        );
-                    }
-                }
             }
         }
 
