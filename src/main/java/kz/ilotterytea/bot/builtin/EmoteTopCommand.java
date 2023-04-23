@@ -1,16 +1,21 @@
 package kz.ilotterytea.bot.builtin;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import kz.ilotterytea.bot.Huinyabot;
+import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.ArgumentsModel;
-import kz.ilotterytea.bot.models.TargetModel;
-import kz.ilotterytea.bot.models.emotes.Emote;
-import kz.ilotterytea.bot.models.emotes.Provider;
+import kz.ilotterytea.bot.models.serverresponse.Emote;
+import kz.ilotterytea.bot.models.serverresponse.ServerPayload;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
+import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Emote top command.
@@ -56,9 +61,59 @@ public class EmoteTopCommand extends Command {
             count = MAX_COUNT;
         }
 
-        TargetModel target = Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId());
+        OkHttpClient client = new OkHttpClient.Builder().build();
+        Request request = new Request.Builder()
+                .get()
+                .url(SharedConstants.STATS_URL + "/api/v1/channel/" + m.getEvent().getChannel().getId() + "/emotes")
+                .build();
 
-        if (!target.getEmotes().containsKey(Provider.SEVENTV)) {
+        ArrayList<Emote> emotes;
+
+        try (Response response = client.newCall(request).execute()) {
+            if (response.code() != 200) {
+                return Huinyabot.getInstance().getLocale().formattedText(
+                        m.getLanguage(),
+                        LineIds.HTTP_ERROR,
+                        String.valueOf(response.code()),
+                        "Stats API"
+                );
+            }
+
+            if (response.body() == null) {
+                return Huinyabot.getInstance().getLocale().formattedText(
+                        m.getLanguage(),
+                        LineIds.SOMETHING_WENT_WRONG
+                );
+            }
+
+            String body = response.body().string();
+
+            ServerPayload<ArrayList<Emote>> payload = new Gson().fromJson(body, new TypeToken<ServerPayload<ArrayList<Emote>>>(){}.getType());
+
+            if (payload.getData() != null) {
+                emotes = payload.getData();
+            } else {
+                return Huinyabot.getInstance().getLocale().formattedText(
+                        m.getLanguage(),
+                        LineIds.C_ETOP_NOCHANNELEMOTES,
+                        Huinyabot.getInstance().getLocale().literalText(
+                                m.getLanguage(),
+                                LineIds.STV
+                        ),
+                        Huinyabot.getInstance().getLocale().literalText(
+                                m.getLanguage(),
+                                LineIds.STV
+                        )
+                );
+            }
+        } catch (IOException e) {
+            return Huinyabot.getInstance().getLocale().formattedText(
+                    m.getLanguage(),
+                    LineIds.SOMETHING_WENT_WRONG
+            );
+        }
+
+        if (emotes.isEmpty()) {
             return Huinyabot.getInstance().getLocale().formattedText(
                     m.getLanguage(),
                     LineIds.C_ETOP_NOCHANNELEMOTES,
@@ -73,23 +128,15 @@ public class EmoteTopCommand extends Command {
             );
         }
 
-        Map<String, Emote> emotes = target.getEmotes().get(Provider.SEVENTV)
-                .entrySet()
-                .stream()
-                .sorted(Collections.reverseOrder(Comparator.comparingInt(e -> e.getValue().getCount())))
-                .collect(
-                        Collectors.toMap(
-                                Map.Entry::getKey,
-                                Map.Entry::getValue,
-                                (l, r) -> l,
-                                LinkedHashMap::new
-                        )
-                );
+        // Remove the deleted emotes:
+        emotes.removeIf(e -> e.getDeletionTimestamp() != null);
 
-        ArrayList<String> keys = new ArrayList<>(emotes.keySet());
+        // Sort the emotes by used count:
+        emotes.sort(Comparator.comparingInt(Emote::getUsedTimes));
+        Collections.reverse(emotes);
 
-        if (keys.size() < count) {
-            count = keys.size();
+        if (emotes.size() < count) {
+            count = emotes.size();
         }
 
         ArrayList<String> msgs = new ArrayList<>();
@@ -98,9 +145,7 @@ public class EmoteTopCommand extends Command {
         int index = 0;
 
         for (int i = 0; i < count; i++) {
-            if (emotes.keySet().toArray().length < i && emotes.keySet().toArray()[i] == null) continue;
-
-            Emote em = emotes.get(keys.get(i));
+            Emote em = emotes.get(i);
 
             StringBuilder sb = new StringBuilder();
 
@@ -113,17 +158,17 @@ public class EmoteTopCommand extends Command {
                                     LineIds.STV
                             ),
                             msgs.get(index) + (i + 1) + ". " + em.getName()
-                            + (em.isDeleted() ? "*" : ((em.isGlobal() ? " ^" : "")))
-                            + " (" + em.getCount() + "); "
+                            + (em.getGlobal() ? " *" : "")
+                            + " (" + em.getUsedTimes() + "); "
                     ).length() < 500
             ) {
                 sb.append(msgs.get(index))
                         .append(i + 1)
                         .append(". ")
                         .append(em.getName())
-                        .append((em.isDeleted()) ? "*" : ((em.isGlobal()) ? " ^" : ""))
+                        .append(em.getGlobal() ? " ^" : "")
                         .append(" (")
-                        .append(em.getCount())
+                        .append(em.getUsedTimes())
                         .append("); ");
             } else {
                 msgs.add("");

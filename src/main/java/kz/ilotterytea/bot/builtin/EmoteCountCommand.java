@@ -1,14 +1,20 @@
 package kz.ilotterytea.bot.builtin;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import kz.ilotterytea.bot.Huinyabot;
+import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.ArgumentsModel;
-import kz.ilotterytea.bot.models.TargetModel;
-import kz.ilotterytea.bot.models.emotes.Emote;
-import kz.ilotterytea.bot.models.emotes.Provider;
+import kz.ilotterytea.bot.models.serverresponse.Emote;
+import kz.ilotterytea.bot.models.serverresponse.ServerPayload;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,12 +58,62 @@ public class EmoteCountCommand extends Command {
         }
 
         String name = s[0];
-        TargetModel target = Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId());
+        OkHttpClient client = new OkHttpClient.Builder().build();
+        Request request = new Request.Builder()
+                .get()
+                .url(SharedConstants.STATS_URL + "/api/v1/channel/" + m.getEvent().getChannel().getId() + "/emotes")
+                .build();
 
-        if (!target.getEmotes().containsKey(Provider.SEVENTV)) {
+        ArrayList<Emote> emotes;
+
+        try (Response response = client.newCall(request).execute()) {
+            if (response.code() != 200) {
+                return Huinyabot.getInstance().getLocale().formattedText(
+                        m.getLanguage(),
+                        LineIds.HTTP_ERROR,
+                        String.valueOf(response.code()),
+                        "Stats API"
+                );
+            }
+
+            if (response.body() == null) {
+                return Huinyabot.getInstance().getLocale().formattedText(
+                        m.getLanguage(),
+                        LineIds.SOMETHING_WENT_WRONG
+                );
+            }
+
+            String body = response.body().string();
+
+            ServerPayload<ArrayList<Emote>> payload = new Gson().fromJson(body, new TypeToken<ServerPayload<ArrayList<Emote>>>(){}.getType());
+
+            if (payload.getData() != null) {
+                emotes = payload.getData();
+            } else {
+                return Huinyabot.getInstance().getLocale().formattedText(
+                        m.getLanguage(),
+                        LineIds.C_ETOP_NOCHANNELEMOTES,
+                        Huinyabot.getInstance().getLocale().literalText(
+                                m.getLanguage(),
+                                LineIds.STV
+                        ),
+                        Huinyabot.getInstance().getLocale().literalText(
+                                m.getLanguage(),
+                                LineIds.STV
+                        )
+                );
+            }
+        } catch (IOException e) {
             return Huinyabot.getInstance().getLocale().formattedText(
                     m.getLanguage(),
-                    LineIds.C_ECOUNT_NOCHANNELEMOTES,
+                    LineIds.SOMETHING_WENT_WRONG
+            );
+        }
+
+        if (emotes.isEmpty()) {
+            return Huinyabot.getInstance().getLocale().formattedText(
+                    m.getLanguage(),
+                    LineIds.C_ETOP_NOCHANNELEMOTES,
                     Huinyabot.getInstance().getLocale().literalText(
                             m.getLanguage(),
                             LineIds.STV
@@ -69,48 +125,41 @@ public class EmoteCountCommand extends Command {
             );
         }
 
-        Map<String, Emote> emotes = target.getEmotes().get(Provider.SEVENTV)
-                .entrySet()
-                .stream()
-                .sorted(Collections.reverseOrder(Comparator.comparingInt(e -> e.getValue().getCount())))
-                .collect(
-                        Collectors.toMap(
-                                Map.Entry::getKey,
-                                Map.Entry::getValue,
-                                (l, r) -> l,
-                                LinkedHashMap::new
-                        )
-                );
+        // Get the emote:
+        Optional<Emote> optionalEmote = emotes.stream().filter(e -> e.getName().equals(name) && e.getDeletionTimestamp() == null).findFirst();
 
-        int place = 0;
-
-        for (Emote em : emotes.values()) {
-            place++;
-            if (Objects.equals(em.getName(), name)) {
-                return Huinyabot.getInstance().getLocale().formattedText(
-                        m.getLanguage(),
-                        LineIds.C_ECOUNT_SUCCESS,
-                        Huinyabot.getInstance().getLocale().literalText(
-                                m.getLanguage(),
-                                LineIds.STV
-                        ),
-                        em.getName(),
-                        (em.isDeleted()) ? "*" : ((em.isGlobal()) ? " ^" : ""),
-                        String.valueOf(em.getCount()),
-                        String.valueOf(place),
-                        String.valueOf(emotes.values().size())
-                );
-            }
+        if (optionalEmote.isEmpty()) {
+            return Huinyabot.getInstance().getLocale().formattedText(
+                    m.getLanguage(),
+                    LineIds.C_ECOUNT_NOEMOTEFOUND,
+                    Huinyabot.getInstance().getLocale().literalText(
+                            m.getLanguage(),
+                            LineIds.STV
+                    ),
+                    name
+            );
         }
+
+        Emote emote = optionalEmote.get();
+
+        // Sort the emote list:
+        emotes.sort(Comparator.comparingInt(Emote::getUsedTimes));
+        Collections.reverse(emotes);
+
+        int position = emotes.indexOf(emote);
 
         return Huinyabot.getInstance().getLocale().formattedText(
                 m.getLanguage(),
-                LineIds.C_ECOUNT_NOEMOTEFOUND,
+                LineIds.C_ECOUNT_SUCCESS,
                 Huinyabot.getInstance().getLocale().literalText(
                         m.getLanguage(),
                         LineIds.STV
                 ),
-                name
+                emote.getName(),
+                (emote.getGlobal() ? " *" : ""),
+                String.valueOf(emote.getUsedTimes()),
+                (position < 0 ? "N/A" : String.valueOf(position + 1)),
+                String.valueOf(emotes.size())
         );
     }
 }
