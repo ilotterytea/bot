@@ -52,32 +52,42 @@ public class PingCommand extends Command {
         double totalMemMb = (rt.totalMemory() / 1024.0) / 1024.0;
         double percentMemUsage = Math.round((usedMemMb / totalMemMb) * 100.0);
 
-        String neurobajStatus;
-
         OkHttpClient client = new OkHttpClient.Builder().build();
 
-        Request request = new Request.Builder()
+        // Getting info about Neurobaj:
+        String neurobajStatus;
+
+        try (Response response = client.newCall(new Request.Builder()
                 .get()
                 .url(SharedConstants.NEUROBAJ_URL + "/api/v1/status")
-                .build();
-
-        Call call = client.newCall(request);
-
-        Response response;
-
-        try {
-            response = call.execute();
-
-            long ping = response.receivedResponseAtMillis() - response.sentRequestAtMillis();
-
-            if (response.code() == 200) {
-                neurobajStatus = "OK (" + ping + "ms)";
-            } else {
+                .build()
+        ).execute()) {
+            if (response.code() != 200) {
                 neurobajStatus = "NOT OK (" + response.code() + ")";
+            } else {
+                neurobajStatus = "OK (" + (response.receivedResponseAtMillis() - response.sentRequestAtMillis()) + "ms)";
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            neurobajStatus = "NOT OK";
+        } catch (IOException e) {
+            e.printStackTrace();
+            neurobajStatus = "N/A";
+        }
+
+        // Getting info about Stats:
+        String statsStatus;
+
+        try (Response response = client.newCall(new Request.Builder()
+                .get()
+                .url(SharedConstants.STATS_URL + "/api/v1/health")
+                .build()
+        ).execute()) {
+            if (response.code() != 200) {
+                statsStatus = "NOT OK (" + response.code() + ")";
+            } else {
+                statsStatus = "OK (" + (response.receivedResponseAtMillis() - response.sentRequestAtMillis()) + "ms)";
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            statsStatus = "N/A";
         }
 
         return Huinyabot.getInstance().getLocale().formattedText(
@@ -97,7 +107,8 @@ public class PingCommand extends Command {
                         m.getLanguage(),
                         LineIds.CON
                 ),
-                neurobajStatus
+                neurobajStatus,
+                statsStatus
         );
     }
 }
