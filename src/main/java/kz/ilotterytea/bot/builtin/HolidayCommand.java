@@ -10,8 +10,8 @@ import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.models.HolidayModel;
-import kz.ilotterytea.bot.models.emotes.Emote;
-import kz.ilotterytea.bot.models.emotes.Provider;
+import kz.ilotterytea.bot.models.serverresponse.Emote;
+import kz.ilotterytea.bot.models.serverresponse.ServerPayload;
 import kz.ilotterytea.bot.utils.StringUtils;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -200,6 +200,58 @@ public class HolidayCommand extends Command {
             return String.join(", ", holidays);
         }
 
+        OkHttpClient client = new OkHttpClient.Builder().build();
+        Request statsRequest = new Request.Builder()
+                .get()
+                .url(SharedConstants.STATS_URL + "/api/v1/channel/" + m.getEvent().getChannel().getId() + "/emotes")
+                .build();
+
+        ArrayList<Emote> emotes;
+
+        try (Response response = client.newCall(statsRequest).execute()) {
+            if (response.code() != 200) {
+                return Huinyabot.getInstance().getLocale().formattedText(
+                        m.getLanguage(),
+                        LineIds.HTTP_ERROR,
+                        String.valueOf(response.code()),
+                        "Stats API"
+                );
+            }
+
+            if (response.body() == null) {
+                return Huinyabot.getInstance().getLocale().formattedText(
+                        m.getLanguage(),
+                        LineIds.SOMETHING_WENT_WRONG
+                );
+            }
+
+            String body = response.body().string();
+
+            ServerPayload<ArrayList<Emote>> payload = new Gson().fromJson(body, new TypeToken<ServerPayload<ArrayList<Emote>>>(){}.getType());
+
+            if (payload.getData() != null) {
+                emotes = payload.getData();
+            } else {
+                return Huinyabot.getInstance().getLocale().formattedText(
+                        m.getLanguage(),
+                        LineIds.C_ETOP_NOCHANNELEMOTES,
+                        Huinyabot.getInstance().getLocale().literalText(
+                                m.getLanguage(),
+                                LineIds.STV
+                        ),
+                        Huinyabot.getInstance().getLocale().literalText(
+                                m.getLanguage(),
+                                LineIds.STV
+                        )
+                );
+            }
+        } catch (IOException e) {
+            return Huinyabot.getInstance().getLocale().formattedText(
+                    m.getLanguage(),
+                    LineIds.SOMETHING_WENT_WRONG
+            );
+        }
+
         if (m.getMessage().getOptions().contains("massping") || m.getMessage().getOptions().contains("тык")) {
             ArrayList<String> msgs = new ArrayList<>();
             int index = 0;
@@ -211,13 +263,11 @@ public class HolidayCommand extends Command {
                 StringBuilder sb = new StringBuilder();
 
                 if (!m.getMessage().getOptions().contains("no-emotes") || !m.getMessage().getOptions().contains("без-эмоутов")) {
-                    if (Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getEmotes().containsKey(Provider.SEVENTV)) {
-                        for (Emote emote : Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getEmotes().get(Provider.SEVENTV).values()) {
-                            if (Objects.equals(emote.getName().toLowerCase(), uName.toLowerCase())) {
-                                uName = emote.getName();
-                                break;
-                            }
-                        }
+                    String finalUName = uName;
+                    Optional<Emote> optionalEmote = emotes.stream().filter(e -> e.getName().equalsIgnoreCase(finalUName)).findFirst();
+
+                    if (optionalEmote.isPresent()) {
+                        uName = optionalEmote.get().getName();
                     }
                 }
 
