@@ -1,10 +1,13 @@
 package kz.ilotterytea.bot.entities.channels;
 
 import jakarta.persistence.*;
+import kz.ilotterytea.bot.entities.listenables.Listenable;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author ilotterytea
@@ -41,9 +44,13 @@ public class Channel {
     @OneToOne(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private ChannelPreferences preferences;
 
+    @OneToMany(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    private Set<Listenable> listenables;
+
     public Channel(Integer aliasId, String aliasName) {
         this.aliasId = aliasId;
         this.aliasName = aliasName;
+        this.listenables = new HashSet<>();
     }
 
     public Channel() {}
@@ -103,5 +110,25 @@ public class Channel {
     public void setPreferences(ChannelPreferences preferences) {
         preferences.setChannel(this);
         this.preferences = preferences;
+    }
+
+    public Set<Listenable> getListenables() {
+        return listenables;
+    }
+
+    public void setListenables(Set<Listenable> listenables) {
+        for (Listenable listenable : listenables) {
+            listenable.setChannel(this);
+        }
+        this.listenables = listenables;
+    }
+
+    public void addListenable(Listenable listenable) {
+        listenable.setChannel(this);
+        this.listenables.add(listenable);
+    }
+
+    public void removeListenable(Listenable listenable) {
+        this.listenables.remove(listenable);
     }
 }
