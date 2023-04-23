@@ -1,7 +1,5 @@
 package kz.ilotterytea.bot.models;
 
-import kz.ilotterytea.bot.models.emotes.Emote;
-import kz.ilotterytea.bot.models.emotes.Provider;
 import kz.ilotterytea.bot.models.notify.NotifyListener;
 
 import java.util.ArrayList;
@@ -22,8 +20,6 @@ public class TargetModel {
     private final StatsModel stats;
     /** The chat language. */
     private String language;
-    /** Target's emotes. */
-    private Map<Provider, Map<String, Emote>> emotes;
     /** Target's custom commands. */
     private Map<String, CustomCommand> custom;
     private final Map<String, NotifyListener> listeners;
@@ -37,7 +33,6 @@ public class TargetModel {
             StatsModel stats,
             String language,
             ArrayList<String> flags,
-            Map<Provider, Map<String, Emote>> emotes,
             Map<String, CustomCommand> customCommands,
             Map<String, NotifyListener> listeners,
             String prefix
@@ -46,7 +41,6 @@ public class TargetModel {
         this.stats = stats;
         this.flags = flags;
         this.language = language;
-        this.emotes = emotes;
         this.custom = customCommands;
         this.listeners = listeners;
         this.prefix = prefix;
@@ -54,8 +48,6 @@ public class TargetModel {
 
     public StatsModel getStats() { return stats; }
     public String getAliasId() { return aliasId; }
-    public Map<Provider, Map<String, Emote>> getEmotes() { return emotes; }
-    public void setEmotes(Provider provider, Map<String, Emote> emotes) { this.emotes.put(provider, emotes); }
     public Map<String, CustomCommand> getCustomCommands() { return custom; }
     public void setCustomCommands(Map<String, CustomCommand> commands) { this.custom = commands; }
     public ArrayList<String> getFlags() { return flags; }

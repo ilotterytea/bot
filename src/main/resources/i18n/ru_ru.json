@@ -6,7 +6,6 @@
   "msg.not_enough_rights": "Недостаточно прав для выполнения данного действия.",
   "msg.http_response_error": "Получен код статуса %s, пока обрабатывал %s запрос!",
   "msg.something_went_wrong": "Что-то пошло не так!",
-
   "providers.7tv": "7TV",
   "providers.bttv": "BTTV",
   "providers.ffz": "FFZ",
@@ -26,7 +25,7 @@
 
   "cmd.ping.name": "Пинг!",
   "cmd.ping.desc": "Check if this bot alive",
-  "cmd.ping.response.success": "DankCrouching \u2615 Java %s \u00b7 Время работы: %s \u00b7 Потребление ОЗУ: %s% (%sMB) из %sMB \u00b7 TMI: %sмс \u00b7 7TV EventAPI: %s \u00b7 Neurobaj API: %s",
+  "cmd.ping.response.success": "DankCrouching \u2615 Java %s \u00b7 Время работы: %s \u00b7 Потребление ОЗУ: %s% (%sMB) из %sMB \u00b7 TMI: %sмс \u00b7 7TV EventAPI: %s \u00b7 Neurobaj API: %s \u00b7 Stats API: %s",
 
   "emoteupdater.new_emote_with_author": "(%s) %s добавил эмоут %s",
   "emoteupdater.removed_emote_with_author": "(%s) %s удалил эмоут %s",

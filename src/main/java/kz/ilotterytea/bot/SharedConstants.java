@@ -40,4 +40,6 @@ public class SharedConstants {
     public static final String STV_GLOBAL_EMOTES_URL = "https://api.7tv.app/v2/emotes/global";
 
     public static final String NEUROBAJ_URL = "https://neurobaj.ilotterytea.kz";
+
+    public static final String STATS_URL = "http://localhost:8080";
 }

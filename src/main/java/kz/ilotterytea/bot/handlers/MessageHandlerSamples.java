@@ -12,8 +12,6 @@ import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.*;
-import kz.ilotterytea.bot.models.emotes.Emote;
-import kz.ilotterytea.bot.models.emotes.Provider;
 import kz.ilotterytea.bot.models.notify.NotifyListener;
 import kz.ilotterytea.bot.models.notify.NotifySubscriber;
 import okhttp3.*;
@@ -62,18 +60,6 @@ public class MessageHandlerSamples {
         bot.getTargetCtrl().get(e.getChannel().getId()).getStats().setChatLines(
                 target.getStats().getChatLines() + 1
         );
-
-        // Emote counter update:
-        if (target.getEmotes().containsKey(Provider.SEVENTV)) {
-            for (String word : e.getMessage().get().split(" ")) {
-                for (Emote em : target.getEmotes().get(Provider.SEVENTV).values()) {
-                    if (Objects.equals(word, em.getName())) {
-                        em.setCount(em.getCount() + 1);
-                        break;
-                    }
-                }
-            }
-        }
 
         String MSG = e.getMessage().get();
         final String PREFIX = (Huinyabot.getInstance().getTargetCtrl().get(e.getChannel().getId()).getPrefix() == null) ?
