@@ -3,7 +3,6 @@ package kz.ilotterytea.bot.entities.channels;
 import jakarta.persistence.*;
 import kz.ilotterytea.bot.entities.CustomCommand;
 import kz.ilotterytea.bot.entities.listenables.Listenable;
-import kz.ilotterytea.bot.entities.permissions.Permission;
 import kz.ilotterytea.bot.entities.permissions.UserPermission;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -56,12 +55,17 @@ public class Channel {
     @OneToMany(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private Set<UserPermission> permissions;
 
+    @Enumerated(EnumType.ORDINAL)
+    @Column(nullable = false)
+    private Set<ChannelFeature> features;
+
     public Channel(Integer aliasId, String aliasName) {
         this.aliasId = aliasId;
         this.aliasName = aliasName;
         this.listenables = new HashSet<>();
         this.commands = new HashSet<>();
         this.permissions = new HashSet<>();
+        this.features = new HashSet<>();
     }
 
     public Channel() {}
@@ -182,5 +186,21 @@ public class Channel {
 
     public void removePermission(UserPermission permission) {
         this.permissions.remove(permission);
+    }
+
+    public Set<ChannelFeature> getFeatures() {
+        return features;
+    }
+
+    public void setFeatures(Set<ChannelFeature> features) {
+        this.features = features;
+    }
+
+    public void addFeature(ChannelFeature feature) {
+        this.features.add(feature);
+    }
+
+    public void removeFeature(ChannelFeature feature) {
+        this.features.remove(feature);
     }
 }
