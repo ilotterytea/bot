@@ -3,6 +3,9 @@ package kz.ilotterytea.bot.entities;
 import jakarta.persistence.*;
 import kz.ilotterytea.bot.entities.channels.Channel;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author ilotterytea
  * @version 1.0
@@ -31,12 +34,16 @@ public class CustomCommand {
     @Column(name = "is_global", nullable = false)
     private Boolean isGlobal;
 
+    @Column(nullable = false)
+    private Set<String> aliases;
+
     public CustomCommand(String name, String message, Channel channel) {
         this.channel = channel;
         this.name = name;
         this.message = message;
         this.isEnabled = true;
         this.isGlobal = false;
+        this.aliases = new HashSet<>();
     }
 
     public CustomCommand() {}
@@ -87,5 +94,21 @@ public class CustomCommand {
 
     public void setGlobal(Boolean global) {
         isGlobal = global;
+    }
+
+    public Set<String> getAliases() {
+        return aliases;
+    }
+
+    public void setAliases(Set<String> aliases) {
+        this.aliases = aliases;
+    }
+
+    public void addAlias(String alias) {
+        this.aliases.add(alias);
+    }
+
+    public void removeAlias(String alias) {
+        this.aliases.remove(alias);
     }
 }
