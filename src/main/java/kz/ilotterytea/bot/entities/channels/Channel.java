@@ -3,6 +3,8 @@ package kz.ilotterytea.bot.entities.channels;
 import jakarta.persistence.*;
 import kz.ilotterytea.bot.entities.CustomCommand;
 import kz.ilotterytea.bot.entities.listenables.Listenable;
+import kz.ilotterytea.bot.entities.permissions.Permission;
+import kz.ilotterytea.bot.entities.permissions.UserPermission;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -51,11 +53,15 @@ public class Channel {
     @OneToMany(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private Set<CustomCommand> commands;
 
+    @OneToMany(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    private Set<UserPermission> permissions;
+
     public Channel(Integer aliasId, String aliasName) {
         this.aliasId = aliasId;
         this.aliasName = aliasName;
         this.listenables = new HashSet<>();
         this.commands = new HashSet<>();
+        this.permissions = new HashSet<>();
     }
 
     public Channel() {}
@@ -155,5 +161,26 @@ public class Channel {
 
     public void removeCommand(CustomCommand command) {
         this.commands.remove(command);
+    }
+
+    public Set<UserPermission> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(Set<UserPermission> permissions) {
+        for (UserPermission permission : permissions) {
+            permission.setChannel(this);
+        }
+
+        this.permissions = permissions;
+    }
+
+    public void addPermission(UserPermission permission) {
+        permission.setChannel(this);
+        this.permissions.add(permission);
+    }
+
+    public void removePermission(UserPermission permission) {
+        this.permissions.remove(permission);
     }
 }

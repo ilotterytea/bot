@@ -1,6 +1,8 @@
 package kz.ilotterytea.bot.entities.users;
 
 import jakarta.persistence.*;
+import kz.ilotterytea.bot.entities.permissions.Permission;
+import kz.ilotterytea.bot.entities.permissions.UserPermission;
 import kz.ilotterytea.bot.entities.subscribers.Subscriber;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -47,10 +49,18 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private Set<Subscriber> subscribers;
 
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "global_permission", nullable = false)
+    private Permission globalPermission;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    private Set<UserPermission> permissions;
+
     public User(Integer aliasId, String aliasName) {
         this.aliasId = aliasId;
         this.aliasName = aliasName;
         this.subscribers = new HashSet<>();
+        this.permissions = new HashSet<>();
     }
 
     public User() {}
@@ -130,5 +140,34 @@ public class User {
 
     public void removeSubscriber(Subscriber subscriber) {
         this.subscribers.remove(subscriber);
+    }
+
+    public Permission getGlobalPermission() {
+        return globalPermission;
+    }
+
+    public void setGlobalPermission(Permission globalPermission) {
+        this.globalPermission = globalPermission;
+    }
+
+    public Set<UserPermission> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(Set<UserPermission> permissions) {
+        for (UserPermission permission : permissions) {
+            permission.setUser(this);
+        }
+
+        this.permissions = permissions;
+    }
+
+    public void addPermission(UserPermission permission) {
+        permission.setUser(this);
+        this.permissions.add(permission);
+    }
+
+    public void removePermission(UserPermission permission) {
+        this.permissions.remove(permission);
     }
 }
