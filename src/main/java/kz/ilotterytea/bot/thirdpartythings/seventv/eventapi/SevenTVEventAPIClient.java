@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.SharedConstants;
+import kz.ilotterytea.bot.entities.channels.Channel;
 import kz.ilotterytea.bot.i18n.LineIds;
-import kz.ilotterytea.bot.models.TargetModel;
 import kz.ilotterytea.bot.thirdpartythings.seventv.api.SevenTVAPIClient;
 import kz.ilotterytea.bot.thirdpartythings.seventv.api.schemas.SevenTVUser;
 import kz.ilotterytea.bot.thirdpartythings.seventv.api.schemas.User;
@@ -14,6 +14,8 @@ import kz.ilotterytea.bot.thirdpartythings.seventv.api.schemas.emoteset.EmoteSet
 import kz.ilotterytea.bot.thirdpartythings.seventv.eventapi.schemas.*;
 import kz.ilotterytea.bot.thirdpartythings.seventv.eventapi.schemas.emoteset.EmoteSetBody;
 import kz.ilotterytea.bot.thirdpartythings.seventv.eventapi.schemas.emoteset.EmoteSetBodyObject;
+import kz.ilotterytea.bot.utils.HibernateUtil;
+import org.hibernate.Session;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
@@ -63,8 +65,6 @@ public class SevenTVEventAPIClient extends WebSocketClient {
             Payload<PayloadData<EmoteSetBody>> emoteSetPayload = gson.fromJson(message, new TypeToken<Payload<PayloadData<EmoteSetBody>>>(){}.getType());
             EmoteSetBody body = emoteSetPayload.getData().getBody();
 
-            System.out.println(message);
-
             // Getting information about the emote set:
             EmoteSet emoteSet = SevenTVAPIClient.getEmoteSet(body.getId());
 
@@ -90,12 +90,18 @@ public class SevenTVEventAPIClient extends WebSocketClient {
             }
 
             // Obtaining the target model:
-            TargetModel targetModel = BOT.getTargetCtrl().get(connection.get().getId());
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            List<Channel> channels = session.createQuery("from Channel where aliasId = :aliasId AND optOutTimestamp is null", Channel.class)
+                    .setParameter("aliasId", connection.get().getId())
+                    .getResultList();
+            session.close();
 
-            if (targetModel == null) {
-                LOGGER.debug("No target models for Twitch ID " + connection.get().getId() + "! There will be no further processing!");
+            if (channels.isEmpty()) {
+                LOGGER.debug("No channel for Twitch ID " + connection.get().getId() + "! There will be no further processing!");
                 return;
             }
+
+            Channel channel = channels.get(0);
 
             List<String> messages = new ArrayList<>();
 
@@ -104,10 +110,10 @@ public class SevenTVEventAPIClient extends WebSocketClient {
                 for (EmoteSetBodyObject object : body.getPushed()) {
                     messages.add(
                             BOT.getLocale().formattedText(
-                                    (targetModel.getLanguage() == null) ? "en_us" : targetModel.getLanguage(),
+                                    channel.getPreferences().getLanguage(),
                                     LineIds.NEW_EMOTE_WITH_AUTHOR,
                                     BOT.getLocale().literalText(
-                                            (targetModel.getLanguage() == null) ? "en_us" : targetModel.getLanguage(),
+                                            channel.getPreferences().getLanguage(),
                                             LineIds.STV
                                     ),
                                     body.getActor().getUsername(),
@@ -123,10 +129,10 @@ public class SevenTVEventAPIClient extends WebSocketClient {
                 for (EmoteSetBodyObject object : body.getPulled()) {
                     messages.add(
                             BOT.getLocale().formattedText(
-                                    (targetModel.getLanguage() == null) ? "en_us" : targetModel.getLanguage(),
+                                    channel.getPreferences().getLanguage(),
                                     LineIds.REMOVED_EMOTE_WITH_AUTHOR,
                                     BOT.getLocale().literalText(
-                                            (targetModel.getLanguage() == null) ? "en_us" : targetModel.getLanguage(),
+                                            channel.getPreferences().getLanguage(),
                                             LineIds.STV
                                     ),
                                     body.getActor().getUsername(),
@@ -141,10 +147,10 @@ public class SevenTVEventAPIClient extends WebSocketClient {
                 for (EmoteSetBodyObject object : body.getUpdated()) {
                     messages.add(
                             BOT.getLocale().formattedText(
-                                    (targetModel.getLanguage() == null) ? "en_us" : targetModel.getLanguage(),
+                                    channel.getPreferences().getLanguage(),
                                     LineIds.UPDATED_EMOTE_WITH_AUTHOR,
                                     BOT.getLocale().literalText(
-                                            (targetModel.getLanguage() == null) ? "en_us" : targetModel.getLanguage(),
+                                            channel.getPreferences().getLanguage(),
                                             LineIds.STV
                                     ),
                                     body.getActor().getUsername(),
@@ -293,9 +299,14 @@ public class SevenTVEventAPIClient extends WebSocketClient {
             sessionId = helloDataPayload.getData().getSessionId();
         }
 
-        for (TargetModel targetModel : Huinyabot.getInstance().getTargetCtrl().getAll().values()) {
-            if (!joinChannel(Integer.parseInt(targetModel.getAliasId()))) {
-                LOGGER.debug("Couldn't find the 7TV userdata for alias ID " + targetModel.getAliasId());
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List<Channel> channels = session.createQuery("from Channel where optOutTimestamp is null", Channel.class)
+                .getResultList();
+        session.close();
+
+        for (Channel channel : channels) {
+            if (!joinChannel(channel.getAliasId())) {
+                LOGGER.debug("Couldn't find the 7TV userdata for alias ID " + channel.getAliasId());
             }
         }
     }
