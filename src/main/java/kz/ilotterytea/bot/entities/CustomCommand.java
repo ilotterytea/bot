@@ -28,11 +28,15 @@ public class CustomCommand {
     @Column(name = "is_enabled", nullable = false)
     private Boolean isEnabled;
 
+    @Column(name = "is_global", nullable = false)
+    private Boolean isGlobal;
+
     public CustomCommand(String name, String message, Channel channel) {
         this.channel = channel;
         this.name = name;
         this.message = message;
         this.isEnabled = true;
+        this.isGlobal = false;
     }
 
     public CustomCommand() {}
@@ -75,5 +79,13 @@ public class CustomCommand {
 
     public void setEnabled(Boolean enabled) {
         isEnabled = enabled;
+    }
+
+    public Boolean getGlobal() {
+        return isGlobal;
+    }
+
+    public void setGlobal(Boolean global) {
+        isGlobal = global;
     }
 }
