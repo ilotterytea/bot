@@ -1,13 +1,16 @@
 package kz.ilotterytea.bot.builtin;
 
-import com.github.twitch4j.helix.domain.User;
-import com.google.gson.Gson;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.entities.channels.Channel;
+import kz.ilotterytea.bot.entities.channels.ChannelPreferences;
+import kz.ilotterytea.bot.entities.users.User;
+import kz.ilotterytea.bot.entities.users.UserPreferences;
 import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.ArgumentsModel;
-import kz.ilotterytea.bot.models.TargetModel;
+import kz.ilotterytea.bot.utils.HibernateUtil;
+import org.hibernate.Session;
 
 import java.util.*;
 
@@ -37,70 +40,76 @@ public class JoinCommand extends Command {
 
     @Override
     public String run(ArgumentsModel m) {
-        ArrayList<String> s = new ArrayList<>(Arrays.asList(m.getMessage().getMessage().split(" ")));
+        Session session = HibernateUtil.getSessionFactory().openSession();
 
-        if (Objects.equals(s.get(0), "")) {
-            s.add(0, m.getEvent().getUserName());
-        } else if (m.getCurrentPermissions().getId() < Permissions.SUPAUSER.getId()) {
-            return Huinyabot.getInstance().getLocale().literalText(
-                    m.getLanguage(),
-                    LineIds.NO_RIGHTS
-            );
+        // Getting the sender's local user info:
+        List<User> users = session.createQuery("from User where aliasId = :aliasId", User.class)
+                .setParameter("aliasId", m.getEvent().getUser().getId())
+                .getResultList();
+
+        User user;
+
+        session.getTransaction().begin();
+
+        if (users.isEmpty()) {
+            user = new User(Integer.parseInt(m.getEvent().getUser().getId()), m.getEvent().getUser().getName());
+            UserPreferences preferences = new UserPreferences(user);
+            user.setPreferences(preferences);
+
+            session.persist(user);
+            session.persist(preferences);
+
+            session.getTransaction().commit();
+        } else {
+            user = users.get(0);
         }
 
-        List<User> users = Huinyabot.getInstance().getClient().getHelix().getUsers(
-                Huinyabot.getInstance().getProperties().getProperty("ACCESS_TOKEN", null),
-                null,
-                Collections.singletonList(s.get(0))
-        ).execute().getUsers();
+        // Getting the channel's local info if it exists:
+        List<Channel> channels = session.createQuery("from Channel where aliasId = :aliasId", Channel.class)
+                .setParameter("aliasId", m.getEvent().getChannel().getId())
+                .getResultList();
 
-        if (users.size() == 0) {
-            return Huinyabot.getInstance().getLocale().formattedText(
-                    m.getLanguage(),
-                    LineIds.C_JOIN_NOTFOUND,
-                    s.get(0)
-            );
+        Channel originChannel = channels.get(0);
+
+        // Getting the sender's local channel info if it exists:
+        channels = session.createQuery("from Channel where aliasId = :aliasId", Channel.class)
+                .setParameter("aliasId", user.getAliasId())
+                .getResultList();
+
+        Channel channel;
+
+        // Creating a new channel if it does not exist:
+        if (channels.isEmpty()) {
+            channel = new Channel(user.getAliasId(), user.getAliasName());
+            ChannelPreferences preferences = new ChannelPreferences(channel);
+            channel.setPreferences(preferences);
+
+            session.persist(channel);
+            session.persist(preferences);
+
+            session.getTransaction().commit();
+        } else {
+            channel = channels.get(0);
+
+            // If the channel has already been opt-outed, opt-in:
+            if (channel.getOptOutTimestamp() != null) {
+                channel.setOptOutTimestamp(null);
+            } else {
+                session.close();
+                return Huinyabot.getInstance().getLocale().formattedText(
+                        originChannel.getPreferences().getLanguage(),
+                        LineIds.C_JOIN_ALREADYIN,
+                        channel.getAliasName()
+                );
+            }
         }
 
-        User user = users.get(0);
-
-        final String id = user.getId();
-        final String name = user.getLogin();
-
-        if (Huinyabot.getInstance().getTargetCtrl().get(id) != null) {
-            return Huinyabot.getInstance().getLocale().formattedText(
-                    m.getLanguage(),
-                    LineIds.C_JOIN_ALREADYIN,
-                    name
-            );
-        }
-
-        TargetModel targetModel = Huinyabot.getInstance().getTargetCtrl().getOrDefault(id);
-
-        if (m.getMessage().getOptions().contains("only-listen") && !targetModel.getFlags().contains("listen-only")) {
-            targetModel.getFlags().add("listen-only");
-        }
-
-        Huinyabot.getInstance().getTargetCtrl().set(id, targetModel);
-
-        Huinyabot.getInstance().getClient().getChat().joinChannel(name);
-        if (!m.getMessage().getOptions().contains("silent") && !m.getMessage().getOptions().contains("тихо") && !m.getMessage().getOptions().contains("only-listen")) {
-            Huinyabot.getInstance().getClient().getChat().sendMessage(
-                    name,
-                    Huinyabot.getInstance().getLocale().formattedText(
-                            m.getLanguage(),
-                            LineIds.C_JOIN_SUCCESSCHAT,
-                            name
-                    )
-            );
-        }
-
-        Huinyabot.getInstance().getTargetLinks().put(user.getLogin(), user.getId());
+        session.close();
 
         return Huinyabot.getInstance().getLocale().formattedText(
-                m.getLanguage(),
+                originChannel.getPreferences().getLanguage(),
                 LineIds.C_JOIN_SUCCESS,
-                name
+                channel.getAliasName()
         );
     }
 }
