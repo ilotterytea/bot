@@ -11,6 +11,8 @@ import java.util.Set;
  * @author ilotterytea
  * @version 1.0
  */
+@Entity
+@Table(name = "listenables")
 public class Listenable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
