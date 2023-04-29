@@ -3,10 +3,14 @@ package kz.ilotterytea.bot.builtin;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.entities.CustomCommand;
+import kz.ilotterytea.bot.entities.channels.Channel;
+import kz.ilotterytea.bot.entities.permissions.UserPermission;
+import kz.ilotterytea.bot.entities.users.User;
 import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.ArgumentsModel;
-import kz.ilotterytea.bot.models.CustomCommand;
-import kz.ilotterytea.bot.models.TargetModel;
+import kz.ilotterytea.bot.utils.HibernateUtil;
+import org.hibernate.Session;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,264 +41,177 @@ public class CustomCommandControl extends Command {
 
     @Override
     public String run(ArgumentsModel m) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        // Getting local info about the channel:
+        List<Channel> channels = session.createQuery("from Channel where aliasId = :aliasId", Channel.class)
+                .setParameter("aliasId", m.getEvent().getChannel().getId())
+                .getResultList();
+
+        Channel channel = channels.get(0);
+
+        // Getting local info about the user:
+        List<User> users = session.createQuery("from User where aliasId = :aliasId", User.class)
+                .setParameter("aliasId", m.getEvent().getUser().getId())
+                .getResultList();
+
+        User user = users.get(0);
+
+        // Getting info about the permission:
+        List<UserPermission> permissions = session.createQuery("from UserPermission where user = :user AND channel = :channel", UserPermission.class)
+                .setParameter("user", user)
+                .setParameter("channel", channel)
+                .getResultList();
+
+        UserPermission permission = permissions.get(0);
+
         ArrayList<String> s = new ArrayList<>(Arrays.asList(m.getMessage().getMessage().split(" ")));
-        if (Objects.equals(s.get(0), "")) {
-            return Huinyabot.getInstance().getLocale().literalText(
-                    m.getLanguage(),
-                    LineIds.NOT_ENOUGH_ARGS
-            );
-        }
-
-        if (Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands() == null) {
-            Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).setCustomCommands(new HashMap<>());
-        }
-
-        final String name = s.get(0);
-        s.remove(0);
 
         if (m.getMessage().getSubCommand() == null) {
             return Huinyabot.getInstance().getLocale().literalText(
-                    m.getLanguage(),
+                    channel.getPreferences().getLanguage(),
                     LineIds.NO_SUBCMD
             );
         }
 
-        switch (m.getMessage().getSubCommand()) {
-            case "list": {
-                TargetModel target = (Huinyabot.getInstance().getTargetLinks().containsKey(name) && Huinyabot.getInstance().getTargetCtrl().getAll().containsKey(
-                        Huinyabot.getInstance().getTargetLinks().get(name)
-                )) ? Huinyabot.getInstance().getTargetCtrl().get(
-                        Huinyabot.getInstance().getTargetLinks().get(name)
-                ) : Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId());
-
-                if (target == null) {
-                    return null;
-                }
-
-                List<String> cmds = target.getCustomCommands().values()
-                        .stream()
-                        .map(CustomCommand::getId)
-                        .collect(Collectors.toList());
-
-                if (cmds.size() == 0) {
-                    return Huinyabot.getInstance().getLocale().formattedText(
-                            m.getLanguage(),
-                            LineIds.C_CMD_NOCMDS,
-                            ((Huinyabot.getInstance().getTargetLinks().containsKey(name) && Huinyabot.getInstance().getTargetCtrl().getAll().containsKey(Huinyabot.getInstance().getTargetLinks().get(name))) ? name : m.getEvent().getChannel().getName())
-                    );
-                }
-
+        if (m.getMessage().getSubCommand().equals("list")) {
+            if (channel.getCommands().isEmpty()) {
                 return Huinyabot.getInstance().getLocale().formattedText(
-                        m.getLanguage(),
-                        LineIds.C_CMD_SUCCESS_LIST,
-                        ((Huinyabot.getInstance().getTargetLinks().containsKey(name) && Huinyabot.getInstance().getTargetCtrl().getAll().containsKey(Huinyabot.getInstance().getTargetLinks().get(name))) ? name : m.getEvent().getChannel().getName()),
-                        String.join(", ", cmds)
+                        channel.getPreferences().getLanguage(),
+                        LineIds.C_CMD_NOCMDS,
+                        channel.getAliasName()
                 );
             }
-            default:
-                break;
+
+            return Huinyabot.getInstance().getLocale().formattedText(
+                    channel.getPreferences().getLanguage(),
+                    LineIds.C_CMD_SUCCESS_LIST,
+                    channel.getAliasName(),
+                    channel.getCommands().stream().map(CustomCommand::getName).collect(Collectors.joining(", "))
+            );
         }
 
-        if (m.getCurrentPermissions().getId() >= Permissions.BROADCASTER.getId()) {
-            switch (m.getMessage().getSubCommand()) {
-                case "new": {
-                    String response = String.join(" ", s);
-                    if (Objects.equals(response, "")) {
-                        return Huinyabot.getInstance().getLocale().literalText(
-                                m.getLanguage(),
-                                LineIds.C_CMD_NOSECONDARG
-                        );
-                    }
+        if (Objects.equals(s.get(0), "")) {
+            return Huinyabot.getInstance().getLocale().literalText(
+                    channel.getPreferences().getLanguage(),
+                    LineIds.NOT_ENOUGH_ARGS
+            );
+        }
 
-                    CustomCommand cmd = new CustomCommand(
-                            name,
-                            response,
-                            true,
-                            new ArrayList<>()
-                    );
 
-                    if (Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().containsKey(cmd.getId()) || Huinyabot.getInstance().getLoader().getCommands().containsKey(cmd.getId())) {
-                        return Huinyabot.getInstance().getLocale().formattedText(
-                                m.getLanguage(),
-                                LineIds.C_CMD_ALREADYEXISTS,
-                                cmd.getId()
-                        );
-                    }
+        final String name = s.get(0);
+        s.remove(0);
 
-                    if (m.getMessage().getOptions().contains("no-mention")) {
-                        cmd.setFlag("no-mention");
-                    }
+        // If the command was run by a broadcaster:
+        if (permission.getPermission().getValue() >= Permissions.BROADCASTER.getId()) {
+            Optional<CustomCommand> optionalCustomCommands = channel.getCommands().stream().filter(c -> c.getName().equals(name)).findFirst();
+            String response = String.join(" ", s);
 
-                    Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().put(cmd.getId(), cmd);
+            if (Objects.equals(response, "")) {
+                return Huinyabot.getInstance().getLocale().literalText(
+                        channel.getPreferences().getLanguage(),
+                        LineIds.C_CMD_NOSECONDARG
+                );
+            }
+
+            // Create a new custom command:
+            if (m.getMessage().getSubCommand().equals("new")) {
+                // Check if a command with the same name already exists:
+                if (optionalCustomCommands.isPresent() || Huinyabot.getInstance().getLoader().getCommand(name).isPresent()) {
                     return Huinyabot.getInstance().getLocale().formattedText(
-                            m.getLanguage(),
-                            LineIds.C_CMD_SUCCESS_NEW,
-                            cmd.getId()
-                    );
-                }
-                case "edit": {
-                    String response = String.join(" ", s);
-                    if (Objects.equals(response, "")) {
-                        return Huinyabot.getInstance().getLocale().literalText(
-                                m.getLanguage(),
-                                LineIds.C_CMD_NOSECONDARG
-                        );
-                    }
-
-                    CustomCommand cmd = new CustomCommand(
-                            name,
-                            response,
-                            true,
-                            new ArrayList<>()
-                    );
-
-                    if (!Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().containsKey(cmd.getId())) {
-                        return Huinyabot.getInstance().getLocale().formattedText(
-                                m.getLanguage(),
-                                LineIds.C_CMD_DOESNOTEXISTS,
-                                cmd.getId()
-                        );
-                    }
-
-                    Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().get(cmd.getId()).setResponse(response);
-                    return Huinyabot.getInstance().getLocale().formattedText(
-                            m.getLanguage(),
-                            LineIds.C_CMD_SUCCESS_EDIT,
-                            cmd.getId()
-                    );
-                }
-                case "delete": {
-                    String response = String.join(" ", s);
-
-                    CustomCommand cmd = new CustomCommand(
-                            name,
-                            response,
-                            true,
-                            new ArrayList<>()
-                    );
-
-                    if (!Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().containsKey(cmd.getId())) {
-                        return Huinyabot.getInstance().getLocale().formattedText(
-                                m.getLanguage(),
-                                LineIds.C_CMD_DOESNOTEXISTS,
-                                cmd.getId()
-                        );
-                    }
-
-                    Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().remove(cmd.getId());
-                    return Huinyabot.getInstance().getLocale().formattedText(
-                            m.getLanguage(),
-                            LineIds.C_CMD_SUCCESS_DELETE,
-                            cmd.getId()
-                    );
-                }
-                case "rename": {
-                    String name2 = s.get(0);
-                    if (Objects.equals(name2, "")) {
-                        return Huinyabot.getInstance().getLocale().literalText(
-                                m.getLanguage(),
-                                LineIds.C_CMD_NOSECONDARG
-                        );
-                    }
-
-                    if (Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().containsKey(name2) || Huinyabot.getInstance().getLoader().getCommands().containsKey(name2)) {
-                        return Huinyabot.getInstance().getLocale().formattedText(
-                                m.getLanguage(),
-                                LineIds.C_CMD_ALREADYEXISTS,
-                                name2
-                        );
-                    }
-
-                    Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().put(
-                            name2,
-                            Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().get(name)
-                    );
-                    Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().remove(name);
-                    Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().get(name2).setId(name2);
-
-                    return Huinyabot.getInstance().getLocale().formattedText(
-                            m.getLanguage(),
-                            LineIds.C_CMD_SUCCESS_RENAME,
-                            name,
-                            name2
-                    );
-                }
-                case "copy": {
-
-                    if (s.size() == 0) {
-                        return Huinyabot.getInstance().getLocale().literalText(
-                                m.getLanguage(),
-                                LineIds.C_CMD_NOSECONDARG
-                        );
-                    }
-                    String name2 = s.get(0);
-
-                    if (!Huinyabot.getInstance().getTargetLinks().containsKey(name)) {
-                        return Huinyabot.getInstance().getLocale().formattedText(
-                                m.getLanguage(),
-                                LineIds.C_CMD_NOTFOUND,
-                                name
-                        );
-                    }
-
-                    if (!Huinyabot.getInstance().getTargetCtrl().get(
-                            Huinyabot.getInstance().getTargetLinks().get(name)
-                    ).getCustomCommands().containsKey(name2)) {
-                        return Huinyabot.getInstance().getLocale().formattedText(
-                                m.getLanguage(),
-                                LineIds.C_CMD_DOESNOTEXISTS,
-                                name2
-                        );
-                    }
-
-                    if (Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().containsKey(name2)) {
-                        return Huinyabot.getInstance().getLocale().formattedText(
-                                m.getLanguage(),
-                                LineIds.C_CMD_ALREADYEXISTS,
-                                name2
-                        );
-                    }
-
-                    Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().put(
-                            Huinyabot.getInstance().getTargetCtrl().get(Huinyabot.getInstance().getTargetLinks().get(name)).getCustomCommands().get(name2).getId(),
-                            Huinyabot.getInstance().getTargetCtrl().get(Huinyabot.getInstance().getTargetLinks().get(name)).getCustomCommands().get(name2)
-                    );
-                    return Huinyabot.getInstance().getLocale().formattedText(
-                            m.getLanguage(),
-                            LineIds.C_CMD_SUCCESS_COPY,
-                            name2,
+                            channel.getPreferences().getLanguage(),
+                            LineIds.C_CMD_ALREADYEXISTS,
                             name
                     );
                 }
-                case "toggle": {
-                    if (!Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().containsKey(name)) {
-                        return Huinyabot.getInstance().getLocale().formattedText(
-                                m.getLanguage(),
-                                LineIds.C_CMD_DOESNOTEXISTS,
-                                name
-                        );
-                    }
 
-                    Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().get(name).setValue(
-                            !Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().get(name).getValue()
+                // Creating a new command and assign it to the channel:
+                CustomCommand command = new CustomCommand(name, response, channel);
+                channel.addCommand(command);
+
+                // Saving changes:
+                session.getTransaction().begin();
+                
+                session.persist(channel);
+                session.persist(command);
+                
+                session.getTransaction().commit();
+                session.close();
+
+                return Huinyabot.getInstance().getLocale().formattedText(
+                        channel.getPreferences().getLanguage(),
+                        LineIds.C_CMD_SUCCESS_NEW,
+                        command.getName()
+                );
+            }
+
+            // If the command not exists:
+            if (optionalCustomCommands.isEmpty()) {
+                return Huinyabot.getInstance().getLocale().formattedText(
+                        channel.getPreferences().getLanguage(),
+                        LineIds.C_CMD_DOESNOTEXISTS,
+                        name
+                );
+            }
+
+            CustomCommand command = optionalCustomCommands.get();
+
+            switch (m.getMessage().getSubCommand()) {
+                // "Edit a command response" clause:
+                case "edit": {
+                    // Setting a new response:
+                    command.setMessage(response);
+
+                    // Saving changes:
+                    session.getTransaction().begin();
+
+                    session.persist(command);
+
+                    session.getTransaction().commit();
+                    session.close();
+
+                    return Huinyabot.getInstance().getLocale().formattedText(
+                            channel.getPreferences().getLanguage(),
+                            LineIds.C_CMD_SUCCESS_EDIT,
+                            command.getName()
                     );
-
-                    if (Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getCustomCommands().get(name).getValue()) {
-                        return Huinyabot.getInstance().getLocale().formattedText(
-                                m.getLanguage(),
-                                LineIds.C_CMD_SUCCESS_ENABLE,
-                                name
-                        );
-                    } else {
-                        return Huinyabot.getInstance().getLocale().formattedText(
-                                m.getLanguage(),
-                                LineIds.C_CMD_SUCCESS_DISABLE,
-                                name
-                        );
-                    }
                 }
+                // "Delete a command" clause:
+                case "delete":
+                    // Deleting a command and saving changes:
+                    session.getTransaction().begin();
+                    session.remove(command);
+                    session.getTransaction().commit();
+                    session.close();
+
+                    return Huinyabot.getInstance().getLocale().formattedText(
+                            channel.getPreferences().getLanguage(),
+                            LineIds.C_CMD_SUCCESS_DELETE,
+                            command.getName()
+                    );
+                case "rename":
+                    String nameToRename = s.get(0);
+                    String previousName = command.getName();
+
+                    System.out.println(nameToRename);
+                    System.out.println(previousName);
+
+                    command.setName(nameToRename);
+
+                    // Saving changes:
+                    session.getTransaction().begin();
+                    session.persist(command);
+                    session.getTransaction().commit();
+                    session.close();
+
+                    return Huinyabot.getInstance().getLocale().formattedText(
+                            channel.getPreferences().getLanguage(),
+                            LineIds.C_CMD_SUCCESS_RENAME,
+                            previousName,
+                            nameToRename
+                    );
                 default:
-                    return null;
+                    break;
             }
         }
 
