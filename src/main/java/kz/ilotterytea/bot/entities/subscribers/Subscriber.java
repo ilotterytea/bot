@@ -24,7 +24,7 @@ public class Subscriber {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", updatable = false, nullable = false)
+    @JoinColumn(name = "listenable_id", updatable = false, nullable = false)
     private Listenable listenable;
 
     @Enumerated(EnumType.ORDINAL)
