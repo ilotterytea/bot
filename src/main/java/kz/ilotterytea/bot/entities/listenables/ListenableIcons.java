@@ -30,6 +30,8 @@ public class ListenableIcons {
         this.listenable = listenable;
     }
 
+    public ListenableIcons() {}
+
     public Listenable getListenable() {
         return listenable;
     }

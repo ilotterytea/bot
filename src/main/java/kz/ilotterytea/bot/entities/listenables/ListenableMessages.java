@@ -30,6 +30,8 @@ public class ListenableMessages {
         this.listenable = listenable;
     }
 
+    public ListenableMessages() {}
+
     public Listenable getListenable() {
         return listenable;
     }
