@@ -1,17 +1,18 @@
 package kz.ilotterytea.bot.builtin;
 
 import kz.ilotterytea.bot.Huinyabot;
-import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.entities.channels.Channel;
+import kz.ilotterytea.bot.entities.channels.ChannelPreferences;
+import kz.ilotterytea.bot.entities.permissions.UserPermission;
+import kz.ilotterytea.bot.entities.users.User;
 import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.ArgumentsModel;
-import kz.ilotterytea.bot.models.UserModel;
+import kz.ilotterytea.bot.utils.HibernateUtil;
+import org.hibernate.Session;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Ping command.
@@ -26,7 +27,7 @@ public class SetterCommand extends Command {
     public int getDelay() { return 5000; }
 
     @Override
-    public Permissions getPermissions() { return Permissions.USER; }
+    public Permissions getPermissions() { return Permissions.BROADCASTER; }
 
     @Override
     public ArrayList<String> getOptions() { return new ArrayList<>(Collections.singletonList("self")); }
@@ -46,93 +47,95 @@ public class SetterCommand extends Command {
             );
         }
 
-        final ArrayList<String> NULLABLE_SUBCMDS = new ArrayList<>(Arrays.asList("prefix", "locale"));
+        List<String> s = List.of(m.getMessage().getMessage().split(" "));
 
-        if ((Objects.equals(m.getMessage().getMessage(), "") && NULLABLE_SUBCMDS.contains(m.getMessage().getSubCommand())) || m.getCurrentPermissions().getId() < Permissions.BROADCASTER.getId()) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        // Getting the origin channel's info:
+        List<Channel> channels = session.createQuery("from Channel where aliasId = :aliasId AND optOutTimestamp is null", Channel.class)
+                .setParameter("aliasId", m.getEvent().getChannel().getId())
+                .getResultList();
+
+        Channel channel = channels.get(0);
+
+        // Getting the sender's info:
+        List<User> users = session.createQuery("from User where aliasId = :aliasId AND optOutTimestamp is null", User.class)
+                .setParameter("aliasId", m.getEvent().getUser().getId())
+                .getResultList();
+
+        User user = users.get(0);
+
+        // Getting the sender's permission:
+        List<UserPermission> permissions = session.createQuery("from UserPermission where user = :user AND channel = :channel", UserPermission.class)
+                .setParameter("user", user)
+                .setParameter("channel", channel)
+                .getResultList();
+
+        UserPermission permission = permissions.get(0);
+
+        // Broadcaster:
+        if (permission.getPermission().getValue() >= Permissions.BROADCASTER.getId()) {
             switch (m.getMessage().getSubCommand()) {
+                // "Prefix" clause.
                 case "prefix": {
-                    return Huinyabot.getInstance().getLocale().formattedText(
-                            m.getLanguage(),
-                            LineIds.C_SET_SUCCESS_PREFIX_INFO,
-                            (Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId())
-                                    .getPrefix() != null) ? Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId())
-                            .getPrefix() : Huinyabot.getInstance().getProperties().getProperty("PREFIX", SharedConstants.DEFAULT_PREFIX)
-                    );
-                }
-                case "locale": {
-                    if (m.getMessage().getOptions().contains("self") && !Objects.equals(m.getMessage().getMessage(), "")) {
-                        if (!Huinyabot.getInstance().getLocale().getLocaleIds().contains(m.getMessage().getMessage().toLowerCase())) {
-                            return Huinyabot.getInstance().getLocale().formattedText(
-                                    m.getLanguage(),
-                                    LineIds.C_SET_SUCCESS_LOCALE_LIST,
-                                    String.join(", ", Huinyabot.getInstance().getLocale().getLocaleIds())
-                            );
-                        }
-
-                        UserModel user = Huinyabot.getInstance().getUserCtrl().getOrDefault(m.getSender().getAliasId());
-
-                        user.setLanguage(m.getMessage().getMessage().toLowerCase());
-
-                        Huinyabot.getInstance().getUserCtrl().set(user.getAliasId(), user);
-
+                    if (s.isEmpty()) {
                         return Huinyabot.getInstance().getLocale().literalText(
-                                user.getLanguage(),
-                                LineIds.C_SET_SUCCESS_LOCALE_SET_USER
+                                channel.getPreferences().getLanguage(),
+                                LineIds.NOT_ENOUGH_ARGS
                         );
                     }
 
+                    ChannelPreferences preferences = channel.getPreferences();
+                    preferences.setPrefix(m.getMessage().getMessage().toLowerCase());
+                    channel.setPreferences(preferences);
+
+                    session.getTransaction().begin();
+
+                    session.persist(user);
+                    session.persist(preferences);
+
+                    session.getTransaction().commit();
+
                     return Huinyabot.getInstance().getLocale().formattedText(
-                            m.getLanguage(),
-                            LineIds.C_SET_SUCCESS_LOCALE_INFO,
-                            (Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId())
-                                    .getLanguage() != null) ? Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId())
-                                    .getLanguage() : Huinyabot.getInstance().getProperties().getProperty("DEFAULT_LANGUAGE", SharedConstants.DEFAULT_LOCALE_ID)
+                            preferences.getLanguage(),
+                            LineIds.C_SET_SUCCESS_PREFIX_SET,
+                            preferences.getPrefix()
                     );
                 }
-                default: return null;
+                // "Locale", "language" clause.
+                case "locale":
+                    if (
+                            s.isEmpty() ||
+                            !Huinyabot.getInstance().getLocale().getLocaleIds().contains(m.getMessage().getMessage().toLowerCase())
+                    ) {
+                        return Huinyabot.getInstance().getLocale().formattedText(
+                                channel.getPreferences().getLanguage(),
+                                LineIds.C_SET_SUCCESS_LOCALE_LIST,
+                                String.join(", ", Huinyabot.getInstance().getLocale().getLocaleIds())
+                        );
+                    }
+
+                    ChannelPreferences preferences = channel.getPreferences();
+                    preferences.setLanguage(m.getMessage().getMessage().toLowerCase());
+                    channel.setPreferences(preferences);
+
+                    session.getTransaction().begin();
+
+                    session.persist(user);
+                    session.persist(preferences);
+
+                    session.getTransaction().commit();
+
+                    return Huinyabot.getInstance().getLocale().literalText(
+                            preferences.getLanguage(),
+                            LineIds.C_SET_SUCCESS_LOCALE_SET
+                    );
             }
         }
 
-        switch (m.getMessage().getSubCommand()) {
-            case "prefix": {
-                Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).setPrefix(m.getMessage().getMessage());
-                return Huinyabot.getInstance().getLocale().formattedText(
-                        m.getLanguage(),
-                        LineIds.C_SET_SUCCESS_PREFIX_SET,
-                        Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getPrefix()
-                );
-            }
-            case "locale": {
-                if (!Huinyabot.getInstance().getLocale().getLocaleIds().contains(m.getMessage().getMessage().toLowerCase())) {
-                    return Huinyabot.getInstance().getLocale().formattedText(
-                            m.getLanguage(),
-                            LineIds.C_SET_SUCCESS_LOCALE_LIST,
-                            String.join(", ", Huinyabot.getInstance().getLocale().getLocaleIds())
-                    );
-                }
-
-                Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).setLanguage(m.getMessage().getMessage().toLowerCase());
-
-                return Huinyabot.getInstance().getLocale().literalText(
-                        Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getLanguage(),
-                        LineIds.C_SET_SUCCESS_LOCALE_SET
-                );
-            }
-            case "notify-7tv": {
-                boolean isEnabled = Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getFlags().contains("notify-7tv");
-
-                if (isEnabled) {
-                    Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getFlags().remove("notify-7tv");
-                } else {
-                    Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getFlags().add("notify-7tv");
-                }
-
-                return Huinyabot.getInstance().getLocale().literalText(
-                        Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId()).getLanguage(),
-                        (isEnabled) ? LineIds.C_SET_SUCCESS_NOTIFY7TV_DISABLED : LineIds.C_SET_SUCCESS_NOTIFY7TV_ENABLED
-                );
-            }
-            default: return null;
-        }
+        return Huinyabot.getInstance().getLocale().literalText(
+                channel.getPreferences().getLanguage(),
+                LineIds.NO_RIGHTS
+        );
     }
 }
