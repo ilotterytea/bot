@@ -21,6 +21,9 @@ public class Listenable {
     @Column(name = "alias_id", updatable = false, nullable = false)
     private Integer aliasId;
 
+    @Column(name = "alias_name", nullable = false)
+    private String aliasName;
+
     @ManyToOne
     @JoinColumn(name = "channel_id", updatable = false, nullable = false)
     private Channel channel;
@@ -41,8 +44,9 @@ public class Listenable {
     @OneToMany(mappedBy = "listenable", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private Set<Subscriber> subscribers;
 
-    public Listenable(Integer aliasId, ListenableMessages messages, ListenableIcons icons) {
+    public Listenable(Integer aliasId, String aliasName, ListenableMessages messages, ListenableIcons icons) {
         this.aliasId = aliasId;
+        this.aliasName = aliasName;
         this.messages = messages;
         this.icons = icons;
         this.flags = new HashSet<>();
@@ -66,6 +70,14 @@ public class Listenable {
 
     public void setAliasId(Integer aliasId) {
         this.aliasId = aliasId;
+    }
+
+    public String getAliasName() {
+        return aliasName;
+    }
+
+    public void setAliasName(String aliasName) {
+        this.aliasName = aliasName;
     }
 
     public Channel getChannel() {
