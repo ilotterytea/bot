@@ -5,8 +5,18 @@ package kz.ilotterytea.bot.entities.subscribers;
  * @version 1.0
  */
 public enum SubscriberEvent {
-    LIVE,
-    OFFLINE,
-    TITLE,
-    CATEGORY
+    LIVE("LIVE"),
+    OFFLINE("OFFLINE"),
+    TITLE("TITLE"),
+    CATEGORY("CATEGORY");
+
+    private String name;
+
+    SubscriberEvent(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 }
