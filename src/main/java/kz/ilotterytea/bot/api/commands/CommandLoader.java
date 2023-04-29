@@ -72,6 +72,10 @@ public class CommandLoader extends ClassLoader {
         return response;
     }
 
+    public Optional<Command> getCommand(String id) {
+        return this.COMMANDS.values().stream().filter(c -> c.getNameId().equals(id) || c.getAliases().contains(id)).findFirst();
+    }
+
     /**
      * Get the loaded commands.
      * @since 1.0

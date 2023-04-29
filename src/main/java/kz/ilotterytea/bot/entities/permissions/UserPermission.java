@@ -8,6 +8,8 @@ import kz.ilotterytea.bot.entities.users.User;
  * @author ilotterytea
  * @version 1.4
  */
+@Entity
+@Table(name = "user_permissions")
 public class UserPermission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
