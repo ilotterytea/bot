@@ -6,6 +6,7 @@ import kz.ilotterytea.bot.entities.channels.ChannelPreferences;
 import kz.ilotterytea.bot.entities.listenables.Listenable;
 import kz.ilotterytea.bot.entities.listenables.ListenableIcons;
 import kz.ilotterytea.bot.entities.listenables.ListenableMessages;
+import kz.ilotterytea.bot.entities.permissions.UserPermission;
 import kz.ilotterytea.bot.entities.subscribers.Subscriber;
 import kz.ilotterytea.bot.entities.users.User;
 import kz.ilotterytea.bot.entities.users.UserPreferences;
@@ -28,6 +29,7 @@ public class HibernateUtil {
             .addAnnotatedClass(ListenableIcons.class)
             .addAnnotatedClass(Subscriber.class)
             .addAnnotatedClass(CustomCommand.class)
+            .addAnnotatedClass(UserPermission.class)
             .buildSessionFactory();
 
     public static SessionFactory getSessionFactory() {
