@@ -114,37 +114,42 @@ public class Huinyabot extends Bot {
         // Obtaining the channels:
         List<Channel> channels = session.createQuery("from Channel where optOutTimestamp is null", Channel.class).getResultList();
 
-        List<User> twitchChannels = client.getHelix().getUsers(
-                credential.getAccessToken(),
-                channels.stream().map(c -> c.getAliasId().toString()).collect(Collectors.toList()),
-                null
-        ).execute().getUsers();
+        if (!channels.isEmpty()) {
+            List<User> twitchChannels = client.getHelix().getUsers(
+                    credential.getAccessToken(),
+                    channels.stream().map(c -> c.getAliasId().toString()).collect(Collectors.toList()),
+                    null
+            ).execute().getUsers();
 
-        // Join channel chats:
-        for (User twitchChannel : twitchChannels) {
-            client.getChat().joinChannel(twitchChannel.getLogin());
-            LOGGER.debug("Joined to " + twitchChannel.getLogin() + "'s chat room!");
+            // Join channel chats:
+            for (User twitchChannel : twitchChannels) {
+                client.getChat().joinChannel(twitchChannel.getLogin());
+                LOGGER.debug("Joined to " + twitchChannel.getLogin() + "'s chat room!");
+            }
         }
 
         // Obtaining the listenables:
         List<Listenable> listenables = session.createQuery("from Listenable where isEnabled = false", Listenable.class).getResultList();
-        Set<Integer> listenableIds = new HashSet<>();
 
-        for (Listenable listenable : listenables) {
-            listenableIds.add(listenable.getAliasId());
-        }
+        if (!listenables.isEmpty()) {
+            Set<Integer> listenableIds = new HashSet<>();
 
-        // Getting Twitch info about the listenables:
-        List<User> listenableUsers = client.getHelix().getUsers(
-                credential.getAccessToken(),
-                listenableIds.stream().map(Object::toString).collect(Collectors.toList()),
-                null
-        ).execute().getUsers();
+            for (Listenable listenable : listenables) {
+                listenableIds.add(listenable.getAliasId());
+            }
 
-        // Listening the listenables:
-        for (User listenableUser : listenableUsers) {
-            client.getClientHelper().enableStreamEventListener(listenableUser.getId(), listenableUser.getLogin());
-            LOGGER.debug("Listening for stream events for user " + listenableUser.getLogin());
+            // Getting Twitch info about the listenables:
+            List<User> listenableUsers = client.getHelix().getUsers(
+                    credential.getAccessToken(),
+                    listenableIds.stream().map(Object::toString).collect(Collectors.toList()),
+                    null
+            ).execute().getUsers();
+
+            // Listening the listenables:
+            for (User listenableUser : listenableUsers) {
+                client.getClientHelper().enableStreamEventListener(listenableUser.getId(), listenableUser.getLogin());
+                LOGGER.debug("Listening for stream events for user " + listenableUser.getLogin());
+            }
         }
 
         session.close();
