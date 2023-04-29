@@ -21,6 +21,7 @@ import kz.ilotterytea.bot.entities.subscribers.Subscriber;
 import kz.ilotterytea.bot.entities.subscribers.SubscriberEvent;
 import kz.ilotterytea.bot.entities.users.UserPreferences;
 import kz.ilotterytea.bot.i18n.LineIds;
+import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.models.MessageModel;
 import kz.ilotterytea.bot.utils.HibernateUtil;
 import okhttp3.*;
@@ -163,7 +164,13 @@ public class MessageHandlerSamples {
             if (optionalCommand.isPresent()) {
                 Command command = optionalCommand.get();
 
-                String response = command.run(null);
+                String response = command.run(new ArgumentsModel(
+                        user,
+                        channel.getPreferences().getLanguage(),
+                        userPermission,
+                        messageModel,
+                        e
+                ));
 
                 if (response != null) {
                     bot.getClient().getChat().sendMessage(
