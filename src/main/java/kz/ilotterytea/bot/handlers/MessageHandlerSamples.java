@@ -120,23 +120,30 @@ public class MessageHandlerSamples {
         final MessageModel messageModel = MessageModel.create(e.getMessage().get(), channel.getPreferences().getPrefix());
 
         // Update user's permissions:
-        Optional<UserPermission> optionalUserPermission = user.getPermissions().stream().filter(p -> p.getChannel().getAliasId().equals(channel.getAliasId())).findFirst();
+        UserPermission userPermission = user.getPermissions()
+                .stream()
+                .filter(p -> p.getChannel().getAliasId().equals(channel.getAliasId()))
+                .findFirst()
+                .orElseGet(() -> {
+                    UserPermission permission1 = new UserPermission();
+                    permission1.setPermission(Permission.USER);
+                    channel.addPermission(permission1);
+                    user.addPermission(permission1);
 
-        if (optionalUserPermission.isPresent()) {
-            UserPermission userPermission = optionalUserPermission.get();
+                    return permission1;
+                });
 
-            if (Objects.equals(e.getChannel().getId(), e.getUser().getId())) {
-                userPermission.setPermission(Permission.BROADCASTER);
-            } else if (e.getBadges().containsKey("moderator")) {
-                userPermission.setPermission(Permission.MOD);
-            } else if (e.getBadges().containsKey("vip")) {
-                userPermission.setPermission(Permission.VIP);
-            } else {
-                userPermission.setPermission(Permission.USER);
-            }
-
-            session.persist(userPermission);
+        if (Objects.equals(e.getChannel().getId(), e.getUser().getId())) {
+            userPermission.setPermission(Permission.BROADCASTER);
+        } else if (e.getBadges().containsKey("moderator")) {
+            userPermission.setPermission(Permission.MOD);
+        } else if (e.getBadges().containsKey("vip")) {
+            userPermission.setPermission(Permission.VIP);
+        } else {
+            userPermission.setPermission(Permission.USER);
         }
+
+        session.persist(userPermission);
 
         // 'Test':
         if (Objects.equals(MSG, "test")) {
