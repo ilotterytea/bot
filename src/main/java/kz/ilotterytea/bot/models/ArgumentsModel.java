@@ -1,7 +1,8 @@
 package kz.ilotterytea.bot.models;
 
 import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
-import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.entities.permissions.UserPermission;
+import kz.ilotterytea.bot.entities.users.User;
 
 /**
  * Message arguments model.
@@ -9,29 +10,28 @@ import kz.ilotterytea.bot.api.permissions.Permissions;
  * @since 1.0
  */
 public class ArgumentsModel {
-    private final UserModel sender;
-    private Permissions currentPermissions;
+    private final User sender;
+    private UserPermission currentPermissions;
     private String language;
     private final MessageModel msg;
     private final IRCMessageEvent event;
 
     public ArgumentsModel(
-            UserModel sender,
-            Permissions currentPermissions,
+            User sender,
             String language,
+            UserPermission permission,
             MessageModel msg,
             IRCMessageEvent event
     ) {
         this.sender = sender;
-        this.currentPermissions = currentPermissions;
         this.language = language;
+        this.currentPermissions = permission;
         this.msg = msg;
         this.event = event;
     }
 
-    public UserModel getSender() { return sender; }
-    public Permissions getCurrentPermissions() { return currentPermissions; }
-    public void setCurrentPermissions(Permissions currentPermissions) { this.currentPermissions = currentPermissions; }
+    public User getSender() { return sender; }
+    public UserPermission getCurrentPermissions() { return currentPermissions; }
     public String getLanguage() { return language; }
     public void setLanguage(String language) { this.language = language; }
     public MessageModel getMessage() { return msg; }
