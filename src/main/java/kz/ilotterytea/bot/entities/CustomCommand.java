@@ -22,7 +22,7 @@ public class CustomCommand {
     @JoinColumn(name = "channel_id", updatable = false, nullable = false)
     private Channel channel;
 
-    @Column(updatable = false, nullable = false)
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false)
