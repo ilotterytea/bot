@@ -4,11 +4,18 @@ import com.github.twitch4j.helix.domain.User;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.entities.channels.Channel;
+import kz.ilotterytea.bot.entities.listenables.Listenable;
+import kz.ilotterytea.bot.entities.listenables.ListenableFlag;
+import kz.ilotterytea.bot.entities.listenables.ListenableIcons;
+import kz.ilotterytea.bot.entities.listenables.ListenableMessages;
+import kz.ilotterytea.bot.entities.permissions.UserPermission;
+import kz.ilotterytea.bot.entities.subscribers.Subscriber;
+import kz.ilotterytea.bot.entities.subscribers.SubscriberEvent;
 import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.models.ArgumentsModel;
-import kz.ilotterytea.bot.models.TargetModel;
-import kz.ilotterytea.bot.models.notify.NotifyListener;
-import kz.ilotterytea.bot.models.notify.NotifySubscriber;
+import kz.ilotterytea.bot.utils.HibernateUtil;
+import org.hibernate.Session;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -39,797 +46,651 @@ public class NotifyMeCommand extends Command {
 
     @Override
     public String run(ArgumentsModel m) {
-        final int MAX_LISTEN_COUNT = 15;
-        final ArrayList<String> EVENTS = new ArrayList<>(Arrays.asList("live", "offline", "title", "game"));
-
-        TargetModel target = Huinyabot.getInstance().getTargetCtrl().get(m.getEvent().getChannel().getId());
-
         if (m.getMessage().getSubCommand() == null) {
             return null;
         }
 
-        switch (m.getMessage().getSubCommand()) {
-            case "subs":
-            case "subscriptions": {
-                if (target.getListeners().keySet().size() == 0) {
-                    return Huinyabot.getInstance().getLocale().literalText(
-                            m.getLanguage(),
-                            LineIds.C_NOTIFY_NOLISTENINGCHANNELS
-                    );
-                }
-                ArrayList<String> msgs = new ArrayList<>();
-                int index = 0;
+        Session session = HibernateUtil.getSessionFactory().openSession();
 
-                msgs.add("");
+        // Getting channel local info:
+        List<Channel> channels = session.createQuery("from Channel where aliasId = :aliasId", Channel.class)
+                .setParameter("aliasId", m.getEvent().getChannel().getId())
+                .getResultList();
 
-                List<User> users = new ArrayList<>(Huinyabot.getInstance().getClient().getHelix().getUsers(
-                        Huinyabot.getInstance().getProperties().getProperty("ACCESS_TOKEN", null),
-                        new ArrayList<>(target.getListeners().keySet()),
-                        null
-                ).execute().getUsers());
+        Channel channel = channels.get(0);
 
-                for (User user : users) {
-                    NotifyListener listener = target.getListeners().get(user.getId());
-                    NotifySubscriber subscriber = listener.getSubscribers()
-                            .stream().filter(l -> Objects.equals(l.getAliasId(), m.getSender().getAliasId()))
-                            .findFirst().orElse(null);
+        // Getting sender local info:
+        List<kz.ilotterytea.bot.entities.users.User> users = session.createQuery("from User where aliasId = :aliasId", kz.ilotterytea.bot.entities.users.User.class)
+                .setParameter("aliasId", m.getEvent().getUser().getId())
+                .getResultList();
 
-                    if (subscriber == null) {
-                        continue;
-                    }
+        kz.ilotterytea.bot.entities.users.User user = users.get(0);
 
-                    StringBuilder sb = new StringBuilder();
+        // Getting permission info:
+        List<UserPermission> permissions = session.createQuery("from UserPermission where user = :user AND channel = :channel", UserPermission.class)
+                .setParameter("user", user)
+                .setParameter("channel", channel)
+                .getResultList();
 
-                    if (
-                            Huinyabot.getInstance().getLocale().formattedText(
-                                    m.getLanguage(),
-                                    LineIds.C_NOTIFY_SUCCESS_SUBS,
-                                    msgs.get(index) + user.getLogin() + " (" + String.join(
-                                            ",", subscriber.getSubscribedEvents()
-                                    ) + "); "
-                            ).length() < 500
-                    ) {
-                        sb.append(msgs.get(index)).append(user.getLogin()).append(" (").append(String.join(",", subscriber.getSubscribedEvents())).append("); ");
-                        msgs.remove(index);
-                        msgs.add(index, sb.toString());
-                    } else {
-                        msgs.add("");
-                        index++;
-                    }
-                }
+        UserPermission permission = permissions.get(0);
 
-                if (msgs.get(0).equals("")) {
-                    return Huinyabot.getInstance().getLocale().literalText(
-                            m.getLanguage(),
-                            LineIds.C_NOTIFY_SUCCESS_SUBSNOONE
-                    );
-                }
+        Huinyabot bot = Huinyabot.getInstance();
 
-                for (String msg : msgs) {
-                    Huinyabot.getInstance().getClient().getChat().sendMessage(
-                            m.getEvent().getChannel().getName(),
-                            Huinyabot.getInstance().getLocale().formattedText(
-                                    m.getLanguage(),
-                                    LineIds.C_NOTIFY_SUCCESS_SUBS,
-                                    msg
-                            ),
-                            null,
-                            (m.getEvent().getMessageId().isPresent()) ? m.getEvent().getMessageId().get() : null
-                    );
-                }
+        List<String> s = new ArrayList<>(List.of(m.getMessage().getMessage().split(" ")));
 
-                return null;
-            }
-            case "list": {
-                if (target.getListeners().keySet().size() == 0) {
-                    return Huinyabot.getInstance().getLocale().literalText(
-                            m.getLanguage(),
-                            LineIds.C_NOTIFY_NOLISTENINGCHANNELS
-                    );
-                }
-                ArrayList<String> msgs = new ArrayList<>();
-                int index = 0;
-
-                msgs.add("");
-
-                List<User> users = new ArrayList<>(Huinyabot.getInstance().getClient().getHelix().getUsers(
-                        Huinyabot.getInstance().getProperties().getProperty("ACCESS_TOKEN", null),
-                        new ArrayList<>(target.getListeners().keySet()),
-                        null
-                ).execute().getUsers());
-
-                for (User user : users) {
-                    NotifyListener listener = target.getListeners().get(user.getId());
-                    StringBuilder sb = new StringBuilder();
-
-                    if (
-                            Huinyabot.getInstance().getLocale().formattedText(
-                                    m.getLanguage(),
-                                    LineIds.C_NOTIFY_SUCCESS_LIST,
-                                    msgs.get(index) + user.getLogin() + " (" + String.join(
-                                            ",", listener.getEvents()
-                                    ) + "); "
-                            ).length() < 500
-                    ) {
-                        sb.append(msgs.get(index)).append(user.getLogin()).append(" (").append(String.join(",", listener.getEvents())).append("); ");
-                        msgs.remove(index);
-                        msgs.add(index, sb.toString());
-                    } else {
-                        msgs.add("");
-                        index++;
-                    }
-                }
-
-                for (String msg : msgs) {
-                    Huinyabot.getInstance().getClient().getChat().sendMessage(
-                            m.getEvent().getChannel().getName(),
-                            Huinyabot.getInstance().getLocale().formattedText(
-                                    m.getLanguage(),
-                                    LineIds.C_NOTIFY_SUCCESS_LIST,
-                                    msg
-                            ),
-                            null,
-                            (m.getEvent().getMessageId().isPresent()) ? m.getEvent().getMessageId().get() : null
-                    );
-                }
-
-                return null;
-            }
-            default: {
-                break;
-            }
-        }
-
-        ArrayList<String> s = new ArrayList<>(Arrays.asList(m.getMessage().getMessage().split(" ")));
-        if (s.size() == 0 || Objects.equals(s.get(0), "")) {
-            return Huinyabot.getInstance().getLocale().literalText(
-                    m.getLanguage(),
+        if (s.isEmpty()) {
+            session.close();
+            return bot.getLocale().literalText(
+                    channel.getPreferences().getLanguage(),
                     LineIds.NOT_ENOUGH_ARGS
             );
         }
-        ArrayList<String> subInfo = new ArrayList<>(Arrays.asList(s.get(0).split(":")));
-        if (subInfo.size() == 0) {
-            return Huinyabot.getInstance().getLocale().literalText(
-                    m.getLanguage(),
-                    LineIds.NOT_ENOUGH_ARGS
-            );
-        }
+
+        String[] targetEvent = s.get(0).split(":");
         s.remove(0);
 
-        final String STREAMER_NAME = subInfo.get(0).toLowerCase();
-        final String SUB_EVENT = (subInfo.size() > 1) ? subInfo.get(1).toLowerCase() : null;
+        // Getting the Twitch info about the target (specified user):
+        List<User> twitchUsers;
 
-        List<User> users = Huinyabot.getInstance().getClient().getHelix().getUsers(
-                Huinyabot.getInstance().getProperties().getProperty("ACCESS_TOKEN", null),
-                null,
-                Collections.singletonList(STREAMER_NAME)
-        ).execute().getUsers();
+        try {
+            twitchUsers = bot.getClient().getHelix()
+                    .getUsers(
+                            bot.getCredential().getAccessToken(),
+                            null,
+                            Collections.singletonList(targetEvent[0])
+                    )
+                    .execute()
+                    .getUsers();
+        } catch (Exception e) {
+            session.close();
+            return null;
+        }
 
-        if (users.size() == 0) {
-            return Huinyabot.getInstance().getLocale().formattedText(
-                    m.getLanguage(),
-                    LineIds.C_NOTIFY_USERNOTFOUND
+        if (twitchUsers.isEmpty()) {
+            session.close();
+            return bot.getLocale().formattedText(
+                    channel.getPreferences().getLanguage(),
+                    LineIds.C_NOTIFY_USERNOTFOUND,
+                    targetEvent[0]
             );
         }
 
-        final User USER = users.get(0);
+        User twitchUser = twitchUsers.get(0);
 
-        if (m.getCurrentPermissions().getId() >= Permissions.BROADCASTER.getId()) {
-            switch (m.getMessage().getSubCommand()) {
-                case "on": {
-                    if (!target.getListeners().containsKey(USER.getId()) && target.getListeners().keySet().size() + 1 > MAX_LISTEN_COUNT) {
-                        return Huinyabot.getInstance().getLocale()
-                                .formattedText(
-                                        m.getLanguage(),
-                                        LineIds.C_NOTIFY_EXCEEDEDLIMIT,
-                                        String.valueOf(target.getListeners().keySet().size()),
-                                        String.valueOf(MAX_LISTEN_COUNT)
-                                );
-                    }
+        // Getting active listenables for the target (specified user):
+        List<Listenable> listenables = session.createQuery("from Listenable where aliasId = :aliasId AND channel = :channel", Listenable.class)
+                .setParameter("aliasId", twitchUser.getId())
+                .setParameter("channel", channel)
+                .getResultList();
 
-                    NotifyListener listener = target.getListeners().getOrDefault(
-                            USER.getId(),
-                            new NotifyListener(
-                                new HashMap<>(),
-                                new HashMap<>(),
-                                new ArrayList<>(),
-                                new ArrayList<>(),
-                                new HashMap<>()
-                            )
+        Listenable listenable;
+
+        if (
+                permission.getPermission().getValue() >= Permissions.BROADCASTER.getId() &&
+                        (!m.getMessage().getSubCommand().equals("sub") && !m.getMessage().getSubCommand().equals("unsub") &&
+                        !m.getMessage().getSubCommand().equals("list") && !m.getMessage().getSubCommand().equals("subs")
+                        )
+        ) {
+            session.getTransaction().begin();
+
+            // Make the target listenable:
+            if (m.getMessage().getSubCommand().equals("on")) {
+                List<Listenable> otherListenables = session.createQuery("from Listenable where aliasId = :aliasId AND isEnabled = true AND channel != :channel", Listenable.class)
+                        .setParameter("aliasId", twitchUser.getId())
+                        .setParameter("channel", channel)
+                        .getResultList();
+
+                if (otherListenables.isEmpty()) {
+                    bot.getClient().getClientHelper().enableStreamEventListener(twitchUser.getId(), twitchUser.getLogin());
+                }
+
+                if (channel.getListenables().stream().filter(c -> c.getAliasName().equals(targetEvent[0])).findFirst().isEmpty()) {
+                    ListenableMessages messages = new ListenableMessages();
+                    ListenableIcons icons = new ListenableIcons();
+
+                    listenable = new Listenable(Integer.parseInt(twitchUser.getId()), twitchUser.getLogin(), messages, icons);
+                    listenable.setIcons(icons);
+                    listenable.setMessages(messages);
+
+                    channel.addListenable(listenable);
+
+                    session.persist(channel);
+                    session.persist(listenable);
+                    session.persist(messages);
+                    session.persist(icons);
+
+                    session.getTransaction().commit();
+                    session.close();
+                    return bot.getLocale().formattedText(
+                            channel.getPreferences().getLanguage(),
+                            LineIds.C_NOTIFY_SUCCESS_ON,
+                            "all",
+                            twitchUser.getLogin()
                     );
+                } else {
+                    session.close();
+                    return bot.getLocale().formattedText(
+                            channel.getPreferences().getLanguage(),
+                            LineIds.C_NOTIFY_ALREADYLISTENING,
+                            twitchUser.getLogin()
+                    );
+                }
+            }
 
-                    if (SUB_EVENT != null) {
-                        for (String event : SUB_EVENT.split(",")) {
-                            event = event.toLowerCase();
-                            if (!listener.getEvents().contains(event) && EVENTS.contains(event)) {
-                                listener.getEvents().add(event);
-                            }
-                        }
-                    } else {
-                        for (String event : EVENTS) {
-                            if (!listener.getEvents().contains(event)) {
-                                listener.getEvents().add(event);
-                            }
-                        }
-                    }
+            if (listenables.isEmpty()) {
+                session.close();
+                return bot.getLocale().formattedText(
+                        channel.getPreferences().getLanguage(),
+                        LineIds.C_NOTIFY_DOESNOTLISTENING,
+                        targetEvent[0]
+                );
+            } else {
+                listenable = listenables.get(0);
+            }
 
-                    boolean someoneElseListening = false;
+            // Stop listening to the channel:
+            if (m.getMessage().getSubCommand().equals("off")) {
+                List<Listenable> otherListenables = session.createQuery("from Listenable where aliasId = :aliasId AND isEnabled = true AND channel != :channel", Listenable.class)
+                        .setParameter("aliasId", twitchUser.getId())
+                        .setParameter("channel", channel)
+                        .getResultList();
 
-                    for (TargetModel target2 : Huinyabot.getInstance().getTargetCtrl().getAll().values()) {
-                        if (target2.getListeners().containsKey(USER.getId())) {
-                            someoneElseListening = true;
+                if (otherListenables.isEmpty()) {
+                    bot.getClient().getClientHelper().disableStreamEventListenerForId(twitchUser.getId());
+                }
+
+                session.remove(listenable);
+                session.getTransaction().commit();
+                session.close();
+
+                return bot.getLocale().formattedText(
+                        channel.getPreferences().getLanguage(),
+                        LineIds.C_NOTIFY_SUCCESS_OFFFULL,
+                        "all",
+                        twitchUser.getLogin()
+                );
+            }
+
+            String msg = String.join(" ", s);
+
+            if (msg.isBlank()) {
+                session.close();
+                return bot.getLocale().literalText(
+                        channel.getPreferences().getLanguage(),
+                        LineIds.C_NOTIFY_NOMSG
+                );
+            }
+
+            // Setting the message:
+            if (m.getMessage().getSubCommand().equals("message")) {
+                ListenableMessages messages = listenable.getMessages();
+
+                // Setting message for an event:
+                if (targetEvent.length > 1) {
+                    switch (targetEvent[1]) {
+                        case "live":
+                            messages.setLiveMessage(msg);
                             break;
-                        }
-                    }
-
-                    if (!someoneElseListening) {
-                        Huinyabot.getInstance().getClient().getClientHelper().enableStreamEventListener(USER.getLogin());
-                    }
-
-                    Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().put(USER.getId(), listener);
-
-                    return Huinyabot.getInstance().getLocale()
-                            .formattedText(
-                                    m.getLanguage(),
-                                    LineIds.C_NOTIFY_SUCCESS_ON,
-                                    listener.getEvents().stream().map(ev->"\""+ev+"\"").collect(Collectors.joining(", ")),
-                                    USER.getLogin()
+                        case "offline":
+                            messages.setOfflineMessage(msg);
+                            break;
+                        case "title":
+                            messages.setTitleMessage(msg);
+                            break;
+                        case "category":
+                            messages.setCategoryMessage(msg);
+                            break;
+                        default:
+                            session.close();
+                            return bot.getLocale().literalText(
+                                    channel.getPreferences().getLanguage(),
+                                    LineIds.C_NOTIFY_NOTHINGCHANGED
                             );
+                    }
+                } else {
+                    messages.setLiveMessage(msg);
+                    messages.setOfflineMessage(msg);
+                    messages.setTitleMessage(msg);
+                    messages.setCategoryMessage(msg);
                 }
-                case "off": {
-                    if (!target.getListeners().containsKey(USER.getId())) {
-                        return Huinyabot.getInstance().getLocale()
-                                .formattedText(
-                                        m.getLanguage(),
-                                        LineIds.C_NOTIFY_DOESNOTLISTENING,
-                                        USER.getLogin()
-                                );
-                    }
 
-                    NotifyListener listener = target.getListeners().get(USER.getId());
+                listenable.setMessages(messages);
 
-                    // Setting subscribe events
-                    if (SUB_EVENT != null) {
-                        for (String event : SUB_EVENT.split(",")) {
-                            event = event.toLowerCase();
-                            if (listener.getEvents().contains(event) && EVENTS.contains(event)) {
-                                listener.getEvents().remove(event);
-                            }
-                        }
+                // Saving changes:
+                session.persist(listenable);
+                session.persist(messages);
+                session.getTransaction().commit();
+                session.close();
 
-                        if (listener.getEvents().size() == 0) {
-                            Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().remove(USER.getId());
-                            listener = null;
-                        } else {
-                            Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().remove(USER.getId());
-                            Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().put(USER.getId(), listener);
-                        }
-                    } else {
-                        Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().remove(USER.getId());
-                        listener = null;
-                    }
+                if (targetEvent.length > 1) {
+                    return bot.getLocale().formattedText(
+                            channel.getPreferences().getLanguage(),
+                            LineIds.C_NOTIFY_SUCCESS_COMMENT_UPDATED,
+                            targetEvent[1],
+                            channel.getAliasName()
+                    );
+                } else {
+                    return bot.getLocale().formattedText(
+                            channel.getPreferences().getLanguage(),
+                            LineIds.C_NOTIFY_SUCCESS_COMMENT_UPDATEDALL,
+                            channel.getAliasName()
+                    );
+                }
+            }
 
-                    boolean someoneElseListening = false;
+            // Setting the icon:
+            else if (m.getMessage().getSubCommand().equals("icon")) {
+                ListenableIcons icons = listenable.getIcons();
 
-                    for (TargetModel target2 : Huinyabot.getInstance().getTargetCtrl().getAll().values()) {
-                        if (target2.getListeners().containsKey(USER.getId())) {
-                            someoneElseListening = true;
+                if (msg.isBlank()) {
+                    session.close();
+                    return bot.getLocale().literalText(
+                            channel.getPreferences().getLanguage(),
+                            LineIds.C_NOTIFY_NOMSG
+                    );
+                }
+
+                // Setting message for an event:
+                if (targetEvent.length > 1) {
+                    switch (targetEvent[1]) {
+                        case "live":
+                            icons.setLiveIcon(msg);
                             break;
-                        }
+                        case "offline":
+                            icons.setOfflineIcon(msg);
+                            break;
+                        case "title":
+                            icons.setTitleIcon(msg);
+                            break;
+                        case "category":
+                            icons.setCategoryIcon(msg);
+                            break;
+                        default:
+                            session.close();
+                            return bot.getLocale().literalText(
+                                    channel.getPreferences().getLanguage(),
+                                    LineIds.C_NOTIFY_NOTHINGCHANGED
+                            );
                     }
-
-                    if (!someoneElseListening) {
-                        Huinyabot.getInstance().getClient().getClientHelper().disableStreamEventListenerForId(USER.getId());
-                    }
-
-                    if (listener == null) {
-                        return Huinyabot.getInstance().getLocale()
-                                .formattedText(
-                                        m.getLanguage(),
-                                        LineIds.C_NOTIFY_SUCCESS_OFFFULL,
-                                        USER.getLogin()
-                                );
-                    } else {
-                        return Huinyabot.getInstance().getLocale()
-                                .formattedText(
-                                        m.getLanguage(),
-                                        LineIds.C_NOTIFY_SUCCESS_OFF,
-                                        listener.getEvents().stream().map(ev -> "\"" + ev + "\"").collect(Collectors.joining(", ")),
-                                        USER.getLogin()
-                                );
-                    }
+                } else {
+                    icons.setLiveIcon(msg);
+                    icons.setOfflineIcon(msg);
+                    icons.setTitleIcon(msg);
+                    icons.setCategoryIcon(msg);
                 }
-                case "message": {
-                    if (!m.getMessage().getOptions().contains("clear") && s.size() == 0) {
-                        return Huinyabot.getInstance().getLocale()
-                                .literalText(
-                                        m.getLanguage(),
-                                        LineIds.C_NOTIFY_NOMSG
-                                );
-                    }
 
-                    if (!target.getListeners().containsKey(USER.getId())) {
-                         return Huinyabot.getInstance().getLocale()
-                                 .formattedText(
-                                         m.getLanguage(),
-                                         LineIds.C_NOTIFY_DOESNOTLISTENING,
-                                         USER.getLogin()
-                                 );
-                    }
+                // Saving changes:
+                session.getTransaction().begin();
+                session.persist(icons);
+                session.getTransaction().commit();
+                session.close();
 
-                    NotifyListener listener = target.getListeners().get(USER.getId());
-                    ArrayList<String> args = new ArrayList<>();
-
-                    if (SUB_EVENT != null) {
-                        for (String event : SUB_EVENT.split(",")) {
-                            event = event.toLowerCase();
-                            if (listener.getEvents().contains(event) && EVENTS.contains(event)) {
-                                args.add(event);
-                                if (m.getMessage().getOptions().contains("clear")) {
-                                    listener.getMessages().remove(event);
-                                    continue;
-                                }
-                                listener.getMessages().put(event, String.join(" ", s));
-                            }
-                        }
-
-                        Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().remove(USER.getId());
-                        Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().put(USER.getId(), listener);
-
-                        if (m.getMessage().getOptions().contains("clear")) {
-                            return Huinyabot.getInstance().getLocale()
-                                    .formattedText(
-                                            m.getLanguage(),
-                                            LineIds.C_NOTIFY_SUCCESS_COMMENT_REMOVED,
-                                            args.stream().map(a -> "\"" + a + "\"").collect(Collectors.joining(", ")),
-                                            USER.getLogin()
-                                    );
-                        } else {
-                            return Huinyabot.getInstance().getLocale()
-                                    .formattedText(
-                                            m.getLanguage(),
-                                            LineIds.C_NOTIFY_SUCCESS_COMMENT_UPDATED,
-                                            args.stream().map(a->"\""+a+"\"").collect(Collectors.joining(", ")),
-                                            USER.getLogin()
-                                    );
-                        }
-
-                    } else {
-                        for (String event : EVENTS) {
-                            if (listener.getEvents().contains(event)) {
-                                if (m.getMessage().getOptions().contains("clear")) {
-                                    listener.getMessages().remove(event);
-                                    continue;
-                                }
-                                listener.getMessages().put(event, String.join(" ", s));
-                            }
-                        }
-
-                        Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().remove(USER.getId());
-                        Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().put(USER.getId(), listener);
-
-                        if (m.getMessage().getOptions().contains("clear")) {
-                            return Huinyabot.getInstance().getLocale()
-                                    .formattedText(
-                                            m.getLanguage(),
-                                            LineIds.C_NOTIFY_SUCCESS_COMMENT_REMOVEDALL,
-                                            USER.getLogin()
-                                    );
-                        } else {
-                            return Huinyabot.getInstance().getLocale()
-                                    .formattedText(
-                                            m.getLanguage(),
-                                            LineIds.C_NOTIFY_SUCCESS_COMMENT_UPDATEDALL,
-                                            USER.getLogin()
-                                    );
-                        }
-                    }
+                if (targetEvent.length > 1) {
+                    return bot.getLocale().formattedText(
+                            channel.getPreferences().getLanguage(),
+                            LineIds.C_NOTIFY_SUCCESS_ICON_UPDATED,
+                            targetEvent[1],
+                            listenable.getAliasName()
+                    );
+                } else {
+                    return bot.getLocale().formattedText(
+                            channel.getPreferences().getLanguage(),
+                            LineIds.C_NOTIFY_SUCCESS_ICON_UPDATEDALL,
+                            listenable.getAliasName()
+                    );
                 }
-                case "icon": {
-                    if (!m.getMessage().getOptions().contains("clear") && s.size() == 0) {
-                        return Huinyabot.getInstance().getLocale()
-                                .literalText(
-                                        m.getLanguage(),
-                                        LineIds.C_NOTIFY_NOMSG
-                                );
-                    }
+            }
 
-                    if (!target.getListeners().containsKey(USER.getId())) {
-                        return Huinyabot.getInstance().getLocale()
-                                .formattedText(
-                                        m.getLanguage(),
-                                        LineIds.C_NOTIFY_DOESNOTLISTENING,
-                                        USER.getLogin()
-                                );
-                    }
+            // Setting the flag:
+            else if (m.getMessage().getSubCommand().equals("flag")) {
+                ListenableFlag flag;
 
-                    NotifyListener listener = target.getListeners().get(USER.getId());
-                    ArrayList<String> args = new ArrayList<>();
-
-                    if (SUB_EVENT != null) {
-                        for (String event : SUB_EVENT.split(",")) {
-                            event = event.toLowerCase();
-                            if (listener.getEvents().contains(event) && EVENTS.contains(event)) {
-                                args.add(event);
-                                if (m.getMessage().getOptions().contains("clear")) {
-                                    listener.getIcons().remove(event);
-                                    continue;
-                                }
-                                listener.getIcons().put(event, String.join(" ", s));
-                            }
-                        }
-
-                        Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().remove(USER.getId());
-                        Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().put(USER.getId(), listener);
-
-                        if (m.getMessage().getOptions().contains("clear")) {
-                            return Huinyabot.getInstance().getLocale()
-                                    .formattedText(
-                                            m.getLanguage(),
-                                            LineIds.C_NOTIFY_SUCCESS_ICON_REMOVED,
-                                            args.stream().map(a -> "\"" + a + "\"").collect(Collectors.joining(", ")),
-                                            USER.getLogin()
-                                    );
-                        } else {
-                            return Huinyabot.getInstance().getLocale()
-                                    .formattedText(
-                                            m.getLanguage(),
-                                            LineIds.C_NOTIFY_SUCCESS_ICON_UPDATED,
-                                            args.stream().map(a->"\""+a+"\"").collect(Collectors.joining(", ")),
-                                            USER.getLogin()
-                                    );
-                        }
-
-                    } else {
-                        for (String event : EVENTS) {
-                            if (listener.getEvents().contains(event)) {
-                                if (m.getMessage().getOptions().contains("clear")) {
-                                    listener.getIcons().remove(event);
-                                    continue;
-                                }
-                                listener.getIcons().put(event, String.join(" ", s));
-                            }
-                        }
-
-                        Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().remove(USER.getId());
-                        Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().put(USER.getId(), listener);
-
-                        if (m.getMessage().getOptions().contains("clear")) {
-                            return Huinyabot.getInstance().getLocale()
-                                    .formattedText(
-                                            m.getLanguage(),
-                                            LineIds.C_NOTIFY_SUCCESS_ICON_REMOVEDALL,
-                                            USER.getLogin()
-                                    );
-                        } else {
-                            return Huinyabot.getInstance().getLocale()
-                                    .formattedText(
-                                            m.getLanguage(),
-                                            LineIds.C_NOTIFY_SUCCESS_ICON_UPDATEDALL,
-                                            USER.getLogin()
-                                    );
-                        }
-                    }
+                // Parsing the flag name:
+                switch (msg.toLowerCase()) {
+                    case "massping":
+                        flag = ListenableFlag.MASSPING;
+                        break;
+                    case "no-sub":
+                    case "unsubscriberable":
+                        flag = ListenableFlag.UNSUBSCRIBERABLE;
+                        break;
+                    default:
+                        session.close();
+                        return bot.getLocale().literalText(
+                                channel.getPreferences().getLanguage(),
+                                LineIds.C_NOTIFY_NOFLAG
+                        );
                 }
-                case "flag": {
-                    if (!target.getListeners().containsKey(USER.getId())) {
-                        return Huinyabot.getInstance().getLocale()
-                                .formattedText(
-                                        m.getLanguage(),
-                                        LineIds.C_NOTIFY_DOESNOTLISTENING,
-                                        USER.getLogin()
-                                );
-                    }
 
-                    if (m.getMessage().getOptions().size() == 0) {
-                        return Huinyabot.getInstance().getLocale()
-                                .literalText(
-                                        m.getLanguage(),
-                                        LineIds.C_NOTIFY_NOFLAG
-                                );
-                    }
+                Set<ListenableFlag> flags = listenable.getFlags();
+                String msgToSend;
 
-                    NotifyListener listener = target.getListeners().get(USER.getId());
-                    ArrayList<String> args = new ArrayList<>();
-
-                    if (SUB_EVENT != null) {
-                        for (String event : SUB_EVENT.split(",")) {
-                            event = event.toLowerCase();
-                            if (listener.getEvents().contains(event) && EVENTS.contains(event)) {
-                                args.add(event);
-                                if (!listener.getFlags().containsKey(event)) {
-                                    listener.getFlags().put(event, m.getMessage().getOptions());
-                                    continue;
-                                }
-
-                                for (String o : m.getMessage().getOptions()) {
-                                    if (!listener.getFlags().get(event).contains(o)) {
-                                        listener.getFlags().get(event).add(o);
-                                    }
-                                }
-                            }
-                        }
-
-                        Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().remove(USER.getId());
-                        Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().put(USER.getId(), listener);
-
-                        return Huinyabot.getInstance().getLocale()
-                                .formattedText(
-                                        m.getLanguage(),
-                                        LineIds.C_NOTIFY_SUCCESS_FLAG,
-                                        m.getMessage().getOptions().stream().map(a->"\""+a+"\"").collect(Collectors.joining(", ")),
-                                        args.stream().map(a->"\""+a+"\"").collect(Collectors.joining(", ")),
-                                        USER.getLogin()
-                                );
-                    } else {
-                        for (String event : EVENTS) {
-                            if (listener.getEvents().contains(event)) {
-                                if (!listener.getFlags().containsKey(event)) {
-                                    listener.getFlags().put(event, m.getMessage().getOptions());
-                                    continue;
-                                }
-
-                                for (String o : m.getMessage().getOptions()) {
-                                    if (!listener.getFlags().get(event).contains(o)) {
-                                        listener.getFlags().get(event).add(o);
-                                    }
-                                }
-                            }
-                        }
-
-                        Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().remove(USER.getId());
-                        Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().put(USER.getId(), listener);
-
-                        return Huinyabot.getInstance().getLocale()
-                                .formattedText(
-                                        m.getLanguage(),
-                                        LineIds.C_NOTIFY_SUCCESS_FLAGALL,
-                                        m.getMessage().getOptions().stream().map(a->"\""+a+"\"").collect(Collectors.joining(", ")),
-                                        USER.getLogin()
-                                );
-                    }
+                // Updating flags:
+                if (flags.add(flag)) {
+                    msgToSend = bot.getLocale().formattedText(
+                            channel.getPreferences().getLanguage(),
+                            LineIds.C_NOTIFY_SUCCESS_FLAG,
+                            msg.toLowerCase(),
+                            targetEvent[1],
+                            listenable.getAliasName()
+                    );
+                } else {
+                    msgToSend = bot.getLocale().literalText(
+                            channel.getPreferences().getLanguage(),
+                            LineIds.C_NOTIFY_NOTHINGCHANGED
+                    );
                 }
-                case "unflag": {
-                    if (!target.getListeners().containsKey(USER.getId())) {
-                        return Huinyabot.getInstance().getLocale()
-                                .formattedText(
-                                        m.getLanguage(),
-                                        LineIds.C_NOTIFY_DOESNOTLISTENING,
-                                        USER.getLogin()
-                                );
-                    }
 
-                    NotifyListener listener = target.getListeners().get(USER.getId());
-                    ArrayList<String> args = new ArrayList<>();
+                listenable.setFlags(flags);
 
-                    if (SUB_EVENT != null) {
-                        for (String event : SUB_EVENT.split(",")) {
-                            event = event.toLowerCase();
-                            if (listener.getEvents().contains(event) && EVENTS.contains(event)) {
-                                if (listener.getFlags().containsKey(event)) {
-                                    args.add(event);
-                                    if (m.getMessage().getOptions().size() == 0){
-                                        listener.getFlags().remove(event);
-                                        continue;
-                                    }
-                                    for (String o : m.getMessage().getOptions()) {
-                                        listener.getFlags().get(event).remove(o);
-                                    }
-                                }
-                            }
-                        }
+                // Saving changes:
+                session.persist(listenable);
+                session.getTransaction().commit();
+                session.close();
 
-                        Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().remove(USER.getId());
-                        Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().put(USER.getId(), listener);
+                return msgToSend;
+            }
 
-                        return Huinyabot.getInstance().getLocale()
-                                .formattedText(
-                                        m.getLanguage(),
-                                        LineIds.C_NOTIFY_SUCCESS_UNFLAG,
-                                        m.getMessage().getOptions().stream().map(a->"\""+a+"\"").collect(Collectors.joining(", ")),
-                                        args.stream().map(a->"\""+a+"\"").collect(Collectors.joining(", ")),
-                                        USER.getLogin()
-                                );
-                    } else {
-                        for (String event : EVENTS) {
-                            if (listener.getEvents().contains(event)) {
-                                if (listener.getFlags().containsKey(event)) {
-                                    if (m.getMessage().getOptions().size() == 0){
-                                        listener.getFlags().remove(event);
-                                        continue;
-                                    }
-                                    for (String o : m.getMessage().getOptions()) {
-                                        listener.getFlags().get(event).remove(o);
-                                    }
-                                }
-                            }
-                        }
+            // Removing the flag:
+            else if (m.getMessage().getSubCommand().equals("unflag")) {
+                ListenableFlag flag;
 
-                        Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().remove(USER.getId());
-                        Huinyabot.getInstance().getTargetCtrl().get(target.getAliasId()).getListeners().put(USER.getId(), listener);
-
-                        return Huinyabot.getInstance().getLocale()
-                                .formattedText(
-                                        m.getLanguage(),
-                                        LineIds.C_NOTIFY_SUCCESS_UNFLAGALL,
-                                        m.getMessage().getOptions().stream().map(a->"\""+a+"\"").collect(Collectors.joining(", ")),
-                                        USER.getLogin()
-                                );
-                    }
+                // Parsing the flag name:
+                switch (msg.toLowerCase()) {
+                    case "massping":
+                        flag = ListenableFlag.MASSPING;
+                        break;
+                    case "no-sub":
+                    case "unsubscriberable":
+                        flag = ListenableFlag.UNSUBSCRIBERABLE;
+                        break;
+                    default:
+                        session.close();
+                        return bot.getLocale().literalText(
+                                channel.getPreferences().getLanguage(),
+                                LineIds.C_NOTIFY_NOFLAG
+                        );
                 }
-                default: {
-                    break;
+
+                Set<ListenableFlag> flags = listenable.getFlags();
+                String msgToSend;
+
+                // Updating flags:
+                if (flags.remove(flag)) {
+                    msgToSend = bot.getLocale().formattedText(
+                            channel.getPreferences().getLanguage(),
+                            LineIds.C_NOTIFY_SUCCESS_UNFLAG,
+                            msg.toLowerCase(),
+                            targetEvent[1],
+                            channel.getAliasName()
+                    );
+                } else {
+                    msgToSend = bot.getLocale().literalText(
+                            channel.getPreferences().getLanguage(),
+                            LineIds.C_NOTIFY_NOTHINGCHANGED
+                    );
                 }
+
+                listenable.setFlags(flags);
+
+                // Saving changes:
+                session.persist(listenable);
+                session.getTransaction().commit();
+                session.close();
+
+                return msgToSend;
+            }
+            else {
+                session.close();
+                return bot.getLocale().literalText(
+                        channel.getPreferences().getLanguage(),
+                        LineIds.NO_SUBCMD
+                );
             }
         }
 
-        if (!target.getListeners().containsKey(USER.getId())) {
-            return Huinyabot.getInstance().getLocale()
-                    .formattedText(
-                            m.getLanguage(),
-                            LineIds.C_NOTIFY_DOESNOTLISTENING,
-                            USER.getLogin()
-                    );
+        // Obtain available channels for subscription:
+        if (m.getMessage().getSubCommand().equals("list")) {
+            if (channel.getListenables().isEmpty()) {
+                session.close();
+                return bot.getLocale().literalText(
+                        channel.getPreferences().getLanguage(),
+                        LineIds.C_NOTIFY_NOLISTENINGCHANNELS
+                );
+            }
+
+            session.close();
+            return bot.getLocale().formattedText(
+                    channel.getPreferences().getLanguage(),
+                    LineIds.C_NOTIFY_SUCCESS_LIST,
+                    channel.getListenables().stream().map(Listenable::getAliasName).collect(Collectors.joining(", "))
+            );
         }
 
-        NotifyListener listener = target.getListeners().getOrDefault(USER.getId(), null);
+        // Receiving subscribed channels:
+        else if (m.getMessage().getSubCommand().equals("subs")) {
+            if (user.getSubscribers().isEmpty()) {
+                session.close();
+                return bot.getLocale().literalText(
+                        channel.getPreferences().getLanguage(),
+                        LineIds.C_NOTIFY_SUCCESS_SUBSNOONE
+                );
+            }
 
-        if (listener != null) {
-            switch (m.getMessage().getSubCommand()) {
-                case "sub":
-                case "subscribe": {
-                    NotifySubscriber subscriber = listener.getSubscribers()
-                            .stream()
-                            .filter(sub -> Objects.equals(sub.getAliasId(), m.getSender().getAliasId()))
-                            .findFirst().orElse(new NotifySubscriber(new ArrayList<>(), m.getSender().getAliasId()));
+            session.close();
+            return bot.getLocale().formattedText(
+                    channel.getPreferences().getLanguage(),
+                    LineIds.C_NOTIFY_SUCCESS_LIST,
+                    user.getSubscribers().stream().map(sub -> {
+                        String events = sub.getEvents().stream().map(SubscriberEvent::getName).collect(Collectors.joining("-"));
 
-                    ArrayList<String> subs = new ArrayList<>();
+                        return sub.getListenable().getAliasName() + " (" + events + ")";
+                    }).collect(Collectors.joining(", "))
+            );
 
-                    if (SUB_EVENT != null) {
-                        for (String event : SUB_EVENT.split(",")) {
-                            event = event.toLowerCase();
-                            if (EVENTS.contains(event) && !subscriber.getSubscribedEvents().contains(event)) {
-                                subscriber.subscribeToEvent(event);
-                                subs.add(event);
-                            }
+        }
+
+        if (listenables.isEmpty()) {
+            session.close();
+            return bot.getLocale().formattedText(
+                    channel.getPreferences().getLanguage(),
+                    LineIds.C_NOTIFY_DOESNOTLISTENING,
+                    targetEvent[0]
+            );
+        } else {
+            listenable = listenables.get(0);
+        }
+
+        // Subscribe to the channel:
+        if (m.getMessage().getSubCommand().equals("sub")) {
+            Subscriber subscriber = listenable.getSubscribers()
+                    .stream()
+                    .filter(p -> p.getUser().getAliasId().equals(user.getAliasId()))
+                    .findFirst()
+                    .orElseGet(() -> {
+                        Subscriber sub = new Subscriber(user, listenable);
+
+                        user.addSubscriber(sub);
+                        listenable.addSubscriber(sub);
+
+                        session.persist(user);
+                        session.persist(listenable);
+                        session.persist(sub);
+
+                        return sub;
+                    });
+
+            Set<SubscriberEvent> events = subscriber.getEvents();
+            List<String> eventIds = new ArrayList<>();
+
+            if (targetEvent.length > 1) {
+                switch (targetEvent[1]) {
+                    case "live":
+                        if (events.add(SubscriberEvent.LIVE)) {
+                            eventIds.add(SubscriberEvent.LIVE.getName());
                         }
-                    } else {
-                        for (String event : EVENTS) {
-                            if (!subscriber.getSubscribedEvents().contains(event)) {
-                                subscriber.subscribeToEvent(event);
-                                subs.add(event);
-                            }
+                        break;
+                    case "offline":
+                        if (events.add(SubscriberEvent.OFFLINE)) {
+                            eventIds.add(SubscriberEvent.OFFLINE.getName());
                         }
-                    }
-
-                    if (subs.size() == 0) {
-                        return Huinyabot.getInstance().getLocale()
-                                .literalText(
-                                        m.getLanguage(),
-                                        LineIds.C_NOTIFY_ALREADYSUB
-                                );
-                    }
-
-                    int index = Huinyabot.getInstance().getTargetCtrl()
-                            .get(target.getAliasId())
-                            .getListeners()
-                            .get(USER.getId())
-                            .getSubscribers()
-                            .indexOf(
-                                    Huinyabot.getInstance().getTargetCtrl()
-                                            .get(target.getAliasId())
-                                            .getListeners()
-                                            .get(USER.getId())
-                                            .getSubscribers()
-                                            .stream().filter(sub -> Objects.equals(sub.getAliasId(), m.getSender().getAliasId()))
-                                            .findFirst().orElse(null)
-                            );
-
-                    if (index == -1) {
-                        Huinyabot.getInstance().getTargetCtrl()
-                                .get(target.getAliasId())
-                                .getListeners()
-                                .get(USER.getId())
-                                .getSubscribers()
-                                .add(subscriber);
-                    } else {
-                        Huinyabot.getInstance().getTargetCtrl()
-                                .get(target.getAliasId())
-                                .getListeners()
-                                .get(USER.getId())
-                                .getSubscribers()
-                                .remove(index);
-
-                        Huinyabot.getInstance().getTargetCtrl()
-                                .get(target.getAliasId())
-                                .getListeners()
-                                .get(USER.getId())
-                                .getSubscribers()
-                                .add(index, subscriber);
-                    }
-
-                    return Huinyabot.getInstance().getLocale()
-                            .formattedText(
-                                    m.getLanguage(),
-                                    LineIds.C_NOTIFY_SUCCESS_SUB,
-                                    subs.stream().map(sub->"\""+sub+"\"").collect(Collectors.joining(", ")),
-                                    USER.getLogin()
-                            );
+                        break;
+                    case "title":
+                        if (events.add(SubscriberEvent.TITLE)) {
+                            eventIds.add(SubscriberEvent.TITLE.getName());
+                        }
+                        break;
+                    case "category":
+                        if (events.add(SubscriberEvent.CATEGORY)) {
+                            eventIds.add(SubscriberEvent.CATEGORY.getName());
+                        }
+                        break;
+                    default:
+                        session.close();
+                        return bot.getLocale().literalText(
+                                channel.getPreferences().getLanguage(),
+                                LineIds.C_NOTIFY_NOTHINGCHANGED
+                        );
                 }
-                case "unsub":
-                case "unsubscribe": {
-                    NotifySubscriber subscriber = listener.getSubscribers()
-                            .stream()
-                            .filter(sub -> Objects.equals(sub.getAliasId(), m.getSender().getAliasId()))
-                            .findFirst().orElse(null);
-
-                    if (subscriber == null) {
-                        return Huinyabot.getInstance().getLocale()
-                                .formattedText(
-                                        m.getLanguage(),
-                                        LineIds.C_NOTIFY_NOTSUB,
-                                        USER.getLogin()
-                                );
-                    }
-
-                    int index = listener.getSubscribers().indexOf(subscriber);
-
-                    ArrayList<String> subs = new ArrayList<>();
-
-                    if (SUB_EVENT != null) {
-                        for (String event : SUB_EVENT.split(",")) {
-                            event = event.toLowerCase();
-                            if (EVENTS.contains(event) && subscriber.getSubscribedEvents().contains(event)) {
-                                subscriber.unsubscribeFromEvent(event);
-                                subs.add(event);
-                            }
-                        }
-
-                        if (subscriber.getSubscribedEvents().size() == 0) {
-                            Huinyabot.getInstance().getTargetCtrl()
-                                    .get(target.getAliasId())
-                                    .getListeners()
-                                    .get(USER.getId())
-                                    .getSubscribers()
-                                    .remove(index);
-
-                            return Huinyabot.getInstance().getLocale()
-                                    .formattedText(
-                                            m.getLanguage(),
-                                            LineIds.C_NOTIFY_SUCCESS_UNSUBFULL,
-                                            USER.getLogin()
-                                    );
-                        }
-                    } else {
-                        Huinyabot.getInstance().getTargetCtrl()
-                                .get(target.getAliasId())
-                                .getListeners()
-                                .get(USER.getId())
-                                .getSubscribers()
-                                .remove(index);
-
-                        return Huinyabot.getInstance().getLocale()
-                                .formattedText(
-                                        m.getLanguage(),
-                                        LineIds.C_NOTIFY_SUCCESS_UNSUBFULL,
-                                        USER.getLogin()
-                                );
-                    }
-
-                    return Huinyabot.getInstance().getLocale()
-                            .formattedText(
-                                    m.getLanguage(),
-                                    LineIds.C_NOTIFY_SUCCESS_UNSUB,
-                                    subs.stream().map(sub->"\""+sub+"\"").collect(Collectors.joining(", ")),
-                                    USER.getLogin()
-                            );
+            } else {
+                if (events.add(SubscriberEvent.LIVE)) {
+                    eventIds.add(SubscriberEvent.LIVE.getName());
                 }
-                default: {
-                    break;
+
+                if (events.add(SubscriberEvent.TITLE)) {
+                    eventIds.add(SubscriberEvent.TITLE.getName());
+                }
+
+                if (events.add(SubscriberEvent.OFFLINE)) {
+                    eventIds.add(SubscriberEvent.OFFLINE.getName());
+                }
+
+                if (events.add(SubscriberEvent.CATEGORY)) {
+                    eventIds.add(SubscriberEvent.CATEGORY.getName());
                 }
             }
+
+            String msgToSend;
+
+            if (eventIds.isEmpty()) {
+                msgToSend = bot.getLocale().literalText(
+                        channel.getPreferences().getLanguage(),
+                        LineIds.C_NOTIFY_NOTHINGCHANGED
+                );
+            } else {
+                msgToSend = bot.getLocale().formattedText(
+                        channel.getPreferences().getLanguage(),
+                        LineIds.C_NOTIFY_SUCCESS_SUB,
+                        String.join(", ", eventIds),
+                        listenable.getAliasName()
+                );
+            }
+
+            session.persist(subscriber);
+
+            session.getTransaction().commit();
+            session.close();
+
+            return msgToSend;
         }
 
+        // Unsubscribe from the channel:
+        else if (m.getMessage().getSubCommand().equals("unsub")) {
+            List<Subscriber> subscribers = session.createQuery("from Subscriber where user = :user AND listenable = :listenable", Subscriber.class)
+                    .setParameter("listenable", listenable)
+                    .setParameter("user", user)
+                    .getResultList();
+
+            if (subscribers.isEmpty()) {
+                session.close();
+                return bot.getLocale().formattedText(
+                        channel.getPreferences().getLanguage(),
+                        LineIds.C_NOTIFY_NOTSUB,
+                        listenable.getAliasName()
+                );
+            }
+
+            Subscriber subscriber = subscribers.get(0);
+
+            Set<SubscriberEvent> events = subscriber.getEvents();
+            List<String> eventIds = new ArrayList<>();
+
+            if (targetEvent.length > 1) {
+                switch (targetEvent[1]) {
+                    case "live":
+                        if (events.remove(SubscriberEvent.LIVE)) {
+                            eventIds.add(SubscriberEvent.LIVE.getName());
+                        }
+                        break;
+                    case "offline":
+                        if (events.remove(SubscriberEvent.OFFLINE)) {
+                            eventIds.add(SubscriberEvent.OFFLINE.getName());
+                        }
+                        break;
+                    case "title":
+                        if (events.remove(SubscriberEvent.TITLE)) {
+                            eventIds.add(SubscriberEvent.TITLE.getName());
+                        }
+                        break;
+                    case "category":
+                        if (events.remove(SubscriberEvent.CATEGORY)) {
+                            eventIds.add(SubscriberEvent.CATEGORY.getName());
+                        }
+                        break;
+                    default:
+                        session.close();
+                        return bot.getLocale().literalText(
+                                channel.getPreferences().getLanguage(),
+                                LineIds.C_NOTIFY_NOTHINGCHANGED
+                        );
+                }
+            } else {
+                if (events.remove(SubscriberEvent.LIVE)) {
+                    eventIds.add(SubscriberEvent.LIVE.getName());
+                }
+
+                if (events.remove(SubscriberEvent.TITLE)) {
+                    eventIds.add(SubscriberEvent.TITLE.getName());
+                }
+
+                if (events.remove(SubscriberEvent.OFFLINE)) {
+                    eventIds.add(SubscriberEvent.OFFLINE.getName());
+                }
+
+                if (events.remove(SubscriberEvent.CATEGORY)) {
+                    eventIds.add(SubscriberEvent.CATEGORY.getName());
+                }
+            }
+
+            String msgToSend;
+
+            if (eventIds.isEmpty()) {
+                msgToSend = bot.getLocale().literalText(
+                        channel.getPreferences().getLanguage(),
+                        LineIds.C_NOTIFY_NOTHINGCHANGED
+                );
+            } else {
+                msgToSend = bot.getLocale().formattedText(
+                        channel.getPreferences().getLanguage(),
+                        LineIds.C_NOTIFY_SUCCESS_UNSUB,
+                        String.join(", ", eventIds),
+                        listenable.getAliasName()
+                );
+            }
+
+            if (subscriber.getEvents().isEmpty()) {
+                session.remove(subscriber);
+            } else {
+                session.persist(subscriber);
+            }
+
+            session.getTransaction().commit();
+            session.close();
+
+            return msgToSend;
+        }
+
+        session.close();
         return null;
     }
 }
