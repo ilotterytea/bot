@@ -360,6 +360,8 @@ public class MessageHandlerSamples {
                 }
             }
 
+            messages.add(icon + " " + String.join(", ", currentMessage) + " " + icon);
+
             // Sending messages:
             for (int i = 0; i < messages.size(); i++) {
                 if (i == 0) {
@@ -460,6 +462,8 @@ public class MessageHandlerSamples {
                     currentMessage.add("@" + name);
                 }
             }
+
+            messages.add(icon + " " + String.join(", ", currentMessage) + " " + icon);
 
             // Sending messages:
             for (int i = 0; i < messages.size(); i++) {
@@ -564,6 +568,8 @@ public class MessageHandlerSamples {
                 }
             }
 
+            messages.add(icon + " " + String.join(", ", currentMessage) + " " + icon);
+
             // Sending messages:
             for (int i = 0; i < messages.size(); i++) {
                 if (i == 0) {
@@ -666,6 +672,8 @@ public class MessageHandlerSamples {
                     currentMessage.add("@" + name);
                 }
             }
+
+            messages.add(icon + " " + String.join(", ", currentMessage) + " " + icon);
 
             // Sending messages:
             for (int i = 0; i < messages.size(); i++) {
