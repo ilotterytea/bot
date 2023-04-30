@@ -298,10 +298,23 @@ public class MessageHandlerSamples {
             Channel channel = listenable.getChannel();
             List<String> messages = new ArrayList<>();
 
-            messages.add(listenable.getMessages().getLiveMessage()
-                    .replace("%\\{name}", e.getChannel().getName())
-                    .replace("%\\{title}", (Objects.equals(e.getStream().getTitle(), "")) ? "N/A" : e.getStream().getTitle())
-                    .replace("%\\{game}", (Objects.equals(e.getStream().getGameName(), "")) ? "N/A" : e.getStream().getGameName())
+            String icon = (listenable.getIcons().getLiveIcon() == null) ? "" : listenable.getIcons().getLiveIcon();
+
+            String announcementLine;
+            if (listenable.getMessages().getLiveMessage() == null) {
+                announcementLine = bot.getLocale().literalText(
+                        channel.getPreferences().getLanguage(),
+                        LineIds.WENT_LIVE_NOTIFICATION
+                );
+            } else {
+                announcementLine = listenable.getMessages().getLiveMessage();
+            }
+
+            messages.add(icon + " " + announcementLine
+                    .replace("%{name}", e.getChannel().getName())
+                    .replace("%{title}", (Objects.equals(e.getStream().getTitle(), "")) ? "N/A" : e.getStream().getTitle())
+                    .replace("%{game}", (Objects.equals(e.getStream().getGameName(), "")) ? "N/A" : e.getStream().getGameName())
+                    + " " + icon
             );
 
             List<String> currentMessage = new ArrayList<>();
@@ -330,18 +343,18 @@ public class MessageHandlerSamples {
             // The message will end up looking like "@username, @someone, ...".
             for (String name : names) {
                 if (
-                        (listenable.getIcons().getLiveIcon() +
+                        (icon +
                                 " " +
                                 String.join(", ", currentMessage) +
                                 "@" +
                                 name +
                                 ", " +
                                 " " +
-                                listenable.getIcons().getLiveIcon()).length() > 500
+                                icon).length() < 500
                 ) {
                     currentMessage.add("@" + name);
                 } else {
-                    messages.add(listenable.getIcons().getLiveIcon() + " " + String.join(", ", currentMessage) + " " + listenable.getIcons().getLiveIcon());
+                    messages.add(icon + " " + String.join(", ", currentMessage) + " " + icon);
                     currentMessage = new ArrayList<>();
                     currentMessage.add("@" + name);
                 }
@@ -388,8 +401,21 @@ public class MessageHandlerSamples {
             Channel channel = listenable.getChannel();
             List<String> messages = new ArrayList<>();
 
-            messages.add(listenable.getMessages().getOfflineMessage()
-                    .replace("%\\{name}", e.getChannel().getName())
+            String icon = (listenable.getIcons().getOfflineIcon() == null) ? "" : listenable.getIcons().getOfflineIcon();
+
+            String announcementLine;
+            if (listenable.getMessages().getOfflineMessage() == null) {
+                announcementLine = bot.getLocale().literalText(
+                        channel.getPreferences().getLanguage(),
+                        LineIds.WENT_OFFLINE_NOTIFICATION
+                );
+            } else {
+                announcementLine = listenable.getMessages().getOfflineMessage();
+            }
+
+            messages.add(icon + " " + announcementLine
+                    .replace("%{name}", e.getChannel().getName())
+                    + " " + icon
             );
 
             List<String> currentMessage = new ArrayList<>();
@@ -418,18 +444,18 @@ public class MessageHandlerSamples {
             // The message will end up looking like "@username, @someone, ...".
             for (String name : names) {
                 if (
-                        (listenable.getIcons().getOfflineIcon() +
+                        (icon +
                                 " " +
                                 String.join(", ", currentMessage) +
                                 "@" +
                                 name +
                                 ", " +
                                 " " +
-                                listenable.getIcons().getOfflineIcon()).length() > 500
+                                icon).length() < 500
                 ) {
                     currentMessage.add("@" + name);
                 } else {
-                    messages.add(listenable.getIcons().getOfflineIcon() + " " + String.join(", ", currentMessage) + " " + listenable.getIcons().getOfflineIcon());
+                    messages.add(icon + " " + String.join(", ", currentMessage) + " " + icon);
                     currentMessage = new ArrayList<>();
                     currentMessage.add("@" + name);
                 }
@@ -476,10 +502,23 @@ public class MessageHandlerSamples {
             Channel channel = listenable.getChannel();
             List<String> messages = new ArrayList<>();
 
-            messages.add(listenable.getMessages().getTitleMessage()
-                    .replace("%\\{name}", e.getChannel().getName())
-                    .replace("%\\{title}", (Objects.equals(e.getStream().getTitle(), "")) ? "N/A" : e.getStream().getTitle())
-                    .replace("%\\{game}", (Objects.equals(e.getStream().getGameName(), "")) ? "N/A" : e.getStream().getGameName())
+            String icon = (listenable.getIcons().getTitleIcon() == null) ? "" : listenable.getIcons().getTitleIcon();
+
+            String announcementLine;
+            if (listenable.getMessages().getTitleMessage() == null) {
+                announcementLine = bot.getLocale().literalText(
+                        channel.getPreferences().getLanguage(),
+                        LineIds.TITLE_CHANGE_NOTIFICATION
+                );
+            } else {
+                announcementLine = listenable.getMessages().getTitleMessage();
+            }
+
+            messages.add(icon + " " + announcementLine
+                    .replace("%{name}", e.getChannel().getName())
+                    .replace("%{title}", (Objects.equals(e.getStream().getTitle(), "")) ? "N/A" : e.getStream().getTitle())
+                    .replace("%{game}", (Objects.equals(e.getStream().getGameName(), "")) ? "N/A" : e.getStream().getGameName())
+                    + " " + icon
             );
 
             List<String> currentMessage = new ArrayList<>();
@@ -508,18 +547,18 @@ public class MessageHandlerSamples {
             // The message will end up looking like "@username, @someone, ...".
             for (String name : names) {
                 if (
-                        (listenable.getIcons().getTitleIcon() +
+                        (icon +
                                 " " +
                                 String.join(", ", currentMessage) +
                                 "@" +
                                 name +
                                 ", " +
                                 " " +
-                                listenable.getIcons().getTitleIcon()).length() > 500
+                                icon).length() < 500
                 ) {
                     currentMessage.add("@" + name);
                 } else {
-                    messages.add(listenable.getIcons().getTitleIcon() + " " + String.join(", ", currentMessage) + " " + listenable.getIcons().getTitleIcon());
+                    messages.add(icon + " " + String.join(", ", currentMessage) + " " + icon);
                     currentMessage = new ArrayList<>();
                     currentMessage.add("@" + name);
                 }
@@ -566,10 +605,23 @@ public class MessageHandlerSamples {
             Channel channel = listenable.getChannel();
             List<String> messages = new ArrayList<>();
 
-            messages.add(listenable.getMessages().getCategoryMessage()
-                    .replace("%\\{name}", e.getChannel().getName())
-                    .replace("%\\{title}", (Objects.equals(e.getStream().getTitle(), "")) ? "N/A" : e.getStream().getTitle())
-                    .replace("%\\{game}", (Objects.equals(e.getStream().getGameName(), "")) ? "N/A" : e.getStream().getGameName())
+            String icon = (listenable.getIcons().getCategoryIcon() == null) ? "" : listenable.getIcons().getCategoryIcon();
+
+            String announcementLine;
+            if (listenable.getMessages().getCategoryMessage() == null) {
+                announcementLine = bot.getLocale().literalText(
+                        channel.getPreferences().getLanguage(),
+                        LineIds.GAME_CHANGE_NOTIFICATION
+                );
+            } else {
+                announcementLine = listenable.getMessages().getCategoryMessage();
+            }
+
+            messages.add(icon + " " + announcementLine
+                    .replace("%{name}", e.getChannel().getName())
+                    .replace("%{title}", (Objects.equals(e.getStream().getTitle(), "")) ? "N/A" : e.getStream().getTitle())
+                    .replace("%{game}", (Objects.equals(e.getStream().getGameName(), "")) ? "N/A" : e.getStream().getGameName())
+                    + " " + icon
             );
 
             List<String> currentMessage = new ArrayList<>();
@@ -598,18 +650,18 @@ public class MessageHandlerSamples {
             // The message will end up looking like "@username, @someone, ...".
             for (String name : names) {
                 if (
-                        (listenable.getIcons().getCategoryIcon() +
+                        (icon +
                                 " " +
                                 String.join(", ", currentMessage) +
                                 "@" +
                                 name +
                                 ", " +
                                 " " +
-                                listenable.getIcons().getCategoryIcon()).length() > 500
+                                icon).length() < 500
                 ) {
                     currentMessage.add("@" + name);
                 } else {
-                    messages.add(listenable.getIcons().getCategoryIcon() + " " + String.join(", ", currentMessage) + " " + listenable.getIcons().getCategoryIcon());
+                    messages.add(icon + " " + String.join(", ", currentMessage) + " " + icon);
                     currentMessage = new ArrayList<>();
                     currentMessage.add("@" + name);
                 }
