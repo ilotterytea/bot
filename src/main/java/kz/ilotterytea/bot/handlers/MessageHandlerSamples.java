@@ -363,30 +363,11 @@ public class MessageHandlerSamples {
             messages.add(icon + " " + String.join(", ", currentMessage) + " " + icon);
 
             // Sending messages:
-            for (int i = 0; i < messages.size(); i++) {
-                if (i == 0) {
-                    try {
-                        bot.getClient().getHelix().sendChatAnnouncement(
-                                bot.getCredential().getAccessToken(),
-                                listenable.getChannel().getAliasId().toString(),
-                                bot.getCredential().getUserId(),
-                                messages.get(i),
-                                AnnouncementColor.PRIMARY
-                        );
-                    } catch (Exception ex) {
-                        LOG.error("Couldn't send an announcement message: " + ex);
-
-                        bot.getClient().getChat().sendMessage(
-                                channel.getAliasName(),
-                                messages.get(i)
-                        );
-                    }
-                } else {
-                    bot.getClient().getChat().sendMessage(
-                            channel.getAliasName(),
-                            messages.get(i)
-                    );
-                }
+            for (String message : messages) {
+                bot.getClient().getChat().sendMessage(
+                        channel.getAliasName(),
+                        message
+                );
             }
         }
 
@@ -466,30 +447,11 @@ public class MessageHandlerSamples {
             messages.add(icon + " " + String.join(", ", currentMessage) + " " + icon);
 
             // Sending messages:
-            for (int i = 0; i < messages.size(); i++) {
-                if (i == 0) {
-                    try {
-                        bot.getClient().getHelix().sendChatAnnouncement(
-                                bot.getCredential().getAccessToken(),
-                                listenable.getChannel().getAliasId().toString(),
-                                bot.getCredential().getUserId(),
-                                messages.get(i),
-                                AnnouncementColor.PRIMARY
-                        );
-                    } catch (Exception ex) {
-                        LOG.error("Couldn't send an announcement message: " + ex);
-
-                        bot.getClient().getChat().sendMessage(
-                                channel.getAliasName(),
-                                messages.get(i)
-                        );
-                    }
-                } else {
-                    bot.getClient().getChat().sendMessage(
-                            channel.getAliasName(),
-                            messages.get(i)
-                    );
-                }
+            for (String message : messages) {
+                bot.getClient().getChat().sendMessage(
+                        channel.getAliasName(),
+                        message
+                );
             }
         }
 
@@ -571,30 +533,11 @@ public class MessageHandlerSamples {
             messages.add(icon + " " + String.join(", ", currentMessage) + " " + icon);
 
             // Sending messages:
-            for (int i = 0; i < messages.size(); i++) {
-                if (i == 0) {
-                    try {
-                        bot.getClient().getHelix().sendChatAnnouncement(
-                                bot.getCredential().getAccessToken(),
-                                listenable.getChannel().getAliasId().toString(),
-                                bot.getCredential().getUserId(),
-                                messages.get(i),
-                                AnnouncementColor.PRIMARY
-                        );
-                    } catch (Exception ex) {
-                        LOG.error("Couldn't send an announcement message: " + ex);
-
-                        bot.getClient().getChat().sendMessage(
-                                channel.getAliasName(),
-                                messages.get(i)
-                        );
-                    }
-                } else {
-                    bot.getClient().getChat().sendMessage(
-                            channel.getAliasName(),
-                            messages.get(i)
-                    );
-                }
+            for (String message : messages) {
+                bot.getClient().getChat().sendMessage(
+                        channel.getAliasName(),
+                        message
+                );
             }
         }
 
@@ -676,30 +619,11 @@ public class MessageHandlerSamples {
             messages.add(icon + " " + String.join(", ", currentMessage) + " " + icon);
 
             // Sending messages:
-            for (int i = 0; i < messages.size(); i++) {
-                if (i == 0) {
-                    try {
-                        bot.getClient().getHelix().sendChatAnnouncement(
-                                bot.getCredential().getAccessToken(),
-                                listenable.getChannel().getAliasId().toString(),
-                                bot.getCredential().getUserId(),
-                                messages.get(i),
-                                AnnouncementColor.PRIMARY
-                        );
-                    } catch (Exception ex) {
-                        LOG.error("Couldn't send an announcement message: " + ex);
-
-                        bot.getClient().getChat().sendMessage(
-                                channel.getAliasName(),
-                                messages.get(i)
-                        );
-                    }
-                } else {
-                    bot.getClient().getChat().sendMessage(
-                            channel.getAliasName(),
-                            messages.get(i)
-                    );
-                }
+            for (String message : messages) {
+                bot.getClient().getChat().sendMessage(
+                        channel.getAliasName(),
+                        message
+                );
             }
         }
 
