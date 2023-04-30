@@ -129,7 +129,7 @@ public class Huinyabot extends Bot {
         }
 
         // Obtaining the listenables:
-        List<Listenable> listenables = session.createQuery("from Listenable where isEnabled = false", Listenable.class).getResultList();
+        List<Listenable> listenables = session.createQuery("from Listenable where isEnabled = true", Listenable.class).getResultList();
 
         if (!listenables.isEmpty()) {
             Set<Integer> listenableIds = new HashSet<>();
