@@ -106,6 +106,8 @@ public class JoinCommand extends Command {
 
         session.close();
 
+        Huinyabot.getInstance().getClient().getChat().joinChannel(m.getEvent().getUser().getName());
+
         return Huinyabot.getInstance().getLocale().formattedText(
                 originChannel.getPreferences().getLanguage(),
                 LineIds.C_JOIN_SUCCESS,
