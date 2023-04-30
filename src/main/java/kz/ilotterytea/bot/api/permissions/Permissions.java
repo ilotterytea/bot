@@ -10,9 +10,8 @@ public enum Permissions {
     USER(1),
     VIP(2),
     MOD(3),
-    TRUSTED(4),
-    BROADCASTER(5),
-    SUPAUSER(127),
+    BROADCASTER(4),
+    SUPAUSER(5),
     ;
 
     private final int id;
