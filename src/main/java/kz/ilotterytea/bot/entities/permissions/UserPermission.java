@@ -24,6 +24,7 @@ public class UserPermission {
     @JoinColumn(name = "user_id", updatable = false, nullable = false)
     private User user;
 
+    @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false)
     private Permission permission;
 
