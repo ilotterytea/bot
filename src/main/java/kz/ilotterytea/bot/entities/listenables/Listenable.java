@@ -109,6 +109,7 @@ public class Listenable {
     }
 
     public void setMessages(ListenableMessages messages) {
+        messages.setListenable(this);
         this.messages = messages;
     }
 
@@ -117,6 +118,7 @@ public class Listenable {
     }
 
     public void setIcons(ListenableIcons icons) {
+        icons.setListenable(this);
         this.icons = icons;
     }
 
