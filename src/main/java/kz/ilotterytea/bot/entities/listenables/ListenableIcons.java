@@ -3,8 +3,9 @@ package kz.ilotterytea.bot.entities.listenables;
 import jakarta.persistence.*;
 
 /**
+ * Listenable's icons.
  * @author ilotterytea
- * @version 1.0
+ * @version 1.4
  */
 @Entity
 @Table(name = "listenable_icons")

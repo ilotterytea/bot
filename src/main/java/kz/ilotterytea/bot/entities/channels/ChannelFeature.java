@@ -1,8 +1,9 @@
 package kz.ilotterytea.bot.entities.channels;
 
 /**
+ * Channel features.
  * @author ilotterytea
- * @version 1.0
+ * @version 1.4
  */
 public enum ChannelFeature {
     NOTIFY_7TV("notify_7tv_events"),

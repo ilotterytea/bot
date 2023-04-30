@@ -7,8 +7,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * Custom command.
  * @author ilotterytea
- * @version 1.0
+ * @version 1.4
  */
 @Entity
 @Table(name = "custom_commands")

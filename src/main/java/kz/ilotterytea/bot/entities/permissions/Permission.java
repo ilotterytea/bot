@@ -1,6 +1,7 @@
 package kz.ilotterytea.bot.entities.permissions;
 
 /**
+ * Permission.
  * @author ilotterytea
  * @version 1.4
  */

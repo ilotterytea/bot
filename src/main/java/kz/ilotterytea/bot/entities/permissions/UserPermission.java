@@ -5,6 +5,7 @@ import kz.ilotterytea.bot.entities.channels.Channel;
 import kz.ilotterytea.bot.entities.users.User;
 
 /**
+ * User permission.
  * @author ilotterytea
  * @version 1.4
  */

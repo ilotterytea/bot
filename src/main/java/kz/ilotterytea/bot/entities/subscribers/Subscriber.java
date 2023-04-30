@@ -8,8 +8,9 @@ import kz.ilotterytea.bot.entities.users.User;
 import java.util.Set;
 
 /**
+ * Subscriber for listenable.
  * @author ilotterytea
- * @version 1.0
+ * @version 1.4
  */
 @Entity
 @Table(name = "subscribers")

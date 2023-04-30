@@ -4,8 +4,9 @@ import jakarta.persistence.*;
 import kz.ilotterytea.bot.SharedConstants;
 
 /**
+ * User preferences
  * @author ilotterytea
- * @version 1.0
+ * @version 1.4
  */
 @Entity
 @Table(name = "user_preferences")

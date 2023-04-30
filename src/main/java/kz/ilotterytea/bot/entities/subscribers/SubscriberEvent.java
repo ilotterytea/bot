@@ -1,8 +1,9 @@
 package kz.ilotterytea.bot.entities.subscribers;
 
 /**
+ * Subscriber's subscribed event.
  * @author ilotterytea
- * @version 1.0
+ * @version 1.4
  */
 public enum SubscriberEvent {
     LIVE("LIVE"),
