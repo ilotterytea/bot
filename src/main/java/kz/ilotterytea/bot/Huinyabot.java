@@ -3,30 +3,30 @@ package kz.ilotterytea.bot;
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
-import com.github.twitch4j.chat.events.channel.DeleteMessageEvent;
 import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
-import com.github.twitch4j.chat.events.channel.UserBanEvent;
 import com.github.twitch4j.events.ChannelChangeGameEvent;
 import com.github.twitch4j.events.ChannelChangeTitleEvent;
 import com.github.twitch4j.events.ChannelGoLiveEvent;
 import com.github.twitch4j.events.ChannelGoOfflineEvent;
 import com.github.twitch4j.helix.domain.User;
-import com.google.gson.Gson;
 import kz.ilotterytea.bot.api.commands.CommandLoader;
 import kz.ilotterytea.bot.api.delay.DelayManager;
+import kz.ilotterytea.bot.entities.channels.Channel;
+import kz.ilotterytea.bot.entities.channels.ChannelPreferences;
+import kz.ilotterytea.bot.entities.listenables.Listenable;
 import kz.ilotterytea.bot.handlers.MessageHandlerSamples;
 import kz.ilotterytea.bot.i18n.I18N;
-import kz.ilotterytea.bot.models.TargetModel;
 import kz.ilotterytea.bot.storage.PropLoader;
-import kz.ilotterytea.bot.storage.json.TargetController;
-import kz.ilotterytea.bot.storage.json.UserController;
 import kz.ilotterytea.bot.thirdpartythings.seventv.eventapi.SevenTVEventAPIClient;
+import kz.ilotterytea.bot.utils.HibernateUtil;
 import kz.ilotterytea.bot.utils.StorageUtils;
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.net.URISyntaxException;
+import java.util.stream.Collectors;
 
 /**
  * Bot.
@@ -38,10 +38,7 @@ public class Huinyabot extends Bot {
     private TwitchClient client;
     private CommandLoader loader;
     private DelayManager delayer;
-    private TargetController targets;
-    private UserController users;
     private SevenTVEventAPIClient sevenTV;
-    private Map<String, String> targetLinks;
     private OAuth2Credential credential;
     private I18N i18N;
 
@@ -51,9 +48,6 @@ public class Huinyabot extends Bot {
     public Properties getProperties() { return properties; }
     public CommandLoader getLoader() { return loader; }
     public DelayManager getDelayer() { return delayer; }
-    public TargetController getTargetCtrl() { return targets; }
-    public UserController getUserCtrl() { return users; }
-    public Map<String, String> getTargetLinks() { return targetLinks; }
     public OAuth2Credential getCredential() { return credential; }
     public I18N getLocale() { return i18N; }
 
@@ -64,23 +58,11 @@ public class Huinyabot extends Bot {
     @Override
     public void init() {
         StorageUtils.checkIntegrity();
-        targets = new TargetController(SharedConstants.TARGETS_DIR);
-        users = new UserController(SharedConstants.USERS_DIR);
 
         properties = new PropLoader(SharedConstants.PROPERTIES_PATH);
         loader = new CommandLoader();
         delayer = new DelayManager();
-        targetLinks = new HashMap<>();
-
         i18N = new I18N(StorageUtils.getFilepathsFromResource("/i18n"));
-
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                targets.save();
-                users.save();
-            }
-        }, 300000, 300000);
 
         try {
             sevenTV = new SevenTVEventAPIClient();
@@ -102,51 +84,75 @@ public class Huinyabot extends Bot {
                 .build();
 
         client.getChat().connect();
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        // Join bot's chat:
         if (credential.getUserName() != null && credential.getUserId() != null) {
             client.getChat().joinChannel(credential.getUserName());
-            targetLinks.put(credential.getUserName(), credential.getUserId());
+            LOGGER.debug("Joined to bot's chat room!");
 
-            if (!Huinyabot.getInstance().targets.getAll().containsKey(credential.getUserId())) {
-                Huinyabot.getInstance().targets.set(credential.getUserId(), Huinyabot.getInstance().targets.getOrDefault(credential.getUserId()));
+            // Generate a new channel for bot if it doesn't exist:
+            List<Channel> channels = session.createQuery("from Channel where aliasId = :aliasId", Channel.class)
+                    .setParameter("aliasId", credential.getUserId())
+                    .getResultList();
+
+            if (channels.isEmpty()) {
+                LOGGER.debug("The bot doesn't have a channel entry. Creating a new one...");
+
+                Channel channel = new Channel(Integer.parseInt(credential.getUserId()), credential.getUserName());
+                ChannelPreferences preferences = new ChannelPreferences(channel);
+                channel.setPreferences(preferences);
+
+                session.getTransaction().begin();
+                session.persist(channel);
+                session.persist(preferences);
+                session.getTransaction().commit();
             }
         }
 
-        List<User> userList = new ArrayList<>();
-        if (client.getHelix() != null && properties.getProperty("ACCESS_TOKEN") != null && targets.getAll().keySet().size() > 0) {
-            userList = client.getHelix().getUsers(
-                    properties.getProperty("ACCESS_TOKEN"),
-                    new ArrayList<>(targets.getAll().keySet()),
+        // Obtaining the channels:
+        List<Channel> channels = session.createQuery("from Channel where optOutTimestamp is null", Channel.class).getResultList();
+
+        if (!channels.isEmpty()) {
+            List<User> twitchChannels = client.getHelix().getUsers(
+                    credential.getAccessToken(),
+                    channels.stream().map(c -> c.getAliasId().toString()).collect(Collectors.toList()),
                     null
             ).execute().getUsers();
 
-            for (User u : userList) {
-                if (!client.getChat().isChannelJoined(u.getLogin())) {
-                    client.getChat().joinChannel(u.getLogin());
-                }
-
-                targetLinks.put(u.getLogin(), u.getId());
+            // Join channel chats:
+            for (User twitchChannel : twitchChannels) {
+                client.getChat().joinChannel(twitchChannel.getLogin());
+                LOGGER.debug("Joined to " + twitchChannel.getLogin() + "'s chat room!");
             }
         }
 
-        ArrayList<String> listeningNow = new ArrayList<>();
+        // Obtaining the listenables:
+        List<Listenable> listenables = session.createQuery("from Listenable where isEnabled = true", Listenable.class).getResultList();
 
-        for (TargetModel target : targets.getAll().values()) {
-            if (target.getListeners().keySet().size() != 0) {
-                List<User> users = client.getHelix().getUsers(
-                        properties.getProperty("ACCESS_TOKEN", null),
-                        new ArrayList<>(target.getListeners().keySet()),
-                        null
-                ).execute().getUsers();
+        if (!listenables.isEmpty()) {
+            Set<Integer> listenableIds = new HashSet<>();
 
-                for (User user : users) {
-                    if (!listeningNow.contains(user.getLogin())) {
-                        client.getClientHelper().enableStreamEventListener(user.getId(), user.getLogin());
-                        listeningNow.add(user.getLogin());
-                        LOGGER.debug("Listening for stream events for user " + user.getLogin());
-                    }
-                }
+            for (Listenable listenable : listenables) {
+                listenableIds.add(listenable.getAliasId());
+            }
+
+            // Getting Twitch info about the listenables:
+            List<User> listenableUsers = client.getHelix().getUsers(
+                    credential.getAccessToken(),
+                    listenableIds.stream().map(Object::toString).collect(Collectors.toList()),
+                    null
+            ).execute().getUsers();
+
+            // Listening the listenables:
+            for (User listenableUser : listenableUsers) {
+                client.getClientHelper().enableStreamEventListener(listenableUser.getId(), listenableUser.getLogin());
+                LOGGER.debug("Listening for stream events for user " + listenableUser.getLogin());
             }
         }
+
+        session.close();
 
         client.getEventManager().onEvent(IRCMessageEvent.class, MessageHandlerSamples::ircMessageEvent);
 
@@ -160,7 +166,5 @@ public class Huinyabot extends Bot {
     public void dispose() {
         client.close();
         sevenTV.close();
-        targets.save();
-        users.save();
     }
 }
