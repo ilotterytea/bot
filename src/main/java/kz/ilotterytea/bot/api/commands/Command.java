@@ -1,55 +1,65 @@
 package kz.ilotterytea.bot.api.commands;
 
-import kz.ilotterytea.bot.api.permissions.Permissions;
-import kz.ilotterytea.bot.models.ArgumentsModel;
+import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
+import kz.ilotterytea.bot.entities.channels.Channel;
+import kz.ilotterytea.bot.entities.permissions.Permission;
+import kz.ilotterytea.bot.entities.permissions.UserPermission;
+import kz.ilotterytea.bot.entities.users.User;
+import kz.ilotterytea.bot.utils.ParsedMessage;
 
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * Command.
  * @author ilotterytea
  * @since 1.0
  */
-public abstract class Command {
+public interface Command {
     /**
      * Get the name ID of command.
      * @since 1.0
      * @author ilotterytea
      * @return name ID.
      */
-    public abstract String getNameId();
+    String getNameId();
     /**
      * Get the seconds delay between command executions.
      * @since 1.0
      * @author ilotterytea
      * @return delay.
      */
-    public abstract int getDelay();
+    int getDelay();
     /**
      * Get the ID of minimal permissions to run the command.
      * @return permission ID.
      */
-    public abstract Permissions getPermissions();
+    Permission getPermissions();
     /**
      * Get the names of the options that should be used in the command.
      * @return array list of option names.
      */
-    public abstract ArrayList<String> getOptions();
+    List<String> getOptions();
     /**
      * Get the names of the subcommands that should be used in the command.
      * @return array list of subcommand names.
      */
-    public abstract ArrayList<String> getSubcommands();
+    List<String> getSubcommands();
     /**
      * Get command alias names.
      * @return array list of alias names.
      */
-    public abstract ArrayList<String> getAliases();
+    List<String> getAliases();
     /**
      * Run the command.
      * @since 1.0
      * @author ilotterytea
      * @return response.
      */
-    public abstract String run(ArgumentsModel args);
+    Optional<String> run(
+            IRCMessageEvent event,
+            ParsedMessage message,
+            Channel channel,
+            User user,
+            UserPermission permission
+    );
 }
