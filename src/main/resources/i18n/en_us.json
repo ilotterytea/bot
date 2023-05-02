@@ -6,6 +6,8 @@
   "msg.not_enough_rights": "Not enough rights to perform this action.",
   "msg.http_response_error": "Received the %s status code while processing the %s request!",
   "msg.something_went_wrong": "Something went wrong!",
+  "msg.unknown_subcommand": "Unknown subcommand is specified!",
+  "msg.no_message": "No message specified!",
 
   "providers.7tv": "7TV",
   "providers.bttv": "BTTV",

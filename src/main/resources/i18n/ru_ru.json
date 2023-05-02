@@ -6,6 +6,9 @@
   "msg.not_enough_rights": "Недостаточно прав для выполнения данного действия.",
   "msg.http_response_error": "Получен код статуса %s, пока обрабатывал %s запрос!",
   "msg.something_went_wrong": "Что-то пошло не так!",
+  "msg.unknown_subcommand": "Указана неизвестная подкоманда!",
+  "msg.no_message": "Нет сообщения!",
+  
   "providers.7tv": "7TV",
   "providers.bttv": "BTTV",
   "providers.ffz": "FFZ",

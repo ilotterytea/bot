@@ -13,6 +13,8 @@ public enum LineIds {
     NO_RIGHTS("msg.not_enough_rights"),
     HTTP_ERROR("msg.http_response_error"),
     SOMETHING_WENT_WRONG("msg.something_went_wrong"),
+    UNKNOWN_SUBCOMMAND("msg.unknown_subcommand"),
+    NO_MESSAGE("msg.no_message"),
 
     STV("providers.7tv"),
     BTTV("providers.bttv"),
