@@ -1,22 +1,27 @@
 package kz.ilotterytea.bot.builtin;
 
+import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 import com.github.twitch4j.helix.domain.Chatter;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.api.commands.Command;
-import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.entities.channels.Channel;
+import kz.ilotterytea.bot.entities.permissions.Permission;
+import kz.ilotterytea.bot.entities.permissions.UserPermission;
+import kz.ilotterytea.bot.entities.users.User;
 import kz.ilotterytea.bot.i18n.LineIds;
-import kz.ilotterytea.bot.models.ArgumentsModel;
+import kz.ilotterytea.bot.utils.ParsedMessage;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Ping em, Fors! LUL
  * @author ilotterytea
  * @since 1.0
  */
-public class MasspingCommand extends Command {
+public class MasspingCommand implements Command {
     @Override
     public String getNameId() { return "massping"; }
 
@@ -24,41 +29,47 @@ public class MasspingCommand extends Command {
     public int getDelay() { return 60000; }
 
     @Override
-    public Permissions getPermissions() { return Permissions.BROADCASTER; }
+    public Permission getPermissions() { return Permission.BROADCASTER; }
 
     @Override
-    public ArrayList<String> getOptions() { return new ArrayList<>(); }
+    public List<String> getOptions() { return Collections.emptyList(); }
 
     @Override
-    public ArrayList<String> getSubcommands() { return new ArrayList<>(); }
+    public List<String> getSubcommands() { return Collections.emptyList(); }
 
     @Override
-    public ArrayList<String> getAliases() { return new ArrayList<>(Arrays.asList("mp", "масспинг", "мп")); }
+    public List<String> getAliases() { return List.of("mp", "масспинг", "мп", "massbing"); }
 
     @Override
-    public String run(ArgumentsModel m) {
-        if (!m.getEvent().getChannelName().isPresent()) return null;
-
+    public Optional<String> run(IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
         List<Chatter> chatters;
 
         try {
             chatters = Huinyabot.getInstance().getClient().getHelix().getChatters(
                     Huinyabot.getInstance().getProperties().getProperty("ACCESS_TOKEN"),
-                    m.getEvent().getChannel().getId(),
+                    channel.getAliasId().toString(),
                     Huinyabot.getInstance().getCredential().getUserId(),
                     null,
                     null
             ).execute().getChatters();
         } catch (Exception e) {
-            return Huinyabot.getInstance().getLocale().literalText(
-                    m.getLanguage(),
+            return Optional.ofNullable(Huinyabot.getInstance().getLocale().literalText(
+                    channel.getPreferences().getLanguage(),
                     LineIds.C_MASSPING_NOTMOD
-            );
+            ));
         }
-
+        
+        String msgToAnnounce;
+        
+        if (message.getMessage().isEmpty()) {
+        	msgToAnnounce = "";
+        } else {
+        	msgToAnnounce = message.getMessage().get();
+        }
 
         ArrayList<String> msgs = new ArrayList<>();
         msgs.add("");
+        
         int index = 0;
 
         for (Chatter chatter : chatters) {
@@ -69,7 +80,7 @@ public class MasspingCommand extends Command {
                     .append("@")
                     .append(chatter.getUserLogin())
                     .append(", ")
-                    .append(m.getMessage().getMessage())
+                    .append(msgToAnnounce)
                     .length() < 500
             ) {
                 sb.append(msgs.get(index)).append("@").append(chatter.getUserLogin()).append(", ");
@@ -83,8 +94,8 @@ public class MasspingCommand extends Command {
 
         for (String msg : msgs) {
             Huinyabot.getInstance().getClient().getChat().sendMessage(
-                    m.getEvent().getChannel().getName(),
-                    msg + m.getMessage().getMessage()
+                    channel.getPreferences().getLanguage(),
+                    msg + msgToAnnounce
             );
         }
 
