@@ -3,27 +3,32 @@ package kz.ilotterytea.bot.builtin;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.api.commands.Command;
-import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.entities.channels.Channel;
+import kz.ilotterytea.bot.entities.permissions.Permission;
+import kz.ilotterytea.bot.entities.permissions.UserPermission;
+import kz.ilotterytea.bot.entities.users.User;
 import kz.ilotterytea.bot.i18n.LineIds;
-import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.thirdpartythings.seventv.eventapi.SevenTVEventAPIClient;
+import kz.ilotterytea.bot.utils.ParsedMessage;
 import kz.ilotterytea.bot.utils.StringUtils;
-import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 
 /**
  * Ping command.
  * @author ilotterytea
  * @since 1.0
  */
-public class PingCommand extends Command {
+public class PingCommand implements Command {
     @Override
     public String getNameId() { return "ping"; }
 
@@ -31,19 +36,19 @@ public class PingCommand extends Command {
     public int getDelay() { return 5000; }
 
     @Override
-    public Permissions getPermissions() { return Permissions.USER; }
+    public Permission getPermissions() { return Permission.USER; }
 
     @Override
-    public ArrayList<String> getOptions() { return new ArrayList<>(); }
+    public List<String> getOptions() { return Collections.emptyList(); }
 
     @Override
-    public ArrayList<String> getSubcommands() { return new ArrayList<>(); }
+    public List<String> getSubcommands() { return Collections.emptyList(); }
 
     @Override
-    public ArrayList<String> getAliases() { return new ArrayList<>(Arrays.asList("pong", "пинг", "понг")); }
+    public List<String> getAliases() { return List.of("pong", "пинг", "понг"); }
 
     @Override
-    public String run(ArgumentsModel m) {
+    public Optional<String> run(IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
         long uptime = ManagementFactory.getRuntimeMXBean().getUptime();
 
         String ut = StringUtils.formatTimestamp(uptime / 1000);
@@ -91,8 +96,8 @@ public class PingCommand extends Command {
             statsStatus = "N/A";
         }
 
-        return Huinyabot.getInstance().getLocale().formattedText(
-                m.getLanguage(),
+        return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
+                channel.getPreferences().getLanguage(),
                 LineIds.C_PING_SUCCESS,
                 System.getProperty("java.version"),
                 ut,
@@ -102,14 +107,14 @@ public class PingCommand extends Command {
                 String.valueOf(Huinyabot.getInstance().getClient().getChat().getLatency()),
                 (SevenTVEventAPIClient.getInstance().isClosed()) ?
         Huinyabot.getInstance().getLocale().literalText(
-                m.getLanguage(),
+                channel.getPreferences().getLanguage(),
                 LineIds.DISCON
         ):Huinyabot.getInstance().getLocale().literalText(
-                        m.getLanguage(),
+                        channel.getPreferences().getLanguage(),
                         LineIds.CON
                 ),
                 neurobajStatus,
                 statsStatus
-        );
+        ));
     }
 }
