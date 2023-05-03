@@ -2,19 +2,27 @@ package kz.ilotterytea.bot.builtin;
 
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.api.commands.Command;
-import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.entities.channels.Channel;
+import kz.ilotterytea.bot.entities.permissions.Permission;
+import kz.ilotterytea.bot.entities.permissions.UserPermission;
+import kz.ilotterytea.bot.entities.users.User;
 import kz.ilotterytea.bot.i18n.LineIds;
-import kz.ilotterytea.bot.models.ArgumentsModel;
+import kz.ilotterytea.bot.utils.ParsedMessage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 
 /**
  * Spam command.
  * @author ilotterytea
  * @since 1.0
  */
-public class SpamCommand extends Command {
+public class SpamCommand implements Command {
     @Override
     public String getNameId() { return "spam"; }
 
@@ -22,38 +30,38 @@ public class SpamCommand extends Command {
     public int getDelay() { return 30000; }
 
     @Override
-    public Permissions getPermissions() { return Permissions.MOD; }
+    public Permission getPermissions() { return Permission.MOD; }
 
     @Override
-    public ArrayList<String> getOptions() { return new ArrayList<>(Arrays.asList("count")); }
+    public List<String> getOptions() { return Collections.singletonList("count"); }
 
     @Override
-    public ArrayList<String> getSubcommands() { return new ArrayList<>(); }
+    public List<String> getSubcommands() { return Collections.emptyList(); }
 
     @Override
-    public ArrayList<String> getAliases() { return new ArrayList<>(Arrays.asList("спам", "насрать", "repeat", "cv", "paste", "cvpaste")); }
+    public List<String> getAliases() { return List.of("спам", "насрать", "repeat", "cv", "paste", "cvpaste"); }
 
     @Override
-    public String run(ArgumentsModel m) {
+    public Optional<String> run(IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
+    	if (message.getMessage().isEmpty() || message.getMessage().get().split(" ").length == 1) {
+    		return Optional.ofNullable(Huinyabot.getInstance().getLocale().literalText(
+    				channel.getPreferences().getLanguage(),
+    				LineIds.NO_MESSAGE
+    		));
+    	}
+    	
         final int MAX_COUNT = 8;
-        ArrayList<String> s = new ArrayList<>(Arrays.asList(m.getMessage().getMessage().split(" ")));
-
-        if (s.size() <= 1) {
-            return Huinyabot.getInstance().getLocale().literalText(
-                    m.getLanguage(),
-                    LineIds.C_SPAM_NOMSG
-            );
-        }
+        ArrayList<String> s = new ArrayList<>(Arrays.asList(message.getMessage().get().split(" ")));
         int count;
 
         try {
             count = Integer.parseInt(s.get(0));
             s.remove(0);
         } catch (NumberFormatException e) {
-            return Huinyabot.getInstance().getLocale().literalText(
-                    m.getLanguage(),
+            return Optional.ofNullable(Huinyabot.getInstance().getLocale().literalText(
+                    channel.getPreferences().getLanguage(),
                     LineIds.C_SPAM_NOCOUNT
-            );
+            ));
         }
 
         if (count > MAX_COUNT) {
@@ -62,15 +70,15 @@ public class SpamCommand extends Command {
 
         for (int i = 0; i < count; i++) {
             Huinyabot.getInstance().getClient().getChat().sendMessage(
-                    m.getEvent().getChannel().getName(),
+                    channel.getAliasName(),
                     String.format(
                             "%s %s",
                             String.join(" ", s),
-                            (m.getMessage().getOptions().contains("count")) ? i + 1 : ""
+                            (message.getUsedOptions().contains("count")) ? i + 1 : ""
                     )
             );
         }
 
-        return null;
+        return Optional.empty();
     }
 }
