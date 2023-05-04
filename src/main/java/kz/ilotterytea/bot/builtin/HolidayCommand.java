@@ -1,17 +1,21 @@
 package kz.ilotterytea.bot.builtin;
 
+import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 import com.github.twitch4j.tmi.domain.Chatters;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.api.commands.Command;
-import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.entities.channels.Channel;
+import kz.ilotterytea.bot.entities.permissions.Permission;
+import kz.ilotterytea.bot.entities.permissions.UserPermission;
+import kz.ilotterytea.bot.entities.users.User;
 import kz.ilotterytea.bot.i18n.LineIds;
-import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.models.HolidayModel;
 import kz.ilotterytea.bot.models.serverresponse.Emote;
 import kz.ilotterytea.bot.models.serverresponse.ServerPayload;
+import kz.ilotterytea.bot.utils.ParsedMessage;
 import kz.ilotterytea.bot.utils.StringUtils;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -25,7 +29,7 @@ import java.util.*;
  * @author ilotterytea
  * @since 1.0
  */
-public class HolidayCommand extends Command {
+public class HolidayCommand implements Command {
     @Override
     public String getNameId() { return "holiday"; }
 
@@ -33,29 +37,29 @@ public class HolidayCommand extends Command {
     public int getDelay() { return 10000; }
 
     @Override
-    public Permissions getPermissions() { return Permissions.USER; }
+    public Permission getPermissions() { return Permission.USER; }
 
     @Override
-    public ArrayList<String> getOptions() { return new ArrayList<>(Arrays.asList("тык", "massping", "all", "все", "no-emotes", "без-эмоутов")); }
+    public List<String> getOptions() { return List.of("тык", "massping", "all", "все", "no-emotes", "без-эмоутов"); }
 
     @Override
-    public ArrayList<String> getSubcommands() { return new ArrayList<>(Collections.singletonList("search")); }
+    public List<String> getSubcommands() { return Collections.singletonList("search"); }
 
     @Override
-    public ArrayList<String> getAliases() { return new ArrayList<>(Arrays.asList("праздник", "hld")); }
+    public List<String> getAliases() { return List.of("праздник", "hld"); }
 
     @Override
-    public String run(ArgumentsModel m) {
-        if (m.getMessage().getSubCommand() != null && m.getMessage().getSubCommand().equals("search")) {
-            if (m.getMessage().getMessage() == null || m.getMessage().getMessage().equals("")) {
-                return Huinyabot.getInstance().getLocale().literalText(
-                        m.getLanguage(),
+    public Optional<String> run(IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
+        if (message.getSubcommandId().isPresent() && message.getSubcommandId().get().equals("search")) {
+            if (message.getMessage().isEmpty()) {
+                return Optional.ofNullable(Huinyabot.getInstance().getLocale().literalText(
+                        channel.getPreferences().getLanguage(),
                         LineIds.C_HOLIDAY_NOSEARCHQUERY
-                );
+                ));
             }
 
             Request request = new Request.Builder()
-                    .url(String.format(SharedConstants.HOLIDAY_SEARCH_URL, m.getMessage().getMessage()))
+                    .url(String.format(SharedConstants.HOLIDAY_SEARCH_URL, message.getMessage().get()))
                     .build();
 
             ArrayList<HolidayModel> holidays;
@@ -67,23 +71,23 @@ public class HolidayCommand extends Command {
                     assert response.body() != null;
                     holidays = new Gson().fromJson(response.body().string(), new TypeToken<ArrayList<HolidayModel>>(){}.getType());
                 } else {
-                    return Huinyabot.getInstance().getLocale().formattedText(
-                            m.getLanguage(),
+                    return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
+                            channel.getPreferences().getLanguage(),
                             LineIds.HTTP_ERROR,
                             String.valueOf(response.code()),
                             "Holiday"
-                    );
+                    ));
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
             if (holidays.isEmpty()) {
-                return Huinyabot.getInstance().getLocale().formattedText(
-                        m.getLanguage(),
+                return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
+                        channel.getPreferences().getLanguage(),
                         LineIds.C_HOLIDAY_QUERYNOTFOUND,
-                        m.getMessage().getMessage()
-                );
+                        message.getMessage().get()
+                ));
             }
 
             ArrayList<String> _holidays = new ArrayList<>();
@@ -99,10 +103,10 @@ public class HolidayCommand extends Command {
             for (String hol : _holidays) {
                 if (
                         Huinyabot.getInstance().getLocale().formattedText(
-                                m.getLanguage(),
+                                channel.getPreferences().getLanguage(),
                                 LineIds.C_HOLIDAY_QUERYSUCCESS,
                                 String.valueOf(holidays.size()),
-                                m.getMessage().getMessage(),
+                                message.getMessage().get(),
                                 msgs.get(index) + hol + ", "
                         ).length() > 500
                 ) {
@@ -118,12 +122,12 @@ public class HolidayCommand extends Command {
 
             for (String msg : msgs) {
                 Huinyabot.getInstance().getClient().getChat().sendMessage(
-                        m.getEvent().getChannel().getName(),
+                        channel.getAliasName(),
                         Huinyabot.getInstance().getLocale().formattedText(
-                                m.getLanguage(),
+                                channel.getPreferences().getLanguage(),
                                 LineIds.C_HOLIDAY_QUERYSUCCESS,
                                 String.valueOf(holidays.size()),
-                                m.getMessage().getMessage(),
+                                message.getMessage().get(),
                                 msg
                         )
                 );
@@ -135,7 +139,7 @@ public class HolidayCommand extends Command {
         int month;
         int day;
 
-        ArrayList<String> s = new ArrayList<>(Arrays.asList(m.getMessage().getMessage().split(" ")));
+        ArrayList<String> s = new ArrayList<>(Arrays.asList(message.getMessage().get().split(" ")));
 
         if (s.size() == 0) {
             month = Calendar.getInstance().get(Calendar.MONTH) + 1;
@@ -175,54 +179,54 @@ public class HolidayCommand extends Command {
                 assert response.body() != null;
                 holidays = new Gson().fromJson(response.body().string(), new TypeToken<ArrayList<String>>(){}.getType());
             } else {
-                return Huinyabot.getInstance().getLocale().formattedText(
-                        m.getLanguage(),
+                return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
+                        channel.getPreferences().getLanguage(),
                         LineIds.HTTP_ERROR,
                         String.valueOf(response.code()),
                         "Holiday"
-                );
+                ));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         if (holidays.size() == 0) {
-            return Huinyabot.getInstance().getLocale().formattedText(
-                    m.getLanguage(),
+            return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
+                    channel.getPreferences().getLanguage(),
                     LineIds.C_HOLIDAY_NOHOLIDAYS,
                     StringUtils.pad(day) + "/" + StringUtils.pad(month)
-            );
+            ));
         }
 
         String name = holidays.get((int) Math.floor(Math.random() * holidays.size() - 1));
 
-        if (m.getMessage().getOptions().contains("all") || m.getMessage().getOptions().contains("все")) {
-            return String.join(", ", holidays);
+        if (message.getUsedOptions().contains("all") || message.getUsedOptions().contains("все")) {
+            return Optional.ofNullable(String.join(", ", holidays));
         }
 
         OkHttpClient client = new OkHttpClient.Builder().build();
         Request statsRequest = new Request.Builder()
                 .get()
-                .url(SharedConstants.STATS_URL + "/api/v1/channel/" + m.getEvent().getChannel().getId() + "/emotes")
+                .url(SharedConstants.STATS_URL + "/api/v1/channel/" + channel.getAliasId().toString() + "/emotes")
                 .build();
 
         ArrayList<Emote> emotes;
 
         try (Response response = client.newCall(statsRequest).execute()) {
             if (response.code() != 200) {
-                return Huinyabot.getInstance().getLocale().formattedText(
-                        m.getLanguage(),
+                return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
+                        channel.getPreferences().getLanguage(),
                         LineIds.HTTP_ERROR,
                         String.valueOf(response.code()),
                         "Stats API"
-                );
+                ));
             }
 
             if (response.body() == null) {
-                return Huinyabot.getInstance().getLocale().formattedText(
-                        m.getLanguage(),
+                return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
+                        channel.getPreferences().getLanguage(),
                         LineIds.SOMETHING_WENT_WRONG
-                );
+                ));
             }
 
             String body = response.body().string();
@@ -232,37 +236,37 @@ public class HolidayCommand extends Command {
             if (payload.getData() != null) {
                 emotes = payload.getData();
             } else {
-                return Huinyabot.getInstance().getLocale().formattedText(
-                        m.getLanguage(),
+                return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
+                        channel.getPreferences().getLanguage(),
                         LineIds.C_ETOP_NOCHANNELEMOTES,
                         Huinyabot.getInstance().getLocale().literalText(
-                                m.getLanguage(),
+                                channel.getPreferences().getLanguage(),
                                 LineIds.STV
                         ),
                         Huinyabot.getInstance().getLocale().literalText(
-                                m.getLanguage(),
+                                channel.getPreferences().getLanguage(),
                                 LineIds.STV
                         )
-                );
+                ));
             }
         } catch (IOException e) {
-            return Huinyabot.getInstance().getLocale().formattedText(
-                    m.getLanguage(),
+            return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
+                    channel.getPreferences().getLanguage(),
                     LineIds.SOMETHING_WENT_WRONG
-            );
+            ));
         }
 
-        if (m.getMessage().getOptions().contains("massping") || m.getMessage().getOptions().contains("тык")) {
+        if (message.getUsedOptions().contains("massping") || message.getUsedOptions().contains("тык")) {
             ArrayList<String> msgs = new ArrayList<>();
             int index = 0;
-            Chatters chatters = Huinyabot.getInstance().getClient().getMessagingInterface().getChatters(m.getEvent().getChannel().getName()).execute();
+            Chatters chatters = Huinyabot.getInstance().getClient().getMessagingInterface().getChatters(channel.getAliasName()).execute();
 
             msgs.add("");
 
             for (String uName : chatters.getAllViewers()) {
                 StringBuilder sb = new StringBuilder();
 
-                if (!m.getMessage().getOptions().contains("no-emotes") || !m.getMessage().getOptions().contains("без-эмоутов")) {
+                if (!message.getUsedOptions().contains("no-emotes") || !message.getUsedOptions().contains("без-эмоутов")) {
                     String finalUName = uName;
                     Optional<Emote> optionalEmote = emotes.stream().filter(e -> e.getName().equalsIgnoreCase(finalUName)).findFirst();
 
@@ -273,7 +277,7 @@ public class HolidayCommand extends Command {
 
                 if (
                         Huinyabot.getInstance().getLocale().formattedText(
-                                m.getLanguage(),
+                                channel.getPreferences().getLanguage(),
                                 LineIds.C_HOLIDAY_SUCCESS,
                                 msgs.get(index) + uName + " ",
                                 StringUtils.pad(day) + "/" + StringUtils.pad(month),
@@ -293,9 +297,9 @@ public class HolidayCommand extends Command {
 
             for (String msg : msgs) {
                 Huinyabot.getInstance().getClient().getChat().sendMessage(
-                        m.getEvent().getChannel().getName(),
+                        channel.getAliasName(),
                         Huinyabot.getInstance().getLocale().formattedText(
-                                m.getLanguage(),
+                                channel.getPreferences().getLanguage(),
                                 LineIds.C_HOLIDAY_SUCCESS,
                                 msg,
                                 StringUtils.pad(day) + "/" + StringUtils.pad(month),
@@ -309,14 +313,14 @@ public class HolidayCommand extends Command {
             return null;
         }
 
-        return Huinyabot.getInstance().getLocale().formattedText(
-                m.getLanguage(),
+        return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
+                channel.getPreferences().getLanguage(),
                 LineIds.C_HOLIDAY_SUCCESS,
                 "",
                 StringUtils.pad(day) + "/" + StringUtils.pad(month),
                 String.valueOf(holidays.indexOf(name) + 1),
                 String.valueOf(holidays.size()),
                 name
-        );
+        ));
     }
 }
