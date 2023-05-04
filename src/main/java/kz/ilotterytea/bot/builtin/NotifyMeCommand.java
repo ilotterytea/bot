@@ -1,5 +1,6 @@
 package kz.ilotterytea.bot.builtin;
 
+import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 import com.github.twitch4j.helix.domain.User;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.api.commands.Command;
@@ -9,12 +10,14 @@ import kz.ilotterytea.bot.entities.listenables.Listenable;
 import kz.ilotterytea.bot.entities.listenables.ListenableFlag;
 import kz.ilotterytea.bot.entities.listenables.ListenableIcons;
 import kz.ilotterytea.bot.entities.listenables.ListenableMessages;
+import kz.ilotterytea.bot.entities.permissions.Permission;
 import kz.ilotterytea.bot.entities.permissions.UserPermission;
 import kz.ilotterytea.bot.entities.subscribers.Subscriber;
 import kz.ilotterytea.bot.entities.subscribers.SubscriberEvent;
 import kz.ilotterytea.bot.i18n.LineIds;
-import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.utils.HibernateUtil;
+import kz.ilotterytea.bot.utils.ParsedMessage;
+
 import org.hibernate.Session;
 
 import java.util.*;
@@ -25,7 +28,7 @@ import java.util.stream.Collectors;
  * @author ilotterytea
  * @since 1.3
  */
-public class NotifyMeCommand extends Command {
+public class NotifyMeCommand implements Command {
     @Override
     public String getNameId() { return "notify"; }
 
@@ -33,58 +36,35 @@ public class NotifyMeCommand extends Command {
     public int getDelay() { return 10000; }
 
     @Override
-    public Permissions getPermissions() { return Permissions.USER; }
+    public Permission getPermissions() { return Permission.USER; }
 
     @Override
-    public ArrayList<String> getOptions() { return new ArrayList<>(Arrays.asList("massping", "clear", "no-massping", "no-sub", "announce")); }
+    public List<String> getOptions() { return List.of("massping", "clear", "no-massping", "no-sub", "announce"); }
 
     @Override
-    public ArrayList<String> getSubcommands() { return new ArrayList<>(Arrays.asList("subscribe", "unsubscribe", "list", "on", "off", "message", "flag", "unflag", "subs", "subscriptions", "sub", "unsub", "icon")); }
+    public List<String> getSubcommands() { return List.of("subscribe", "unsubscribe", "list", "on", "off", "message", "flag", "unflag", "subs", "subscriptions", "sub", "unsub", "icon"); }
 
     @Override
-    public ArrayList<String> getAliases() { return new ArrayList<>(); }
+    public List<String> getAliases() { return Collections.emptyList(); }
 
     @Override
-    public String run(ArgumentsModel m) {
-        if (m.getMessage().getSubCommand() == null) {
-            return null;
+    public Optional<String> run(IRCMessageEvent event, ParsedMessage message, Channel channel, kz.ilotterytea.bot.entities.users.User user, UserPermission permission) {
+        if (message.getSubcommandId().isEmpty()) {
+            return Optional.ofNullable(Huinyabot.getInstance().getLocale().literalText(
+            		channel.getPreferences().getLanguage(),
+            		LineIds.NO_SUBCMD
+            ));
         }
-
-        Session session = HibernateUtil.getSessionFactory().openSession();
-
-        // Getting channel local info:
-        List<Channel> channels = session.createQuery("from Channel where aliasId = :aliasId", Channel.class)
-                .setParameter("aliasId", m.getEvent().getChannel().getId())
-                .getResultList();
-
-        Channel channel = channels.get(0);
-
-        // Getting sender local info:
-        List<kz.ilotterytea.bot.entities.users.User> users = session.createQuery("from User where aliasId = :aliasId", kz.ilotterytea.bot.entities.users.User.class)
-                .setParameter("aliasId", m.getEvent().getUser().getId())
-                .getResultList();
-
-        kz.ilotterytea.bot.entities.users.User user = users.get(0);
-
-        // Getting permission info:
-        List<UserPermission> permissions = session.createQuery("from UserPermission where user = :user AND channel = :channel", UserPermission.class)
-                .setParameter("user", user)
-                .setParameter("channel", channel)
-                .getResultList();
-
-        UserPermission permission = permissions.get(0);
 
         Huinyabot bot = Huinyabot.getInstance();
 
-        List<String> s = new ArrayList<>(List.of(m.getMessage().getMessage().split(" ")));
-
-        if (s.isEmpty()) {
-            session.close();
-            return bot.getLocale().literalText(
+        if (message.getMessage().isEmpty()) {
+        	return Optional.ofNullable(bot.getLocale().literalText(
                     channel.getPreferences().getLanguage(),
                     LineIds.NOT_ENOUGH_ARGS
-            );
+            ));
         }
+        ArrayList<String> s = new ArrayList<>(List.of(message.getMessage().get().split(" ")));
 
         String[] targetEvent = s.get(0).split(":");
         s.remove(0);
@@ -102,39 +82,38 @@ public class NotifyMeCommand extends Command {
                     .execute()
                     .getUsers();
         } catch (Exception e) {
-            session.close();
             return null;
         }
 
         if (twitchUsers.isEmpty()) {
-            session.close();
-            return bot.getLocale().formattedText(
+            return Optional.ofNullable(bot.getLocale().formattedText(
                     channel.getPreferences().getLanguage(),
                     LineIds.C_NOTIFY_USERNOTFOUND,
                     targetEvent[0]
-            );
+            ));
         }
 
         User twitchUser = twitchUsers.get(0);
 
-        // Getting active listenables for the target (specified user):
-        List<Listenable> listenables = session.createQuery("from Listenable where aliasId = :aliasId AND channel = :channel", Listenable.class)
-                .setParameter("aliasId", twitchUser.getId())
-                .setParameter("channel", channel)
-                .getResultList();
-
+        // Getting active listenable for the target (specified user):
+        Optional<Listenable> optionalListenable = channel.getListenables()
+        		.stream()
+        		.filter(l -> l.getAliasId().toString().equals(twitchUser.getId()))
+        		.findFirst();
+        
         Listenable listenable;
 
+        Session session = HibernateUtil.getSessionFactory().openSession();
         if (
                 permission.getPermission().getValue() >= Permissions.BROADCASTER.getId() &&
-                        (!m.getMessage().getSubCommand().equals("sub") && !m.getMessage().getSubCommand().equals("unsub") &&
-                        !m.getMessage().getSubCommand().equals("list") && !m.getMessage().getSubCommand().equals("subs")
+                        (!message.getSubcommandId().equals("sub") && !message.getSubcommandId().equals("unsub") &&
+                        !message.getSubcommandId().equals("list") && !message.getSubcommandId().equals("subs")
                         )
         ) {
             session.getTransaction().begin();
 
             // Make the target listenable:
-            if (m.getMessage().getSubCommand().equals("on")) {
+            if (message.getSubcommandId().equals("on")) {
                 List<Listenable> otherListenables = session.createQuery("from Listenable where aliasId = :aliasId AND isEnabled = true AND channel != :channel", Listenable.class)
                         .setParameter("aliasId", twitchUser.getId())
                         .setParameter("channel", channel)
@@ -161,35 +140,35 @@ public class NotifyMeCommand extends Command {
 
                     session.getTransaction().commit();
                     session.close();
-                    return bot.getLocale().formattedText(
+                    return Optional.ofNullable(bot.getLocale().formattedText(
                             channel.getPreferences().getLanguage(),
                             LineIds.C_NOTIFY_SUCCESS_ON,
                             "all",
                             twitchUser.getLogin()
-                    );
+                    ));
                 } else {
                     session.close();
-                    return bot.getLocale().formattedText(
+                    return Optional.ofNullable(bot.getLocale().formattedText(
                             channel.getPreferences().getLanguage(),
                             LineIds.C_NOTIFY_ALREADYLISTENING,
                             twitchUser.getLogin()
-                    );
+                    ));
                 }
             }
 
-            if (listenables.isEmpty()) {
+            if (optionalListenable.isEmpty()) {
                 session.close();
-                return bot.getLocale().formattedText(
+                return Optional.ofNullable(bot.getLocale().formattedText(
                         channel.getPreferences().getLanguage(),
                         LineIds.C_NOTIFY_DOESNOTLISTENING,
                         targetEvent[0]
-                );
+                ));
             } else {
-                listenable = listenables.get(0);
+                listenable = optionalListenable.get();
             }
 
             // Stop listening to the channel:
-            if (m.getMessage().getSubCommand().equals("off")) {
+            if (message.getSubcommandId().get().equals("off")) {
                 List<Listenable> otherListenables = session.createQuery("from Listenable where aliasId = :aliasId AND isEnabled = true AND channel != :channel", Listenable.class)
                         .setParameter("aliasId", twitchUser.getId())
                         .setParameter("channel", channel)
@@ -203,26 +182,26 @@ public class NotifyMeCommand extends Command {
                 session.getTransaction().commit();
                 session.close();
 
-                return bot.getLocale().formattedText(
+                return Optional.ofNullable(bot.getLocale().formattedText(
                         channel.getPreferences().getLanguage(),
                         LineIds.C_NOTIFY_SUCCESS_OFFFULL,
                         "all",
                         twitchUser.getLogin()
-                );
+                ));
             }
 
             String msg = String.join(" ", s);
 
             if (msg.isBlank()) {
                 session.close();
-                return bot.getLocale().literalText(
+                return Optional.ofNullable(bot.getLocale().literalText(
                         channel.getPreferences().getLanguage(),
                         LineIds.C_NOTIFY_NOMSG
-                );
+                ));
             }
 
             // Setting the message:
-            if (m.getMessage().getSubCommand().equals("message")) {
+            if (message.getSubcommandId().get().equals("message")) {
                 ListenableMessages messages = listenable.getMessages();
 
                 // Setting message for an event:
@@ -242,10 +221,10 @@ public class NotifyMeCommand extends Command {
                             break;
                         default:
                             session.close();
-                            return bot.getLocale().literalText(
+                            return Optional.ofNullable(bot.getLocale().literalText(
                                     channel.getPreferences().getLanguage(),
                                     LineIds.C_NOTIFY_NOTHINGCHANGED
-                            );
+                            ));
                     }
                 } else {
                     messages.setLiveMessage(msg);
@@ -263,31 +242,31 @@ public class NotifyMeCommand extends Command {
                 session.close();
 
                 if (targetEvent.length > 1) {
-                    return bot.getLocale().formattedText(
+                    return Optional.ofNullable(bot.getLocale().formattedText(
                             channel.getPreferences().getLanguage(),
                             LineIds.C_NOTIFY_SUCCESS_COMMENT_UPDATED,
                             targetEvent[1],
                             channel.getAliasName()
-                    );
+                    ));
                 } else {
-                    return bot.getLocale().formattedText(
+                    return Optional.ofNullable(bot.getLocale().formattedText(
                             channel.getPreferences().getLanguage(),
                             LineIds.C_NOTIFY_SUCCESS_COMMENT_UPDATEDALL,
                             channel.getAliasName()
-                    );
+                    ));
                 }
             }
 
             // Setting the icon:
-            else if (m.getMessage().getSubCommand().equals("icon")) {
+            else if (message.getSubcommandId().get().equals("icon")) {
                 ListenableIcons icons = listenable.getIcons();
 
                 if (msg.isBlank()) {
                     session.close();
-                    return bot.getLocale().literalText(
+                    return Optional.ofNullable(bot.getLocale().literalText(
                             channel.getPreferences().getLanguage(),
                             LineIds.C_NOTIFY_NOMSG
-                    );
+                    ));
                 }
 
                 // Setting message for an event:
@@ -307,10 +286,10 @@ public class NotifyMeCommand extends Command {
                             break;
                         default:
                             session.close();
-                            return bot.getLocale().literalText(
+                            return Optional.ofNullable(bot.getLocale().literalText(
                                     channel.getPreferences().getLanguage(),
                                     LineIds.C_NOTIFY_NOTHINGCHANGED
-                            );
+                            ));
                     }
                 } else {
                     icons.setLiveIcon(msg);
@@ -326,23 +305,23 @@ public class NotifyMeCommand extends Command {
                 session.close();
 
                 if (targetEvent.length > 1) {
-                    return bot.getLocale().formattedText(
+                    return Optional.ofNullable(bot.getLocale().formattedText(
                             channel.getPreferences().getLanguage(),
                             LineIds.C_NOTIFY_SUCCESS_ICON_UPDATED,
                             targetEvent[1],
                             listenable.getAliasName()
-                    );
+                    ));
                 } else {
-                    return bot.getLocale().formattedText(
+                    return Optional.ofNullable(bot.getLocale().formattedText(
                             channel.getPreferences().getLanguage(),
                             LineIds.C_NOTIFY_SUCCESS_ICON_UPDATEDALL,
                             listenable.getAliasName()
-                    );
+                    ));
                 }
             }
 
             // Setting the flag:
-            else if (m.getMessage().getSubCommand().equals("flag")) {
+            else if (message.getSubcommandId().get().equals("flag")) {
                 ListenableFlag flag;
 
                 // Parsing the flag name:
@@ -356,10 +335,10 @@ public class NotifyMeCommand extends Command {
                         break;
                     default:
                         session.close();
-                        return bot.getLocale().literalText(
+                        return Optional.ofNullable(bot.getLocale().literalText(
                                 channel.getPreferences().getLanguage(),
                                 LineIds.C_NOTIFY_NOFLAG
-                        );
+                        ));
                 }
 
                 Set<ListenableFlag> flags = listenable.getFlags();
@@ -388,11 +367,11 @@ public class NotifyMeCommand extends Command {
                 session.getTransaction().commit();
                 session.close();
 
-                return msgToSend;
+                return Optional.ofNullable(msgToSend);
             }
 
             // Removing the flag:
-            else if (m.getMessage().getSubCommand().equals("unflag")) {
+            else if (message.getSubcommandId().get().equals("unflag")) {
                 ListenableFlag flag;
 
                 // Parsing the flag name:
@@ -406,10 +385,10 @@ public class NotifyMeCommand extends Command {
                         break;
                     default:
                         session.close();
-                        return bot.getLocale().literalText(
+                        return Optional.ofNullable(bot.getLocale().literalText(
                                 channel.getPreferences().getLanguage(),
                                 LineIds.C_NOTIFY_NOFLAG
-                        );
+                        ));
                 }
 
                 Set<ListenableFlag> flags = listenable.getFlags();
@@ -438,47 +417,47 @@ public class NotifyMeCommand extends Command {
                 session.getTransaction().commit();
                 session.close();
 
-                return msgToSend;
+                return Optional.ofNullable(msgToSend);
             }
             else {
                 session.close();
-                return bot.getLocale().literalText(
+                return Optional.ofNullable(bot.getLocale().literalText(
                         channel.getPreferences().getLanguage(),
                         LineIds.NO_SUBCMD
-                );
+                ));
             }
         }
 
         // Obtain available channels for subscription:
-        if (m.getMessage().getSubCommand().equals("list")) {
+        if (message.getSubcommandId().get().equals("list")) {
             if (channel.getListenables().isEmpty()) {
                 session.close();
-                return bot.getLocale().literalText(
+                return Optional.ofNullable(bot.getLocale().literalText(
                         channel.getPreferences().getLanguage(),
                         LineIds.C_NOTIFY_NOLISTENINGCHANNELS
-                );
+                ));
             }
 
             session.close();
-            return bot.getLocale().formattedText(
+            return Optional.ofNullable(bot.getLocale().formattedText(
                     channel.getPreferences().getLanguage(),
                     LineIds.C_NOTIFY_SUCCESS_LIST,
                     channel.getListenables().stream().map(Listenable::getAliasName).collect(Collectors.joining(", "))
-            );
+            ));
         }
 
         // Receiving subscribed channels:
-        else if (m.getMessage().getSubCommand().equals("subs")) {
+        else if (message.getSubcommandId().get().equals("subs")) {
             if (user.getSubscribers().isEmpty()) {
                 session.close();
-                return bot.getLocale().literalText(
+                return Optional.ofNullable(bot.getLocale().literalText(
                         channel.getPreferences().getLanguage(),
                         LineIds.C_NOTIFY_SUCCESS_SUBSNOONE
-                );
+                ));
             }
 
             session.close();
-            return bot.getLocale().formattedText(
+            return Optional.ofNullable(bot.getLocale().formattedText(
                     channel.getPreferences().getLanguage(),
                     LineIds.C_NOTIFY_SUCCESS_LIST,
                     user.getSubscribers().stream().map(sub -> {
@@ -486,23 +465,23 @@ public class NotifyMeCommand extends Command {
 
                         return sub.getListenable().getAliasName() + " (" + events + ")";
                     }).collect(Collectors.joining(", "))
-            );
+            ));
 
         }
 
-        if (listenables.isEmpty()) {
+        if (optionalListenable.isEmpty()) {
             session.close();
-            return bot.getLocale().formattedText(
+            return Optional.ofNullable(bot.getLocale().formattedText(
                     channel.getPreferences().getLanguage(),
                     LineIds.C_NOTIFY_DOESNOTLISTENING,
                     targetEvent[0]
-            );
+            ));
         } else {
-            listenable = listenables.get(0);
+            listenable = optionalListenable.get();
         }
 
         // Subscribe to the channel:
-        if (m.getMessage().getSubCommand().equals("sub")) {
+        if (message.getSubcommandId().get().equals("sub")) {
             Subscriber subscriber = listenable.getSubscribers()
                     .stream()
                     .filter(p -> p.getUser().getAliasId().equals(user.getAliasId()))
@@ -547,10 +526,10 @@ public class NotifyMeCommand extends Command {
                         break;
                     default:
                         session.close();
-                        return bot.getLocale().literalText(
+                        return Optional.ofNullable(bot.getLocale().literalText(
                                 channel.getPreferences().getLanguage(),
                                 LineIds.C_NOTIFY_NOTHINGCHANGED
-                        );
+                        ));
                 }
             } else {
                 if (events.add(SubscriberEvent.LIVE)) {
@@ -591,11 +570,11 @@ public class NotifyMeCommand extends Command {
             session.getTransaction().commit();
             session.close();
 
-            return msgToSend;
+            return Optional.ofNullable(msgToSend);
         }
 
         // Unsubscribe from the channel:
-        else if (m.getMessage().getSubCommand().equals("unsub")) {
+        else if (message.getSubcommandId().get().equals("unsub")) {
             List<Subscriber> subscribers = session.createQuery("from Subscriber where user = :user AND listenable = :listenable", Subscriber.class)
                     .setParameter("listenable", listenable)
                     .setParameter("user", user)
@@ -603,11 +582,11 @@ public class NotifyMeCommand extends Command {
 
             if (subscribers.isEmpty()) {
                 session.close();
-                return bot.getLocale().formattedText(
+                return Optional.ofNullable(bot.getLocale().formattedText(
                         channel.getPreferences().getLanguage(),
                         LineIds.C_NOTIFY_NOTSUB,
                         listenable.getAliasName()
-                );
+                ));
             }
 
             Subscriber subscriber = subscribers.get(0);
@@ -639,10 +618,10 @@ public class NotifyMeCommand extends Command {
                         break;
                     default:
                         session.close();
-                        return bot.getLocale().literalText(
+                        return Optional.ofNullable(bot.getLocale().literalText(
                                 channel.getPreferences().getLanguage(),
                                 LineIds.C_NOTIFY_NOTHINGCHANGED
-                        );
+                        ));
                 }
             } else {
                 if (events.remove(SubscriberEvent.LIVE)) {
@@ -687,10 +666,10 @@ public class NotifyMeCommand extends Command {
             session.getTransaction().commit();
             session.close();
 
-            return msgToSend;
+            return Optional.ofNullable(msgToSend);
         }
 
         session.close();
-        return null;
+        return Optional.empty();
     }
 }
