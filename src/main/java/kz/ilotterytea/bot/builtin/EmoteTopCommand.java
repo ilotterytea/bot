@@ -1,15 +1,19 @@
 package kz.ilotterytea.bot.builtin;
 
+import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.api.commands.Command;
-import kz.ilotterytea.bot.api.permissions.Permissions;
+import kz.ilotterytea.bot.entities.channels.Channel;
+import kz.ilotterytea.bot.entities.permissions.Permission;
+import kz.ilotterytea.bot.entities.permissions.UserPermission;
+import kz.ilotterytea.bot.entities.users.User;
 import kz.ilotterytea.bot.i18n.LineIds;
-import kz.ilotterytea.bot.models.ArgumentsModel;
 import kz.ilotterytea.bot.models.serverresponse.Emote;
 import kz.ilotterytea.bot.models.serverresponse.ServerPayload;
+import kz.ilotterytea.bot.utils.ParsedMessage;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -22,7 +26,7 @@ import java.util.*;
  * @author ilotterytea
  * @since 1.1
  */
-public class EmoteTopCommand extends Command {
+public class EmoteTopCommand implements Command {
     @Override
     public String getNameId() { return "etop"; }
 
@@ -30,26 +34,27 @@ public class EmoteTopCommand extends Command {
     public int getDelay() { return 10000; }
 
     @Override
-    public Permissions getPermissions() { return Permissions.USER; }
+    public Permission getPermissions() { return Permission.USER; }
 
     @Override
-    public ArrayList<String> getOptions() { return new ArrayList<>(); }
+    public List<String> getOptions() { return Collections.emptyList(); }
 
     @Override
-    public ArrayList<String> getSubcommands() { return new ArrayList<>(); }
+    public List<String> getSubcommands() { return Collections.emptyList(); }
 
     @Override
-    public ArrayList<String> getAliases() { return new ArrayList<>(Arrays.asList("emotetop", "топэмоутов")); }
+    public List<String> getAliases() { return List.of("emotetop", "топэмоутов"); }
 
     @Override
-    public String run(ArgumentsModel m) {
-        String[] s = m.getMessage().getMessage().split(" ");
+    public Optional<String> run(IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
         final int MAX_COUNT = 10;
         int count;
 
-        if (s.length == 0) {
+        if (message.getMessage().isEmpty()) {
             count = MAX_COUNT;
         } else {
+        	String[] s = message.getMessage().get().split(" ");
+        	
             try {
                 count = Integer.parseInt(s[1]);
             } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
@@ -64,26 +69,26 @@ public class EmoteTopCommand extends Command {
         OkHttpClient client = new OkHttpClient.Builder().build();
         Request request = new Request.Builder()
                 .get()
-                .url(SharedConstants.STATS_URL + "/api/v1/channel/" + m.getEvent().getChannel().getId() + "/emotes")
+                .url(SharedConstants.STATS_URL + "/api/v1/channel/" + channel.getAliasId() + "/emotes")
                 .build();
 
         ArrayList<Emote> emotes;
 
         try (Response response = client.newCall(request).execute()) {
             if (response.code() != 200) {
-                return Huinyabot.getInstance().getLocale().formattedText(
-                        m.getLanguage(),
+                return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
+                        channel.getPreferences().getLanguage(),
                         LineIds.HTTP_ERROR,
                         String.valueOf(response.code()),
                         "Stats API"
-                );
+                ));
             }
 
             if (response.body() == null) {
-                return Huinyabot.getInstance().getLocale().formattedText(
-                        m.getLanguage(),
+            	return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
+                        channel.getPreferences().getLanguage(),
                         LineIds.SOMETHING_WENT_WRONG
-                );
+                ));
             }
 
             String body = response.body().string();
@@ -93,39 +98,39 @@ public class EmoteTopCommand extends Command {
             if (payload.getData() != null) {
                 emotes = payload.getData();
             } else {
-                return Huinyabot.getInstance().getLocale().formattedText(
-                        m.getLanguage(),
+            	return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
+                        channel.getPreferences().getLanguage(),
                         LineIds.C_ETOP_NOCHANNELEMOTES,
                         Huinyabot.getInstance().getLocale().literalText(
-                                m.getLanguage(),
+                                channel.getPreferences().getLanguage(),
                                 LineIds.STV
                         ),
                         Huinyabot.getInstance().getLocale().literalText(
-                                m.getLanguage(),
+                                channel.getPreferences().getLanguage(),
                                 LineIds.STV
                         )
-                );
+                ));
             }
         } catch (IOException e) {
-            return Huinyabot.getInstance().getLocale().formattedText(
-                    m.getLanguage(),
+        	return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
+                    channel.getPreferences().getLanguage(),
                     LineIds.SOMETHING_WENT_WRONG
-            );
+            ));
         }
 
         if (emotes.isEmpty()) {
-            return Huinyabot.getInstance().getLocale().formattedText(
-                    m.getLanguage(),
+        	return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
+                    channel.getPreferences().getLanguage(),
                     LineIds.C_ETOP_NOCHANNELEMOTES,
                     Huinyabot.getInstance().getLocale().literalText(
-                            m.getLanguage(),
+                            channel.getPreferences().getLanguage(),
                             LineIds.STV
                     ),
                     Huinyabot.getInstance().getLocale().literalText(
-                            m.getLanguage(),
+                            channel.getPreferences().getLanguage(),
                             LineIds.STV
                     )
-            );
+            ));
         }
 
         // Remove the deleted emotes:
@@ -151,10 +156,10 @@ public class EmoteTopCommand extends Command {
 
             if (
                     Huinyabot.getInstance().getLocale().formattedText(
-                            m.getLanguage(),
+                            channel.getPreferences().getLanguage(),
                             LineIds.C_ETOP_SUCCESS,
                             Huinyabot.getInstance().getLocale().literalText(
-                                    m.getLanguage(),
+                                    channel.getPreferences().getLanguage(),
                                     LineIds.STV
                             ),
                             msgs.get(index) + (i + 1) + ". " + em.getName()
@@ -181,18 +186,18 @@ public class EmoteTopCommand extends Command {
 
         for (String msg : msgs) {
             Huinyabot.getInstance().getClient().getChat().sendMessage(
-                    m.getEvent().getChannel().getName(),
+                    channel.getAliasName(),
                     Huinyabot.getInstance().getLocale().formattedText(
-                            m.getLanguage(),
+                            channel.getPreferences().getLanguage(),
                             LineIds.C_ETOP_SUCCESS,
                             Huinyabot.getInstance().getLocale().literalText(
-                                    m.getLanguage(),
+                                    channel.getPreferences().getLanguage(),
                                     LineIds.STV
                             ),
                             msg
                     ),
                     null,
-                    (m.getEvent().getMessageId().isPresent()) ? m.getEvent().getMessageId().get() : null
+                    (event.getMessageId().isPresent()) ? event.getMessageId().get() : null
             );
         }
 
