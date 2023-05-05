@@ -5,11 +5,9 @@ import com.github.twitch4j.events.ChannelChangeGameEvent;
 import com.github.twitch4j.events.ChannelChangeTitleEvent;
 import com.github.twitch4j.events.ChannelGoLiveEvent;
 import com.github.twitch4j.events.ChannelGoOfflineEvent;
-import com.github.twitch4j.helix.domain.AnnouncementColor;
 import com.github.twitch4j.helix.domain.Chatter;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.SharedConstants;
-import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.entities.CustomCommand;
 import kz.ilotterytea.bot.entities.channels.Channel;
 import kz.ilotterytea.bot.entities.channels.ChannelPreferences;
@@ -21,9 +19,8 @@ import kz.ilotterytea.bot.entities.subscribers.Subscriber;
 import kz.ilotterytea.bot.entities.subscribers.SubscriberEvent;
 import kz.ilotterytea.bot.entities.users.UserPreferences;
 import kz.ilotterytea.bot.i18n.LineIds;
-import kz.ilotterytea.bot.models.ArgumentsModel;
-import kz.ilotterytea.bot.models.MessageModel;
 import kz.ilotterytea.bot.utils.HibernateUtil;
+import kz.ilotterytea.bot.utils.ParsedMessage;
 import okhttp3.*;
 import org.hibernate.Session;
 import org.slf4j.Logger;
@@ -116,10 +113,6 @@ public class MessageHandlerSamples {
             user = users.get(0);
         }
 
-        String MSG = e.getMessage().get();
-
-        final MessageModel messageModel = MessageModel.create(e.getMessage().get(), channel.getPreferences().getPrefix());
-
         // Update user's permissions:
         UserPermission userPermission = user.getPermissions()
                 .stream()
@@ -146,6 +139,9 @@ public class MessageHandlerSamples {
 
         session.persist(userPermission);
 
+        String MSG = e.getMessage().get();
+        session.getTransaction().commit();
+        
         // 'Test':
         if (Objects.equals(MSG, "test")) {
             bot.getClient().getChat().sendMessage(
@@ -153,36 +149,31 @@ public class MessageHandlerSamples {
                     "test has successfully completed!"
             );
             return;
-        }
-
-        session.getTransaction().commit();
+        }        
+        
+        final Optional<ParsedMessage> parsedMessage = ParsedMessage.parse(MSG, channel.getPreferences().getPrefix());
 
         // Processing the command:
-        if (MSG.startsWith(channel.getPreferences().getPrefix())) {
-            Optional<Command> optionalCommand = bot.getLoader().getCommand(messageModel.getCommand());
-
-            if (optionalCommand.isPresent()) {
-                Command command = optionalCommand.get();
-
-                String response = command.run(new ArgumentsModel(
-                        user,
-                        channel.getPreferences().getLanguage(),
-                        userPermission,
-                        messageModel,
-                        e
-                ));
-
-                if (response != null) {
-                    bot.getClient().getChat().sendMessage(
-                            e.getChannel().getName(),
-                            response,
-                            null,
-                            (e.getMessageId().isEmpty()) ? null : e.getMessageId().get()
-                    );
-                }
-
-                return;
+        if (parsedMessage.isPresent()) {
+        	Optional<String> response = bot.getLoader().call(
+        			parsedMessage.get().getCommandId(),
+            		e,
+            		parsedMessage.get(),
+            		channel,
+            		user,
+            		userPermission
+            );
+        	
+        	if (response.isPresent()) {
+                bot.getClient().getChat().sendMessage(
+                        e.getChannel().getName(),
+                        response.get(),
+                        null,
+                        (e.getMessageId().isEmpty()) ? null : e.getMessageId().get()
+                );
             }
+        	
+        	return;
         }
 
         // Processing the custom commands:

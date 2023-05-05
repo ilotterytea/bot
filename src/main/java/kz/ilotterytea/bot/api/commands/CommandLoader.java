@@ -1,9 +1,15 @@
 package kz.ilotterytea.bot.api.commands;
 
-import kz.ilotterytea.bot.models.ArgumentsModel;
+import kz.ilotterytea.bot.entities.channels.Channel;
+import kz.ilotterytea.bot.entities.permissions.UserPermission;
+import kz.ilotterytea.bot.entities.users.User;
+import kz.ilotterytea.bot.utils.ParsedMessage;
+
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 
 import java.util.*;
 
@@ -55,14 +61,14 @@ public class CommandLoader extends ClassLoader {
      * @param args Arguments.
      * @return response
      */
-    public String call(String nameId, ArgumentsModel args) {
-        String response = null;
+    public Optional<String> call(String nameId, IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
+        Optional<String> response = Optional.empty();
 
         if (COMMANDS.containsKey(nameId)) {
             Command cmd = COMMANDS.get(nameId);
-            if (args.getCurrentPermissions().getId() >= cmd.getPermissions().getId()) {
+            if (permission.getPermission().getValue() >= cmd.getPermissions().getValue()) {
                 try {
-                    response = cmd.run(args);
+                    response = cmd.run(event, message, channel, user, permission);
                 } catch (Exception e) {
                     LOGGER.error(String.format("Error occurred while running the %s command", nameId), e);
                 }
