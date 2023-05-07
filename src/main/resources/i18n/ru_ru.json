@@ -137,5 +137,8 @@
   "cmd.set.response.success.locale.set": "Теперь я буду говорить на русском в этом чате KKomrade",
   "cmd.set.response.success.locale.set.user": "Теперь я буду говорить на русском с Вами KKomrade",
   "cmd.set.response.success.7tv.enabled": "(7TV) Этот чат будет получать уведомления о 7TV событиях!",
-  "cmd.set.response.success.7tv.disabled": "(7TV) Этот чат больше не будет получать уведомления о 7TV событиях!"
+  "cmd.set.response.success.7tv.disabled": "(7TV) Этот чат больше не будет получать уведомления о 7TV событиях!",
+
+  "cmd.esimilarity.response.success": "(%s) Набор эмоутов %s на %s% схож с набором эмоутов %s (%s из %s)",
+  "cmd.esimilarity.response.no_similarity": "(%s) Набор эмоутов %s не имеет одинаковых эмоутов с %s"
 }
