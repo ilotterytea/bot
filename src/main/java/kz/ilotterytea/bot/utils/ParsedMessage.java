@@ -74,7 +74,7 @@ public class ParsedMessage {
         // Getting the subcommand:
         String subcommandId;
 
-        if (!command.getSubcommands().contains(s.get(0))) {
+        if (command.getSubcommands().contains(s.get(0))) {
             subcommandId = s.get(0);
             s.remove(0);
         } else {
