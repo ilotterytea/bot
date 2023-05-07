@@ -8,6 +8,9 @@
   "msg.something_went_wrong": "Something went wrong!",
   "msg.unknown_subcommand": "Unknown subcommand is specified!",
   "msg.no_message": "No message specified!",
+  "msg.no_emote_set": "No emote sets found!",
+  "msg.no_twitch_user": "No Twitch user found!",
+  "msg.same_twitch_user": "The same Twitch user is specified!",
 
   "providers.7tv": "7TV",
   "providers.bttv": "BTTV",

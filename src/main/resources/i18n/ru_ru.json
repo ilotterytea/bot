@@ -8,6 +8,9 @@
   "msg.something_went_wrong": "Что-то пошло не так!",
   "msg.unknown_subcommand": "Указана неизвестная подкоманда!",
   "msg.no_message": "Нет сообщения!",
+  "msg.no_emote_set": "Набор эмоутов не найден!",
+  "msg.no_twitch_user": "Не существует указанного Twitch пользователя!",
+  "msg.same_twitch_user": "Указан один и тот же Twitch пользователь!",
   
   "providers.7tv": "7TV",
   "providers.bttv": "BTTV",

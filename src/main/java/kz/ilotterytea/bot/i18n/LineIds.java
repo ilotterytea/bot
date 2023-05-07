@@ -15,6 +15,9 @@ public enum LineIds {
     SOMETHING_WENT_WRONG("msg.something_went_wrong"),
     UNKNOWN_SUBCOMMAND("msg.unknown_subcommand"),
     NO_MESSAGE("msg.no_message"),
+    NO_EMOTE_SET("msg.no_emote_set"),
+    NO_TWITCH_USER("msg.no_twitch_user"),
+    SAME_TWITCH_USER("msg.same_twitch_user"),
 
     STV("providers.7tv"),
     BTTV("providers.bttv"),
