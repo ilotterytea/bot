@@ -44,5 +44,5 @@ public class SharedConstants {
 
     public static final String NEUROBAJ_URL = "https://neurobaj.ilotterytea.kz";
 
-    public static final String STATS_URL = "http://localhost:8080";
+    public static final String STATS_URL = "https://stats.ilotterytea.kz";
 }
