@@ -47,14 +47,14 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private UserPreferences preferences;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     private Set<Subscriber> subscribers;
 
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "global_permission", nullable = false)
     private Permission globalPermission;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     private Set<UserPermission> permissions;
 
     public User(Integer aliasId, String aliasName) {

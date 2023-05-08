@@ -47,13 +47,13 @@ public class Channel {
     @OneToOne(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private ChannelPreferences preferences;
 
-    @OneToMany(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     private Set<Listenable> listenables;
 
-    @OneToMany(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     private Set<CustomCommand> commands;
 
-    @OneToMany(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     private Set<UserPermission> permissions;
 
     @Enumerated(EnumType.ORDINAL)

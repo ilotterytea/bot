@@ -42,7 +42,7 @@ public class Listenable {
     @Column(name = "is_enabled", nullable = false)
     private Boolean isEnabled;
 
-    @OneToMany(mappedBy = "listenable", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "listenable", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     private Set<Subscriber> subscribers;
 
     public Listenable(Integer aliasId, String aliasName, ListenableMessages messages, ListenableIcons icons) {
