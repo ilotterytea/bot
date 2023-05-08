@@ -142,15 +142,6 @@ public class MessageHandlerSamples {
         String MSG = e.getMessage().get();
         session.getTransaction().commit();
         
-        // 'Test':
-        if (Objects.equals(MSG, "test")) {
-            bot.getClient().getChat().sendMessage(
-                    e.getChannel().getName(),
-                    "test has successfully completed!"
-            );
-            return;
-        }        
-        
         final Optional<ParsedMessage> parsedMessage = ParsedMessage.parse(MSG, channel.getPreferences().getPrefix());
 
         // Processing the command:
