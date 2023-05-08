@@ -113,6 +113,10 @@ public class MessageHandlerSamples {
             user = users.get(0);
         }
 
+        if (user.getGlobalPermission().getValue() == Permission.SUSPENDED.getValue()) {
+            return;
+        }
+
         // Update user's permissions:
         UserPermission userPermission = user.getPermissions()
                 .stream()
@@ -126,6 +130,10 @@ public class MessageHandlerSamples {
 
                     return permission1;
                 });
+
+        if (userPermission.getPermission().getValue() == Permission.SUSPENDED.getValue()) {
+            return;
+        }
 
         if (Objects.equals(e.getChannel().getId(), e.getUser().getId())) {
             userPermission.setPermission(Permission.BROADCASTER);
