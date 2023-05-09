@@ -33,4 +33,7 @@ public class SharedConstants {
     public static final String STV_API_EMOTESET_ENDPOINT = STV_API_BASE_URL + "/emote-sets/%s";
 
     public static final String STATS_URL = "https://stats.ilotterytea.kz";
+
+    public static final String IVR_BASE_API = "https://api.ivr.fi/v2";
+    public static final String IVR_USER_ENDPOINT = IVR_BASE_API + "/twitch/user";
 }
