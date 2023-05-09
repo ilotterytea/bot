@@ -127,7 +127,10 @@ public enum LineIds {
     C_SET_SUCCESS_NOTIFY7TV_DISABLED("cmd.set.response.success.7tv.disabled"),
 
     C_ESIMILARITY_SUCCESS("cmd.esimilarity.response.success"),
-    C_ESIMILARITY_NOSIMILARITY("cmd.esimilarity.response.no_similarity");
+    C_ESIMILARITY_NOSIMILARITY("cmd.esimilarity.response.no_similarity"),
+
+    C_MCSERVER_SUCCESS("cmd.mcserver.response.success"),
+    C_MCSERVER_SERVERISOFFLINE("cmd.mcserver.response.server_is_offline");
 
     private final String id;
     LineIds(String id) {

@@ -140,5 +140,8 @@
   "cmd.set.response.success.7tv.disabled": "(7TV) Этот чат больше не будет получать уведомления о 7TV событиях!",
 
   "cmd.esimilarity.response.success": "(%s) Набор эмоутов %s на %s% схож с набором эмоутов %s (%s из %s)",
-  "cmd.esimilarity.response.no_similarity": "(%s) Набор эмоутов %s не имеет одинаковых эмоутов с %s"
+  "cmd.esimilarity.response.no_similarity": "(%s) Набор эмоутов %s не имеет одинаковых эмоутов с %s",
+
+  "cmd.mcserver.response.success": "✅ %s | \"%s\" | %s игроков из %s | %s",
+  "cmd.mcserver.response.server_is_offline": "⛔ %s | OFFLINE"
 }

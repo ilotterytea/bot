@@ -140,5 +140,8 @@
   "cmd.set.response.success.7tv.disabled": "(7TV) This chat will no longer receive notifications about 7TV events!",
 
   "cmd.esimilarity.response.success": "(%s) %s's emote set is %s% similar to %s's emote set (%s of %s)",
-  "cmd.esimilarity.response.no_similarity": "(%s) %s's emote set is not similar to %s's emote set"
+  "cmd.esimilarity.response.no_similarity": "(%s) %s's emote set is not similar to %s's emote set",
+
+  "cmd.mcserver.response.success": "✅ %s | \"%s\" | %s players out of %s | %s",
+  "cmd.mcserver.response.server_is_offline": "⛔ %s | OFFLINE"
 }

@@ -36,4 +36,6 @@ public class SharedConstants {
 
     public static final String IVR_BASE_API = "https://api.ivr.fi/v2";
     public static final String IVR_USER_ENDPOINT = IVR_BASE_API + "/twitch/user";
+
+    public static final String MCSRVSTATUS_ENDPOINT = "https://api.mcsrvstat.us/2";
 }
