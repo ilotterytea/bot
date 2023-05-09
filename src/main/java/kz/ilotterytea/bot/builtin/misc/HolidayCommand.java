@@ -1,4 +1,4 @@
-package kz.ilotterytea.bot.builtin;
+package kz.ilotterytea.bot.builtin.misc;
 
 import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 import com.github.twitch4j.tmi.domain.Chatters;

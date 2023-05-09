@@ -1,4 +1,4 @@
-package kz.ilotterytea.bot.builtin;
+package kz.ilotterytea.bot.builtin.misc;
 
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.SharedConstants;
