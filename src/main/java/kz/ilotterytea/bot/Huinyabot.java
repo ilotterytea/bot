@@ -57,8 +57,6 @@ public class Huinyabot extends Bot {
 
     @Override
     public void init() {
-        StorageUtils.checkIntegrity();
-
         properties = new PropLoader(SharedConstants.PROPERTIES_PATH);
         loader = new CommandLoader();
         delayer = new DelayManager();
