@@ -60,24 +60,6 @@ public class PingCommand implements Command {
 
         OkHttpClient client = new OkHttpClient.Builder().build();
 
-        // Getting info about Neurobaj:
-        String neurobajStatus;
-
-        try (Response response = client.newCall(new Request.Builder()
-                .get()
-                .url(SharedConstants.NEUROBAJ_URL + "/api/v1/status")
-                .build()
-        ).execute()) {
-            if (response.code() != 200) {
-                neurobajStatus = "NOT OK (" + response.code() + ")";
-            } else {
-                neurobajStatus = "OK (" + (response.receivedResponseAtMillis() - response.sentRequestAtMillis()) + "ms)";
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            neurobajStatus = "N/A";
-        }
-
         // Getting info about Stats:
         String statsStatus;
 
@@ -113,7 +95,6 @@ public class PingCommand implements Command {
                         channel.getPreferences().getLanguage(),
                         LineIds.CON
                 ),
-                neurobajStatus,
                 statsStatus
         ));
     }

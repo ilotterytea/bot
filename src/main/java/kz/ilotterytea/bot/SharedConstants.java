@@ -42,7 +42,5 @@ public class SharedConstants {
     public static final String STV_API_SEVENTV_USER_ENDPOINT = STV_API_BASE_URL + "/users/%s";
     public static final String STV_API_EMOTESET_ENDPOINT = STV_API_BASE_URL + "/emote-sets/%s";
 
-    public static final String NEUROBAJ_URL = "https://neurobaj.ilotterytea.kz";
-
     public static final String STATS_URL = "https://stats.ilotterytea.kz";
 }

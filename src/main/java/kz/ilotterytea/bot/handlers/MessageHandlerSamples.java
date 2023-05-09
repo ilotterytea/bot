@@ -38,20 +38,7 @@ import java.util.stream.Collectors;
  */
 public class MessageHandlerSamples {
     private static final Logger LOG = LoggerFactory.getLogger(MessageHandlerSamples.class.getName());
-
     private static final Huinyabot bot = Huinyabot.getInstance();
-    private static final Pattern markovUsernamePattern = Pattern.compile(
-            "((@)?"+Huinyabot.getInstance().getCredential().getUserName().toLowerCase()+"(,)?)",
-            Pattern.CASE_INSENSITIVE
-    );
-    private static final Pattern markovMessagePattern = Pattern.compile(
-            "^" + markovUsernamePattern.pattern() + ".*",
-            Pattern.MULTILINE | Pattern.CASE_INSENSITIVE
-    );
-    private static final Pattern markovURLPattern = Pattern.compile(
-            "([A-Za-z]+:\\/\\/)?[A-Za-z0-9\\-_]+\\.[A-Za-z0-9\\-_:%&;\\?\\#\\/.=]+",
-            Pattern.CASE_INSENSITIVE
-    );
 
     /**
      * Message handler sample for IRC message events.
@@ -191,90 +178,6 @@ public class MessageHandlerSamples {
         }
 
         session.close();
-
-        // Markov processing:
-        if (markovMessagePattern.matcher(MSG).find()) {
-            MSG = markovUsernamePattern.matcher(MSG).replaceAll("");
-            MSG = markovURLPattern.matcher(MSG).replaceAll("");
-
-            MSG = MSG.trim();
-
-            OkHttpClient client = new OkHttpClient.Builder().build();
-            String url = Objects.requireNonNull(
-                        HttpUrl.parse(SharedConstants.NEUROBAJ_URL + "/api/v1/gen")
-                    )
-                    .newBuilder()
-                    .addQueryParameter("message", MSG)
-                    .addQueryParameter("nsfw", "0")
-                    .build()
-                    .toString();
-
-
-            Request request = new Request.Builder()
-                    .get()
-                    .url(url)
-                    .build();
-
-            Call call = client.newCall(request);
-            Response response;
-
-            try {
-                response = call.execute();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                bot.getClient().getChat().sendMessage(
-                        e.getChannel().getName(),
-                        bot.getLocale().literalText(
-                                channel.getPreferences().getLanguage(),
-                                LineIds.SOMETHING_WENT_WRONG
-                        ),
-                        null,
-                        (e.getMessageId().isPresent()) ? null : e.getMessageId().get()
-                );
-                return;
-            }
-
-            if (response.code() != 200) {
-                bot.getClient().getChat().sendMessage(
-                        e.getChannel().getName(),
-                        bot.getLocale().formattedText(
-                                channel.getPreferences().getLanguage(),
-                                LineIds.HTTP_ERROR,
-                                String.valueOf(response.code()),
-                                "Neurobaj"
-                        ),
-                        null,
-                        (e.getMessageId().isPresent()) ? null : e.getMessageId().get()
-                );
-                return;
-            }
-
-            String generatedText;
-
-            try {
-                assert response.body() != null;
-                generatedText = response.body().string();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                bot.getClient().getChat().sendMessage(
-                        e.getChannel().getName(),
-                        bot.getLocale().literalText(
-                                channel.getPreferences().getLanguage(),
-                                LineIds.SOMETHING_WENT_WRONG
-                        ),
-                        null,
-                        (e.getMessageId().isPresent()) ? null : e.getMessageId().get()
-                );
-                return;
-            }
-
-            bot.getClient().getChat().sendMessage(
-                    e.getChannel().getName(),
-                    generatedText,
-                    null,
-                    (e.getMessageId().isEmpty()) ? null : e.getMessageId().get()
-            );
-        }
     }
 
     public static void goLiveEvent(ChannelGoLiveEvent e) {
