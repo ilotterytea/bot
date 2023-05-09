@@ -95,7 +95,8 @@ public class PingCommand implements Command {
                         channel.getPreferences().getLanguage(),
                         LineIds.CON
                 ),
-                statsStatus
+                statsStatus,
+                SharedConstants.getVersion()
         ));
     }
 }

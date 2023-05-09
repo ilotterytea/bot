@@ -31,7 +31,7 @@
 
   "cmd.ping.name": "Пинг!",
   "cmd.ping.desc": "Check if this bot alive",
-  "cmd.ping.response.success": "DankCrouching \u2615 Java %s \u00b7 Время работы: %s \u00b7 Потребление ОЗУ: %s% (%sMB) из %sMB \u00b7 TMI: %sмс \u00b7 7TV EventAPI: %s \u00b7 Stats API: %s ",
+  "cmd.ping.response.success": "DankCrouching \u2615 Java %s \u00b7 Время работы: %s \u00b7 Потребление ОЗУ: %s% (%sMB) из %sMB \u00b7 TMI: %sмс \u00b7 7TV EventAPI: %s \u00b7 Stats API: %s \u00b7 Работает на версии %s",
 
   "emoteupdater.new_emote_with_author": "(%s) %s добавил эмоут %s",
   "emoteupdater.removed_emote_with_author": "(%s) %s удалил эмоут %s",
