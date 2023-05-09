@@ -94,7 +94,7 @@ public class MasspingCommand implements Command {
 
         for (String msg : msgs) {
             Huinyabot.getInstance().getClient().getChat().sendMessage(
-                    channel.getPreferences().getLanguage(),
+                    channel.getAliasName(),
                     msg + msgToAnnounce
             );
         }
