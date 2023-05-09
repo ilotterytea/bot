@@ -18,14 +18,9 @@ public class SharedConstants {
     }
 
     public static final String PROPERTIES_PATH = "config.properties";
-    public static final String CHAIN_SAVE_PATH = "chains.json";
-
-    public static final File CHAINS_FILE = new File(CHAIN_SAVE_PATH);
 
     public static final String DEFAULT_PREFIX = "!";
     public static final String DEFAULT_LOCALE_ID = "en_us";
-
-    public static final String USER_AGENT = String.format("%s/%s", APP_NAME, getVersion());
 
     public static final String HOLIDAY_URL = "https://hol.ilotterytea.kz/api/v1/%s/%s";
     public static final String HOLIDAY_SEARCH_URL = "https://hol.ilotterytea.kz/api/v1/search?q=%s";
