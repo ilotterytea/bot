@@ -1,4 +1,4 @@
-[![Status Badge](https://github.com/ilotterytea/bot/actions/workflows/release.yml/badge.svg)](https://github.com/ilotterytea/bot/actions/workflows/release.yml)
+[![Status Badge](https://github.com/ilotterytea/bot/actions/workflows/build.yml/badge.svg)](https://github.com/ilotterytea/bot/actions/workflows/build.yml)
 
 # Huinyabot
 A utility and entertainment multi-chat Twitch bot. The bot is built in Java, Gradle and uses Twitch4j as the Twitch API.
