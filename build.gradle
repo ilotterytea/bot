@@ -5,11 +5,7 @@ plugins {
 }
 
 group 'kz.ilotterytea'
-version '1.0'
-
-ext {
-    artifact = 'huinyabot'
-}
+version '1.4.0'
 
 repositories {
     mavenCentral()
@@ -38,8 +34,4 @@ java {
 
 application {
     mainClass = "kz.ilotterytea.bot.Main"
-}
-
-shadowJar {
-    archiveFileName = "${artifact}.jar"
 }

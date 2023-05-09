@@ -11,7 +11,7 @@ This project is for me to learn more about Java and all its tricks.
 ## Building from sources
 ### 1. Cloning the repo
 ```shell
-git clone https://github.com/ilotterytea/bot.git
+git clone https://github.com/ilotterytea/bot.git -b 1.4.0
 cd bot
 ```
 
@@ -52,5 +52,5 @@ CLIENT_ID=client_id_of_your_twitch_application
 
 ### 5. Run the bot
 ```shell
-java -jar huinyabot.jar
+java -jar bot-1.4.0-all.jar
 ```
