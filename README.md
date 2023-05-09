@@ -52,5 +52,5 @@ CLIENT_ID=client_id_of_your_twitch_application
 
 ### 5. Run the bot
 ```shell
-java -jar huinyabot.jar
+java -jar bot-1.4.0-all.jar
 ```
