@@ -4,7 +4,6 @@ import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 import com.github.twitch4j.helix.domain.User;
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.api.commands.Command;
-import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.entities.channels.Channel;
 import kz.ilotterytea.bot.entities.listenables.Listenable;
 import kz.ilotterytea.bot.entities.listenables.ListenableFlag;
@@ -105,7 +104,7 @@ public class NotifyMeCommand implements Command {
 
         Session session = HibernateUtil.getSessionFactory().openSession();
         if (
-                permission.getPermission().getValue() >= Permissions.BROADCASTER.getId() &&
+                permission.getPermission().getValue() >= Permission.BROADCASTER.getValue() &&
                         (!message.getSubcommandId().equals("sub") && !message.getSubcommandId().equals("unsub") &&
                         !message.getSubcommandId().equals("list") && !message.getSubcommandId().equals("subs")
                         )

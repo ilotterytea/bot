@@ -2,7 +2,6 @@ package kz.ilotterytea.bot.builtin;
 
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.api.commands.Command;
-import kz.ilotterytea.bot.api.permissions.Permissions;
 import kz.ilotterytea.bot.entities.CustomCommand;
 import kz.ilotterytea.bot.entities.channels.Channel;
 import kz.ilotterytea.bot.entities.permissions.Permission;
@@ -92,7 +91,7 @@ public class CustomCommandControl implements Command {
         Session session = HibernateUtil.getSessionFactory().openSession();
         
         // If the command was run by a broadcaster:
-        if (permission.getPermission().getValue() >= Permissions.BROADCASTER.getId()) {
+        if (permission.getPermission().getValue() >= Permission.BROADCASTER.getValue()) {
             Optional<CustomCommand> optionalCustomCommands = channel.getCommands().stream().filter(c -> c.getName().equals(name)).findFirst();
             String response = String.join(" ", s);
 
