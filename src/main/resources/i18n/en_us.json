@@ -143,5 +143,15 @@
   "cmd.esimilarity.response.no_similarity": "(%s) %s's emote set is not similar to %s's emote set",
 
   "cmd.mcserver.response.success": "✅ %s | \"%s\" | %s players out of %s | %s",
-  "cmd.mcserver.response.server_is_offline": "⛔ %s | OFFLINE"
+  "cmd.mcserver.response.server_is_offline": "⛔ %s | OFFLINE",
+
+  "cmd.timer.response.list": "Active %s's channel timers: %s",
+  "cmd.timer.response.already_exists": "The timer \"%s\" already exists!",
+  "cmd.timer.response.not_exists": "There is no timer named \"%s\"!",
+  "cmd.timer.response.new": "A new timer \"%s\" has been successfully created!",
+  "cmd.timer.response.delete": "The timer \"%s\" has been successfully deleted!",
+  "cmd.timer.response.info": "Timer \"%s\" | Interval: %sms | Message: \"%s\"",
+  "cmd.timer.response.message": "Successfully edited message for timer \"%s\"!",
+  "cmd.timer.response.interval": "Successfully edited interval for timer \"%s\"!",
+  "cmd.timer.response.not_an_interval": "The specified interval (%s) is not a number!"
 }

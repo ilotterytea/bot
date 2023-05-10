@@ -130,7 +130,17 @@ public enum LineIds {
     C_ESIMILARITY_NOSIMILARITY("cmd.esimilarity.response.no_similarity"),
 
     C_MCSERVER_SUCCESS("cmd.mcserver.response.success"),
-    C_MCSERVER_SERVERISOFFLINE("cmd.mcserver.response.server_is_offline");
+    C_MCSERVER_SERVERISOFFLINE("cmd.mcserver.response.server_is_offline"),
+
+    C_TIMER_LIST("cmd.timer.response.list"),
+    C_TIMER_ALREADYEXISTS("cmd.timer.response.already_exists"),
+    C_TIMER_NOTEXISTS("cmd.timer.response.not_exists"),
+    C_TIMER_NEW("cmd.timer.response.new"),
+    C_TIMER_DELETE("cmd.timer.response.delete"),
+    C_TIMER_INFO("cmd.timer.response.info"),
+    C_TIMER_MESSAGE("cmd.timer.response.message"),
+    C_TIMER_INTERVAL("cmd.timer.response.interval"),
+    C_TIMER_NOTANINTERVAL("cmd.timer.response.not_an_interval");
 
     private final String id;
     LineIds(String id) {
