@@ -152,6 +152,33 @@ public class Huinyabot extends Bot {
 
         session.close();
 
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Session session1 = HibernateUtil.getSessionFactory().openSession();
+                final Date CURRENT_DATE = new Date();
+
+                List<kz.ilotterytea.bot.entities.Timer> timers = session1.createQuery("from Timer", kz.ilotterytea.bot.entities.Timer.class).getResultList();
+
+                session1.getTransaction().begin();
+
+                for (kz.ilotterytea.bot.entities.Timer timer : timers) {
+                    if (CURRENT_DATE.getTime() - timer.getLastTimeExecuted().getTime() > timer.getIntervalMilliseconds()) {
+                        client.getChat().sendMessage(
+                                timer.getChannel().getAliasName(),
+                                timer.getMessage()
+                        );
+
+                        timer.setLastTimeExecuted(new Date());
+                        session1.persist(timer);
+                    }
+                }
+
+                session1.getTransaction().commit();
+                session1.close();
+            }
+        }, 2500, 2500);
+
         client.getEventManager().onEvent(IRCMessageEvent.class, MessageHandlerSamples::ircMessageEvent);
 
         client.getEventManager().onEvent(ChannelGoLiveEvent.class, MessageHandlerSamples::goLiveEvent);
