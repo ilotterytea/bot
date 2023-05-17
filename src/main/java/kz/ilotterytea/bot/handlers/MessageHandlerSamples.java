@@ -101,6 +101,8 @@ public class MessageHandlerSamples {
         }
 
         if (user.getGlobalPermission().getValue() == Permission.SUSPENDED.getValue()) {
+            session.getTransaction().commit();
+            session.close();
             return;
         }
 
@@ -119,6 +121,8 @@ public class MessageHandlerSamples {
                 });
 
         if (userPermission.getPermission().getValue() == Permission.SUSPENDED.getValue()) {
+            session.getTransaction().commit();
+            session.close();
             return;
         }
 
@@ -141,6 +145,8 @@ public class MessageHandlerSamples {
 
         // Processing the command:
         if (parsedMessage.isPresent()) {
+            session.close();
+
         	Optional<String> response = bot.getLoader().call(
         			parsedMessage.get().getCommandId(),
             		e,
