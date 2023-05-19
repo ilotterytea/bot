@@ -1,6 +1,7 @@
 package kz.ilotterytea.bot.entities.users;
 
 import jakarta.persistence.*;
+import kz.ilotterytea.bot.entities.Action;
 import kz.ilotterytea.bot.entities.permissions.Permission;
 import kz.ilotterytea.bot.entities.permissions.UserPermission;
 import kz.ilotterytea.bot.entities.subscribers.Subscriber;
@@ -57,11 +58,15 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     private Set<UserPermission> permissions;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    private Set<Action> actions;
+
     public User(Integer aliasId, String aliasName) {
         this.aliasId = aliasId;
         this.aliasName = aliasName;
         this.subscribers = new HashSet<>();
         this.permissions = new HashSet<>();
+        this.actions = new HashSet<>();
     }
 
     public User() {}
@@ -170,5 +175,25 @@ public class User {
 
     public void removePermission(UserPermission permission) {
         this.permissions.remove(permission);
+    }
+
+    public Set<Action> getActions() {
+        return actions;
+    }
+
+    public void setActions(Set<Action> actions) {
+        for (Action action : actions) {
+            action.setUser(this);
+        }
+        this.actions = actions;
+    }
+
+    public void addAction(Action action) {
+        action.setUser(this);
+        this.actions.add(action);
+    }
+
+    public void removeAction(Action action) {
+        this.actions.remove(action);
     }
 }

@@ -22,6 +22,7 @@ import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.utils.HibernateUtil;
 import kz.ilotterytea.bot.utils.ParsedMessage;
 import okhttp3.*;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,6 +102,8 @@ public class MessageHandlerSamples {
         }
 
         if (user.getGlobalPermission().getValue() == Permission.SUSPENDED.getValue()) {
+            session.getTransaction().commit();
+            session.close();
             return;
         }
 
@@ -119,6 +122,8 @@ public class MessageHandlerSamples {
                 });
 
         if (userPermission.getPermission().getValue() == Permission.SUSPENDED.getValue()) {
+            session.getTransaction().commit();
+            session.close();
             return;
         }
 
@@ -141,6 +146,10 @@ public class MessageHandlerSamples {
 
         // Processing the command:
         if (parsedMessage.isPresent()) {
+            Hibernate.initialize(channel.getActions());
+            Hibernate.initialize(user.getActions());
+            session.close();
+
         	Optional<String> response = bot.getLoader().call(
         			parsedMessage.get().getCommandId(),
             		e,
@@ -219,7 +228,7 @@ public class MessageHandlerSamples {
             if (listenable.getFlags().contains(ListenableFlag.MASSPING)) {
                 try {
                     List<Chatter> userList = bot.getClient().getHelix().getChatters(
-                            bot.getCredential().getAccessToken(),
+                            SharedConstants.TWITCH_ACCESS_TOKEN,
                             listenable.getChannel().getAliasId().toString(),
                             bot.getCredential().getUserId(),
                             1000,
@@ -303,7 +312,7 @@ public class MessageHandlerSamples {
             if (listenable.getFlags().contains(ListenableFlag.MASSPING)) {
                 try {
                     List<Chatter> userList = bot.getClient().getHelix().getChatters(
-                            bot.getCredential().getAccessToken(),
+                            SharedConstants.TWITCH_ACCESS_TOKEN,
                             listenable.getChannel().getAliasId().toString(),
                             bot.getCredential().getUserId(),
                             1000,
@@ -389,7 +398,7 @@ public class MessageHandlerSamples {
             if (listenable.getFlags().contains(ListenableFlag.MASSPING)) {
                 try {
                     List<Chatter> userList = bot.getClient().getHelix().getChatters(
-                            bot.getCredential().getAccessToken(),
+                            SharedConstants.TWITCH_ACCESS_TOKEN,
                             listenable.getChannel().getAliasId().toString(),
                             bot.getCredential().getUserId(),
                             1000,
@@ -475,7 +484,7 @@ public class MessageHandlerSamples {
             if (listenable.getFlags().contains(ListenableFlag.MASSPING)) {
                 try {
                     List<Chatter> userList = bot.getClient().getHelix().getChatters(
-                            bot.getCredential().getAccessToken(),
+                            SharedConstants.TWITCH_ACCESS_TOKEN,
                             listenable.getChannel().getAliasId().toString(),
                             bot.getCredential().getUserId(),
                             1000,

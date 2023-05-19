@@ -140,5 +140,18 @@
   "cmd.set.response.success.7tv.disabled": "(7TV) Этот чат больше не будет получать уведомления о 7TV событиях!",
 
   "cmd.esimilarity.response.success": "(%s) Набор эмоутов %s на %s% схож с набором эмоутов %s (%s из %s)",
-  "cmd.esimilarity.response.no_similarity": "(%s) Набор эмоутов %s не имеет одинаковых эмоутов с %s"
+  "cmd.esimilarity.response.no_similarity": "(%s) Набор эмоутов %s не имеет одинаковых эмоутов с %s",
+
+  "cmd.mcserver.response.success": "✅ %s | \"%s\" | %s игроков из %s | %s",
+  "cmd.mcserver.response.server_is_offline": "⛔ %s | OFFLINE",
+
+  "cmd.timer.response.list": "Активные таймеры канала %s: %s",
+  "cmd.timer.response.already_exists": "Таймер \"%s\" уже существует!",
+  "cmd.timer.response.not_exists": "Какого-либо таймера с именем \"%s\" не существует!",
+  "cmd.timer.response.new": "Успешно создан новый таймер \"%s\"!",
+  "cmd.timer.response.delete": "Таймер \"%s\" успешно удалён!",
+  "cmd.timer.response.info": "Таймер \"%s\" | Интервал: %sмс | Сообщение: \"%s\"",
+  "cmd.timer.response.message": "Успешно отредактировано сообщение таймера \"%s\"!",
+  "cmd.timer.response.interval": "Успешно отредактирован интервал таймера \"%s\"!",
+  "cmd.timer.response.not_an_interval": "Указанный интервал (%s) не является числом!"
 }

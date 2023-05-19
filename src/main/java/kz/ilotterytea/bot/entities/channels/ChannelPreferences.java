@@ -27,8 +27,8 @@ public class ChannelPreferences {
 
     public ChannelPreferences(Channel channel) {
         this.channel = channel;
-        this.prefix = SharedConstants.DEFAULT_PREFIX;
-        this.language = SharedConstants.DEFAULT_LOCALE_ID;
+        this.prefix = SharedConstants.TWITCH_DEFAULT_PREFIX;
+        this.language = SharedConstants.TWITCH_DEFAULT_LOCALE_ID;
     }
 
     public ChannelPreferences() {}

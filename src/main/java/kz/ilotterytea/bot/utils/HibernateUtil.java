@@ -1,6 +1,8 @@
 package kz.ilotterytea.bot.utils;
 
+import kz.ilotterytea.bot.entities.Action;
 import kz.ilotterytea.bot.entities.CustomCommand;
+import kz.ilotterytea.bot.entities.Timer;
 import kz.ilotterytea.bot.entities.channels.Channel;
 import kz.ilotterytea.bot.entities.channels.ChannelPreferences;
 import kz.ilotterytea.bot.entities.listenables.Listenable;
@@ -30,6 +32,8 @@ public class HibernateUtil {
             .addAnnotatedClass(Subscriber.class)
             .addAnnotatedClass(CustomCommand.class)
             .addAnnotatedClass(UserPermission.class)
+            .addAnnotatedClass(Timer.class)
+            .addAnnotatedClass(Action.class)
             .buildSessionFactory();
 
     public static SessionFactory getSessionFactory() {

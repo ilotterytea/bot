@@ -1,10 +1,13 @@
 package kz.ilotterytea.bot.api.commands;
 
+import kz.ilotterytea.bot.entities.Action;
 import kz.ilotterytea.bot.entities.channels.Channel;
 import kz.ilotterytea.bot.entities.permissions.UserPermission;
 import kz.ilotterytea.bot.entities.users.User;
+import kz.ilotterytea.bot.utils.HibernateUtil;
 import kz.ilotterytea.bot.utils.ParsedMessage;
 
+import org.hibernate.Session;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,8 +60,6 @@ public class CommandLoader extends ClassLoader {
      * Call the command.
      * @since 1.0
      * @author ilotterytea
-     * @param nameId Command name ID.
-     * @param args Arguments.
      * @return response
      */
     public Optional<String> call(String nameId, IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
@@ -66,12 +67,45 @@ public class CommandLoader extends ClassLoader {
 
         if (COMMANDS.containsKey(nameId)) {
             Command cmd = COMMANDS.get(nameId);
-            if (permission.getPermission().getValue() >= cmd.getPermissions().getValue()) {
-                try {
-                    response = cmd.run(event, message, channel, user, permission);
-                } catch (Exception e) {
-                    LOGGER.error(String.format("Error occurred while running the %s command", nameId), e);
+
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            List<Action> actions = session.createQuery("from Action WHERE channel = :channel AND user = :user AND commandId = :commandId ORDER BY creationTimestamp DESC", Action.class)
+                    .setParameter("channel", channel)
+                    .setParameter("user", user)
+                    .setParameter("commandId", cmd.getNameId())
+                    .getResultList();
+
+            boolean isExecutedRecently = false;
+            if (!actions.isEmpty()) {
+                long currentTimestamp = new Date().getTime();
+                Action action = actions.get(0);
+
+                if (currentTimestamp - action.getCreationTimestamp().getTime() < cmd.getDelay()) {
+                    isExecutedRecently = true;
                 }
+            }
+
+            if (permission.getPermission().getValue() < cmd.getPermissions().getValue() || isExecutedRecently) {
+                session.close();
+                return Optional.empty();
+            }
+
+            Action action = new Action(user, channel, cmd.getNameId(), event.getMessage().get());
+            channel.addAction(action);
+            user.addAction(action);
+
+            session.getTransaction().begin();
+            session.persist(action);
+            session.merge(channel);
+            session.merge(user);
+            session.getTransaction().commit();
+
+            session.close();
+
+            try {
+                response = cmd.run(event, message, channel, user, permission);
+            } catch (Exception e) {
+                LOGGER.error(String.format("Error occurred while running the %s command", nameId), e);
             }
         }
 

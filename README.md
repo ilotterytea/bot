@@ -11,7 +11,7 @@ This project is for me to learn more about Java and all its tricks.
 ## Building from sources
 ### 1. Cloning the repo
 ```shell
-git clone https://github.com/ilotterytea/bot.git -b 1.4.0
+git clone https://github.com/ilotterytea/bot.git -b 1.5.0
 cd bot
 ```
 
@@ -45,12 +45,15 @@ cd build/libs
 
 ### 4. Create a configuration file (config.properties)
 ```properties
-OAUTH2_TOKEN=oauth:your_token_here
-ACCESS_TOKEN=access_token_from_your_twitch_application
-CLIENT_ID=client_id_of_your_twitch_application
+twitch.oauth2_token=oauth:your_token_here
+twitch.access_token=access_token_from_your_twitch_application
 ``` 
+
+> The `twitch.access_token` is the bot's token received when logging into the application from the bot's account.
+> Token must grant rights `moderator:read:chatters`, otherwise will not work `!massping`, `MASSPING` flag for stream events.
+> Also, the bot must be a moderator on channels that run massping related commands.
 
 ### 5. Run the bot
 ```shell
-java -jar bot-1.4.0-all.jar
+java -jar bot-1.5.0-all.jar
 ```

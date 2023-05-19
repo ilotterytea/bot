@@ -1,4 +1,4 @@
-package kz.ilotterytea.bot.builtin;
+package kz.ilotterytea.bot.builtin.channel;
 
 import kz.ilotterytea.bot.Huinyabot;
 import kz.ilotterytea.bot.api.commands.Command;

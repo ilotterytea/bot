@@ -1,8 +1,9 @@
-package kz.ilotterytea.bot.builtin;
+package kz.ilotterytea.bot.builtin.spam;
 
 import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 import com.github.twitch4j.helix.domain.Chatter;
 import kz.ilotterytea.bot.Huinyabot;
+import kz.ilotterytea.bot.SharedConstants;
 import kz.ilotterytea.bot.api.commands.Command;
 import kz.ilotterytea.bot.entities.channels.Channel;
 import kz.ilotterytea.bot.entities.permissions.Permission;
@@ -46,7 +47,7 @@ public class MasspingCommand implements Command {
 
         try {
             chatters = Huinyabot.getInstance().getClient().getHelix().getChatters(
-                    Huinyabot.getInstance().getProperties().getProperty("ACCESS_TOKEN"),
+                    SharedConstants.TWITCH_ACCESS_TOKEN,
                     channel.getAliasId().toString(),
                     Huinyabot.getInstance().getCredential().getUserId(),
                     null,
