@@ -16,7 +16,6 @@ import kz.ilotterytea.bot.entities.channels.ChannelPreferences;
 import kz.ilotterytea.bot.entities.listenables.Listenable;
 import kz.ilotterytea.bot.handlers.MessageHandlerSamples;
 import kz.ilotterytea.bot.i18n.I18N;
-import kz.ilotterytea.bot.storage.PropLoader;
 import kz.ilotterytea.bot.thirdpartythings.seventv.eventapi.SevenTVEventAPIClient;
 import kz.ilotterytea.bot.utils.HibernateUtil;
 import kz.ilotterytea.bot.utils.StorageUtils;
@@ -34,7 +33,6 @@ import java.util.stream.Collectors;
  * @since 1.0
  */
 public class Huinyabot extends Bot {
-    private Properties properties;
     private TwitchClient client;
     private CommandLoader loader;
     private DelayManager delayer;
@@ -45,7 +43,6 @@ public class Huinyabot extends Bot {
     private final Logger LOGGER = LoggerFactory.getLogger(Huinyabot.class);
 
     public TwitchClient getClient() { return client; }
-    public Properties getProperties() { return properties; }
     public CommandLoader getLoader() { return loader; }
     public DelayManager getDelayer() { return delayer; }
     public OAuth2Credential getCredential() { return credential; }
@@ -57,7 +54,10 @@ public class Huinyabot extends Bot {
 
     @Override
     public void init() {
-        properties = new PropLoader(SharedConstants.PROPERTIES_PATH);
+        if (SharedConstants.TWITCH_ACCESS_TOKEN == null || SharedConstants.TWITCH_OAUTH2_TOKEN == null) {
+            LOGGER.error("No Twitch access token or Twitch OAuth2 token has been provided!");
+            return;
+        }
         loader = new CommandLoader();
         delayer = new DelayManager();
         i18N = new I18N(StorageUtils.getFilepathsFromResource("/i18n"));
@@ -70,14 +70,13 @@ public class Huinyabot extends Bot {
         }
 
         // - - -  T W I T C H  C L I E N T  - - - :
-        credential = new OAuth2Credential("twitch", properties.getProperty("OAUTH2_TOKEN"));
+        credential = new OAuth2Credential("twitch", SharedConstants.TWITCH_OAUTH2_TOKEN);
 
         client = TwitchClientBuilder.builder()
                 .withChatAccount(credential)
                 .withDefaultAuthToken(credential)
                 .withEnableTMI(true)
                 .withEnableChat(true)
-                .withClientId(properties.getProperty("CLIENT_ID"))
                 .withEnableHelix(true)
                 .build();
 

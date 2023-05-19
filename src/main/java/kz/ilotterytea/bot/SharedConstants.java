@@ -1,6 +1,8 @@
 package kz.ilotterytea.bot;
 
-import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  * App constants.
@@ -19,8 +21,25 @@ public class SharedConstants {
 
     public static final String PROPERTIES_PATH = "config.properties";
 
-    public static final String DEFAULT_PREFIX = "!";
-    public static final String DEFAULT_LOCALE_ID = "en_us";
+    public static final String TWITCH_OAUTH2_TOKEN;
+    public static final String TWITCH_ACCESS_TOKEN;
+    public static final String TWITCH_DEFAULT_PREFIX;
+    public static final String TWITCH_DEFAULT_LOCALE_ID;
+
+    static {
+        Properties properties = new Properties();
+
+        try (FileInputStream fileInputStream = new FileInputStream(PROPERTIES_PATH)) {
+            properties.load(fileInputStream);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        TWITCH_OAUTH2_TOKEN = properties.getProperty("twitch.oauth2_token", null);
+        TWITCH_ACCESS_TOKEN = properties.getProperty("twitch.access_token", null);
+        TWITCH_DEFAULT_PREFIX = properties.getProperty("twitch.default_prefix", "!");
+        TWITCH_DEFAULT_LOCALE_ID = properties.getProperty("twitch.default_locale_id", "en_us");
+    }
 
     public static final String HOLIDAY_URL = "https://hol.ilotterytea.kz/api/v1/%s/%s";
     public static final String HOLIDAY_SEARCH_URL = "https://hol.ilotterytea.kz/api/v1/search?q=%s";

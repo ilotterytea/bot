@@ -21,7 +21,7 @@ public class UserPreferences {
 
     public UserPreferences(User user) {
         this.user = user;
-        this.language = SharedConstants.DEFAULT_LOCALE_ID;
+        this.language = SharedConstants.TWITCH_DEFAULT_LOCALE_ID;
     }
 
     public UserPreferences() {}
