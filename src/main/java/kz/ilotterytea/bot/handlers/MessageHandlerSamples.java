@@ -146,10 +146,6 @@ public class MessageHandlerSamples {
 
         // Processing the command:
         if (parsedMessage.isPresent()) {
-            Hibernate.initialize(channel.getActions());
-            Hibernate.initialize(user.getActions());
-            session.close();
-
         	Optional<String> response = bot.getLoader().call(
         			parsedMessage.get().getCommandId(),
             		e,
@@ -167,7 +163,8 @@ public class MessageHandlerSamples {
                         (e.getMessageId().isEmpty()) ? null : e.getMessageId().get()
                 );
             }
-        	
+
+            session.close();
         	return;
         }
 
