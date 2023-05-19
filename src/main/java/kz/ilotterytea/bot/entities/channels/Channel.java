@@ -1,6 +1,7 @@
 package kz.ilotterytea.bot.entities.channels;
 
 import jakarta.persistence.*;
+import kz.ilotterytea.bot.entities.Action;
 import kz.ilotterytea.bot.entities.CustomCommand;
 import kz.ilotterytea.bot.entities.Timer;
 import kz.ilotterytea.bot.entities.listenables.Listenable;
@@ -64,6 +65,9 @@ public class Channel {
     @Column(nullable = false)
     private Set<ChannelFeature> features;
 
+    @OneToMany(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    private Set<Action> actions;
+
     public Channel(Integer aliasId, String aliasName) {
         this.aliasId = aliasId;
         this.aliasName = aliasName;
@@ -72,6 +76,7 @@ public class Channel {
         this.permissions = new HashSet<>();
         this.features = new HashSet<>();
         this.timers = new HashSet<>();
+        this.actions = new HashSet<>();
     }
 
     public Channel() {}
@@ -230,5 +235,25 @@ public class Channel {
     public void removeTimer(Timer timer) {
         timer.setChannel(null);
         this.timers.remove(timer);
+    }
+
+    public Set<Action> getActions() {
+        return actions;
+    }
+
+    public void setActions(Set<Action> actions) {
+        for (Action action : actions) {
+            action.setChannel(this);
+        }
+        this.actions = actions;
+    }
+
+    public void addAction(Action action) {
+        action.setChannel(this);
+        this.actions.add(action);
+    }
+
+    public void removeAction(Action action) {
+        this.actions.remove(action);
     }
 }
