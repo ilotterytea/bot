@@ -225,7 +225,7 @@ public class MessageHandlerSamples {
             if (listenable.getFlags().contains(ListenableFlag.MASSPING)) {
                 try {
                     List<Chatter> userList = bot.getClient().getHelix().getChatters(
-                            bot.getCredential().getAccessToken(),
+                            SharedConstants.TWITCH_ACCESS_TOKEN,
                             listenable.getChannel().getAliasId().toString(),
                             bot.getCredential().getUserId(),
                             1000,
@@ -309,7 +309,7 @@ public class MessageHandlerSamples {
             if (listenable.getFlags().contains(ListenableFlag.MASSPING)) {
                 try {
                     List<Chatter> userList = bot.getClient().getHelix().getChatters(
-                            bot.getCredential().getAccessToken(),
+                            SharedConstants.TWITCH_ACCESS_TOKEN,
                             listenable.getChannel().getAliasId().toString(),
                             bot.getCredential().getUserId(),
                             1000,
@@ -395,7 +395,7 @@ public class MessageHandlerSamples {
             if (listenable.getFlags().contains(ListenableFlag.MASSPING)) {
                 try {
                     List<Chatter> userList = bot.getClient().getHelix().getChatters(
-                            bot.getCredential().getAccessToken(),
+                            SharedConstants.TWITCH_ACCESS_TOKEN,
                             listenable.getChannel().getAliasId().toString(),
                             bot.getCredential().getUserId(),
                             1000,
@@ -481,7 +481,7 @@ public class MessageHandlerSamples {
             if (listenable.getFlags().contains(ListenableFlag.MASSPING)) {
                 try {
                     List<Chatter> userList = bot.getClient().getHelix().getChatters(
-                            bot.getCredential().getAccessToken(),
+                            SharedConstants.TWITCH_ACCESS_TOKEN,
                             listenable.getChannel().getAliasId().toString(),
                             bot.getCredential().getUserId(),
                             1000,
