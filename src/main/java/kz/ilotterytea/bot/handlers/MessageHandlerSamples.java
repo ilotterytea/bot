@@ -22,6 +22,7 @@ import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.utils.HibernateUtil;
 import kz.ilotterytea.bot.utils.ParsedMessage;
 import okhttp3.*;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,6 +146,8 @@ public class MessageHandlerSamples {
 
         // Processing the command:
         if (parsedMessage.isPresent()) {
+            Hibernate.initialize(channel.getActions());
+            Hibernate.initialize(user.getActions());
             session.close();
 
         	Optional<String> response = bot.getLoader().call(

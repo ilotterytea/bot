@@ -10,7 +10,6 @@ import com.github.twitch4j.events.ChannelGoLiveEvent;
 import com.github.twitch4j.events.ChannelGoOfflineEvent;
 import com.github.twitch4j.helix.domain.User;
 import kz.ilotterytea.bot.api.commands.CommandLoader;
-import kz.ilotterytea.bot.api.delay.DelayManager;
 import kz.ilotterytea.bot.entities.channels.Channel;
 import kz.ilotterytea.bot.entities.channels.ChannelPreferences;
 import kz.ilotterytea.bot.entities.listenables.Listenable;
@@ -35,7 +34,6 @@ import java.util.stream.Collectors;
 public class Huinyabot extends Bot {
     private TwitchClient client;
     private CommandLoader loader;
-    private DelayManager delayer;
     private SevenTVEventAPIClient sevenTV;
     private OAuth2Credential credential;
     private I18N i18N;
@@ -44,7 +42,6 @@ public class Huinyabot extends Bot {
 
     public TwitchClient getClient() { return client; }
     public CommandLoader getLoader() { return loader; }
-    public DelayManager getDelayer() { return delayer; }
     public OAuth2Credential getCredential() { return credential; }
     public I18N getLocale() { return i18N; }
 
@@ -59,7 +56,6 @@ public class Huinyabot extends Bot {
             return;
         }
         loader = new CommandLoader();
-        delayer = new DelayManager();
         i18N = new I18N(StorageUtils.getFilepathsFromResource("/i18n"));
 
         try {
