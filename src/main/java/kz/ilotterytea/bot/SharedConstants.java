@@ -12,7 +12,7 @@ import java.util.Properties;
 public class SharedConstants {
     public static final String APP_NAME = "huinyabot";
     public static final byte APP_VERSION_MAJOR = 1;
-    public static final byte APP_VERSION_MINOR = 4;
+    public static final byte APP_VERSION_MINOR = 5;
     public static final byte APP_VERSION_PATCH = 0;
 
     public static String getVersion() {

@@ -11,7 +11,7 @@ This project is for me to learn more about Java and all its tricks.
 ## Building from sources
 ### 1. Cloning the repo
 ```shell
-git clone https://github.com/ilotterytea/bot.git -b 1.4.0
+git clone https://github.com/ilotterytea/bot.git -b 1.5.0
 cd bot
 ```
 
@@ -55,5 +55,5 @@ twitch.access_token=access_token_from_your_twitch_application
 
 ### 5. Run the bot
 ```shell
-java -jar bot-1.4.0-all.jar
+java -jar bot-1.5.0-all.jar
 ```
