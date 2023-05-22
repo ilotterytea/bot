@@ -36,6 +36,9 @@ public enum LineIds {
     WENT_OFFLINE_NOTIFICATION("notification.offline"),
     GAME_CHANGE_NOTIFICATION("notification.game"),
 
+    EVENTS_MESSAGE("events.message"),
+    EVENTS_MESSAGE_SUFFIX("events.message.suffix"),
+
     NEW_EMOTE_WITH_AUTHOR("emoteupdater.new_emote_with_author"),
     REMOVED_EMOTE_WITH_AUTHOR("emoteupdater.removed_emote_with_author"),
     UPDATED_EMOTE_WITH_AUTHOR("emoteupdater.updated_emote_with_author"),
