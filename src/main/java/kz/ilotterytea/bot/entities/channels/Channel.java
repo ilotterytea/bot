@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import kz.ilotterytea.bot.entities.Action;
 import kz.ilotterytea.bot.entities.CustomCommand;
 import kz.ilotterytea.bot.entities.Timer;
-import kz.ilotterytea.bot.entities.listenables.Listenable;
+import kz.ilotterytea.bot.entities.events.Event;
 import kz.ilotterytea.bot.entities.permissions.UserPermission;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -50,7 +50,7 @@ public class Channel {
     private ChannelPreferences preferences;
 
     @OneToMany(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    private Set<Listenable> listenables;
+    private Set<Event> events;
 
     @OneToMany(mappedBy = "channel", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     private Set<CustomCommand> commands;
@@ -71,7 +71,7 @@ public class Channel {
     public Channel(Integer aliasId, String aliasName) {
         this.aliasId = aliasId;
         this.aliasName = aliasName;
-        this.listenables = new HashSet<>();
+        this.events = new HashSet<>();
         this.commands = new HashSet<>();
         this.permissions = new HashSet<>();
         this.features = new HashSet<>();
@@ -138,24 +138,25 @@ public class Channel {
         this.preferences = preferences;
     }
 
-    public Set<Listenable> getListenables() {
-        return listenables;
+    public Set<Event> getEvents() {
+        return events;
     }
 
-    public void setListenables(Set<Listenable> listenables) {
-        for (Listenable listenable : listenables) {
-            listenable.setChannel(this);
+    public void setEvents(Set<Event> events) {
+        for (Event event : events) {
+            event.setChannel(this);
         }
-        this.listenables = listenables;
+        this.events = events;
     }
 
-    public void addListenable(Listenable listenable) {
-        listenable.setChannel(this);
-        this.listenables.add(listenable);
+    public void addEvent(Event event) {
+        event.setChannel(this);
+        this.events.add(event);
     }
 
-    public void removeListenable(Listenable listenable) {
-        this.listenables.remove(listenable);
+    public void removeEvent(Event event) {
+        event.setChannel(null);
+        this.events.remove(event);
     }
 
     public Set<CustomCommand> getCommands() {

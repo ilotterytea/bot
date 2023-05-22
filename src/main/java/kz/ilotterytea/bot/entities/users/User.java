@@ -2,6 +2,7 @@ package kz.ilotterytea.bot.entities.users;
 
 import jakarta.persistence.*;
 import kz.ilotterytea.bot.entities.Action;
+import kz.ilotterytea.bot.entities.events.subscriptions.EventSubscription;
 import kz.ilotterytea.bot.entities.permissions.Permission;
 import kz.ilotterytea.bot.entities.permissions.UserPermission;
 import kz.ilotterytea.bot.entities.subscribers.Subscriber;
@@ -49,7 +50,7 @@ public class User {
     private UserPreferences preferences;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    private Set<Subscriber> subscribers;
+    private Set<EventSubscription> subscriptions;
 
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "global_permission", nullable = false)
@@ -64,7 +65,7 @@ public class User {
     public User(Integer aliasId, String aliasName) {
         this.aliasId = aliasId;
         this.aliasName = aliasName;
-        this.subscribers = new HashSet<>();
+        this.subscriptions = new HashSet<>();
         this.permissions = new HashSet<>();
         this.actions = new HashSet<>();
     }
@@ -128,24 +129,24 @@ public class User {
         this.preferences = preferences;
     }
 
-    public Set<Subscriber> getSubscribers() {
-        return subscribers;
+    public Set<EventSubscription> getSubscriptions() {
+        return subscriptions;
     }
 
-    public void setSubscribers(Set<Subscriber> subscribers) {
-        for (Subscriber subscriber : subscribers) {
-            subscriber.setUser(this);
+    public void setSubscriptions(Set<EventSubscription> subscriptions) {
+        for (EventSubscription subscription : subscriptions) {
+            subscription.setUser(this);
         }
-        this.subscribers = subscribers;
+        this.subscriptions = subscriptions;
     }
 
-    public void addSubscriber(Subscriber subscriber) {
-        subscriber.setUser(this);
-        this.subscribers.add(subscriber);
+    public void addSubscription(EventSubscription subscription) {
+        subscription.setUser(this);
+        this.subscriptions.add(subscription);
     }
 
-    public void removeSubscriber(Subscriber subscriber) {
-        this.subscribers.remove(subscriber);
+    public void removeSubscription(EventSubscription subscription) {
+        this.subscriptions.remove(subscription);
     }
 
     public Permission getGlobalPermission() {
