@@ -10,7 +10,7 @@ import com.github.twitch4j.helix.domain.User;
 import kz.ilotterytea.bot.api.commands.CommandLoader;
 import kz.ilotterytea.bot.entities.channels.Channel;
 import kz.ilotterytea.bot.entities.channels.ChannelPreferences;
-import kz.ilotterytea.bot.entities.listenables.Listenable;
+import kz.ilotterytea.bot.entities.events.Event;
 import kz.ilotterytea.bot.handlers.MessageHandlerSamples;
 import kz.ilotterytea.bot.handlers.StreamEventHandlers;
 import kz.ilotterytea.bot.i18n.I18N;
@@ -120,24 +120,24 @@ public class Huinyabot extends Bot {
             }
         }
 
-        // Obtaining the listenables:
-        List<Listenable> listenables = session.createQuery("from Listenable where isEnabled = true", Listenable.class).getResultList();
+        // Obtaining to stream events:
+        List<Event> streamEvents = session.createQuery("from Listenable where eventType > 0 AND eventType <= 2", Event.class).getResultList();
 
-        if (!listenables.isEmpty()) {
-            Set<Integer> listenableIds = new HashSet<>();
+        if (!streamEvents.isEmpty()) {
+            Set<Integer> eventIds = new HashSet<>();
 
-            for (Listenable listenable : listenables) {
-                listenableIds.add(listenable.getAliasId());
+            for (Event streamEvent : streamEvents) {
+                eventIds.add(streamEvent.getAliasId());
             }
 
-            // Getting Twitch info about the listenables:
+            // Getting Twitch info about the stream events:
             List<User> listenableUsers = client.getHelix().getUsers(
                     credential.getAccessToken(),
-                    listenableIds.stream().map(Object::toString).collect(Collectors.toList()),
+                    eventIds.stream().map(Object::toString).collect(Collectors.toList()),
                     null
             ).execute().getUsers();
 
-            // Listening the listenables:
+            // Listening to stream events:
             for (User listenableUser : listenableUsers) {
                 client.getClientHelper().enableStreamEventListener(listenableUser.getId(), listenableUser.getLogin());
                 LOGGER.debug("Listening for stream events for user " + listenableUser.getLogin());
