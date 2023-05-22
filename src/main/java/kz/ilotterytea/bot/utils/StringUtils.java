@@ -1,6 +1,7 @@
 package kz.ilotterytea.bot.utils;
 
-import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * String utilities.
@@ -42,5 +43,43 @@ public class StringUtils {
         else {
             return String.format("%sd%sh", d, h);
         }
+    }
+
+    /**
+     * <p>
+     *     Connect the lines with fixed length.
+     *     If the string exceeds the specified length, the string will be added to the next element.
+     * </p>
+     *
+     * <p>
+     *     For example:
+     *     <ul>
+     *         <li>Input: ["hello", "my", "name", "is", "jeff"]</li>
+     *         <li>Output: ["hello my", "name is", "jeff"]</li>
+     *     </ul>
+     * </p>
+     * For example:
+     * @param strings Strings
+     * @param fixedLength Fixed length
+     * @return a list of strings
+     */
+    public static List<String> joinStringsWithFixedLength(String separator, List<String> strings, int fixedLength) {
+        List<String> outputStrings = new ArrayList<>();
+        List<String> outputBuffer = new ArrayList<>();
+
+        for (String string : strings) {
+            String joinedBuffer = String.join(separator, outputBuffer);
+
+            if (joinedBuffer.length() + separator.length() + string.length() > fixedLength) {
+                outputStrings.add(joinedBuffer);
+                outputBuffer.clear();
+            }
+
+            outputBuffer.add(string);
+        }
+
+        outputStrings.add(String.join(separator, outputBuffer));
+
+        return outputStrings;
     }
 }
