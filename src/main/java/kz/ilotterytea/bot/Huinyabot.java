@@ -4,8 +4,6 @@ import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
 import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
-import com.github.twitch4j.events.ChannelChangeGameEvent;
-import com.github.twitch4j.events.ChannelChangeTitleEvent;
 import com.github.twitch4j.events.ChannelGoLiveEvent;
 import com.github.twitch4j.events.ChannelGoOfflineEvent;
 import com.github.twitch4j.helix.domain.User;
@@ -14,6 +12,7 @@ import kz.ilotterytea.bot.entities.channels.Channel;
 import kz.ilotterytea.bot.entities.channels.ChannelPreferences;
 import kz.ilotterytea.bot.entities.listenables.Listenable;
 import kz.ilotterytea.bot.handlers.MessageHandlerSamples;
+import kz.ilotterytea.bot.handlers.StreamEventHandlers;
 import kz.ilotterytea.bot.i18n.I18N;
 import kz.ilotterytea.bot.thirdpartythings.seventv.eventapi.SevenTVEventAPIClient;
 import kz.ilotterytea.bot.utils.HibernateUtil;
@@ -176,10 +175,9 @@ public class Huinyabot extends Bot {
 
         client.getEventManager().onEvent(IRCMessageEvent.class, MessageHandlerSamples::ircMessageEvent);
 
-        client.getEventManager().onEvent(ChannelGoLiveEvent.class, MessageHandlerSamples::goLiveEvent);
-        client.getEventManager().onEvent(ChannelGoOfflineEvent.class, MessageHandlerSamples::goOfflineEvent);
-        client.getEventManager().onEvent(ChannelChangeGameEvent.class, MessageHandlerSamples::changeGameEvent);
-        client.getEventManager().onEvent(ChannelChangeTitleEvent.class, MessageHandlerSamples::changeTitleEvent);
+        // Handling stream events:
+        client.getEventManager().onEvent(ChannelGoLiveEvent.class, StreamEventHandlers::handleGoLiveEvent);
+        client.getEventManager().onEvent(ChannelGoOfflineEvent.class, StreamEventHandlers::handleGoOfflineEvent);
     }
 
     @Override
