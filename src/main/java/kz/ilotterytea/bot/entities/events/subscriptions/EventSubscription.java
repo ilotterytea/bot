@@ -28,10 +28,7 @@ public class EventSubscription {
     @JoinColumn(name = "event_id", nullable = false, updatable = false)
     private Event event;
 
-    public EventSubscription(User user, Event event) {
-        this.user = user;
-        this.event = event;
-    }
+    public EventSubscription() {}
 
     public UUID getId() {
         return id;
