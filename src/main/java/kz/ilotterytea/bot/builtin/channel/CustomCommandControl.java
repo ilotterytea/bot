@@ -8,7 +8,6 @@ import kz.ilotterytea.bot.entities.permissions.Permission;
 import kz.ilotterytea.bot.entities.permissions.UserPermission;
 import kz.ilotterytea.bot.entities.users.User;
 import kz.ilotterytea.bot.i18n.LineIds;
-import kz.ilotterytea.bot.utils.HibernateUtil;
 import kz.ilotterytea.bot.utils.ParsedMessage;
 
 import org.hibernate.Session;
@@ -43,7 +42,7 @@ public class CustomCommandControl implements Command {
     public List<String> getAliases() { return List.of("scmd", "custom", "command", "команда"); }
 
     @Override
-    public Optional<String> run(IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
+    public Optional<String> run(Session session, IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
     	if (message.getMessage().isEmpty()) {
     		return Optional.ofNullable(Huinyabot.getInstance().getLocale().literalText(
                     channel.getPreferences().getLanguage(),
@@ -87,8 +86,6 @@ public class CustomCommandControl implements Command {
 
         final String name = s.get(0);
         s.remove(0);
-
-        Session session = HibernateUtil.getSessionFactory().openSession();
         
         // If the command was run by a broadcaster:
         if (permission.getPermission().getValue() >= Permission.BROADCASTER.getValue()) {
@@ -118,13 +115,8 @@ public class CustomCommandControl implements Command {
                 channel.addCommand(command);
 
                 // Saving changes:
-                session.getTransaction().begin();
-                
                 session.persist(channel);
                 session.persist(command);
-                
-                session.getTransaction().commit();
-                session.close();
 
                 return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
                         channel.getPreferences().getLanguage(),
@@ -151,12 +143,7 @@ public class CustomCommandControl implements Command {
                     command.setMessage(response);
 
                     // Saving changes:
-                    session.getTransaction().begin();
-
                     session.persist(command);
-
-                    session.getTransaction().commit();
-                    session.close();
 
                     return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
                             channel.getPreferences().getLanguage(),
@@ -167,10 +154,7 @@ public class CustomCommandControl implements Command {
                 // "Delete a command" clause:
                 case "delete":
                     // Deleting a command and saving changes:
-                    session.getTransaction().begin();
                     session.remove(command);
-                    session.getTransaction().commit();
-                    session.close();
 
                     return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
                             channel.getPreferences().getLanguage(),
@@ -187,10 +171,7 @@ public class CustomCommandControl implements Command {
                     command.setName(nameToRename);
 
                     // Saving changes:
-                    session.getTransaction().begin();
                     session.persist(command);
-                    session.getTransaction().commit();
-                    session.close();
 
                     return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
                             channel.getPreferences().getLanguage(),

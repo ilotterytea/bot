@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
+import org.hibernate.Session;
 
 /**
  * Spam command.
@@ -42,7 +43,7 @@ public class SpamCommand implements Command {
     public List<String> getAliases() { return List.of("спам", "насрать", "repeat", "cv", "paste", "cvpaste"); }
 
     @Override
-    public Optional<String> run(IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
+    public Optional<String> run(Session session, IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
     	if (message.getMessage().isEmpty() || message.getMessage().get().split(" ").length == 1) {
     		return Optional.ofNullable(Huinyabot.getInstance().getLocale().literalText(
     				channel.getPreferences().getLanguage(),

@@ -11,6 +11,7 @@ import kz.ilotterytea.bot.entities.permissions.UserPermission;
 import kz.ilotterytea.bot.entities.users.User;
 import kz.ilotterytea.bot.i18n.LineIds;
 import kz.ilotterytea.bot.utils.ParsedMessage;
+import org.hibernate.Session;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,7 +43,7 @@ public class MasspingCommand implements Command {
     public List<String> getAliases() { return List.of("mp", "масспинг", "мп", "massbing"); }
 
     @Override
-    public Optional<String> run(IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
+    public Optional<String> run(Session session, IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
         List<Chatter> chatters;
 
         try {

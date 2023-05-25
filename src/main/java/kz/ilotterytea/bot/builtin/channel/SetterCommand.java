@@ -42,7 +42,7 @@ public class SetterCommand implements Command {
     public List<String> getAliases() { return Collections.emptyList(); }
 
     @Override
-    public Optional<String> run(IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
+    public Optional<String> run(Session session, IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
         if (message.getSubcommandId().isEmpty()) {
             return Optional.ofNullable(Huinyabot.getInstance().getLocale().literalText(
                     channel.getPreferences().getLanguage(),
@@ -57,18 +57,13 @@ public class SetterCommand implements Command {
         	));
         }
 
-        Session session = HibernateUtil.getSessionFactory().openSession();
-
         switch (message.getSubcommandId().get()) {
 	        // "Prefix" clause.
 	        case "prefix": {
 	            ChannelPreferences preferences = channel.getPreferences();
 	            preferences.setPrefix(message.getMessage().get());
-	
-	            session.getTransaction().begin();
-	            session.persist(preferences);
-	            session.getTransaction().commit();
-	            session.close();
+
+	            session.merge(preferences);
 	
 	            return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
 	                    preferences.getLanguage(),
@@ -88,18 +83,14 @@ public class SetterCommand implements Command {
 	
 	            ChannelPreferences preferences = channel.getPreferences();
 	            preferences.setLanguage(message.getMessage().get().toLowerCase());
-	
-	            session.getTransaction().begin();
-	            session.persist(preferences);
-	            session.getTransaction().commit();
-	            session.close();
+
+	            session.merge(preferences);
 	
 	            return Optional.ofNullable(Huinyabot.getInstance().getLocale().literalText(
 	                    preferences.getLanguage(),
 	                    LineIds.C_SET_SUCCESS_LOCALE_SET
 	            ));
 	        default:
-	        	session.close();
 	        	return Optional.ofNullable(Huinyabot.getInstance().getLocale().literalText(
 	        			channel.getPreferences().getLanguage(),
 	        			LineIds.UNKNOWN_SUBCOMMAND

@@ -6,6 +6,7 @@ import kz.ilotterytea.bot.entities.permissions.Permission;
 import kz.ilotterytea.bot.entities.permissions.UserPermission;
 import kz.ilotterytea.bot.entities.users.User;
 import kz.ilotterytea.bot.utils.ParsedMessage;
+import org.hibernate.Session;
 
 import java.util.*;
 
@@ -56,6 +57,7 @@ public interface Command {
      * @return response.
      */
     Optional<String> run(
+            Session session,
             IRCMessageEvent event,
             ParsedMessage message,
             Channel channel,

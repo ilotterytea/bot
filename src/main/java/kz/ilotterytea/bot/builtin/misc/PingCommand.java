@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
+import org.hibernate.Session;
 
 /**
  * Ping command.
@@ -48,7 +49,7 @@ public class PingCommand implements Command {
     public List<String> getAliases() { return List.of("pong", "пинг", "понг"); }
 
     @Override
-    public Optional<String> run(IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
+    public Optional<String> run(Session session, IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
         long uptime = ManagementFactory.getRuntimeMXBean().getUptime();
 
         String ut = StringUtils.formatTimestamp(uptime / 1000);

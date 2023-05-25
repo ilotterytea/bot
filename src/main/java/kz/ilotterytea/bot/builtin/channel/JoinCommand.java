@@ -42,11 +42,7 @@ public class JoinCommand implements Command {
     public List<String> getAliases() { return Collections.singletonList("зайти"); }
 
     @Override
-    public Optional<String> run(IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-
-        session.getTransaction().begin();
-
+    public Optional<String> run(Session session, IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
         // Getting the sender's local channel info if it exists:
         List<Channel> userChannels = session.createQuery("from Channel where aliasId = :aliasId", Channel.class)
                 .setParameter("aliasId", user.getAliasId())
@@ -62,8 +58,6 @@ public class JoinCommand implements Command {
 
             session.persist(userChannel);
             session.persist(preferences);
-
-            session.getTransaction().commit();
         } else {
         	userChannel = userChannels.get(0);
 
@@ -73,9 +67,7 @@ public class JoinCommand implements Command {
             	userChannel.setAliasName(user.getAliasName());
             	
             	session.persist(userChannel);
-            	session.getTransaction().commit();
             } else {
-                session.close();
                 return Optional.ofNullable(Huinyabot.getInstance().getLocale().formattedText(
                 		channel.getPreferences().getLanguage(),
                         LineIds.C_JOIN_ALREADYIN,
@@ -83,8 +75,6 @@ public class JoinCommand implements Command {
                 ));
             }
         }
-
-        session.close();
 
         Huinyabot.getInstance().getClient().getChat().joinChannel(userChannel.getAliasName());
 

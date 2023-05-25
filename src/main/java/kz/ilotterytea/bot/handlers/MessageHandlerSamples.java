@@ -130,8 +130,11 @@ public class MessageHandlerSamples {
 
         // Processing the command:
         if (parsedMessage.isPresent()) {
+            session.getTransaction().begin();
+
         	Optional<String> response = bot.getLoader().call(
         			parsedMessage.get().getCommandId(),
+                    session,
             		e,
             		parsedMessage.get(),
             		channel,
@@ -148,6 +151,7 @@ public class MessageHandlerSamples {
                 );
             }
 
+            session.getTransaction().commit();
             session.close();
         	return;
         }

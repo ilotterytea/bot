@@ -12,6 +12,7 @@ import kz.ilotterytea.bot.thirdpartythings.seventv.api.SevenTVAPIClient;
 import kz.ilotterytea.bot.thirdpartythings.seventv.api.schemas.emoteset.Emote;
 import kz.ilotterytea.bot.thirdpartythings.seventv.api.schemas.emoteset.EmoteSet;
 import kz.ilotterytea.bot.utils.ParsedMessage;
+import org.hibernate.Session;
 
 import java.util.Collections;
 import java.util.List;
@@ -42,7 +43,7 @@ public class EmoteSetSimilarityCommand implements Command {
     public List<String> getAliases() { return Collections.singletonList("esim"); }
 
     @Override
-    public Optional<String> run(IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
+    public Optional<String> run(Session session, IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
         if (message.getMessage().isEmpty()) {
             return Optional.ofNullable(Huinyabot.getInstance().getLocale().literalText(
                     channel.getPreferences().getLanguage(),

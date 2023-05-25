@@ -20,6 +20,7 @@ import kz.ilotterytea.bot.utils.StringUtils;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.hibernate.Session;
 
 import java.io.IOException;
 import java.util.*;
@@ -49,7 +50,7 @@ public class HolidayCommand implements Command {
     public List<String> getAliases() { return List.of("праздник", "hld"); }
 
     @Override
-    public Optional<String> run(IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
+    public Optional<String> run(Session session, IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
         if (message.getSubcommandId().isPresent() && message.getSubcommandId().get().equals("search")) {
             if (message.getMessage().isEmpty()) {
                 return Optional.ofNullable(Huinyabot.getInstance().getLocale().literalText(

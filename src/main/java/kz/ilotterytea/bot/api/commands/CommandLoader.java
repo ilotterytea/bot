@@ -4,7 +4,6 @@ import kz.ilotterytea.bot.entities.Action;
 import kz.ilotterytea.bot.entities.channels.Channel;
 import kz.ilotterytea.bot.entities.permissions.UserPermission;
 import kz.ilotterytea.bot.entities.users.User;
-import kz.ilotterytea.bot.utils.HibernateUtil;
 import kz.ilotterytea.bot.utils.ParsedMessage;
 
 import org.hibernate.Session;
@@ -62,13 +61,12 @@ public class CommandLoader extends ClassLoader {
      * @author ilotterytea
      * @return response
      */
-    public Optional<String> call(String nameId, IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
+    public Optional<String> call(String nameId, Session session, IRCMessageEvent event, ParsedMessage message, Channel channel, User user, UserPermission permission) {
         Optional<String> response = Optional.empty();
 
         if (COMMANDS.containsKey(nameId)) {
             Command cmd = COMMANDS.get(nameId);
 
-            Session session = HibernateUtil.getSessionFactory().openSession();
             List<Action> actions = session.createQuery("from Action WHERE channel = :channel AND user = :user AND commandId = :commandId ORDER BY creationTimestamp DESC", Action.class)
                     .setParameter("channel", channel)
                     .setParameter("user", user)
@@ -94,16 +92,12 @@ public class CommandLoader extends ClassLoader {
             channel.addAction(action);
             user.addAction(action);
 
-            session.getTransaction().begin();
             session.persist(action);
             session.merge(channel);
             session.merge(user);
-            session.getTransaction().commit();
-
-            session.close();
 
             try {
-                response = cmd.run(event, message, channel, user, permission);
+                response = cmd.run(session, event, message, channel, user, permission);
             } catch (Exception e) {
                 LOGGER.error(String.format("Error occurred while running the %s command", nameId), e);
             }
