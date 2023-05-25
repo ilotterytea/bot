@@ -55,6 +55,8 @@ public class Event {
         this.subscriptions = new HashSet<>();
     }
 
+    public Event() {}
+
     @PrePersist
     private void prePersist() {
         if (eventType != EventType.CUSTOM && aliasId == null) {
