@@ -5,7 +5,6 @@ import kz.ilotterytea.bot.entities.Action;
 import kz.ilotterytea.bot.entities.events.subscriptions.EventSubscription;
 import kz.ilotterytea.bot.entities.permissions.Permission;
 import kz.ilotterytea.bot.entities.permissions.UserPermission;
-import kz.ilotterytea.bot.entities.subscribers.Subscriber;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 

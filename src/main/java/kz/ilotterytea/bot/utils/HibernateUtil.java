@@ -6,8 +6,8 @@ import kz.ilotterytea.bot.entities.Timer;
 import kz.ilotterytea.bot.entities.channels.Channel;
 import kz.ilotterytea.bot.entities.channels.ChannelPreferences;
 import kz.ilotterytea.bot.entities.events.Event;
+import kz.ilotterytea.bot.entities.events.subscriptions.EventSubscription;
 import kz.ilotterytea.bot.entities.permissions.UserPermission;
-import kz.ilotterytea.bot.entities.subscribers.Subscriber;
 import kz.ilotterytea.bot.entities.users.User;
 import kz.ilotterytea.bot.entities.users.UserPreferences;
 import org.hibernate.SessionFactory;
@@ -25,7 +25,7 @@ public class HibernateUtil {
             .addAnnotatedClass(User.class)
             .addAnnotatedClass(UserPreferences.class)
             .addAnnotatedClass(Event.class)
-            .addAnnotatedClass(Subscriber.class)
+            .addAnnotatedClass(EventSubscription.class)
             .addAnnotatedClass(CustomCommand.class)
             .addAnnotatedClass(UserPermission.class)
             .addAnnotatedClass(Timer.class)
