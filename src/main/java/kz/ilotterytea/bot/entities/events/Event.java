@@ -43,7 +43,7 @@ public class Event {
     @Column(nullable = false)
     private Set<EventFlag> flags;
 
-    @OneToMany(mappedBy = "event", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<EventSubscription> subscriptions;
 
     public Event(Integer aliasId, EventType eventType, String eventName, String eventMessage) {
