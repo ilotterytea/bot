@@ -121,7 +121,7 @@ public class Huinyabot extends Bot {
         }
 
         // Obtaining to stream events:
-        List<Event> streamEvents = session.createQuery("from Listenable where eventType > 0 AND eventType <= 2", Event.class).getResultList();
+        List<Event> streamEvents = session.createQuery("from Event where eventType > 0 AND eventType <= 2", Event.class).getResultList();
 
         if (!streamEvents.isEmpty()) {
             Set<Integer> eventIds = new HashSet<>();
