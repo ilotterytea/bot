@@ -48,7 +48,7 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private UserPreferences preferences;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<EventSubscription> subscriptions;
 
     @Enumerated(EnumType.ORDINAL)
