@@ -143,7 +143,18 @@ public enum LineIds {
     C_TIMER_INFO("cmd.timer.response.info"),
     C_TIMER_MESSAGE("cmd.timer.response.message"),
     C_TIMER_INTERVAL("cmd.timer.response.interval"),
-    C_TIMER_NOTANINTERVAL("cmd.timer.response.not_an_interval");
+    C_TIMER_NOTANINTERVAL("cmd.timer.response.not_an_interval"),
+
+    C_EVENT_NOEVENTS("cmd.event.response.no_events"),
+    C_EVENT_LIST("cmd.event.response.list"),
+    C_EVENT_ONCUSTOM("cmd.event.response.on.custom"),
+    C_EVENT_ON("cmd.event.response.on"),
+    C_EVENT_ONUPDATE("cmd.event.response.on.update"),
+    C_EVENT_OFF("cmd.event.response.off"),
+    C_EVENT_FLAG("cmd.event.response.flag"),
+    C_EVENT_UNFLAG("cmd.event.response.flag"),
+    C_EVENT_FLAGNOTEXISTS("cmd.event.response.flag_not_exists"),
+    C_EVENT_NOTEXISTS("cmd.event.response.not_exists");
 
     private final String id;
     LineIds(String id) {

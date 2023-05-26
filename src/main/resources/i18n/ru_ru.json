@@ -156,5 +156,18 @@
   "cmd.timer.response.info": "Таймер \"%s\" | Интервал: %sмс | Сообщение: \"%s\"",
   "cmd.timer.response.message": "Успешно отредактировано сообщение таймера \"%s\"!",
   "cmd.timer.response.interval": "Успешно отредактирован интервал таймера \"%s\"!",
-  "cmd.timer.response.not_an_interval": "Указанный интервал (%s) не является числом!"
+  "cmd.timer.response.not_an_interval": "Указанный интервал (%s) не является числом!",
+
+  "cmd.event.name": "Event",
+  "cmd.event.desc": "Event",
+  "cmd.event.response.no_events": "На этом канале нету каких-либо активных событий.",
+  "cmd.event.response.list": "Активные события канала %s: %s",
+  "cmd.event.response.on.custom": "Событие \"%s\" доступно для подписки. Отправьте !notify sub %s для подписки или !event call %s для вызова этого события.",
+  "cmd.event.response.on": "Прослушиваю события \"%s\" канала %s. Они будут вызываться, когда они будут проходить на канале.",
+  "cmd.event.response.on.update": "Обновил сообщение для события \"%s\"!",
+  "cmd.event.response.off": "Событие \"%s\" больше не активно на этом канале.",
+  "cmd.event.response.flag": "Установил флаг \"%s\" для события \"%s\"!",
+  "cmd.event.response.unflag": "Снял флаг \"%s\" с события \"%s\"!",
+  "cmd.event.response.flag_not_exists": "Флаг \"%s\" не существует. Доступные флаги: %s",
+  "cmd.event.response.not_exists": "Не существует события \"%s\"!"
 }

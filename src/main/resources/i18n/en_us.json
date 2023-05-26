@@ -156,5 +156,18 @@
   "cmd.timer.response.info": "Timer \"%s\" | Interval: %sms | Message: \"%s\"",
   "cmd.timer.response.message": "Successfully edited message for timer \"%s\"!",
   "cmd.timer.response.interval": "Successfully edited interval for timer \"%s\"!",
-  "cmd.timer.response.not_an_interval": "The specified interval (%s) is not a number!"
+  "cmd.timer.response.not_an_interval": "The specified interval (%s) is not a number!",
+
+  "cmd.event.name": "Event",
+  "cmd.event.desc": "Event",
+  "cmd.event.response.no_events": "There are no active events on this channel.",
+  "cmd.event.response.list": "Active events in %s's channel: %s",
+  "cmd.event.response.on.custom": "The event \"%s\" is available for subscription. Send !notify sub %s to subscribe or !event call %s to call this event.",
+  "cmd.event.response.on": "Listening for events \"%s\" of channel %s. They will be called when they happen on the channel.",
+  "cmd.event.response.on.update": "Updated the message for event \"%s\"!",
+  "cmd.event.response.off": "The event \"%s\" is no longer active on this channel.",
+  "cmd.event.response.flag": "The flag \"%s\" has been set for the event \"%s\"!",
+  "cmd.event.response.unflag": "Removed the \"%s\" flag from the \"%s\" event!",
+  "cmd.event.response.flag_not_exists": "The flag \"%s\" does not exist. Available flags: %s",
+  "cmd.event.response.not_exists": "There is no \"%s\" event!"
 }
