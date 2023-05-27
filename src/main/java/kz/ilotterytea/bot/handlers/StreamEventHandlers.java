@@ -56,7 +56,7 @@ public class StreamEventHandlers {
      */
     private static List<Event> getEventsByAliasId(String aliasId, EventType eventType) {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        List<Event> events = session.createQuery("from Events where aliasId = :aliasId AND eventType = :eventType", Event.class)
+        List<Event> events = session.createQuery("from Event where aliasId = :aliasId AND eventType = :eventType", Event.class)
                 .setParameter("aliasId", aliasId)
                 .setParameter("eventType", eventType)
                 .getResultList();
