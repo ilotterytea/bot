@@ -2,6 +2,8 @@ use twitch_irc::login::StaticLoginCredentials;
 use twitch_irc::TwitchIRCClient;
 use twitch_irc::{ClientConfig, SecureTCPTransport};
 
+mod api;
+
 #[tokio::main]
 pub async fn main() {
     // default configuration is to join chat as anonymous.
