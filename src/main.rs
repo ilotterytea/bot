@@ -1,6 +1,9 @@
+use std::sync::Arc;
+use tokio::sync::Mutex;
 use twitch_irc::login::StaticLoginCredentials;
 use twitch_irc::TwitchIRCClient;
 use twitch_irc::{ClientConfig, SecureTCPTransport};
+use crate::api::command::CommandLoader;
 
 mod api;
 
@@ -11,13 +14,7 @@ pub async fn main() {
     let (mut incoming_messages, client) =
         TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(config);
 
-    // first thing you should do: start consuming incoming messages,
-    // otherwise they will back up.
-    let join_handle = tokio::spawn(async move {
-        while let Some(message) = incoming_messages.recv().await {
-            println!("Received message: {:?}", message);
-        }
-    });
+    let command_loader = Arc::new(Mutex::from(CommandLoader::new()));
 
     // join a channel
     // This function only returns an error if the passed channel login name is malformed,
