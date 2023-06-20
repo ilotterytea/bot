@@ -6,6 +6,7 @@ use twitch_irc::{ClientConfig, SecureTCPTransport};
 use crate::api::command::CommandLoader;
 
 mod api;
+mod locale;
 
 #[tokio::main]
 pub async fn main() {
