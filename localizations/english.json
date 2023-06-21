@@ -1,3 +1,5 @@
 {
-  "MSG_TEST": "test was successfully completed on {}"
+  "MSG_TEST": "test was successfully completed on {}",
+
+  "CMD_PING_RESPONSE": "DankPoke \uD83E\uDD80 Pong! Rust {} · Uptime: {} · Memory usage: {}MB"
 }

@@ -9,6 +9,7 @@ use crate::shared_variables::CONFIGURATION;
 use crate::handlers::irc_message_handler;
 
 mod api;
+mod commands;
 mod config;
 mod handlers;
 mod locale;

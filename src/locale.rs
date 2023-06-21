@@ -6,6 +6,8 @@ use std::str::from_utf8;
 #[derive(Debug, Hash, PartialEq, Eq, Deserialize)]
 pub enum LineId {
     MSG_TEST,
+
+    CMD_PING_RESPONSE,
 }
 
 /// Localization manager.
