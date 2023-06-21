@@ -13,6 +13,7 @@ mod config;
 mod handlers;
 mod locale;
 mod shared_variables;
+mod utils;
 
 #[tokio::main]
 pub async fn main() {
