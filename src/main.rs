@@ -7,6 +7,7 @@ use crate::api::command::CommandLoader;
 
 mod api;
 mod locale;
+mod shared_variables;
 
 #[tokio::main]
 pub async fn main() {
