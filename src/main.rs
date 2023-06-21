@@ -5,7 +5,7 @@ use twitch_irc::message::ServerMessage;
 use twitch_irc::TwitchIRCClient;
 use twitch_irc::{ClientConfig, SecureTCPTransport};
 use crate::api::command::CommandLoader;
-use crate::shared_variables::CONFIGURATION;
+use crate::shared_variables::{CONFIGURATION, START_TIME};
 use crate::handlers::irc_message_handler;
 
 mod api;
@@ -18,6 +18,7 @@ mod utils;
 
 #[tokio::main]
 pub async fn main() {
+    println!("{:?}", *START_TIME);
     // default configuration is to join chat as anonymous.
     let (mut incoming_messages, client) =
         TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(
