@@ -1,4 +1,6 @@
 use async_trait::async_trait;
+use twitch_irc::message::PrivmsgMessage;
+use crate::api::message::ParsedMessage;
 use crate::commands;
 
 #[async_trait]
@@ -8,7 +10,11 @@ pub trait Command {
     fn get_name_id(&self) -> String;
 
     /// Run the command.
-    async fn run(&self) -> Option<Vec<String>>;
+    async fn run(
+        &self,
+        event_message: &PrivmsgMessage,
+        message: ParsedMessage
+    ) -> Option<Vec<String>>;
 }
 
 /// Command loader.
@@ -28,14 +34,18 @@ impl CommandLoader {
 
     /// Run the command.
     /// Returns None if command has no response.
-    pub async fn run(&self, command_id: String) -> Option<Vec<String>> {
+    pub async fn run(
+        &self,
+        event_message: &PrivmsgMessage,
+        message: ParsedMessage
+    ) -> Option<Vec<String>> {
         let wrapped_command = &self.commands.iter()
-            .find(|it| it.get_name_id().eq(&command_id));
+            .find(|it| it.get_name_id().eq(&message.command_id));
 
         if wrapped_command.is_none() {
             return None;
         }
 
-        wrapped_command.unwrap().run().await
+        wrapped_command.unwrap().run(event_message, message).await
     }
 }
