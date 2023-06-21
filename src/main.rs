@@ -40,11 +40,7 @@ pub async fn main() {
     let join_handle = tokio::spawn(async move {
         while let Some(message) = incoming_messages.recv().await {
             if let ServerMessage::Privmsg(msg) = message {
-                irc_message_handler(
-                    &client,
-                    command_loader.lock().await,
-                    msg
-                );
+                irc_message_handler(&client, command_loader.lock().await, msg).await;
             }
         }
     });
