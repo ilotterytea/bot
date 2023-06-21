@@ -63,12 +63,15 @@ impl Localizations {
         let mut index = 0;
 
         for word in message {
-            let w = word.replace("{}", parameters.get(index).unwrap());
+            let w = if word.contains("{}") {
+                index += 1;
+                word.replace("{}", parameters.get(index - 1).unwrap())
+            } else {
+                word.to_string()
+            };
 
             final_message.push_str(w.as_str());
             final_message.push(' ');
-
-            index += 1;
 
             if parameters.len() == index {
                 index = 0;
