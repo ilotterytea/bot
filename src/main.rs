@@ -1,13 +1,16 @@
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use twitch_irc::login::StaticLoginCredentials;
+use twitch_irc::message::ServerMessage;
 use twitch_irc::TwitchIRCClient;
 use twitch_irc::{ClientConfig, SecureTCPTransport};
 use crate::api::command::CommandLoader;
 use crate::shared_variables::CONFIGURATION;
+use crate::handlers::irc_message_handler;
 
 mod api;
 mod config;
+mod handlers;
 mod locale;
 mod shared_variables;
 
@@ -31,6 +34,18 @@ pub async fn main() {
     client
         .join(CONFIGURATION.twitch.bot_name.to_owned())
         .unwrap();
+
+    let join_handle = tokio::spawn(async move {
+        while let Some(message) = incoming_messages.recv().await {
+            if let ServerMessage::Privmsg(msg) = message {
+                irc_message_handler(
+                    &client,
+                    command_loader.lock().await,
+                    msg
+                );
+            }
+        }
+    });
 
     // keep the tokio executor alive.
     // If you return instead of waiting the background task will exit.
