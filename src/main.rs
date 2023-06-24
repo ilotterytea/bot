@@ -1,16 +1,16 @@
+use crate::api::command::CommandLoader;
+use crate::handlers::irc_message_handler;
+use crate::shared_variables::START_TIME;
+use std::env;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use twitch_irc::login::StaticLoginCredentials;
 use twitch_irc::message::ServerMessage;
 use twitch_irc::TwitchIRCClient;
 use twitch_irc::{ClientConfig, SecureTCPTransport};
-use crate::api::command::CommandLoader;
-use crate::shared_variables::{CONFIGURATION, START_TIME};
-use crate::handlers::irc_message_handler;
 
 mod api;
 mod commands;
-mod config;
 mod handlers;
 mod locale;
 mod shared_variables;
@@ -19,12 +19,17 @@ mod utils;
 #[tokio::main]
 pub async fn main() {
     println!("{:?}", *START_TIME);
+    dotenvy::dotenv().ok();
+
     // default configuration is to join chat as anonymous.
     let (mut incoming_messages, client) =
         TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(
             ClientConfig::new_simple(StaticLoginCredentials::new(
-                CONFIGURATION.twitch.bot_name.clone(),
-                Some(CONFIGURATION.twitch.oauth2_token.clone()),
+                env::var("BOT_NAME")
+                    .unwrap_or_else(|_| panic!("No BOT_NAME value specified in .env file!")),
+                Some(env::var("BOT_OAUTH2_TOKEN").unwrap_or_else(|_| {
+                    panic!("No BOT_OAUTH2_TOKEN value specified in .env file!")
+                })),
             )),
         );
 
@@ -35,7 +40,10 @@ pub async fn main() {
     // so in this simple case where the channel name is hardcoded we can ignore the potential
     // error with `unwrap`.
     client
-        .join(CONFIGURATION.twitch.bot_name.to_owned())
+        .join(
+            env::var("BOT_NAME")
+                .unwrap_or_else(|_| panic!("No BOT_NAME value specified in .env file!")),
+        )
         .unwrap();
 
     let join_handle = tokio::spawn(async move {
