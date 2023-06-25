@@ -1,0 +1,18 @@
+-- Channels
+CREATE TABLE "channels" (
+  "id" SERIAL NOT NULL PRIMARY KEY,
+  "alias_id" INTEGER UNIQUE NOT NULL,
+  "alias_name" VARCHAR(25) NOT NULL,
+  "joined_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "opt_outed_at" TIMESTAMP
+);
+
+-- Users
+
+CREATE TABLE "users" (
+  "id" SERIAL NOT NULL PRIMARY KEY,
+  "alias_id" INTEGER UNIQUE NOT NULL,
+  "alias_name" VARCHAR(25) NOT NULL,
+  "joined_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "is_superuser" BOOLEAN NOT NULL DEFAULT FALSE
+);

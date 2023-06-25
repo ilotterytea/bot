@@ -1,3 +1,7 @@
+use diesel::pg::PgConnection;
+use diesel::prelude::*;
+use std::env;
+
 /// Format the timestamp (in seconds) as a humanized timestamp.
 /// <br>
 /// Example:
@@ -19,4 +23,12 @@ pub fn format_timestamp(timestamp: u64) -> String {
     } else {
         format!("{}d{}h", d, h)
     }
+}
+
+/// Establish connection to the database.
+pub fn establish_connection() -> PgConnection {
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+
+    PgConnection::establish(&database_url)
+        .unwrap_or_else(|_| panic!("Error conencting to {}", database_url))
 }

@@ -13,6 +13,8 @@ mod api;
 mod commands;
 mod handlers;
 mod locale;
+mod models;
+mod schema;
 mod shared_variables;
 mod utils;
 
