@@ -13,8 +13,10 @@ dotenvy = "0.15.7"
 include_dir = "0.7.3"
 lazy_static = "1.4.0"
 psutil = "3.2.2"
+reqwest = { version = "0.11.18", features = ["json"] }
 serde = { version = "1.0.164", features = ["derive"] }
 serde_json = "1.0.97"
 tokio = { version = "1.28.2", features = ["full"] }
 twitch-irc = "5.0.0"
+twitch_api = { version = "0.7.0-rc.6", features = ["twitch_oauth2", "helix", "pubsub", "unsupported", "reqwest"] }
 version_check = "0.9.4"
