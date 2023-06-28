@@ -1,9 +1,16 @@
 use crate::api::command::CommandLoader;
 use crate::handlers::irc_message_handler;
+use crate::schema::channels::dsl as ch;
 use crate::shared_variables::START_TIME;
+use crate::utils::establish_connection;
+use diesel::prelude::*;
 use std::env;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use twitch_api::helix::users::GetUsersRequest;
+use twitch_api::twitch_oauth2::{AccessToken, UserToken};
+use twitch_api::types::UserIdRef;
+use twitch_api::TwitchClient;
 use twitch_irc::login::StaticLoginCredentials;
 use twitch_irc::message::ServerMessage;
 use twitch_irc::TwitchIRCClient;
@@ -37,6 +44,22 @@ pub async fn main() {
 
     let command_loader = Arc::new(Mutex::from(CommandLoader::new()));
 
+    let api_client: TwitchClient<reqwest::Client> = TwitchClient::default();
+    let api_token = match UserToken::from_existing(
+        &reqwest::Client::new(),
+        AccessToken::new(
+            env::var("BOT_ACCESS_TOKEN")
+                .expect("BOT_ACCESS_TOKEN must be set for Twitch API requests!"),
+        ),
+        None,
+        None,
+    )
+    .await
+    {
+        Ok(t) => t,
+        Err(e) => panic!("Got error: {}", e),
+    };
+
     // join a channel
     // This function only returns an error if the passed channel login name is malformed,
     // so in this simple case where the channel name is hardcoded we can ignore the potential
@@ -48,6 +71,36 @@ pub async fn main() {
         )
         .unwrap();
 
+    let conn = &mut establish_connection();
+
+    // Select channel IDs from the DB and join those channels
+    let channel_ids = ch::channels
+        .select(ch::alias_id)
+        .load::<i32>(conn)
+        .expect("Failed to load channel IDs");
+
+    for channel_id in channel_ids {
+        let _channel_id = channel_id.to_string();
+        let _channel_ids: &[&UserIdRef] = &[_channel_id.as_str().into()];
+
+        let users = &api_client
+            .helix
+            .req_get(GetUsersRequest::ids(_channel_ids), &api_token)
+            .await
+            .expect("Can't send a request");
+
+        let user = users.data.first();
+
+        if user.is_some() {
+            let u = user.unwrap();
+
+            if client.join(u.login.to_string()).is_ok() {
+                println!("Successfully joined #{}", u.login);
+            }
+        }
+    }
+
+    // The handler for Twitch chat client
     let join_handle = tokio::spawn(async move {
         while let Some(message) = incoming_messages.recv().await {
             if let ServerMessage::Privmsg(msg) = message {
