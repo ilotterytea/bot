@@ -7,8 +7,6 @@ pub struct Channel {
     pub id: i32,
     pub alias_id: i32,
     pub alias_name: String,
-    pub prefix: Option<String>,
-    pub language: Option<String>,
     pub joined_at: NaiveDateTime,
     pub opt_outed_at: Option<NaiveDateTime>,
 }
