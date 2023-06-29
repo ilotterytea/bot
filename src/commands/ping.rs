@@ -1,12 +1,13 @@
 use crate::api::command::Command;
 use crate::api::message::ParsedMessage;
+use crate::api::InstanceBundle;
 use crate::locale::{LineId, Localizations};
+use crate::models::diesel::{Channel, User};
 use crate::shared_variables::START_TIME;
 use crate::utils::format_timestamp;
 use async_trait::async_trait;
 use psutil::process::processes;
 use std::time::Instant;
-use twitch_irc::message::PrivmsgMessage;
 use version_check::Version;
 
 pub struct PingCommand;
@@ -19,7 +20,9 @@ impl Command for PingCommand {
 
     async fn run(
         &self,
-        _event_message: &PrivmsgMessage,
+        _instance_bundle: &InstanceBundle,
+        _channel: Channel,
+        _user: User,
         _message: ParsedMessage,
     ) -> Option<Vec<String>> {
         let current_time = Instant::now();

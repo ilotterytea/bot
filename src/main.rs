@@ -1,4 +1,5 @@
 use crate::api::command::CommandLoader;
+use crate::api::InstanceBundle;
 use crate::handlers::irc_message_handler;
 use crate::schema::channels::dsl as ch;
 use crate::shared_variables::START_TIME;
@@ -103,8 +104,14 @@ pub async fn main() {
     // The handler for Twitch chat client
     let join_handle = tokio::spawn(async move {
         while let Some(message) = incoming_messages.recv().await {
+            let instance_bundle = InstanceBundle {
+                twitch_client: &client,
+                twitch_api_client: &api_client,
+                twitch_api_token: &api_token,
+            };
+
             if let ServerMessage::Privmsg(msg) = message {
-                irc_message_handler(&client, command_loader.lock().await, msg).await;
+                irc_message_handler(instance_bundle, command_loader.lock().await, msg).await;
             }
         }
     });

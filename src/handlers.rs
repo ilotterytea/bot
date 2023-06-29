@@ -1,17 +1,16 @@
 use crate::api::command::CommandLoader;
 use crate::api::message::ParsedMessage;
+use crate::api::InstanceBundle;
 use crate::models::diesel::{Channel, NewChannel, NewUser, User};
 use crate::schema::{channels::dsl as ch, users::dsl as us};
 use crate::utils::establish_connection;
 use diesel::{insert_into, ExpressionMethods, QueryDsl, RunQueryDsl};
 use tokio::sync::MutexGuard;
-use twitch_irc::login::StaticLoginCredentials;
 use twitch_irc::message::PrivmsgMessage;
-use twitch_irc::{SecureTCPTransport, TwitchIRCClient};
 
 /// The handler for Twitch IRC messages.
 pub async fn irc_message_handler(
-    client: &TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>,
+    instance_bundle: InstanceBundle<'_>,
     command_loader: MutexGuard<'_, CommandLoader>,
     message: PrivmsgMessage,
 ) {
@@ -68,11 +67,14 @@ pub async fn irc_message_handler(
     if wrapped_parsed_msg.is_some() {
         let parsed_msg = wrapped_parsed_msg.unwrap();
 
-        let command = command_loader.run(&message, parsed_msg).await;
+        let command = command_loader
+            .run(&instance_bundle, channel, user, parsed_msg)
+            .await;
 
         if command.is_some() {
             for line in command.unwrap() {
-                client
+                instance_bundle
+                    .twitch_client
                     .say(message.channel_login.to_owned(), line)
                     .await
                     .expect("Couldn't send the message!")
