@@ -2,6 +2,8 @@ use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use std::env;
 
+pub mod twitch;
+
 /// Format the timestamp (in seconds) as a humanized timestamp.
 /// <br>
 /// Example:

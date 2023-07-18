@@ -11,13 +11,18 @@ chrono = "0.4.26"
 diesel = { version = "2.1.0", default-features = false, features = ["postgres", "chrono"] }
 diesel-derive-enum = { version = "2.1.0", features = ["postgres"] }
 dotenvy = "0.15.7"
+eyre = "0.6.8"
+futures = "0.3.28"
 include_dir = "0.7.3"
+itertools = "0.11.0"
 lazy_static = "1.4.0"
 psutil = "3.2.2"
 reqwest = { version = "0.11.18", features = ["json"] }
 serde = { version = "1.0.164", features = ["derive"] }
 serde_json = "1.0.97"
 tokio = { version = "1.28.2", features = ["full"] }
+tokio-tungstenite = { version = "0.19.0", features = ["native-tls"] }
 twitch-irc = "5.0.0"
-twitch_api = { version = "0.7.0-rc.6", features = ["twitch_oauth2", "helix", "pubsub", "unsupported", "reqwest"] }
+twitch_api = { version = "0.7.0-rc.6", features = ["twitch_oauth2", "helix", "pubsub", "unsupported", "reqwest", "eventsub", "hmac"] }
+url = "2.4.0"
 version_check = "0.9.4"

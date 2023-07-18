@@ -1,17 +1,21 @@
 use crate::api::command::CommandLoader;
 use crate::api::InstanceBundle;
 use crate::handlers::irc_message_handler;
-use crate::schema::channels::dsl as ch;
+use crate::livestream::EventsubLivestreamClient;
+use crate::schema::{channels::dsl as ch, events::dsl as ev};
 use crate::shared_variables::START_TIME;
 use crate::utils::establish_connection;
+use crate::utils::twitch::get_access_token;
 use diesel::prelude::*;
+use eyre::Context;
+use reqwest::Client;
 use std::env;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use twitch_api::client::ClientDefault;
 use twitch_api::helix::users::GetUsersRequest;
-use twitch_api::twitch_oauth2::{AccessToken, UserToken};
-use twitch_api::types::UserIdRef;
-use twitch_api::TwitchClient;
+use twitch_api::types::{UserId, UserIdRef};
+use twitch_api::{HelixClient, TWITCH_EVENTSUB_WEBSOCKET_URL};
 use twitch_irc::login::StaticLoginCredentials;
 use twitch_irc::message::ServerMessage;
 use twitch_irc::TwitchIRCClient;
@@ -20,6 +24,7 @@ use twitch_irc::{ClientConfig, SecureTCPTransport};
 mod api;
 mod commands;
 mod handlers;
+mod livestream;
 mod locale;
 mod models;
 mod schema;
@@ -27,7 +32,7 @@ mod shared_variables;
 mod utils;
 
 #[tokio::main]
-pub async fn main() {
+pub async fn main() -> Result<(), eyre::Report> {
     println!("{:?}", *START_TIME);
     dotenvy::dotenv().ok();
 
@@ -45,22 +50,27 @@ pub async fn main() {
 
     let command_loader = Arc::new(Mutex::from(CommandLoader::new()));
 
-    let api_client: TwitchClient<reqwest::Client> = TwitchClient::default();
-    let api_token = match UserToken::from_existing(
-        &reqwest::Client::new(),
-        AccessToken::new(
+    let helix_client = HelixClient::with_client(
+        Client::default_client_with_name(Some(
+            "ilotterytea/bot"
+                .parse()
+                .wrap_err_with(|| "when creating header name")
+                .unwrap(),
+        ))
+        .wrap_err_with(|| "when creating client")?,
+    );
+
+    let helix_token = get_access_token(
+        helix_client.get_client(),
+        Some(
             env::var("BOT_ACCESS_TOKEN")
-                .expect("BOT_ACCESS_TOKEN must be set for Twitch API requests!"),
+                .expect("BOT_ACCESS_TOKEN must be set for Twitch API requests"),
         ),
         None,
         None,
+        None,
     )
-    .await
-    {
-        Ok(t) => t,
-        Err(e) => panic!("Got error: {}", e),
-    };
-
+    .await?;
     // join a channel
     // This function only returns an error if the passed channel login name is malformed,
     // so in this simple case where the channel name is hardcoded we can ignore the potential
@@ -84,9 +94,8 @@ pub async fn main() {
         let _channel_id = channel_id.to_string();
         let _channel_ids: &[&UserIdRef] = &[_channel_id.as_str().into()];
 
-        let users = &api_client
-            .helix
-            .req_get(GetUsersRequest::ids(_channel_ids), &api_token)
+        let users = &helix_client
+            .req_get(GetUsersRequest::ids(_channel_ids), &helix_token)
             .await
             .expect("Can't send a request");
 
@@ -101,22 +110,48 @@ pub async fn main() {
         }
     }
 
+    // Getting all the stream events
+    let event_channel_ids = ev::events
+        .filter(ev::target_alias_id.is_not_null())
+        .select(ev::target_alias_id)
+        .load::<Option<i32>>(conn)
+        .expect("Failed to load the event target alias IDs");
+
+    let initial_eventsub_channel_ids: Vec<UserId> = event_channel_ids
+        .iter()
+        .map(|x| UserId::new(x.unwrap().to_string()))
+        .collect::<Vec<UserId>>();
+
+    let eventsub_client = EventsubLivestreamClient {
+        session_id: None,
+        token: helix_token.clone(),
+        client: helix_client.clone(),
+        connect_url: TWITCH_EVENTSUB_WEBSOCKET_URL.clone(),
+        listening_channel_ids: Vec::new(),
+        awaiting_channel_ids: initial_eventsub_channel_ids,
+    };
+
+    let eventsub_handle = tokio::spawn(async move { eventsub_client.run().await });
+
     // The handler for Twitch chat client
     let join_handle = tokio::spawn(async move {
         while let Some(message) = incoming_messages.recv().await {
             let instance_bundle = InstanceBundle {
                 twitch_client: &client,
-                twitch_api_client: &api_client,
-                twitch_api_token: &api_token,
+                twitch_api_client: &helix_client,
+                twitch_api_token: &helix_token,
             };
-
             if let ServerMessage::Privmsg(msg) = message {
                 irc_message_handler(instance_bundle, command_loader.lock().await, msg).await;
             }
         }
     });
 
+    let _ = eventsub_handle.await.unwrap();
+
     // keep the tokio executor alive.
     // If you return instead of waiting the background task will exit.
     join_handle.await.unwrap();
+
+    Ok(())
 }
