@@ -59,7 +59,7 @@ pub struct Event {
     pub custom_alias_id: Option<String>,
     pub message: String,
     pub event_type: EventType,
-    pub flags: Vec<EventFlag>,
+    pub flags: Vec<Option<EventFlag>>,
 }
 
 #[derive(Insertable)]
