@@ -38,7 +38,7 @@ impl CommandLoader {
     /// Returns None if command has no response.
     pub async fn run(
         &self,
-        instance_bundle: &InstanceBundle<'_>,
+        instance_bundle: &InstanceBundle,
         channel: Channel,
         user: User,
         message: ParsedMessage,
@@ -58,4 +58,3 @@ impl CommandLoader {
             .await
     }
 }
-

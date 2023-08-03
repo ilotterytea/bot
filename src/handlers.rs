@@ -10,7 +10,7 @@ use twitch_irc::message::PrivmsgMessage;
 
 /// The handler for Twitch IRC messages.
 pub async fn irc_message_handler(
-    instance_bundle: InstanceBundle<'_>,
+    instance_bundle: InstanceBundle,
     command_loader: MutexGuard<'_, CommandLoader>,
     message: PrivmsgMessage,
 ) {

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use eyre::Context;
 use itertools::Itertools;
 use tokio::net::TcpStream;
@@ -19,8 +21,8 @@ use twitch_api::{
 
 pub struct EventsubLivestreamClient {
     pub session_id: Option<String>,
-    pub token: UserToken,
-    pub client: HelixClient<'static, reqwest::Client>,
+    pub token: Arc<UserToken>,
+    pub client: Arc<HelixClient<'static, reqwest::Client>>,
     pub awaiting_channel_ids: Vec<UserId>,
     pub listening_channel_ids: Vec<UserId>,
     pub connect_url: url::Url,
@@ -184,7 +186,7 @@ impl EventsubLivestreamClient {
             .create_eventsub_subscription(
                 StreamOnlineV1::broadcaster_user_id(channel_id.clone()),
                 transport.clone(),
-                &self.token,
+                &*self.token,
             )
             .await?;
 
@@ -192,7 +194,7 @@ impl EventsubLivestreamClient {
             .create_eventsub_subscription(
                 StreamOfflineV1::broadcaster_user_id(channel_id.clone()),
                 transport,
-                &self.token,
+                &*self.token,
             )
             .await?;
 

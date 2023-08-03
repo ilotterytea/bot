@@ -13,7 +13,6 @@ use std::env;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use twitch_api::client::ClientDefault;
-use twitch_api::helix::users::GetUsersRequest;
 use twitch_api::types::{UserId, UserIdRef};
 use twitch_api::{HelixClient, TWITCH_EVENTSUB_WEBSOCKET_URL};
 use twitch_irc::login::StaticLoginCredentials;
@@ -48,9 +47,11 @@ pub async fn main() -> Result<(), eyre::Report> {
             )),
         );
 
+    let client = Arc::new(client);
+
     let command_loader = Arc::new(Mutex::from(CommandLoader::new()));
 
-    let helix_client = HelixClient::with_client(
+    let helix_client = Arc::new(HelixClient::with_client(
         Client::default_client_with_name(Some(
             "ilotterytea/bot"
                 .parse()
@@ -58,19 +59,22 @@ pub async fn main() -> Result<(), eyre::Report> {
                 .unwrap(),
         ))
         .wrap_err_with(|| "when creating client")?,
+    ));
+
+    let helix_token = Arc::new(
+        get_access_token(
+            helix_client.get_client(),
+            Some(
+                env::var("BOT_ACCESS_TOKEN")
+                    .expect("BOT_ACCESS_TOKEN must be set for Twitch API requests"),
+            ),
+            None,
+            None,
+            None,
+        )
+        .await?,
     );
 
-    let helix_token = get_access_token(
-        helix_client.get_client(),
-        Some(
-            env::var("BOT_ACCESS_TOKEN")
-                .expect("BOT_ACCESS_TOKEN must be set for Twitch API requests"),
-        ),
-        None,
-        None,
-        None,
-    )
-    .await?;
     // join a channel
     // This function only returns an error if the passed channel login name is malformed,
     // so in this simple case where the channel name is hardcoded we can ignore the potential
@@ -94,15 +98,13 @@ pub async fn main() -> Result<(), eyre::Report> {
         let _channel_id = channel_id.to_string();
         let _channel_ids: &[&UserIdRef] = &[_channel_id.as_str().into()];
 
-        let users = &helix_client
-            .req_get(GetUsersRequest::ids(_channel_ids), &helix_token)
+        let user = &helix_client
+            .get_user_from_id(UserIdRef::from_str(_channel_id.as_str()), &*helix_token)
             .await
-            .expect("Can't send a request");
-
-        let user = users.data.first();
+            .unwrap();
 
         if user.is_some() {
-            let u = user.unwrap();
+            let u = user.clone().unwrap();
 
             if client.join(u.login.to_string()).is_ok() {
                 println!("Successfully joined #{}", u.login);
@@ -124,6 +126,7 @@ pub async fn main() -> Result<(), eyre::Report> {
 
     let eventsub_client = EventsubLivestreamClient {
         session_id: None,
+        irc_client: client.clone(),
         token: helix_token.clone(),
         client: helix_client.clone(),
         connect_url: TWITCH_EVENTSUB_WEBSOCKET_URL.clone(),
@@ -137,9 +140,9 @@ pub async fn main() -> Result<(), eyre::Report> {
     let join_handle = tokio::spawn(async move {
         while let Some(message) = incoming_messages.recv().await {
             let instance_bundle = InstanceBundle {
-                twitch_client: &client,
-                twitch_api_client: &helix_client,
-                twitch_api_token: &helix_token,
+                twitch_client: client.clone(),
+                twitch_api_client: helix_client.clone(),
+                twitch_api_token: helix_token.clone(),
             };
             if let ServerMessage::Privmsg(msg) = message {
                 irc_message_handler(instance_bundle, command_loader.lock().await, msg).await;
