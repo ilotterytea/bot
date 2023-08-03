@@ -12,15 +12,19 @@ use twitch_api::{
     eventsub::{
         event::websocket::{EventsubWebsocketData, ReconnectPayload, SessionData, WelcomePayload},
         stream::{StreamOfflineV1, StreamOnlineV1},
-        Event, Payload, Transport,
+        Event, Message as EventsubMessage, Payload, Transport,
     },
     twitch_oauth2::UserToken,
     types::UserId,
     HelixClient,
 };
+use twitch_irc::{login::StaticLoginCredentials, SecureTCPTransport, TwitchIRCClient};
+
+use crate::{handlers::handle_stream_event, models::diesel::EventType};
 
 pub struct EventsubLivestreamClient {
     pub session_id: Option<String>,
+    pub irc_client: Arc<TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>>,
     pub token: Arc<UserToken>,
     pub client: Arc<HelixClient<'static, reqwest::Client>>,
     pub awaiting_channel_ids: Vec<UserId>,
@@ -95,9 +99,37 @@ impl EventsubLivestreamClient {
                     } => match payload {
                         Event::StreamOnlineV1(Payload { message, .. }) => {
                             println!("got live event: {message:?}");
+
+                            match message {
+                                EventsubMessage::Notification(e) => {
+                                    handle_stream_event(
+                                        self.irc_client.clone(),
+                                        self.client.clone(),
+                                        self.token.clone(),
+                                        e.broadcaster_user_id,
+                                        EventType::Live,
+                                    )
+                                    .await
+                                }
+                                _ => {}
+                            }
                         }
                         Event::StreamOfflineV1(Payload { message, .. }) => {
                             println!("got offline event: {message:?}");
+
+                            match message {
+                                EventsubMessage::Notification(e) => {
+                                    handle_stream_event(
+                                        self.irc_client.clone(),
+                                        self.client.clone(),
+                                        self.token.clone(),
+                                        e.broadcaster_user_id,
+                                        EventType::Offline,
+                                    )
+                                    .await
+                                }
+                                _ => {}
+                            }
                         }
                         _ => {}
                     },
