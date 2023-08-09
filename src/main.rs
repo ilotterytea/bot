@@ -9,6 +9,7 @@ use crate::utils::twitch::get_access_token;
 use diesel::prelude::*;
 use eyre::Context;
 use reqwest::Client;
+use seventv::websocket::SevenTVWebsocketClient;
 use std::env;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -27,6 +28,7 @@ mod livestream;
 mod locale;
 mod models;
 mod schema;
+mod seventv;
 mod shared_variables;
 mod utils;
 
@@ -136,6 +138,17 @@ pub async fn main() -> Result<(), eyre::Report> {
 
     let eventsub_handle = tokio::spawn(async move { eventsub_client.run().await });
 
+    let seventv = SevenTVWebsocketClient {
+        helix_client: helix_client.clone(),
+        helix_token: helix_token.clone(),
+        irc_client: client.clone(),
+        awaiting_channel_ids: Vec::new(),
+        listening_channel_ids: Vec::new(),
+        connect_url: url::Url::parse("wss://events.7tv.io/v3").unwrap(),
+    };
+
+    let seventv_handle = tokio::spawn(async move { seventv.run().await });
+
     // The handler for Twitch chat client
     let join_handle = tokio::spawn(async move {
         while let Some(message) = incoming_messages.recv().await {
@@ -151,6 +164,8 @@ pub async fn main() -> Result<(), eyre::Report> {
     });
 
     let _ = eventsub_handle.await.unwrap();
+
+    let _ = seventv_handle.await.unwrap();
 
     // keep the tokio executor alive.
     // If you return instead of waiting the background task will exit.
