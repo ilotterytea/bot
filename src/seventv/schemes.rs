@@ -1,0 +1,59 @@
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Payload<T> {
+    pub op: u32,
+    pub d: T,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Dispatch {
+    pub event_type: String,
+    pub body: DispatchBody,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct DispatchBody {
+    pub id: String,
+    pub actor: String,
+    pub added: Option<Vec<ChangeField>>,
+    pub updated: Option<Vec<ChangeField>>,
+    pub removed: Option<Vec<ChangeField>>,
+    pub pushed: Option<Vec<ChangeField>>,
+    pub pulled: Option<Vec<ChangeField>>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct ChangeField {
+    pub key: String,
+    pub old_value: Option<String>,
+    pub value: Option<String>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Hello {
+    pub subscription_limit: u32,
+    pub session_id: String,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Ack {
+    pub command: String,
+    pub data: String,
+}
+
+#[derive(Serialize, Debug)]
+pub struct Subscribe {
+    pub event_type: String,
+    pub condition: SubscribeCondition,
+}
+
+#[derive(Serialize, Debug)]
+pub struct SubscribeCondition {
+    pub object_id: String,
+}
+
+#[derive(Serialize)]
+pub struct Resume {
+    pub session_id: String,
+}
