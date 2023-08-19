@@ -16,6 +16,7 @@ pub struct SevenTVWebsocketClient {
     pub helix_client: Arc<HelixClient<'static, reqwest::Client>>,
     pub awaiting_channel_ids: Vec<UserId>,
     pub listening_channel_ids: Vec<UserId>,
+    pub session_id: Option<String>,
     pub connect_url: url::Url,
 }
 

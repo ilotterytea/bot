@@ -139,6 +139,7 @@ pub async fn main() -> Result<(), eyre::Report> {
     let eventsub_handle = tokio::spawn(async move { eventsub_client.run().await });
 
     let seventv = SevenTVWebsocketClient {
+        session_id: None,
         helix_client: helix_client.clone(),
         helix_token: helix_token.clone(),
         irc_client: client.clone(),
