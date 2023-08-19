@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use eyre::Context;
+use futures_util::SinkExt;
 use tokio::net::TcpStream;
 use tokio_tungstenite::{
     connect_async_with_config, tungstenite,
@@ -10,9 +11,12 @@ use tokio_tungstenite::{
 use twitch_api::{twitch_oauth2::UserToken, types::UserId, HelixClient};
 use twitch_irc::{login::StaticLoginCredentials, SecureTCPTransport, TwitchIRCClient};
 
+use crate::seventv::schemes::{Dispatch, Hello, Payload};
+
 use super::schemes::Resume;
 
 pub struct SevenTVWebsocketClient {
+    pub client: Option<Arc<WebSocketStream<MaybeTlsStream<TcpStream>>>>,
     pub irc_client: Arc<TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>>,
     pub helix_token: Arc<UserToken>,
     pub helix_client: Arc<HelixClient<'static, reqwest::Client>>,
@@ -52,16 +56,57 @@ impl SevenTVWebsocketClient {
                         }
                         _ => msg.context("when getting message")?,
                     };
-                    self.process_message(msg).await?
+                    self.process_message(&mut s, msg).await?
                 }
             )
         }
     }
 
-    pub async fn process_message(&mut self, msg: Message) -> Result<(), eyre::Report> {
+    pub async fn process_message(
+        &mut self,
+        socket: &mut WebSocketStream<MaybeTlsStream<TcpStream>>,
+        msg: Message,
+    ) -> Result<(), eyre::Report> {
         match msg {
             Message::Text(s) => {
                 println!("received 7tv text message: {s}");
+
+                if let Ok(e) = serde_json::from_str::<Payload<String>>(s.as_str()) {
+                    match e.op {
+                        // Dispatch
+                        0 => {
+                            if let Ok(d) = serde_json::from_str::<Dispatch>(e.d.as_str()) {
+                                if d.event_type != "emote_set.update".to_string() {
+                                    return Ok(());
+                                }
+                            }
+                        }
+                        // Hello
+                        1 => {
+                            if let Ok(d) = serde_json::from_str::<Hello>(e.d.as_str()) {
+                                if self.session_id.is_none() {
+                                    self.session_id = Some(d.session_id);
+                                } else {
+                                    self.resume_session(socket).await?;
+                                }
+                            }
+                        }
+                        // Heartbeat
+                        2 => println!("[7TV EventAPI] Heartbeat!"),
+                        // Reconnect
+                        4 => println!("[7TV EventAPI] Reconnect!"),
+                        // Error
+                        6 => println!("[7TV EventAPI] Error: {}", e.d),
+                        // End of Stream
+                        7 => {
+                            println!("[7TV EventAPI] The host has closed the connection! Reason: ")
+                        }
+                        _ => println!(
+                            "[7TV EventAPI] Unhandled opcode: {}. Payload: {}",
+                            e.op, e.d
+                        ),
+                    }
+                }
             }
             Message::Close(e) => {
                 let e = if e.is_some() {
