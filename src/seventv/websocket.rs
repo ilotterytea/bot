@@ -10,6 +10,8 @@ use tokio_tungstenite::{
 use twitch_api::{twitch_oauth2::UserToken, types::UserId, HelixClient};
 use twitch_irc::{login::StaticLoginCredentials, SecureTCPTransport, TwitchIRCClient};
 
+use super::schemes::Resume;
+
 pub struct SevenTVWebsocketClient {
     pub irc_client: Arc<TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>>,
     pub helix_token: Arc<UserToken>,
@@ -112,6 +114,30 @@ impl SevenTVWebsocketClient {
         self.listening_channel_ids.push(channel_id.clone());
 
         println!("Listening 7TV events for channel ID {}", channel_id.take());
+
+        Ok(())
+    }
+
+    async fn resume_session(
+        &mut self,
+        socket: &mut WebSocketStream<MaybeTlsStream<TcpStream>>,
+    ) -> Result<(), eyre::Error> {
+        if self.session_id.is_none() {
+            println!("[7TV EventAPI] Failed to resume a session because session_id is none!");
+
+            return Ok(());
+        }
+
+        let data = Payload {
+            op: 34,
+            d: Resume {
+                session_id: self.session_id.clone().unwrap(),
+            },
+        };
+
+        socket
+            .send(Message::Text(serde_json::to_string(&data)?))
+            .await?;
 
         Ok(())
     }
