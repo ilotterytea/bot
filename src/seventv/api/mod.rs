@@ -1,6 +1,6 @@
 use reqwest::Client;
 
-use self::schemes::ConnectionUser;
+use self::schemes::{ConnectionUser, EmoteSet};
 
 pub mod schemes;
 
@@ -21,6 +21,19 @@ impl SevenTVAPIClient {
 
         if let Ok(response) = request {
             if let Ok(data) = response.json::<ConnectionUser>().await {
+                return Some(data);
+            }
+        }
+
+        None
+    }
+
+    pub async fn get_emote_set(&self, id: String) -> Option<EmoteSet> {
+        let url = format!("{SEVENTV_URL}/emote-sets/{id}");
+        let request = self.client.get(url).send().await;
+
+        if let Ok(response) = request {
+            if let Ok(data) = response.json::<EmoteSet>().await {
                 return Some(data);
             }
         }
