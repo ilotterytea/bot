@@ -3,6 +3,7 @@ use crate::api::InstanceBundle;
 use crate::handlers::irc_message_handler;
 use crate::livestream::EventsubLivestreamClient;
 use crate::schema::{channels::dsl as ch, events::dsl as ev};
+use crate::seventv::api::SevenTVAPIClient;
 use crate::shared_variables::START_TIME;
 use crate::utils::establish_connection;
 use crate::utils::twitch::get_access_token;
@@ -60,6 +61,7 @@ pub async fn main() -> Result<(), eyre::Report> {
     ))
     .wrap_err_with(|| "when creating client")?;
 
+    let stv_client = Arc::new(SevenTVAPIClient::new(reqwest_client.clone()));
 
     let helix_client = Arc::new(HelixClient::with_client(reqwest_client));
 
@@ -141,6 +143,7 @@ pub async fn main() -> Result<(), eyre::Report> {
     let seventv = SevenTVWebsocketClient {
         client: None,
         session_id: None,
+        seventv_api_client: stv_client,
         helix_client: helix_client.clone(),
         helix_token: helix_token.clone(),
         irc_client: client.clone(),
