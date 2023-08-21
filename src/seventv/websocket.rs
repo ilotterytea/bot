@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use eyre::Context;
 use futures_util::SinkExt;
+use serde_json::Value;
 use tokio::net::TcpStream;
 use tokio_tungstenite::{
     connect_async_with_config, tungstenite,
@@ -75,19 +76,20 @@ impl SevenTVWebsocketClient {
             Message::Text(s) => {
                 println!("received 7tv text message: {s}");
 
-                if let Ok(e) = serde_json::from_str::<Payload<String>>(s.as_str()) {
+                if let Ok(e) = serde_json::from_str::<Payload<Value>>(s.as_str()) {
+                    let d = e.d.to_string();
+                    let d = d.as_str();
+
                     match e.op {
                         // Dispatch
                         0 => {
-                            if let Ok(d) = serde_json::from_str::<Dispatch>(e.d.as_str()) {
-                                if d.event_type != "emote_set.update".to_string() {
-                                    return Ok(());
-                                }
+                            if let Ok(d) = serde_json::from_str::<Dispatch>(d) {
+                                println!("{d:?}");
                             }
                         }
                         // Hello
                         1 => {
-                            if let Ok(d) = serde_json::from_str::<Hello>(e.d.as_str()) {
+                            if let Ok(d) = serde_json::from_str::<Hello>(d) {
                                 if self.session_id.is_none() {
                                     self.session_id = Some(d.session_id);
                                 } else {
