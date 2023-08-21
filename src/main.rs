@@ -52,16 +52,16 @@ pub async fn main() -> Result<(), eyre::Report> {
     let client = Arc::new(client);
 
     let command_loader = Arc::new(Mutex::from(CommandLoader::new()));
+    let reqwest_client = Client::default_client_with_name(Some(
+        "ilotterytea/bot"
+            .parse()
+            .wrap_err_with(|| "when creating header name")
+            .unwrap(),
+    ))
+    .wrap_err_with(|| "when creating client")?;
 
-    let helix_client = Arc::new(HelixClient::with_client(
-        Client::default_client_with_name(Some(
-            "ilotterytea/bot"
-                .parse()
-                .wrap_err_with(|| "when creating header name")
-                .unwrap(),
-        ))
-        .wrap_err_with(|| "when creating client")?,
-    ));
+
+    let helix_client = Arc::new(HelixClient::with_client(reqwest_client));
 
     let helix_token = Arc::new(
         get_access_token(
