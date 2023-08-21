@@ -13,15 +13,19 @@ use twitch_irc::{login::StaticLoginCredentials, SecureTCPTransport, TwitchIRCCli
 
 use crate::seventv::schemes::{Dispatch, Hello, Payload};
 
-use super::schemes::Resume;
+use super::{
+    api::SevenTVAPIClient,
+    schemes::{Resume, Subscribe, SubscribeCondition},
+};
 
 pub struct SevenTVWebsocketClient {
     pub client: Option<Arc<WebSocketStream<MaybeTlsStream<TcpStream>>>>,
     pub irc_client: Arc<TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>>,
+    pub seventv_api_client: Arc<SevenTVAPIClient>,
     pub helix_token: Arc<UserToken>,
     pub helix_client: Arc<HelixClient<'static, reqwest::Client>>,
     pub awaiting_channel_ids: Vec<UserId>,
-    pub listening_channel_ids: Vec<UserId>,
+    pub listening_channel_ids: Vec<String>,
     pub session_id: Option<String>,
     pub connect_url: url::Url,
 }
@@ -139,26 +143,41 @@ impl SevenTVWebsocketClient {
         Ok(())
     }
 
-    pub async fn listen_channel(&mut self, channel_id: UserId) -> Result<(), eyre::Error> {
+    pub async fn listen_channel(
+        &mut self,
+        socket: &mut WebSocketStream<MaybeTlsStream<TcpStream>>,
+        channel_id: String,
+    ) -> Result<(), eyre::Error> {
         if self.listening_channel_ids.contains(&channel_id) {
-            println!(
-                "channel id {} is already in listening list",
-                channel_id.take()
-            );
+            println!("channel id {} is already in listening list", channel_id);
 
             return Ok(());
         }
 
-        let position = self
-            .awaiting_channel_ids
-            .iter()
-            .position(|x| x.eq(&channel_id))
-            .unwrap();
+        if let Some(user) = self
+            .seventv_api_client
+            .get_user_by_twitch_id(channel_id)
+            .await
+        {
+            let emote_set_id = user.emote_set.id;
 
-        self.awaiting_channel_ids.remove(position);
-        self.listening_channel_ids.push(channel_id.clone());
+            let data = Payload {
+                op: 35,
+                d: Subscribe {
+                    event_type: "emote_set.update".to_string(),
+                    condition: SubscribeCondition {
+                        object_id: emote_set_id,
+                    },
+                },
+            };
 
-        println!("Listening 7TV events for channel ID {}", channel_id.take());
+            println!("{:?}", serde_json::to_string(&data).unwrap());
+            socket
+                .send(Message::Text(serde_json::to_string(&data).unwrap()))
+                .await?;
+
+            println!("Listening 7TV events for {}'s emote set", user.username);
+        }
 
         Ok(())
     }
