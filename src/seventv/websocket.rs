@@ -1,5 +1,7 @@
 use std::sync::Arc;
 
+use crate::{models::diesel::Channel, schema::channels::dsl as ch};
+use diesel::RunQueryDsl;
 use eyre::Context;
 use futures_util::SinkExt;
 use serde_json::Value;
@@ -12,7 +14,10 @@ use tokio_tungstenite::{
 use twitch_api::{twitch_oauth2::UserToken, types::UserId, HelixClient};
 use twitch_irc::{login::StaticLoginCredentials, SecureTCPTransport, TwitchIRCClient};
 
-use crate::seventv::schemes::{Dispatch, Hello, Payload};
+use crate::{
+    seventv::schemes::{Dispatch, Hello, Payload},
+    utils::establish_connection,
+};
 
 use super::{
     api::SevenTVAPIClient,
@@ -131,15 +136,17 @@ impl SevenTVWebsocketClient {
         Ok(())
     }
 
-    pub async fn process_awaiting_channels(&mut self) -> Result<(), eyre::Error> {
-        if self.awaiting_channel_ids.is_empty() {
-            return Ok(());
-        }
+    async fn listen_channels(
+        &mut self,
+        socket: &mut WebSocketStream<MaybeTlsStream<TcpStream>>,
+    ) -> Result<(), eyre::Error> {
+        let conn = &mut establish_connection();
 
-        let awaiting_channel_ids = self.awaiting_channel_ids.clone();
-
-        for channel_id in awaiting_channel_ids {
-            self.listen_channel(channel_id).await?;
+        if let Ok(channels) = ch::channels.load::<Channel>(conn) {
+            for channel in channels {
+                self.listen_channel(socket, channel.alias_id.to_string())
+                    .await?;
+            }
         }
 
         Ok(())
