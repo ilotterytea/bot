@@ -44,6 +44,7 @@ pub struct Ack {
 
 #[derive(Serialize, Debug)]
 pub struct Subscribe {
+    #[serde(rename(serialize = "type"))]
     pub event_type: String,
     pub condition: SubscribeCondition,
 }
