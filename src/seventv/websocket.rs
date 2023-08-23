@@ -101,6 +101,7 @@ impl SevenTVWebsocketClient {
                             if let Ok(d) = serde_json::from_str::<Hello>(d) {
                                 if self.session_id.is_none() {
                                     self.session_id = Some(d.session_id);
+                                    self.listen_channels(socket).await?;
                                 } else {
                                     self.resume_session(socket).await?;
                                 }
