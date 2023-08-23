@@ -1,6 +1,10 @@
 use std::sync::Arc;
 
-use crate::{models::diesel::Channel, schema::channels::dsl as ch};
+use crate::{
+    locale::{LineId, Localizations},
+    models::diesel::Channel,
+    schema::channels::dsl as ch,
+};
 use diesel::RunQueryDsl;
 use eyre::Context;
 use futures_util::SinkExt;
@@ -89,7 +93,7 @@ impl SevenTVWebsocketClient {
                         // Dispatch
                         0 => {
                             if let Ok(d) = serde_json::from_str::<Dispatch>(d) {
-                                println!("{d:?}");
+                                self.handle_dispatch(d).await?;
                             }
                         }
                         // Hello
@@ -131,6 +135,121 @@ impl SevenTVWebsocketClient {
                 println!("The connection to 7TV EventAPI was refused: {e}");
             }
             _ => {}
+        }
+
+        Ok(())
+    }
+
+    async fn handle_dispatch(&mut self, body: Dispatch) -> Result<(), eyre::Error> {
+        if body.event_type != "emote_set.update".to_string() {
+            println!("[7TV EventAPI] Unhandled body type: {}", body.event_type);
+            return Ok(());
+        }
+
+        if let Some(emote_set) = self.seventv_api_client.get_emote_set(body.body.id).await {
+            if let Some(emote_set_owner) = emote_set.owner {
+                if let Some(emote_set_owner) =
+                    self.seventv_api_client.get_user(emote_set_owner.id).await
+                {
+                    if let Some(owner) = emote_set_owner
+                        .connections
+                        .iter()
+                        .find(|x| x.platform.eq("TWITCH"))
+                    {
+                        let actor_name = if let Some(connection) = body
+                            .body
+                            .actor
+                            .connections
+                            .iter()
+                            .find(|x| x.platform.eq("TWITCH"))
+                        {
+                            connection.username.clone()
+                        } else {
+                            body.body.actor.username
+                        };
+
+                        let mut messages: Vec<String> = Vec::new();
+
+                        if let Some(pushed) = body.body.pushed {
+                            for e in pushed {
+                                let emote_name = e.value.unwrap().name;
+
+                                messages.push(
+                                    Localizations::formatted_text(
+                                        "english",
+                                        LineId::EMOTES_PUSHED,
+                                        vec![
+                                            Localizations::literal_text(
+                                                "english",
+                                                LineId::PROVIDERS_SEVENTV,
+                                            )
+                                            .unwrap(),
+                                            actor_name.clone(),
+                                            emote_name,
+                                        ],
+                                    )
+                                    .unwrap(),
+                                );
+                            }
+                        }
+
+                        if let Some(pulled) = body.body.pulled {
+                            for e in pulled {
+                                let emote_name = e.old_value.unwrap().name;
+
+                                messages.push(
+                                    Localizations::formatted_text(
+                                        "english",
+                                        LineId::EMOTES_PULLED,
+                                        vec![
+                                            Localizations::literal_text(
+                                                "english",
+                                                LineId::PROVIDERS_SEVENTV,
+                                            )
+                                            .unwrap(),
+                                            actor_name.clone(),
+                                            emote_name,
+                                        ],
+                                    )
+                                    .unwrap(),
+                                )
+                            }
+                        }
+
+                        if let Some(updated) = body.body.updated {
+                            for e in updated {
+                                let emote_name = e.value.unwrap().name;
+                                let old_emote_name = e.old_value.unwrap().name;
+
+                                messages.push(
+                                    Localizations::formatted_text(
+                                        "english",
+                                        LineId::EMOTES_UPDATE,
+                                        vec![
+                                            Localizations::literal_text(
+                                                "english",
+                                                LineId::PROVIDERS_SEVENTV,
+                                            )
+                                            .unwrap(),
+                                            actor_name.clone(),
+                                            old_emote_name,
+                                            emote_name,
+                                        ],
+                                    )
+                                    .unwrap(),
+                                )
+                            }
+                        }
+
+                        for m in messages {
+                            self.irc_client
+                                .say(owner.username.clone(), m)
+                                .await
+                                .expect("Failed to send a message");
+                        }
+                    }
+                }
+            }
         }
 
         Ok(())
