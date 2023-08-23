@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use super::api::schemes::{Emote, User};
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Payload<T> {
     pub op: u32,
@@ -16,7 +18,7 @@ pub struct Dispatch {
 #[derive(Deserialize, Debug)]
 pub struct DispatchBody {
     pub id: String,
-    pub actor: String,
+    pub actor: User,
     pub added: Option<Vec<ChangeField>>,
     pub updated: Option<Vec<ChangeField>>,
     pub removed: Option<Vec<ChangeField>>,
@@ -27,8 +29,8 @@ pub struct DispatchBody {
 #[derive(Deserialize, Debug)]
 pub struct ChangeField {
     pub key: String,
-    pub old_value: Option<String>,
-    pub value: Option<String>,
+    pub old_value: Option<Emote>,
+    pub value: Option<Emote>,
 }
 
 #[derive(Deserialize, Debug)]
