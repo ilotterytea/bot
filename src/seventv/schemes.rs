@@ -8,6 +8,7 @@ pub struct Payload<T> {
 
 #[derive(Deserialize, Debug)]
 pub struct Dispatch {
+    #[serde(rename(deserialize = "type"))]
     pub event_type: String,
     pub body: DispatchBody,
 }
