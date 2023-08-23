@@ -8,6 +8,12 @@ pub enum LineId {
     MSG_TEST,
 
     CMD_PING_RESPONSE,
+
+    PROVIDERS_SEVENTV,
+
+    EMOTES_UPDATE,
+    EMOTES_PULLED,
+    EMOTES_PUSHED,
 }
 
 /// Localization manager.

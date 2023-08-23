@@ -1,5 +1,11 @@
 {
   "MSG_TEST": "тест был успешно завершен {}",
 
-  "CMD_PING_RESPONSE": "DankPoke \uD83E\uDD80 Понг! Rust {} · Время работы: {} · Потребление ОЗУ: {}МБ"
+  "CMD_PING_RESPONSE": "DankPoke \uD83E\uDD80 Понг! Rust {} · Время работы: {} · Потребление ОЗУ: {}МБ",
+
+  "PROVIDERS_SEVENTV": "(7TV)",
+
+  "EMOTES_UPDATE": "{} {} обновил имя эмоута с {} на {}",
+  "EMOTES_PULLED": "{} {} удалил эмоут {}",
+  "EMOTES_PUSHED": "{} {} добавил эмоут {}"
 }

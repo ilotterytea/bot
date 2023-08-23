@@ -1,5 +1,11 @@
 {
   "MSG_TEST": "test was successfully completed on {}",
 
-  "CMD_PING_RESPONSE": "DankPoke \uD83E\uDD80 Pong! Rust {} · Uptime: {} · Memory usage: {}MB"
+  "CMD_PING_RESPONSE": "DankPoke \uD83E\uDD80 Pong! Rust {} · Uptime: {} · Memory usage: {}MB",
+
+  "PROVIDERS_SEVENTV": "(7TV)",
+
+  "EMOTES_UPDATE": "{} {} updated the emote name from {} to {}",
+  "EMOTES_PULLED": "{} {} removed the {} emote",
+  "EMOTES_PUSHED": "{} {} added the {} emote"
 }
