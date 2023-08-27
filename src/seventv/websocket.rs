@@ -73,6 +73,7 @@ impl SevenTVWebsocketClient {
             .context("when establishing connection")?;
 
         loop {
+            self.listen_channels_from_waiting_list(&mut s).await?;
             tokio::select!(
                 Some(msg) = futures::StreamExt::next(&mut s) => {
                     let msg = match msg {
@@ -263,6 +264,21 @@ impl SevenTVWebsocketClient {
                     }
                 }
             }
+        }
+
+        Ok(())
+    }
+
+    async fn listen_channels_from_waiting_list(
+        &mut self,
+        socket: &mut WebSocketStream<MaybeTlsStream<TcpStream>>,
+    ) -> Result<(), eyre::Error> {
+        if !self.waiting_channel_ids.is_empty() {
+            for channel_id in self.waiting_channel_ids.clone() {
+                self.listen_channel(socket, channel_id).await?;
+            }
+
+            self.waiting_channel_ids.clear();
         }
 
         Ok(())
