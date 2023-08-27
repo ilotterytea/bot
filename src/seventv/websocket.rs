@@ -32,6 +32,7 @@ use super::{
 pub struct SevenTVWebsocketClient {
     irc_client: Arc<TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>>,
     seventv_api_client: Arc<SevenTVAPIClient>,
+    waiting_channel_ids: Vec<String>,
     listening_channel_ids: Vec<String>,
     session_id: Option<String>,
     connect_url: url::Url,
@@ -45,6 +46,7 @@ impl SevenTVWebsocketClient {
         Self {
             irc_client,
             seventv_api_client,
+            waiting_channel_ids: Vec::new(),
             listening_channel_ids: Vec::new(),
             session_id: None,
             connect_url: url::Url::parse(SEVENTV_WEBSOCKET_URL).unwrap(),
