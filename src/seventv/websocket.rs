@@ -4,6 +4,7 @@ use crate::{
     locale::{LineId, Localizations},
     models::diesel::Channel,
     schema::channels::dsl as ch,
+    shared_variables::SEVENTV_WEBSOCKET_URL,
 };
 use diesel::RunQueryDsl;
 use eyre::Context;
@@ -29,18 +30,27 @@ use super::{
 };
 
 pub struct SevenTVWebsocketClient {
-    pub client: Option<Arc<WebSocketStream<MaybeTlsStream<TcpStream>>>>,
-    pub irc_client: Arc<TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>>,
-    pub seventv_api_client: Arc<SevenTVAPIClient>,
-    pub helix_token: Arc<UserToken>,
-    pub helix_client: Arc<HelixClient<'static, reqwest::Client>>,
-    pub awaiting_channel_ids: Vec<UserId>,
-    pub listening_channel_ids: Vec<String>,
-    pub session_id: Option<String>,
-    pub connect_url: url::Url,
+    irc_client: Arc<TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>>,
+    seventv_api_client: Arc<SevenTVAPIClient>,
+    listening_channel_ids: Vec<String>,
+    session_id: Option<String>,
+    connect_url: url::Url,
 }
 
 impl SevenTVWebsocketClient {
+    pub fn new(
+        irc_client: Arc<TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>>,
+        seventv_api_client: Arc<SevenTVAPIClient>,
+    ) -> Self {
+        Self {
+            irc_client,
+            seventv_api_client,
+            listening_channel_ids: Vec::new(),
+            session_id: None,
+            connect_url: url::Url::parse(SEVENTV_WEBSOCKET_URL).unwrap(),
+        }
+    }
+
     pub async fn connect(&self) -> Result<WebSocketStream<MaybeTlsStream<TcpStream>>, eyre::Error> {
         let config = WebSocketConfig {
             max_send_queue: None,
