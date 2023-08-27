@@ -284,6 +284,17 @@ impl SevenTVWebsocketClient {
         Ok(())
     }
 
+    pub async fn put_channel_on_waiting_list(&mut self, channel_id: String) -> bool {
+        if self.listening_channel_ids.contains(&channel_id) {
+            println!("channel id {} is already listening", channel_id);
+
+            return false;
+        }
+
+        self.waiting_channel_ids.push(channel_id);
+        true
+    }
+
     async fn listen_channels(
         &mut self,
         socket: &mut WebSocketStream<MaybeTlsStream<TcpStream>>,
