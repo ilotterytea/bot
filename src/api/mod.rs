@@ -4,7 +4,10 @@ use tokio::sync::Mutex;
 use twitch_api::{twitch_oauth2::UserToken, HelixClient};
 use twitch_irc::{login::StaticLoginCredentials, SecureTCPTransport, TwitchIRCClient};
 
-use crate::{livestream::EventsubLivestreamClient, seventv::websocket::SevenTVWebsocketClient};
+use crate::{
+    livestream::EventsubLivestreamClient,
+    seventv::{api::SevenTVAPIClient, websocket::SevenTVWebsocketClient},
+};
 
 pub mod command;
 pub mod message;
@@ -21,4 +24,6 @@ pub struct InstanceBundle {
     pub twitch_eventsub_client: Arc<Mutex<EventsubLivestreamClient>>,
     // 7TV EventAPI client.
     pub seventv_eventapi_client: Arc<Mutex<SevenTVWebsocketClient>>,
+    // 7TV API client.
+    pub seventv_api_client: Arc<SevenTVAPIClient>,
 }

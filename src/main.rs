@@ -162,6 +162,7 @@ pub async fn main() -> Result<(), eyre::Report> {
                 twitch_api_token: helix_token.clone(),
                 twitch_eventsub_client: eventsub_client.clone(),
                 seventv_eventapi_client: seventv.clone(),
+                seventv_api_client: stv_client.clone(),
             };
             if let ServerMessage::Privmsg(msg) = message {
                 irc_message_handler(instance_bundle, command_loader.lock().await, msg).await;
