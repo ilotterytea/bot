@@ -143,9 +143,15 @@ pub async fn main() -> Result<(), eyre::Report> {
         async move { eventsub_client.lock().await.run().await }
     });
 
-    let seventv = SevenTVWebsocketClient::new(client.clone(), stv_client.clone());
+    let seventv = Arc::new(Mutex::new(SevenTVWebsocketClient::new(
+        client.clone(),
+        stv_client.clone(),
+    )));
 
-    let seventv_handle = tokio::spawn(async move { seventv.run().await });
+    let seventv_handle = tokio::spawn({
+        let seventv = seventv.clone();
+        async move { seventv.lock().await.run().await }
+    });
 
     // The handler for Twitch chat client
     let join_handle = tokio::spawn(async move {
