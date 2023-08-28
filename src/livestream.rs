@@ -46,7 +46,7 @@ impl EventsubLivestreamClient {
         Ok(socket)
     }
 
-    pub async fn run(mut self) -> Result<(), eyre::Error> {
+    pub async fn run(&mut self) -> Result<(), eyre::Error> {
         let mut s = self
             .connect()
             .await
