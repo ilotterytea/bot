@@ -128,7 +128,7 @@ pub async fn main() -> Result<(), eyre::Report> {
         .map(|x| UserId::new(x.unwrap().to_string()))
         .collect::<Vec<UserId>>();
 
-    let eventsub_client = EventsubLivestreamClient {
+    let eventsub_client = Arc::new(Mutex::new(EventsubLivestreamClient {
         session_id: None,
         irc_client: client.clone(),
         token: helix_token.clone(),
@@ -136,9 +136,12 @@ pub async fn main() -> Result<(), eyre::Report> {
         connect_url: TWITCH_EVENTSUB_WEBSOCKET_URL.clone(),
         listening_channel_ids: Vec::new(),
         awaiting_channel_ids: initial_eventsub_channel_ids,
-    };
+    }));
 
-    let eventsub_handle = tokio::spawn(async move { eventsub_client.run().await });
+    let eventsub_handle = tokio::spawn({
+        let eventsub_client = eventsub_client.clone();
+        async move { eventsub_client.lock().await.run().await }
+    });
 
     let seventv = SevenTVWebsocketClient::new(client.clone(), stv_client.clone());
 
