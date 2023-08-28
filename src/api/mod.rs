@@ -1,7 +1,10 @@
 use reqwest::Client;
 use std::sync::Arc;
+use tokio::sync::Mutex;
 use twitch_api::{twitch_oauth2::UserToken, HelixClient};
 use twitch_irc::{login::StaticLoginCredentials, SecureTCPTransport, TwitchIRCClient};
+
+use crate::livestream::EventsubLivestreamClient;
 
 pub mod command;
 pub mod message;
@@ -14,4 +17,6 @@ pub struct InstanceBundle {
     pub twitch_api_client: Arc<HelixClient<'static, Client>>,
     /// A token for Twitch API client.
     pub twitch_api_token: Arc<UserToken>,
+    // Twitch EventSub client.
+    pub twitch_eventsub_client: Arc<Mutex<EventsubLivestreamClient>>,
 }
