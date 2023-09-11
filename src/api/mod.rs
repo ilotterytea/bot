@@ -5,7 +5,7 @@ use twitch_api::{twitch_oauth2::UserToken, HelixClient};
 use twitch_irc::{login::StaticLoginCredentials, SecureTCPTransport, TwitchIRCClient};
 
 use crate::{
-    livestream::EventsubLivestreamClient,
+    livestream::EventsubLivestreamData,
     seventv::{api::SevenTVAPIClient, websocket::SevenTVWebsocketClient},
 };
 
@@ -21,7 +21,7 @@ pub struct InstanceBundle {
     /// A token for Twitch API client.
     pub twitch_api_token: Arc<UserToken>,
     // Twitch EventSub client.
-    pub twitch_eventsub_client: Arc<Mutex<EventsubLivestreamClient>>,
+    pub twitch_eventsub_data: Arc<Mutex<EventsubLivestreamData>>,
     // 7TV EventAPI client.
     pub seventv_eventapi_client: Arc<Mutex<SevenTVWebsocketClient>>,
     // 7TV API client.

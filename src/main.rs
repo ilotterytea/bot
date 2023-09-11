@@ -1,7 +1,7 @@
 use crate::api::command::CommandLoader;
 use crate::api::InstanceBundle;
 use crate::handlers::irc_message_handler;
-use crate::livestream::EventsubLivestreamClient;
+use crate::livestream::{EventsubLivestreamClient, EventsubLivestreamData};
 use crate::schema::{channels::dsl as ch, events::dsl as ev};
 use crate::seventv::api::SevenTVAPIClient;
 use crate::shared_variables::START_TIME;
@@ -128,20 +128,20 @@ pub async fn main() -> Result<(), eyre::Report> {
         .map(|x| UserId::new(x.unwrap().to_string()))
         .collect::<Vec<UserId>>();
 
-    let eventsub_client = Arc::new(Mutex::new(EventsubLivestreamClient {
-        session_id: None,
-        irc_client: client.clone(),
-        token: helix_token.clone(),
-        client: helix_client.clone(),
-        connect_url: TWITCH_EVENTSUB_WEBSOCKET_URL.clone(),
-        listening_channel_ids: Vec::new(),
+    let eventsub_data = Arc::new(Mutex::new(EventsubLivestreamData {
         awaiting_channel_ids: initial_eventsub_channel_ids,
+        listening_channel_ids: Vec::new(),
     }));
 
-    let eventsub_handle = tokio::spawn({
-        let eventsub_client = eventsub_client.clone();
-        async move { eventsub_client.lock().await.run().await }
-    });
+    let mut eventsub_client = EventsubLivestreamClient::new(
+        client.clone(),
+        helix_token.clone(),
+        helix_client.clone(),
+        eventsub_data.clone(),
+    )
+    .await?;
+
+    let eventsub_handle = tokio::spawn(async move { eventsub_client.run().await });
 
     let seventv = Arc::new(Mutex::new(SevenTVWebsocketClient::new(
         client.clone(),
@@ -160,7 +160,7 @@ pub async fn main() -> Result<(), eyre::Report> {
                 twitch_client: client.clone(),
                 twitch_api_client: helix_client.clone(),
                 twitch_api_token: helix_token.clone(),
-                twitch_eventsub_client: eventsub_client.clone(),
+                twitch_eventsub_data: eventsub_data.clone(),
                 seventv_eventapi_client: seventv.clone(),
                 seventv_api_client: stv_client.clone(),
             };
