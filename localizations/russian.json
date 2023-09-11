@@ -1,11 +1,15 @@
 {
   "MSG_TEST": "тест был успешно завершен {}",
 
-  "CMD_PING_RESPONSE": "DankPoke \uD83E\uDD80 Понг! Rust {} · Время работы: {} · Потребление ОЗУ: {}МБ",
-
   "PROVIDERS_SEVENTV": "(7TV)",
 
   "EMOTES_UPDATE": "{} {} обновил имя эмоута с {} на {}",
   "EMOTES_PULLED": "{} {} удалил эмоут {}",
-  "EMOTES_PUSHED": "{} {} добавил эмоут {}"
+  "EMOTES_PUSHED": "{} {} добавил эмоут {}",
+
+  "CMD_PING_RESPONSE": "DankPoke \uD83E\uDD80 Понг! Rust {} · Время работы: {} · Потребление ОЗУ: {}МБ",
+
+  "CMD_JOIN_RESPONSE": "@{}, успешно подключился к чату {}!",
+  "CMD_JOIN_RESPONSE_IN_NEW_CHAT": "@{}, я внутри вашего чата! Напишите !help, чтобы узнать больше о командах",
+  "CMD_JOIN_ALREADY_JOINED": "@{}, я уже в вашем чате!"
 }

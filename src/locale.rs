@@ -7,13 +7,17 @@ use std::str::from_utf8;
 pub enum LineId {
     MSG_TEST,
 
-    CMD_PING_RESPONSE,
-
     PROVIDERS_SEVENTV,
 
     EMOTES_UPDATE,
     EMOTES_PULLED,
     EMOTES_PUSHED,
+
+    CMD_PING_RESPONSE,
+
+    CMD_JOIN_RESPONSE,
+    CMD_JOIN_RESPONSE_IN_NEW_CHAT,
+    CMD_JOIN_ALREADY_JOINED,
 }
 
 /// Localization manager.

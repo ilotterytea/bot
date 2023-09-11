@@ -1,11 +1,15 @@
 {
   "MSG_TEST": "test was successfully completed on {}",
 
-  "CMD_PING_RESPONSE": "DankPoke \uD83E\uDD80 Pong! Rust {} · Uptime: {} · Memory usage: {}MB",
-
   "PROVIDERS_SEVENTV": "(7TV)",
 
   "EMOTES_UPDATE": "{} {} updated the emote name from {} to {}",
   "EMOTES_PULLED": "{} {} removed the {} emote",
-  "EMOTES_PUSHED": "{} {} added the {} emote"
+  "EMOTES_PUSHED": "{} {} added the {} emote",
+
+  "CMD_PING_RESPONSE": "DankPoke \uD83E\uDD80 Pong! Rust {} · Uptime: {} · Memory usage: {}MB",
+
+  "CMD_JOIN_RESPONSE": "@{}, successfully joined to {}'s chat room!",
+  "CMD_JOIN_RESPONSE_IN_NEW_CHAT": "@{}, I'm inside your chat! Use !help for more information",
+  "CMD_JOIN_ALREADY_JOINED": "@{}, I'm already in your chat!"
 }
