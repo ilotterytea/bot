@@ -6,3 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+dotenvy = "0.15.7"
+tokio = { version = "1.32.0", features = ["full"] }
+twitch-irc = "5.0.1"
