@@ -1,3 +1,4 @@
+use crate::command::CommandLoader;
 use twitch_irc::{
     login::StaticLoginCredentials, message::ServerMessage, ClientConfig, SecureTCPTransport,
     TwitchIRCClient,
@@ -9,6 +10,7 @@ mod command;
 async fn main() {
     println!("Hello, world!");
 
+    let command_loader = CommandLoader::new();
     let (mut irc_incoming_messages, irc_client) =
         TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(ClientConfig::default());
 
