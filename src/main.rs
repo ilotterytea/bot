@@ -3,6 +3,8 @@ use twitch_irc::{
     TwitchIRCClient,
 };
 
+mod command;
+
 #[tokio::main]
 async fn main() {
     println!("Hello, world!");
