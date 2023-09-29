@@ -1,10 +1,11 @@
-use crate::command::CommandLoader;
+use crate::{command::CommandLoader, handlers::handle_chat_message};
 use twitch_irc::{
     login::StaticLoginCredentials, message::ServerMessage, ClientConfig, SecureTCPTransport,
     TwitchIRCClient,
 };
 
 mod command;
+mod handlers;
 
 #[tokio::main]
 async fn main() {
@@ -21,6 +22,7 @@ async fn main() {
             match irc_message {
                 ServerMessage::Privmsg(message) => {
                     println!("received message: {:?}", message);
+                    handle_chat_message(&command_loader).await;
                 }
                 _ => {
                     println!("not handled message: {:?}", irc_message);
