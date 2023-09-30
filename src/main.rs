@@ -1,4 +1,6 @@
-use crate::{command::CommandLoader, handlers::handle_chat_message};
+use std::sync::Arc;
+
+use crate::{command::CommandLoader, handlers::handle_chat_message, localization::Localizator};
 use twitch_irc::{
     login::StaticLoginCredentials, message::ServerMessage, ClientConfig, SecureTCPTransport,
     TwitchIRCClient,
@@ -6,11 +8,13 @@ use twitch_irc::{
 
 mod command;
 mod handlers;
+mod localization;
 
 #[tokio::main]
 async fn main() {
     println!("Hello, world!");
 
+    let localizator = Arc::new(Localizator::new());
     let command_loader = CommandLoader::new();
     let (mut irc_incoming_messages, irc_client) =
         TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(ClientConfig::default());
