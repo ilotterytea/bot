@@ -19,6 +19,8 @@ async fn main() {
     let (mut irc_incoming_messages, irc_client) =
         TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(ClientConfig::default());
 
+    let irc_client = Arc::new(irc_client);
+
     irc_client.join("ilotterytea".into()).unwrap();
 
     let irc_thread = tokio::spawn(async move {
