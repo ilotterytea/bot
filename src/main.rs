@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
-use crate::{command::CommandLoader, handlers::handle_chat_message, localization::Localizator};
+use crate::{
+    command::CommandLoader, handlers::handle_chat_message, instance_bundle::InstanceBundle,
+    localization::Localizator,
+};
 use twitch_irc::{
     login::StaticLoginCredentials, message::ServerMessage, ClientConfig, SecureTCPTransport,
     TwitchIRCClient,
@@ -8,6 +11,7 @@ use twitch_irc::{
 
 mod command;
 mod handlers;
+mod instance_bundle;
 mod localization;
 
 #[tokio::main]
@@ -28,7 +32,12 @@ async fn main() {
             match irc_message {
                 ServerMessage::Privmsg(message) => {
                     println!("received message: {:?}", message);
-                    handle_chat_message(&command_loader).await;
+                    let instance_bundle = InstanceBundle {
+                        twitch_irc_client: irc_client.clone(),
+                        localizator: localizator.clone(),
+                    };
+
+                    handle_chat_message(instance_bundle, &command_loader).await;
                 }
                 _ => {
                     println!("not handled message: {:?}", irc_message);
