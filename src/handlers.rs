@@ -13,7 +13,7 @@ pub async fn handle_chat_message(
 
     if let Some(parsed_message) = parsed_message {
         if let Ok(Some(response)) = command_loader
-            .execute_command(&instance_bundle, parsed_message)
+            .execute_command(&instance_bundle, message.clone(), parsed_message)
             .await
         {
             for line in response {
