@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{env, sync::Arc};
 
 use crate::{
     command::CommandLoader, handlers::handle_chat_message, instance_bundle::InstanceBundle,
@@ -24,11 +24,20 @@ async fn main() {
     *START_TIME;
 
     println!("Hello, world!");
+    dotenvy::dotenv().expect("Failed to load .env file");
 
     let localizator = Arc::new(Localizator::new());
     let command_loader = CommandLoader::new();
     let (mut irc_incoming_messages, irc_client) =
-        TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(ClientConfig::default());
+        TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(
+            ClientConfig::new_simple(StaticLoginCredentials::new(
+                env::var("BOT_USERNAME")
+                    .unwrap_or_else(|_| panic!("No BOT_USERNAME value specified in .env file!")),
+                Some(env::var("BOT_OAUTH2_TOKEN").unwrap_or_else(|_| {
+                    panic!("No BOT_OAUTH2_TOKEN value specified in .env file!")
+                })),
+            )),
+        );
 
     let irc_client = Arc::new(irc_client);
 
