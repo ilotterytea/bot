@@ -10,6 +10,7 @@ use twitch_irc::{
 };
 
 mod command;
+mod commands;
 mod handlers;
 mod instance_bundle;
 mod localization;
