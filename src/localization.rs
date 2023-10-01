@@ -53,4 +53,28 @@ impl Localizator {
 
         None
     }
+
+    pub fn get_formatted_text(
+        &self,
+        locale_id: &str,
+        line_id: LineId,
+        parameters: Vec<String>,
+    ) -> Option<String> {
+        if let Some(line) = self.get_literal_text(locale_id, line_id) {
+            line.split("{}")
+                .enumerate()
+                .fold(String::new(), |mut acc: String, (i, part)| {
+                    acc.push_str(part);
+
+                    if i < parameters.len() {
+                        acc.push_str(parameters.get(i).unwrap());
+                    }
+
+                    acc
+                });
+
+            return Some(line);
+        }
+        None
+    }
 }
