@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use twitch_irc::message::PrivmsgMessage;
 
 use crate::{
     command::Command, instance_bundle::InstanceBundle, localization::LineId,
@@ -16,6 +17,7 @@ impl Command for PingCommand {
     async fn execute(
         &self,
         instance_bundle: &InstanceBundle,
+        data_message: PrivmsgMessage,
         message: ParsedPrivmsgMessage,
     ) -> Option<Vec<String>> {
         Some(vec![instance_bundle
