@@ -38,7 +38,7 @@ async fn main() {
                         localizator: localizator.clone(),
                     };
 
-                    handle_chat_message(instance_bundle, &command_loader).await;
+                    handle_chat_message(instance_bundle, &command_loader, message).await;
                 }
                 _ => {
                     println!("not handled message: {:?}", irc_message);
