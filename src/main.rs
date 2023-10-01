@@ -16,6 +16,7 @@ mod instance_bundle;
 mod localization;
 mod message;
 mod shared_variables;
+mod utils;
 
 #[tokio::main]
 async fn main() {
