@@ -43,4 +43,14 @@ impl Localizator {
 
         Self { localizations }
     }
+
+    pub fn get_literal_text(&self, locale_id: &str, line_id: LineId) -> Option<String> {
+        if let Some(locale) = self.localizations.get(locale_id) {
+            if let Some(line) = locale.get(&line_id) {
+                return Some(line.clone());
+            }
+        }
+
+        None
+    }
 }
