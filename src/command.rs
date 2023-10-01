@@ -1,4 +1,6 @@
-use crate::{instance_bundle::InstanceBundle, message::ParsedPrivmsgMessage};
+use crate::{
+    commands::ping::PingCommand, instance_bundle::InstanceBundle, message::ParsedPrivmsgMessage,
+};
 use async_trait::async_trait;
 
 #[async_trait]
@@ -17,7 +19,9 @@ pub struct CommandLoader {
 
 impl CommandLoader {
     pub fn new() -> Self {
-        Self { commands: vec![] }
+        Self {
+            commands: vec![Box::new(PingCommand)],
+        }
     }
 
     pub async fn execute_command(
