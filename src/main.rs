@@ -13,6 +13,7 @@ mod command;
 mod handlers;
 mod instance_bundle;
 mod localization;
+mod message;
 
 #[tokio::main]
 async fn main() {
