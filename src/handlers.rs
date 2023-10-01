@@ -9,7 +9,7 @@ pub async fn handle_chat_message(
     command_loader: &CommandLoader,
     message: PrivmsgMessage,
 ) {
-    let parsed_message = ParsedPrivmsgMessage::parse(message.message_text.as_str(), "~");
+    let parsed_message = ParsedPrivmsgMessage::parse(message.message_text.as_str(), '~');
 
     if let Some(parsed_message) = parsed_message {
         if let Ok(Some(response)) = command_loader
