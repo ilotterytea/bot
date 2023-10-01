@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::{
     command::CommandLoader, handlers::handle_chat_message, instance_bundle::InstanceBundle,
-    localization::Localizator,
+    localization::Localizator, shared_variables::START_TIME,
 };
 use twitch_irc::{
     login::StaticLoginCredentials, message::ServerMessage, ClientConfig, SecureTCPTransport,
@@ -15,9 +15,13 @@ mod handlers;
 mod instance_bundle;
 mod localization;
 mod message;
+mod shared_variables;
 
 #[tokio::main]
 async fn main() {
+    // Activating static variable
+    *START_TIME;
+
     println!("Hello, world!");
 
     let localizator = Arc::new(Localizator::new());
