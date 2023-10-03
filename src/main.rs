@@ -15,6 +15,8 @@ mod handlers;
 mod instance_bundle;
 mod localization;
 mod message;
+mod models;
+mod schema;
 mod shared_variables;
 mod utils;
 
