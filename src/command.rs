@@ -1,5 +1,8 @@
 use crate::{
-    commands::ping::PingCommand, instance_bundle::InstanceBundle, message::ParsedPrivmsgMessage,
+    commands::ping::PingCommand,
+    instance_bundle::InstanceBundle,
+    message::ParsedPrivmsgMessage,
+    models::diesel::{Channel, ChannelPreference, User},
 };
 use async_trait::async_trait;
 use twitch_irc::message::PrivmsgMessage;
@@ -12,6 +15,9 @@ pub trait Command {
         instance_bundle: &InstanceBundle,
         data_message: PrivmsgMessage,
         message: ParsedPrivmsgMessage,
+        channel: &Channel,
+        channel_preferences: &ChannelPreference,
+        user: &User,
     ) -> Option<Vec<String>>;
 }
 
@@ -31,6 +37,9 @@ impl CommandLoader {
         instance_bundle: &InstanceBundle,
         data_message: PrivmsgMessage,
         message: ParsedPrivmsgMessage,
+        channel: &Channel,
+        channel_preferences: &ChannelPreference,
+        user: &User,
     ) -> Result<Option<Vec<String>>, &str> {
         if let Some(command) = self
             .commands
@@ -38,7 +47,14 @@ impl CommandLoader {
             .find(|x| x.get_name().eq(message.command_id.as_str()))
         {
             return Ok(command
-                .execute(instance_bundle, data_message, message)
+                .execute(
+                    instance_bundle,
+                    data_message,
+                    message,
+                    channel,
+                    channel_preferences,
+                    user,
+                )
                 .await);
         }
         Err("bruh")
