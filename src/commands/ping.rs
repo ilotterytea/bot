@@ -6,8 +6,13 @@ use twitch_irc::message::PrivmsgMessage;
 use version_check::Version;
 
 use crate::{
-    command::Command, instance_bundle::InstanceBundle, localization::LineId,
-    message::ParsedPrivmsgMessage, shared_variables::START_TIME, utils::format_timestamp,
+    command::Command,
+    instance_bundle::InstanceBundle,
+    localization::LineId,
+    message::ParsedPrivmsgMessage,
+    models::diesel::{Channel, ChannelPreference, User},
+    shared_variables::START_TIME,
+    utils::format_timestamp,
 };
 
 pub struct PingCommand;
@@ -23,6 +28,9 @@ impl Command for PingCommand {
         instance_bundle: &InstanceBundle,
         data_message: PrivmsgMessage,
         message: ParsedPrivmsgMessage,
+        _channel: &Channel,
+        channel_preferences: &ChannelPreference,
+        _user: &User,
     ) -> Option<Vec<String>> {
         let rust_version = match Version::read() {
             Some(version) => version.to_string(),
@@ -58,7 +66,7 @@ impl Command for PingCommand {
         Some(vec![instance_bundle
             .localizator
             .get_formatted_text(
-                "english",
+                channel_preferences.language.clone().unwrap().as_str(),
                 LineId::CommandPingResponse,
                 vec![
                     data_message.sender.name,
