@@ -7,6 +7,7 @@ use crate::{
     message::ParsedPrivmsgMessage,
     models::diesel::{Channel, ChannelPreference, NewChannel, NewChannelPreference, NewUser, User},
     schema::{channel_preferences::dsl as chp, channels::dsl as ch, users::dsl as us},
+    shared_variables::DEFAULT_PREFIX,
     utils::establish_connection,
 };
 
@@ -35,7 +36,7 @@ pub async fn handle_chat_message(
                 .expect("Failed to get a channel after creating it")
         });
 
-    let channel_preference = ChannelPreference::belonging_to(&channel)
+    let mut channel_preference = ChannelPreference::belonging_to(&channel)
         .first::<ChannelPreference>(conn)
         .unwrap_or_else(|_| {
             insert_into(chp::channel_preferences)
@@ -49,6 +50,10 @@ pub async fn handle_chat_message(
                 .first::<ChannelPreference>(conn)
                 .expect("Failed to get preferences after creating them")
         });
+
+    if let None = channel_preference.prefix {
+        channel_preference.prefix = Some(DEFAULT_PREFIX.to_string());
+    }
 
     let user = us::users
         .filter(us::alias_id.eq(message.sender.id.parse::<i32>().unwrap()))

@@ -6,3 +6,4 @@ lazy_static! {
     pub static ref START_TIME: Instant = Instant::now();
 }
 
+pub const DEFAULT_PREFIX: char = '~';
