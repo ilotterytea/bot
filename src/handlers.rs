@@ -7,7 +7,7 @@ use crate::{
     message::ParsedPrivmsgMessage,
     models::diesel::{Channel, ChannelPreference, NewChannel, NewChannelPreference, NewUser, User},
     schema::{channel_preferences::dsl as chp, channels::dsl as ch, users::dsl as us},
-    shared_variables::DEFAULT_PREFIX,
+    shared_variables::{DEFAULT_LANGUAGE, DEFAULT_PREFIX},
     utils::establish_connection,
 };
 
@@ -53,6 +53,10 @@ pub async fn handle_chat_message(
 
     if let None = channel_preference.prefix {
         channel_preference.prefix = Some(DEFAULT_PREFIX.to_string());
+    }
+
+    if let None = channel_preference.language {
+        channel_preference.language = Some(DEFAULT_LANGUAGE.to_string());
     }
 
     let user = us::users

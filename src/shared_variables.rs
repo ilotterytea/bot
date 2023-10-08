@@ -7,3 +7,4 @@ lazy_static! {
 }
 
 pub const DEFAULT_PREFIX: char = '~';
+pub const DEFAULT_LANGUAGE: &str = "english";
