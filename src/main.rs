@@ -43,7 +43,7 @@ async fn main() {
 
     let irc_client = Arc::new(irc_client);
 
-    irc_client.join("ilotterytea".into()).unwrap();
+    irc_client.join("imteabot".into()).unwrap();
 
     let irc_thread = tokio::spawn(async move {
         while let Some(irc_message) = irc_incoming_messages.recv().await {
