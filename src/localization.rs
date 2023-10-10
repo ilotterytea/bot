@@ -4,12 +4,20 @@ use std::{collections::HashMap, str::from_utf8};
 #[derive(PartialEq, Eq, Hash)]
 pub enum LineId {
     CommandPingResponse,
+    CommandSpamNoCount,
+    CommandSpamNoMessage,
+    CommandSpamInvalidCount,
+    CommandSpamResponse,
 }
 
 impl LineId {
     pub fn from_string(value: String) -> Option<Self> {
         match value.as_str() {
             "cmd.ping.response" => Some(Self::CommandPingResponse),
+            "cmd.spam.no_count" => Some(Self::CommandSpamNoCount),
+            "cmd.spam.no_message" => Some(Self::CommandSpamNoMessage),
+            "cmd.spam.invalid_count" => Some(Self::CommandSpamInvalidCount),
+            "cmd.spam.response" => Some(Self::CommandSpamResponse),
             _ => None,
         }
     }
