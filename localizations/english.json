@@ -1,3 +1,7 @@
 {
-  "cmd.ping.response": "{}: DankPoke 🦀 Rust {} · Uptime: {} · Memory usage: {}MB"
+  "cmd.ping.response": "{}: DankPoke 🦀 Rust {} · Uptime: {} · Memory usage: {}MB",
+  "cmd.spam.no_count": "{}: No value specified for amount of messages",
+  "cmd.spam.no_message": "{}: No message specified",
+  "cmd.spam.invalid_count": "{}: Value \"{}\" is not a number, less than or equal to zero",
+  "cmd.spam.response": "{}"
 }
