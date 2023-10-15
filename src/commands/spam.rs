@@ -65,7 +65,7 @@ impl Command for SpamCommand {
                 .localizator
                 .get_formatted_text(
                     channel_preferences.language.clone().unwrap().as_str(),
-                    LineId::CommandSpamNoMessage,
+                    LineId::MsgNoMessage,
                     vec![data_message.sender.name],
                 )
                 .unwrap()]);
