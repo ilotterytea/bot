@@ -1,7 +1,8 @@
 {
+  "msg.error": "🚨 {}: Error occurred when executing the command: {}",
+  "msg.no_message": "{}: No message specified for command",
   "cmd.ping.response": "{}: DankPoke 🦀 Rust {} · Uptime: {} · Memory usage: {}MB",
   "cmd.spam.no_count": "{}: No value specified for amount of messages",
-  "cmd.spam.no_message": "{}: No message specified",
   "cmd.spam.invalid_count": "{}: Value \"{}\" is not a number, less than or equal to zero",
   "cmd.spam.response": "{}"
 }
