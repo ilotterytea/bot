@@ -1,5 +1,5 @@
 use crate::{
-    commands::{ping::PingCommand, spam::SpamCommand},
+    commands::{massping::MasspingCommand, ping::PingCommand, spam::SpamCommand},
     instance_bundle::InstanceBundle,
     message::ParsedPrivmsgMessage,
     models::diesel::{Channel, ChannelPreference, User},
@@ -28,7 +28,11 @@ pub struct CommandLoader {
 impl CommandLoader {
     pub fn new() -> Self {
         Self {
-            commands: vec![Box::new(PingCommand), Box::new(SpamCommand)],
+            commands: vec![
+                Box::new(PingCommand),
+                Box::new(SpamCommand),
+                Box::new(MasspingCommand),
+            ],
         }
     }
 
