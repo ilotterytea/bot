@@ -4,6 +4,13 @@ use crate::{
     command::CommandLoader, handlers::handle_chat_message, instance_bundle::InstanceBundle,
     localization::Localizator, shared_variables::START_TIME,
 };
+use eyre::Context;
+use reqwest::Client;
+use twitch_api::{
+    client::ClientDefault,
+    twitch_oauth2::{AccessToken, UserToken},
+    HelixClient,
+};
 use twitch_irc::{
     login::StaticLoginCredentials, message::ServerMessage, ClientConfig, SecureTCPTransport,
     TwitchIRCClient,
@@ -43,6 +50,32 @@ async fn main() {
 
     let irc_client = Arc::new(irc_client);
 
+    let reqwest_client = Client::default_client_with_name(Some(
+        "ilotterytea/bot"
+            .parse()
+            .wrap_err_with(|| "when creating header name")
+            .unwrap(),
+    ))
+    .wrap_err_with(|| "when creating client")
+    .unwrap();
+
+    let helix_token =
+        Arc::new(
+            match UserToken::from_token(
+                &reqwest_client,
+                AccessToken::new(env::var("BOT_ACCESS_TOKEN").unwrap_or_else(|_| {
+                    panic!("No BOT_ACCESS_TOKEN value specified in .env file!")
+                })),
+            )
+            .await
+            {
+                Ok(token) => token,
+                Err(e) => panic!("Failed to construct user token: {}", e),
+            },
+        );
+
+    let helix_client = Arc::new(HelixClient::with_client(reqwest_client));
+
     irc_client.join("imteabot".into()).unwrap();
 
     let irc_thread = tokio::spawn(async move {
@@ -52,6 +85,8 @@ async fn main() {
                     println!("received message: {:?}", message);
                     let instance_bundle = InstanceBundle {
                         twitch_irc_client: irc_client.clone(),
+                        twitch_api_client: helix_client.clone(),
+                        twitch_api_token: helix_token.clone(),
                         localizator: localizator.clone(),
                     };
 
