@@ -8,3 +8,5 @@ lazy_static! {
 
 pub const DEFAULT_PREFIX: char = '~';
 pub const DEFAULT_LANGUAGE: &str = "english";
+
+pub const HOLIDAY_V1_API_URL: &str = "https://hol.ilotterytea.kz/api/v1";
