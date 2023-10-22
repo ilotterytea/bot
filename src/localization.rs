@@ -9,6 +9,8 @@ pub enum LineId {
     CommandSpamNoCount,
     CommandSpamInvalidCount,
     CommandSpamResponse,
+    CommandHolidayEmpty,
+    CommandHolidayResponse,
 }
 
 impl LineId {
@@ -20,6 +22,8 @@ impl LineId {
             "cmd.spam.no_count" => Some(Self::CommandSpamNoCount),
             "cmd.spam.invalid_count" => Some(Self::CommandSpamInvalidCount),
             "cmd.spam.response" => Some(Self::CommandSpamResponse),
+            "cmd.holiday.empty" => Some(Self::CommandHolidayEmpty),
+            "cmd.holiday.response" => Some(Self::CommandHolidayResponse),
             _ => None,
         }
     }

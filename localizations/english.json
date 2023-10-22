@@ -4,5 +4,7 @@
   "cmd.ping.response": "{}: DankPoke 🦀 Rust {} · Uptime: {} · Memory usage: {}MB",
   "cmd.spam.no_count": "{}: No value specified for amount of messages",
   "cmd.spam.invalid_count": "{}: Value \"{}\" is not a number, less than or equal to zero",
-  "cmd.spam.response": "{}"
+  "cmd.spam.response": "{}",
+  "cmd.holiday.empty": "{}: There are no holidays on {}.{}",
+  "cmd.holiday.response": "{}: Today's holiday: {}"
 }
