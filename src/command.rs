@@ -1,5 +1,7 @@
 use crate::{
-    commands::{massping::MasspingCommand, ping::PingCommand, spam::SpamCommand},
+    commands::{
+        holiday::HolidayCommand, massping::MasspingCommand, ping::PingCommand, spam::SpamCommand,
+    },
     instance_bundle::InstanceBundle,
     message::ParsedPrivmsgMessage,
     models::diesel::{Channel, ChannelPreference, User},
@@ -32,6 +34,7 @@ impl CommandLoader {
                 Box::new(PingCommand),
                 Box::new(SpamCommand),
                 Box::new(MasspingCommand),
+                Box::new(HolidayCommand),
             ],
         }
     }
