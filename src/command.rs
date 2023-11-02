@@ -1,6 +1,7 @@
 use crate::{
     commands::{
-        holiday::HolidayCommand, massping::MasspingCommand, ping::PingCommand, spam::SpamCommand,
+        holiday::HolidayCommand, join::JoinCommand, massping::MasspingCommand, ping::PingCommand,
+        spam::SpamCommand,
     },
     instance_bundle::InstanceBundle,
     message::ParsedPrivmsgMessage,
@@ -35,6 +36,7 @@ impl CommandLoader {
                 Box::new(SpamCommand),
                 Box::new(MasspingCommand),
                 Box::new(HolidayCommand),
+                Box::new(JoinCommand),
             ],
         }
     }

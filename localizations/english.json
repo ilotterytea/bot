@@ -6,5 +6,8 @@
   "cmd.spam.invalid_count": "{}: Value \"{}\" is not a number, less than or equal to zero",
   "cmd.spam.response": "{}",
   "cmd.holiday.empty": "{}: There are no holidays on {}.{}",
-  "cmd.holiday.response": "{}: Today's holiday: {}"
+  "cmd.holiday.response": "{}: Today's holiday: {}",
+  "cmd.join.already_joined": "{}: I'm already joined your chat room!",
+  "cmd.join.response": "{}: Successfully joined your chat room!", 
+  "cmd.join.response_in_chat": "Hi {}! I'm in your chat room! Type !help to get some information about the bot."
 }

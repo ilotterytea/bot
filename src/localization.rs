@@ -11,6 +11,9 @@ pub enum LineId {
     CommandSpamResponse,
     CommandHolidayEmpty,
     CommandHolidayResponse,
+    CommandJoinAlreadyJoined,
+    CommandJoinResponse,
+    CommandJoinResponseInChat,
 }
 
 impl LineId {
@@ -24,6 +27,9 @@ impl LineId {
             "cmd.spam.response" => Some(Self::CommandSpamResponse),
             "cmd.holiday.empty" => Some(Self::CommandHolidayEmpty),
             "cmd.holiday.response" => Some(Self::CommandHolidayResponse),
+            "cmd.join.already_joined" => Some(Self::CommandJoinAlreadyJoined),
+            "cmd.join.response" => Some(Self::CommandJoinResponse),
+            "cmd.join.response_in_chat" => Some(Self::CommandJoinResponseInChat),
             _ => None,
         }
     }
