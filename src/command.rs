@@ -6,6 +6,7 @@ use crate::{
     instance_bundle::InstanceBundle,
     message::ParsedPrivmsgMessage,
     models::diesel::{Channel, ChannelPreference, User},
+    shared_variables::DEFAULT_COMMAND_DELAY_SEC,
 };
 use async_trait::async_trait;
 use twitch_irc::message::PrivmsgMessage;
@@ -13,6 +14,9 @@ use twitch_irc::message::PrivmsgMessage;
 #[async_trait]
 pub trait Command {
     fn get_name(&self) -> String;
+    fn get_delay_sec(&self) -> i32 {
+        DEFAULT_COMMAND_DELAY_SEC
+    }
     async fn execute(
         &self,
         instance_bundle: &InstanceBundle,

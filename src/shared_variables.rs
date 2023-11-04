@@ -6,6 +6,8 @@ lazy_static! {
     pub static ref START_TIME: Instant = Instant::now();
 }
 
+pub const DEFAULT_COMMAND_DELAY_SEC: i32 = 5;
+
 pub const DEFAULT_PREFIX: char = '~';
 pub const DEFAULT_LANGUAGE: &str = "english";
 
