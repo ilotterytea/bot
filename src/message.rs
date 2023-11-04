@@ -4,7 +4,7 @@ use crate::command::CommandLoader;
 
 pub struct ParsedPrivmsgMessage {
     pub command_id: String,
-    pub message: String,
+    pub message: Option<String>,
 }
 
 impl ParsedPrivmsgMessage {
@@ -34,10 +34,15 @@ impl ParsedPrivmsgMessage {
         };
 
         message_split.remove(0);
+        let msg = message_split.join(" ");
 
         Some(Self {
             command_id,
-            message: message_split.join(" "),
+            message: if message_split.is_empty() {
+                None
+            } else {
+                Some(msg)
+            },
         })
     }
 }
