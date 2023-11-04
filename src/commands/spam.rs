@@ -26,7 +26,7 @@ impl Command for SpamCommand {
         channel_preferences: &ChannelPreference,
         _user: &User,
     ) -> Option<Vec<String>> {
-        let mut s = message.message.split(' ').collect::<Vec<&str>>();
+        let mut s = message.message.unwrap().split(' ').collect::<Vec<&str>>();
 
         let count = if let Some(c) = s.first() {
             if let Ok(c) = c.parse::<i32>() {
