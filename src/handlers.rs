@@ -16,7 +16,8 @@ pub async fn handle_chat_message(
     command_loader: &CommandLoader,
     message: PrivmsgMessage,
 ) {
-    let parsed_message = ParsedPrivmsgMessage::parse(message.message_text.as_str(), '~');
+    let parsed_message =
+        ParsedPrivmsgMessage::parse(message.message_text.as_str(), '~', command_loader);
     let conn = &mut establish_connection();
 
     let channel = ch::channels
