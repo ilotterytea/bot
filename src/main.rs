@@ -3,7 +3,7 @@ use std::{env, sync::Arc};
 use crate::{
     command::CommandLoader, handlers::handle_chat_message, instance_bundle::InstanceBundle,
     localization::Localizator, schema::channels::dsl as ch, shared_variables::START_TIME,
-    utils::establish_connection,
+    utils::diesel::establish_connection,
 };
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use eyre::Context;

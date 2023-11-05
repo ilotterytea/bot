@@ -9,7 +9,7 @@ use crate::{
     message::ParsedPrivmsgMessage,
     models::diesel::{Channel, ChannelPreference, NewChannel, NewChannelPreference, User},
     schema::{channel_preferences::dsl as chp, channels::dsl as ch},
-    utils::establish_connection,
+    utils::diesel::establish_connection,
 };
 
 pub struct JoinCommand;
