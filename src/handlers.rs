@@ -8,7 +8,7 @@ use crate::{
     models::diesel::{Channel, ChannelPreference, NewChannel, NewChannelPreference, NewUser, User},
     schema::{channel_preferences::dsl as chp, channels::dsl as ch, users::dsl as us},
     shared_variables::{DEFAULT_LANGUAGE, DEFAULT_PREFIX},
-    utils::establish_connection,
+    utils::diesel::establish_connection,
 };
 
 pub async fn handle_chat_message(

@@ -1,6 +1,6 @@
 use std::env;
 
-use diesel::{Connection, PgConnection};
+pub mod diesel;
 
 pub fn format_timestamp(timestamp_in_seconds: u64) -> String {
     let timestamp_as_f64 = timestamp_in_seconds as f64;
@@ -18,10 +18,4 @@ pub fn format_timestamp(timestamp_in_seconds: u64) -> String {
     } else {
         format!("{}d{}h", days, hours)
     }
-}
-
-pub fn establish_connection() -> PgConnection {
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    PgConnection::establish(&database_url)
-        .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
 }
