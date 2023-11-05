@@ -1,4 +1,4 @@
-use crate::schema::{channel_preferences, channels, users};
+use crate::schema::*;
 use chrono::NaiveDateTime;
 use diesel::{Associations, Identifiable, Insertable, Queryable};
 
@@ -45,4 +45,30 @@ pub struct User {
 #[diesel(table_name = users)]
 pub struct NewUser {
     pub alias_id: i32,
+}
+
+#[derive(Queryable, Identifiable, Associations)]
+#[diesel(belongs_to(Channel, foreign_key = channel_id))]
+#[diesel(belongs_to(User, foreign_key = user_id))]
+#[diesel(table_name = actions)]
+pub struct Action {
+    pub id: i32,
+    pub channel_id: i32,
+    pub user_id: i32,
+    pub command: String,
+    pub attributes: Option<String>,
+    pub full_message: String,
+    pub response: Option<String>,
+    pub timestamp: NaiveDateTime,
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = actions)]
+pub struct NewAction {
+    pub channel_id: i32,
+    pub user_id: i32,
+    pub command: String,
+    pub attributes: Option<String>,
+    pub full_message: String,
+    pub response: Option<String>,
 }
