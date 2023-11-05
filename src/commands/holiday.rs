@@ -30,7 +30,8 @@ impl Command for HolidayCommand {
         channel_preferences: &ChannelPreference,
         _user: &User,
     ) -> Option<Vec<String>> {
-        let split_msg = message.message.unwrap().split('.').collect::<Vec<&str>>();
+        let msg = message.message.unwrap();
+        let split_msg = msg.split('.').collect::<Vec<&str>>();
 
         let date = Utc::now();
 
