@@ -3,7 +3,7 @@ use twitch_api::helix::chat::GetChattersRequest;
 use twitch_irc::message::PrivmsgMessage;
 
 use crate::{
-    command::Command,
+    commands::Command,
     instance_bundle::InstanceBundle,
     localization::LineId,
     message::ParsedPrivmsgMessage,

@@ -1,6 +1,6 @@
 use substring::Substring;
 
-use crate::command::CommandLoader;
+use crate::commands::CommandLoader;
 
 #[derive(Clone)]
 pub struct ParsedPrivmsgMessage {

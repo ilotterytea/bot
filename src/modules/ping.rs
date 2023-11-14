@@ -6,7 +6,7 @@ use twitch_irc::message::PrivmsgMessage;
 use version_check::Version;
 
 use crate::{
-    command::Command,
+    commands::Command,
     instance_bundle::InstanceBundle,
     localization::LineId,
     message::ParsedPrivmsgMessage,
