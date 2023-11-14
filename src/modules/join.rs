@@ -3,7 +3,7 @@ use diesel::{insert_into, ExpressionMethods, QueryDsl, RunQueryDsl};
 use twitch_irc::message::PrivmsgMessage;
 
 use crate::{
-    command::Command,
+    commands::Command,
     instance_bundle::InstanceBundle,
     localization::LineId,
     message::ParsedPrivmsgMessage,

@@ -1,7 +1,7 @@
 use std::{env, sync::Arc};
 
 use crate::{
-    command::CommandLoader, handlers::handle_chat_message, instance_bundle::InstanceBundle,
+    commands::CommandLoader, handlers::handle_chat_message, instance_bundle::InstanceBundle,
     localization::Localizator, schema::channels::dsl as ch, shared_variables::START_TIME,
     utils::diesel::establish_connection,
 };
@@ -19,13 +19,13 @@ use twitch_irc::{
     TwitchIRCClient,
 };
 
-mod command;
 mod commands;
 mod handlers;
 mod instance_bundle;
 mod localization;
 mod message;
 mod models;
+mod modules;
 mod schema;
 mod shared_variables;
 mod utils;

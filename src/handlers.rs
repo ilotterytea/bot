@@ -2,7 +2,7 @@ use diesel::{insert_into, BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryD
 use twitch_irc::message::PrivmsgMessage;
 
 use crate::{
-    command::CommandLoader,
+    commands::CommandLoader,
     instance_bundle::InstanceBundle,
     message::ParsedPrivmsgMessage,
     models::diesel::{Channel, ChannelPreference, NewChannel, NewChannelPreference, NewUser, User},
