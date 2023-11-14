@@ -8,7 +8,7 @@ use crate::{
     models::diesel::{Channel, ChannelPreference, NewChannel, NewChannelPreference, NewUser, User},
     schema::{channel_preferences::dsl as chp, channels::dsl as ch, users::dsl as us},
     shared_variables::{DEFAULT_LANGUAGE, DEFAULT_PREFIX},
-    utils::diesel::establish_connection,
+    utils::diesel::{create_action, establish_connection},
 };
 
 pub async fn handle_chat_message(
@@ -82,13 +82,21 @@ pub async fn handle_chat_message(
             .execute_command(
                 &instance_bundle,
                 message.clone(),
-                parsed_message,
+                parsed_message.clone(),
                 &channel,
                 &channel_preference,
                 &user,
             )
             .await
         {
+            create_action(
+                conn,
+                &parsed_message,
+                Some(response.join("\n")),
+                channel.id,
+                user.id,
+            );
+
             for line in response {
                 instance_bundle
                     .twitch_irc_client
@@ -96,6 +104,6 @@ pub async fn handle_chat_message(
                     .await
                     .expect("Failed to send message");
             }
-        };
+        }
     }
 }

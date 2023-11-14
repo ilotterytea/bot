@@ -2,6 +2,7 @@ use substring::Substring;
 
 use crate::command::CommandLoader;
 
+#[derive(Clone)]
 pub struct ParsedPrivmsgMessage {
     pub command_id: String,
     pub message: Option<String>,
