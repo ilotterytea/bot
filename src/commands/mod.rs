@@ -11,6 +11,10 @@ use crate::{
 use async_trait::async_trait;
 use twitch_irc::message::PrivmsgMessage;
 
+use self::request::Request;
+
+pub mod request;
+
 #[async_trait]
 pub trait Command {
     fn get_name(&self) -> String;
@@ -23,11 +27,7 @@ pub trait Command {
     async fn execute(
         &self,
         instance_bundle: &InstanceBundle,
-        data_message: PrivmsgMessage,
-        message: ParsedPrivmsgMessage,
-        channel: &Channel,
-        channel_preferences: &ChannelPreference,
-        user: &User,
+        request: Request,
     ) -> Option<Vec<String>>;
 }
 
@@ -51,27 +51,14 @@ impl CommandLoader {
     pub async fn execute_command(
         &self,
         instance_bundle: &InstanceBundle,
-        data_message: PrivmsgMessage,
-        message: ParsedPrivmsgMessage,
-        channel: &Channel,
-        channel_preferences: &ChannelPreference,
-        user: &User,
+        request: Request,
     ) -> Result<Option<Vec<String>>, &str> {
         if let Some(command) = self
             .commands
             .iter()
-            .find(|x| x.get_name().eq(message.command_id.as_str()))
+            .find(|x| x.get_name().eq(request.command_id.as_str()))
         {
-            return Ok(command
-                .execute(
-                    instance_bundle,
-                    data_message,
-                    message,
-                    channel,
-                    channel_preferences,
-                    user,
-                )
-                .await);
+            return Ok(command.execute(instance_bundle, request).await);
         }
         Err("bruh")
     }

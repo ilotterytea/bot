@@ -2,15 +2,12 @@ use std::time::Instant;
 
 use async_trait::async_trait;
 use psutil::process::processes;
-use twitch_irc::message::PrivmsgMessage;
 use version_check::Version;
 
 use crate::{
-    commands::Command,
+    commands::{request::Request, Command},
     instance_bundle::InstanceBundle,
     localization::LineId,
-    message::ParsedPrivmsgMessage,
-    models::diesel::{Channel, ChannelPreference, User},
     shared_variables::START_TIME,
     utils::format_timestamp,
 };
@@ -26,11 +23,7 @@ impl Command for PingCommand {
     async fn execute(
         &self,
         instance_bundle: &InstanceBundle,
-        data_message: PrivmsgMessage,
-        message: ParsedPrivmsgMessage,
-        _channel: &Channel,
-        channel_preferences: &ChannelPreference,
-        _user: &User,
+        request: Request,
     ) -> Option<Vec<String>> {
         let rust_version = match Version::read() {
             Some(version) => version.to_string(),
@@ -66,10 +59,10 @@ impl Command for PingCommand {
         Some(vec![instance_bundle
             .localizator
             .get_formatted_text(
-                channel_preferences.language.clone().unwrap().as_str(),
+                request.channel_preference.language.as_str(),
                 LineId::CommandPingResponse,
                 vec![
-                    data_message.sender.name,
+                    request.sender.alias_name,
                     rust_version,
                     format_timestamp(uptime),
                     if used_memory_mb > -1.0 {

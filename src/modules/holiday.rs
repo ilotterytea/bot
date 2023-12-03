@@ -2,14 +2,11 @@ use async_trait::async_trait;
 use chrono::{Datelike, Utc};
 use rand::Rng;
 use reqwest::Client;
-use twitch_irc::message::PrivmsgMessage;
 
 use crate::{
-    commands::Command,
+    commands::{request::Request, Command},
     instance_bundle::InstanceBundle,
     localization::LineId,
-    message::ParsedPrivmsgMessage,
-    models::diesel::{Channel, ChannelPreference, User},
     shared_variables::HOLIDAY_V1_API_URL,
 };
 
@@ -24,13 +21,9 @@ impl Command for HolidayCommand {
     async fn execute(
         &self,
         instance_bundle: &InstanceBundle,
-        data_message: PrivmsgMessage,
-        message: ParsedPrivmsgMessage,
-        _channel: &Channel,
-        channel_preferences: &ChannelPreference,
-        _user: &User,
+        request: Request,
     ) -> Option<Vec<String>> {
-        let msg = message.message.unwrap();
+        let msg = request.message.clone().unwrap();
         let split_msg = msg.split('.').collect::<Vec<&str>>();
 
         let date = Utc::now();
@@ -75,10 +68,10 @@ impl Command for HolidayCommand {
             return Some(vec![instance_bundle
                 .localizator
                 .get_formatted_text(
-                    channel_preferences.language.clone().unwrap().as_str(),
+                    request.channel_preference.language.as_str(),
                     LineId::CommandHolidayEmpty,
                     vec![
-                        data_message.sender.name.clone(),
+                        request.sender.alias_name.clone(),
                         day.to_string(),
                         month.to_string(),
                     ],
@@ -93,9 +86,9 @@ impl Command for HolidayCommand {
         Some(vec![instance_bundle
             .localizator
             .get_formatted_text(
-                channel_preferences.language.clone().unwrap().as_str(),
+                request.channel_preference.language.as_str(),
                 LineId::CommandHolidayResponse,
-                vec![data_message.sender.name.clone(), holiday.into()],
+                vec![request.sender.alias_name.clone(), holiday.into()],
             )
             .unwrap()])
     }

@@ -1,13 +1,10 @@
 use async_trait::async_trait;
 use twitch_api::helix::chat::GetChattersRequest;
-use twitch_irc::message::PrivmsgMessage;
 
 use crate::{
-    commands::Command,
+    commands::{request::Request, Command},
     instance_bundle::InstanceBundle,
     localization::LineId,
-    message::ParsedPrivmsgMessage,
-    models::diesel::{Channel, ChannelPreference, User},
 };
 
 pub struct MasspingCommand;
@@ -21,20 +18,16 @@ impl Command for MasspingCommand {
     async fn execute(
         &self,
         instance_bundle: &InstanceBundle,
-        data_message: PrivmsgMessage,
-        message: ParsedPrivmsgMessage,
-        _channel: &Channel,
-        channel_preferences: &ChannelPreference,
-        _user: &User,
+        request: Request,
     ) -> Option<Vec<String>> {
-        let request = GetChattersRequest::new(
-            data_message.channel_id.clone(),
+        let twitch_request = GetChattersRequest::new(
+            request.channel.alias_id.to_string(),
             instance_bundle.twitch_api_token.user_id.clone(),
         );
 
         let chatters = match instance_bundle
             .twitch_api_client
-            .req_get(request, &*instance_bundle.twitch_api_token.clone())
+            .req_get(twitch_request, &*instance_bundle.twitch_api_token.clone())
             .await
         {
             Ok(response) => response.data,
@@ -42,15 +35,15 @@ impl Command for MasspingCommand {
                 return Some(vec![instance_bundle
                     .localizator
                     .get_formatted_text(
-                        channel_preferences.language.clone().unwrap().as_str(),
+                        request.channel_preference.language.as_str(),
                         LineId::MsgError,
-                        vec![data_message.sender.name, e.to_string()],
+                        vec![request.sender.alias_name, e.to_string()],
                     )
                     .unwrap()])
             }
         };
 
-        let message = message.message.unwrap();
+        let message = request.message.unwrap();
         let mut lines: Vec<String> = vec!["".to_string()];
         let mut index = 0;
 

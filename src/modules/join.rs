@@ -1,14 +1,13 @@
 use async_trait::async_trait;
 use diesel::{insert_into, ExpressionMethods, QueryDsl, RunQueryDsl};
-use twitch_irc::message::PrivmsgMessage;
 
 use crate::{
-    commands::Command,
+    commands::{request::Request, Command},
     instance_bundle::InstanceBundle,
     localization::LineId,
-    message::ParsedPrivmsgMessage,
-    models::diesel::{Channel, ChannelPreference, NewChannel, NewChannelPreference, User},
+    models::diesel::{Channel, NewChannel, NewChannelPreference},
     schema::{channel_preferences::dsl as chp, channels::dsl as ch},
+    shared_variables::{DEFAULT_LANGUAGE, DEFAULT_PREFIX},
     utils::diesel::establish_connection,
 };
 
@@ -23,16 +22,12 @@ impl Command for JoinCommand {
     async fn execute(
         &self,
         instance_bundle: &InstanceBundle,
-        data_message: PrivmsgMessage,
-        _message: ParsedPrivmsgMessage,
-        _channel: &Channel,
-        channel_preferences: &ChannelPreference,
-        user: &User,
+        request: Request,
     ) -> Option<Vec<String>> {
         let conn = &mut establish_connection();
 
         let channel_query = ch::channels
-            .filter(ch::alias_id.eq(&user.alias_id))
+            .filter(ch::alias_id.eq(request.sender.alias_id))
             .load::<Channel>(conn)
             .expect("Failed to get users");
 
@@ -40,47 +35,50 @@ impl Command for JoinCommand {
             return Some(vec![instance_bundle
                 .localizator
                 .get_formatted_text(
-                    channel_preferences.language.clone().unwrap().as_str(),
+                    request.channel_preference.language.as_str(),
                     LineId::CommandJoinResponse,
-                    vec![data_message.sender.name.clone()],
+                    vec![request.sender.alias_name.clone()],
                 )
                 .unwrap()]);
         }
 
         insert_into(ch::channels)
             .values([NewChannel {
-                alias_id: user.alias_id,
+                alias_id: request.sender.alias_id,
+                alias_name: request.sender.alias_name.clone(),
             }])
             .execute(conn)
             .expect("Failed to insert a new channel");
 
         let new_channel = ch::channels
-            .filter(ch::alias_id.eq(&user.alias_id))
+            .filter(ch::alias_id.eq(request.sender.alias_id))
             .first::<Channel>(conn)
             .expect("Failed to get users");
 
         insert_into(chp::channel_preferences)
             .values([NewChannelPreference {
                 channel_id: new_channel.id,
+                prefix: DEFAULT_PREFIX.to_string(),
+                language: DEFAULT_LANGUAGE.to_string(),
             }])
             .execute(conn)
             .expect("Failed to insert preferences for a new channel");
 
         instance_bundle
             .twitch_irc_client
-            .join(data_message.sender.name.clone())
+            .join(request.sender.alias_name.clone())
             .expect("Failed to join chat room");
 
         instance_bundle
             .twitch_irc_client
             .say(
-                data_message.sender.name.clone(),
+                request.sender.alias_name.clone(),
                 instance_bundle
                     .localizator
                     .get_formatted_text(
-                        channel_preferences.language.clone().unwrap().as_str(),
+                        request.channel_preference.language.as_str(),
                         LineId::CommandJoinResponseInChat,
-                        vec![data_message.sender.name.clone()],
+                        vec![request.sender.alias_name.clone()],
                     )
                     .unwrap(),
             )
@@ -90,9 +88,9 @@ impl Command for JoinCommand {
         Some(vec![instance_bundle
             .localizator
             .get_formatted_text(
-                channel_preferences.language.clone().unwrap().as_str(),
+                request.channel_preference.language.as_str(),
                 LineId::CommandJoinResponse,
-                vec![data_message.sender.name.clone()],
+                vec![request.sender.alias_name.clone()],
             )
             .unwrap()])
     }
