@@ -9,6 +9,7 @@ edition = "2021"
 async-trait = "0.1.73"
 chrono = "0.4.31"
 diesel = { version = "2.1.2", features = ["postgres", "chrono"] }
+diesel-derive-enum = { version = "2.1.0", features = ["postgres"] }
 dotenvy = "0.15.7"
 eyre = "0.6.8"
 include_dir = "0.7.3"
