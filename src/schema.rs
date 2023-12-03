@@ -1,15 +1,25 @@
 // @generated automatically by Diesel CLI.
 
+pub mod sql_types {
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "action_statuses"))]
+    pub struct ActionStatuses;
+}
+
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::ActionStatuses;
+
     actions (id) {
         id -> Int4,
-        channel_id -> Int4,
         user_id -> Int4,
-        command -> Varchar,
-        attributes -> Nullable<Varchar>,
-        full_message -> Varchar,
-        response -> Nullable<Varchar>,
-        timestamp -> Timestamp,
+        channel_id -> Int4,
+        command_name -> Varchar,
+        arguments -> Nullable<Varchar>,
+        response -> Varchar,
+        status -> ActionStatuses,
+        sent_at -> Timestamp,
+        processed_at -> Timestamp,
     }
 }
 
@@ -17,8 +27,8 @@ diesel::table! {
     channel_preferences (id) {
         id -> Int4,
         channel_id -> Int4,
-        prefix -> Nullable<Varchar>,
-        language -> Nullable<Varchar>,
+        prefix -> Varchar,
+        language -> Varchar,
     }
 }
 
@@ -26,6 +36,7 @@ diesel::table! {
     channels (id) {
         id -> Int4,
         alias_id -> Int4,
+        alias_name -> Varchar,
         joined_at -> Timestamp,
         opt_outed_at -> Nullable<Timestamp>,
     }
@@ -35,9 +46,9 @@ diesel::table! {
     users (id) {
         id -> Int4,
         alias_id -> Int4,
+        alias_name -> Varchar,
         joined_at -> Timestamp,
         opt_outed_at -> Nullable<Timestamp>,
-        is_super_user -> Bool,
     }
 }
 
