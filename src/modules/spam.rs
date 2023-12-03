@@ -1,12 +1,9 @@
 use async_trait::async_trait;
-use twitch_irc::message::PrivmsgMessage;
 
 use crate::{
-    commands::Command,
+    commands::{request::Request, Command},
     instance_bundle::InstanceBundle,
     localization::LineId,
-    message::ParsedPrivmsgMessage,
-    models::diesel::{Channel, ChannelPreference, User},
 };
 
 pub struct SpamCommand;
@@ -20,13 +17,9 @@ impl Command for SpamCommand {
     async fn execute(
         &self,
         instance_bundle: &InstanceBundle,
-        data_message: PrivmsgMessage,
-        message: ParsedPrivmsgMessage,
-        _channel: &Channel,
-        channel_preferences: &ChannelPreference,
-        _user: &User,
+        request: Request,
     ) -> Option<Vec<String>> {
-        let msg = message.message.unwrap();
+        let msg = request.message.unwrap();
         let mut s = msg.split(' ').collect::<Vec<&str>>();
 
         let count = if let Some(c) = s.first() {
@@ -39,9 +32,9 @@ impl Command for SpamCommand {
             return Some(vec![instance_bundle
                 .localizator
                 .get_formatted_text(
-                    channel_preferences.language.clone().unwrap().as_str(),
+                    request.channel_preference.language.as_str(),
                     LineId::CommandSpamNoCount,
-                    vec![data_message.sender.name],
+                    vec![request.sender.alias_name],
                 )
                 .unwrap()]);
         };
@@ -50,9 +43,9 @@ impl Command for SpamCommand {
             return Some(vec![instance_bundle
                 .localizator
                 .get_formatted_text(
-                    channel_preferences.language.clone().unwrap().as_str(),
+                    request.channel_preference.language.as_str(),
                     LineId::CommandSpamInvalidCount,
-                    vec![data_message.sender.name, s.first().unwrap().to_string()],
+                    vec![request.sender.alias_name, s.first().unwrap().to_string()],
                 )
                 .unwrap()]);
         }
@@ -65,9 +58,9 @@ impl Command for SpamCommand {
             return Some(vec![instance_bundle
                 .localizator
                 .get_formatted_text(
-                    channel_preferences.language.clone().unwrap().as_str(),
+                    request.channel_preference.language.as_str(),
                     LineId::MsgNoMessage,
-                    vec![data_message.sender.name],
+                    vec![request.sender.alias_name],
                 )
                 .unwrap()]);
         }
