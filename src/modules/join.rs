@@ -2,7 +2,11 @@ use async_trait::async_trait;
 use diesel::{insert_into, ExpressionMethods, QueryDsl, RunQueryDsl};
 
 use crate::{
-    commands::{request::Request, Command},
+    commands::{
+        request::Request,
+        response::{Response, ResponseError},
+        Command,
+    },
     instance_bundle::InstanceBundle,
     localization::LineId,
     models::diesel::{Channel, NewChannel, NewChannelPreference},
@@ -23,7 +27,7 @@ impl Command for JoinCommand {
         &self,
         instance_bundle: &InstanceBundle,
         request: Request,
-    ) -> Option<Vec<String>> {
+    ) -> Result<Response, ResponseError> {
         let conn = &mut establish_connection();
 
         let channel_query = ch::channels
@@ -32,14 +36,16 @@ impl Command for JoinCommand {
             .expect("Failed to get users");
 
         if !channel_query.is_empty() {
-            return Some(vec![instance_bundle
-                .localizator
-                .get_formatted_text(
-                    request.channel_preference.language.as_str(),
-                    LineId::CommandJoinResponse,
-                    vec![request.sender.alias_name.clone()],
-                )
-                .unwrap()]);
+            return Ok(Response::Single(
+                instance_bundle
+                    .localizator
+                    .get_formatted_text(
+                        request.channel_preference.language.as_str(),
+                        LineId::CommandJoinResponse,
+                        vec![request.sender.alias_name.clone()],
+                    )
+                    .unwrap(),
+            ));
         }
 
         insert_into(ch::channels)
@@ -85,13 +91,15 @@ impl Command for JoinCommand {
             .await
             .expect("Failed to send a message");
 
-        Some(vec![instance_bundle
-            .localizator
-            .get_formatted_text(
-                request.channel_preference.language.as_str(),
-                LineId::CommandJoinResponse,
-                vec![request.sender.alias_name.clone()],
-            )
-            .unwrap()])
+        Ok(Response::Single(
+            instance_bundle
+                .localizator
+                .get_formatted_text(
+                    request.channel_preference.language.as_str(),
+                    LineId::CommandJoinResponse,
+                    vec![request.sender.alias_name.clone()],
+                )
+                .unwrap(),
+        ))
     }
 }

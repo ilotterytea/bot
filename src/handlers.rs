@@ -1,7 +1,7 @@
 use twitch_irc::message::PrivmsgMessage;
 
 use crate::{
-    commands::{request::Request, CommandLoader},
+    commands::{request::Request, response::Response, CommandLoader},
     instance_bundle::InstanceBundle,
     message::ParsedPrivmsgMessage,
     utils::diesel::{create_action, establish_connection},
@@ -15,19 +15,32 @@ pub async fn handle_chat_message(
     let conn = &mut establish_connection();
 
     if let Some(request) = Request::try_from(&message, "~", command_loader, conn) {
-        if let Ok(Some(response)) = command_loader
+        let response = command_loader
             .execute_command(&instance_bundle, request.clone())
-            .await
-        {
-            // TODO: CREATE ACTION LOG LATER
+            .await;
 
-            for line in response {
-                instance_bundle
-                    .twitch_irc_client
-                    .say(message.channel_login.clone(), line)
-                    .await
-                    .expect("Failed to send message");
-            }
+        // TODO: CREATE ACTION LOG LATER
+
+        match response {
+            Ok(r) => match r {
+                Response::Single(line) => {
+                    instance_bundle
+                        .twitch_irc_client
+                        .say(message.channel_login.clone(), line)
+                        .await
+                        .expect("Failed to send message");
+                }
+                Response::Multiple(lines) => {
+                    for line in lines {
+                        instance_bundle
+                            .twitch_irc_client
+                            .say(message.channel_login.clone(), line)
+                            .await
+                            .expect("Failed to send message");
+                    }
+                }
+            },
+            Err(_) => {}
         }
     }
 }

@@ -1,8 +1,13 @@
 use async_trait::async_trait;
+use eyre::Result;
 use twitch_api::helix::chat::GetChattersRequest;
 
 use crate::{
-    commands::{request::Request, Command},
+    commands::{
+        request::Request,
+        response::{Response, ResponseError},
+        Command,
+    },
     instance_bundle::InstanceBundle,
     localization::LineId,
 };
@@ -19,7 +24,7 @@ impl Command for MasspingCommand {
         &self,
         instance_bundle: &InstanceBundle,
         request: Request,
-    ) -> Option<Vec<String>> {
+    ) -> Result<Response, ResponseError> {
         let twitch_request = GetChattersRequest::new(
             request.channel.alias_id.to_string(),
             instance_bundle.twitch_api_token.user_id.clone(),
@@ -32,14 +37,16 @@ impl Command for MasspingCommand {
         {
             Ok(response) => response.data,
             Err(e) => {
-                return Some(vec![instance_bundle
-                    .localizator
-                    .get_formatted_text(
-                        request.channel_preference.language.as_str(),
-                        LineId::MsgError,
-                        vec![request.sender.alias_name, e.to_string()],
-                    )
-                    .unwrap()])
+                return Ok(Response::Single(
+                    instance_bundle
+                        .localizator
+                        .get_formatted_text(
+                            request.channel_preference.language.as_str(),
+                            LineId::MsgError,
+                            vec![request.sender.alias_name, e.to_string()],
+                        )
+                        .unwrap(),
+                ))
             }
         };
 
@@ -72,11 +79,11 @@ impl Command for MasspingCommand {
             lines.insert(index, format!("{}@{}, ", line, chatter.user_login));
         }
 
-        Some(
+        Ok(Response::Multiple(
             lines
                 .iter()
                 .map(|x| format!("{}{}", x, message))
                 .collect::<Vec<String>>(),
-        )
+        ))
     }
 }
