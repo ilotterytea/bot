@@ -1,11 +1,16 @@
 use std::time::Instant;
 
 use async_trait::async_trait;
+use eyre::Result;
 use psutil::process::processes;
 use version_check::Version;
 
 use crate::{
-    commands::{request::Request, Command},
+    commands::{
+        request::Request,
+        response::{Response, ResponseError},
+        Command,
+    },
     instance_bundle::InstanceBundle,
     localization::LineId,
     shared_variables::START_TIME,
@@ -24,7 +29,7 @@ impl Command for PingCommand {
         &self,
         instance_bundle: &InstanceBundle,
         request: Request,
-    ) -> Option<Vec<String>> {
+    ) -> Result<Response, ResponseError> {
         let rust_version = match Version::read() {
             Some(version) => version.to_string(),
             None => "N/A".to_string(),
@@ -56,22 +61,24 @@ impl Command for PingCommand {
             -1.0
         };
 
-        Some(vec![instance_bundle
-            .localizator
-            .get_formatted_text(
-                request.channel_preference.language.as_str(),
-                LineId::CommandPingResponse,
-                vec![
-                    request.sender.alias_name,
-                    rust_version,
-                    format_timestamp(uptime),
-                    if used_memory_mb > -1.0 {
-                        used_memory_mb.to_string()
-                    } else {
-                        "N/A".to_string()
-                    },
-                ],
-            )
-            .unwrap()])
+        Ok(Response::Single(
+            instance_bundle
+                .localizator
+                .get_formatted_text(
+                    request.channel_preference.language.as_str(),
+                    LineId::CommandPingResponse,
+                    vec![
+                        request.sender.alias_name,
+                        rust_version,
+                        format_timestamp(uptime),
+                        if used_memory_mb > -1.0 {
+                            used_memory_mb.to_string()
+                        } else {
+                            "N/A".to_string()
+                        },
+                    ],
+                )
+                .unwrap(),
+        ))
     }
 }

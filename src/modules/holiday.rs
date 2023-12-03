@@ -1,10 +1,15 @@
 use async_trait::async_trait;
 use chrono::{Datelike, Utc};
+use eyre::Result;
 use rand::Rng;
 use reqwest::Client;
 
 use crate::{
-    commands::{request::Request, Command},
+    commands::{
+        request::Request,
+        response::{Response, ResponseError},
+        Command,
+    },
     instance_bundle::InstanceBundle,
     localization::LineId,
     shared_variables::HOLIDAY_V1_API_URL,
@@ -22,7 +27,7 @@ impl Command for HolidayCommand {
         &self,
         instance_bundle: &InstanceBundle,
         request: Request,
-    ) -> Option<Vec<String>> {
+    ) -> Result<Response, ResponseError> {
         let msg = request.message.clone().unwrap();
         let split_msg = msg.split('.').collect::<Vec<&str>>();
 
@@ -65,31 +70,35 @@ impl Command for HolidayCommand {
         };
 
         if holidays.is_empty() {
-            return Some(vec![instance_bundle
-                .localizator
-                .get_formatted_text(
-                    request.channel_preference.language.as_str(),
-                    LineId::CommandHolidayEmpty,
-                    vec![
-                        request.sender.alias_name.clone(),
-                        day.to_string(),
-                        month.to_string(),
-                    ],
-                )
-                .unwrap()]);
+            return Ok(Response::Single(
+                instance_bundle
+                    .localizator
+                    .get_formatted_text(
+                        request.channel_preference.language.as_str(),
+                        LineId::CommandHolidayEmpty,
+                        vec![
+                            request.sender.alias_name.clone(),
+                            day.to_string(),
+                            month.to_string(),
+                        ],
+                    )
+                    .unwrap(),
+            ));
         }
 
         let mut rand = rand::thread_rng();
         let index = rand.gen_range(0..holidays.len());
         let holiday = holidays.get(index).unwrap();
 
-        Some(vec![instance_bundle
-            .localizator
-            .get_formatted_text(
-                request.channel_preference.language.as_str(),
-                LineId::CommandHolidayResponse,
-                vec![request.sender.alias_name.clone(), holiday.into()],
-            )
-            .unwrap()])
+        Ok(Response::Single(
+            instance_bundle
+                .localizator
+                .get_formatted_text(
+                    request.channel_preference.language.as_str(),
+                    LineId::CommandHolidayResponse,
+                    vec![request.sender.alias_name.clone(), holiday.into()],
+                )
+                .unwrap(),
+        ))
     }
 }

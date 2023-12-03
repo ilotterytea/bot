@@ -9,11 +9,16 @@ use crate::{
     shared_variables::{DEFAULT_COMMAND_DELAY_SEC, DEFAULT_COMMAND_OPTIONS},
 };
 use async_trait::async_trait;
+use eyre::Result;
 use twitch_irc::message::PrivmsgMessage;
 
-use self::request::Request;
+use self::{
+    request::Request,
+    response::{Response, ResponseError},
+};
 
 pub mod request;
+pub mod response;
 
 #[async_trait]
 pub trait Command {
@@ -28,7 +33,7 @@ pub trait Command {
         &self,
         instance_bundle: &InstanceBundle,
         request: Request,
-    ) -> Option<Vec<String>>;
+    ) -> Result<Response, ResponseError>;
 }
 
 pub struct CommandLoader {
@@ -52,14 +57,14 @@ impl CommandLoader {
         &self,
         instance_bundle: &InstanceBundle,
         request: Request,
-    ) -> Result<Option<Vec<String>>, &str> {
+    ) -> Result<Response, ResponseError> {
         if let Some(command) = self
             .commands
             .iter()
             .find(|x| x.get_name().eq(request.command_id.as_str()))
         {
-            return Ok(command.execute(instance_bundle, request).await);
+            return command.execute(instance_bundle, request).await;
         }
-        Err("bruh")
+        Err(ResponseError::SomethingWentWrong)
     }
 }
