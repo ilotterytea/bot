@@ -2,10 +2,10 @@ use std::{env, sync::Arc};
 
 use crate::{
     commands::CommandLoader, handlers::handle_chat_message, instance_bundle::InstanceBundle,
-    localization::Localizator, schema::channels::dsl as ch, shared_variables::START_TIME,
-    utils::diesel::establish_connection,
+    localization::Localizator, models::diesel::NewChannel, schema::channels::dsl as ch,
+    shared_variables::START_TIME, utils::diesel::establish_connection,
 };
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::{insert_into, ExpressionMethods, QueryDsl, RunQueryDsl};
 use eyre::Context;
 use reqwest::Client;
 use twitch_api::{
@@ -81,11 +81,29 @@ async fn main() {
 
     let conn = &mut establish_connection();
 
-    let channel_alias_ids = ch::channels
+    let mut channel_alias_ids = ch::channels
         .filter(ch::opt_outed_at.is_null())
         .select(ch::alias_id)
         .load::<i32>(conn)
         .expect("Failed to get alias IDs");
+
+    let bot_user_id = helix_token.user_id.clone().take().parse::<i32>().unwrap();
+
+    if channel_alias_ids
+        .iter()
+        .find(|x| x == &&bot_user_id)
+        .is_none()
+    {
+        insert_into(ch::channels)
+            .values([NewChannel {
+                alias_id: bot_user_id,
+                alias_name: helix_token.login.clone().take(),
+            }])
+            .execute(conn)
+            .expect("Failed to create a bot channel data");
+
+        channel_alias_ids.push(bot_user_id);
+    }
 
     for id in channel_alias_ids {
         let id = id.to_string();
