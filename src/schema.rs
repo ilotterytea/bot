@@ -43,6 +43,18 @@ diesel::table! {
 }
 
 diesel::table! {
+    timers (id) {
+        id -> Int4,
+        name -> Varchar,
+        channel_id -> Int4,
+        messages -> Array<Text>,
+        interval_sec -> Int8,
+        last_executed_at -> Timestamp,
+        is_enabled -> Bool,
+    }
+}
+
+diesel::table! {
     users (id) {
         id -> Int4,
         alias_id -> Int4,
@@ -55,10 +67,12 @@ diesel::table! {
 diesel::joinable!(actions -> channels (channel_id));
 diesel::joinable!(actions -> users (user_id));
 diesel::joinable!(channel_preferences -> channels (channel_id));
+diesel::joinable!(timers -> channels (channel_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     actions,
     channel_preferences,
     channels,
+    timers,
     users,
 );
