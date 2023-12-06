@@ -1,9 +1,14 @@
-use std::{env, sync::Arc};
+use std::{env, sync::Arc, time::Duration};
 
 use crate::{
-    commands::CommandLoader, handlers::handle_chat_message, instance_bundle::InstanceBundle,
-    localization::Localizator, models::diesel::NewChannel, schema::channels::dsl as ch,
-    shared_variables::START_TIME, utils::diesel::establish_connection,
+    commands::CommandLoader,
+    handlers::{handle_chat_message, handle_timers},
+    instance_bundle::InstanceBundle,
+    localization::Localizator,
+    models::diesel::NewChannel,
+    schema::channels::dsl as ch,
+    shared_variables::{START_TIME, TIMER_CHECK_DELAY},
+    utils::diesel::establish_connection,
 };
 use diesel::{insert_into, ExpressionMethods, QueryDsl, RunQueryDsl};
 use eyre::Context;
@@ -125,6 +130,21 @@ async fn main() {
         }
     }
 
+    let timer_thread = tokio::spawn({
+        let instance_bundle = InstanceBundle {
+            twitch_irc_client: irc_client.clone(),
+            twitch_api_client: helix_client.clone(),
+            twitch_api_token: helix_token.clone(),
+            localizator: localizator.clone(),
+        };
+        async move {
+            loop {
+                handle_timers(&instance_bundle).await;
+                tokio::time::sleep(Duration::from_secs(TIMER_CHECK_DELAY)).await;
+            }
+        }
+    });
+
     let irc_thread = tokio::spawn(async move {
         while let Some(irc_message) = irc_incoming_messages.recv().await {
             match irc_message {
@@ -146,5 +166,5 @@ async fn main() {
         }
     });
 
-    tokio::join!(irc_thread);
+    tokio::join!(irc_thread, timer_thread);
 }
