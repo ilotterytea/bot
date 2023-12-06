@@ -87,3 +87,25 @@ pub struct NewAction {
     pub sent_at: NaiveDateTime,
     pub processed_at: NaiveDateTime,
 }
+
+#[derive(Queryable, Identifiable, Associations, Clone)]
+#[diesel(belongs_to(Channel, foreign_key = channel_id))]
+#[diesel(table_name = timers)]
+pub struct Timer {
+    pub id: i32,
+    pub name: String,
+    pub channel_id: i32,
+    pub messages: Vec<String>,
+    pub interval_sec: i64,
+    pub last_executed_at: NaiveDateTime,
+    pub is_enabled: bool,
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = timers)]
+pub struct NewTimer {
+    pub name: String,
+    pub channel_id: i32,
+    pub messages: Vec<String>,
+    pub interval_sec: i64,
+}
