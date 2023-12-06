@@ -13,3 +13,5 @@ pub const DEFAULT_PREFIX: &str = "~";
 pub const DEFAULT_LANGUAGE: &str = "english";
 
 pub const HOLIDAY_V1_API_URL: &str = "https://hol.ilotterytea.kz/api/v1";
+
+pub const TIMER_CHECK_DELAY: u64 = 1;
