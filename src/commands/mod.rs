@@ -6,7 +6,9 @@ use crate::{
         holiday::HolidayCommand, join::JoinCommand, massping::MasspingCommand, ping::PingCommand,
         spam::SpamCommand,
     },
-    shared_variables::{DEFAULT_COMMAND_DELAY_SEC, DEFAULT_COMMAND_OPTIONS},
+    shared_variables::{
+        DEFAULT_COMMAND_DELAY_SEC, DEFAULT_COMMAND_OPTIONS, DEFAULT_COMMAND_SUBCOMMANDS,
+    },
 };
 use async_trait::async_trait;
 use eyre::Result;
@@ -28,6 +30,9 @@ pub trait Command {
     }
     fn get_options(&self) -> Vec<String> {
         DEFAULT_COMMAND_OPTIONS
+    }
+    fn get_subcommands(&self) -> Vec<String> {
+        DEFAULT_COMMAND_SUBCOMMANDS
     }
     async fn execute(
         &self,
