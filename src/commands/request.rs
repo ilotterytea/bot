@@ -13,6 +13,7 @@ use super::CommandLoader;
 #[derive(Clone)]
 pub struct Request {
     pub command_id: String,
+    pub subcommand_id: Option<String>,
     pub message: Option<String>,
 
     pub sender: User,
@@ -106,9 +107,30 @@ impl Request {
             return None;
         };
 
+        let command = command_loader
+            .commands
+            .iter()
+            .find(|x| x.get_name().eq(&command_id))
+            .unwrap();
+
         message_split.remove(0);
+
+        let subcommand_id = if let Some(v) = message_split.get(0) {
+            let v = v.to_string();
+
+            if command.get_subcommands().contains(&v) {
+                message_split.remove(0);
+                Some(v)
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
         Some(Request {
             command_id,
+            subcommand_id,
             message: if message_split.is_empty() {
                 None
             } else {
