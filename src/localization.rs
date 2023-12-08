@@ -14,6 +14,12 @@ pub enum LineId {
     CommandJoinAlreadyJoined,
     CommandJoinResponse,
     CommandJoinResponseInChat,
+
+    CommandTimerDeleted,
+    CommandTimerEnabled,
+    CommandTimerDisabled,
+    CommandTimerInfo,
+    CommandTimerInterval,
 }
 
 impl LineId {
