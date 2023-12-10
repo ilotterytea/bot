@@ -8,6 +8,14 @@
   "cmd.holiday.empty": "{}: There are no holidays on {}.{}",
   "cmd.holiday.response": "{}: Today's holiday: {}",
   "cmd.join.already_joined": "{}: I'm already joined your chat room!",
-  "cmd.join.response": "{}: Successfully joined your chat room!", 
-  "cmd.join.response_in_chat": "Hi {}! I'm in your chat room! Type !help to get some information about the bot."
+  "cmd.join.response": "{}: Successfully joined your chat room!",
+  "cmd.join.response_in_chat": "Hi {}! I'm in your chat room! Type !help to get some information about the bot.",
+  "cmd.timer.deleted": "The \"{}\" (ID {}) timer has been deleted!",
+  "cmd.timer.enabled": "The \"{}\" (ID {}) timer has been enabled!",
+  "cmd.timer.disabled": "The \"{}\" (ID {}) timer has been disabled!",
+  "cmd.timer.info": "{} {} (ID {}) | Interval: {}s | Message: {}",
+  "cmd.timer.interval": "The interval for \"{}\" (ID {}) timer has been changed!",
+  "cmd.timer.message": "The message for \"{}\" (ID {}) timer has been changed!",
+  "cmd.timer.new": "A new timer with \"{}\" name has been successfully created!",
+  "error.timer.already_exists": "The timer with the same name has already exists."
 }
