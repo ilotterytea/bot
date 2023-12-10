@@ -1,7 +1,7 @@
 use include_dir::{include_dir, Dir};
 use std::{collections::HashMap, str::from_utf8};
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Debug)]
 pub enum LineId {
     MsgError,
     MsgNoMessage,
@@ -20,6 +20,10 @@ pub enum LineId {
     CommandTimerDisabled,
     CommandTimerInfo,
     CommandTimerInterval,
+    CommandTimerMessage,
+    CommandTimerNew,
+
+    TimerAlreadyExistsError,
 }
 
 impl LineId {
@@ -36,6 +40,14 @@ impl LineId {
             "cmd.join.already_joined" => Some(Self::CommandJoinAlreadyJoined),
             "cmd.join.response" => Some(Self::CommandJoinResponse),
             "cmd.join.response_in_chat" => Some(Self::CommandJoinResponseInChat),
+            "cmd.timer.deleted" => Some(Self::CommandTimerDeleted),
+            "cmd.timer.enabled" => Some(Self::CommandTimerEnabled),
+            "cmd.timer.disabled" => Some(Self::CommandTimerDisabled),
+            "cmd.timer.info" => Some(Self::CommandTimerInfo),
+            "cmd.timer.interval" => Some(Self::CommandTimerInterval),
+            "cmd.timer.message" => Some(Self::CommandTimerMessage),
+            "cmd.timer.new" => Some(Self::CommandTimerNew),
+            "error.timer.already_exists" => Some(Self::TimerAlreadyExistsError),
             _ => None,
         }
     }
