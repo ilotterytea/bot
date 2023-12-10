@@ -1,5 +1,7 @@
 use async_trait::async_trait;
-use diesel::{delete, update, BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::{
+    delete, insert_into, update, BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl,
+};
 use eyre::Result;
 
 use crate::{
@@ -10,10 +12,9 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    models::diesel::Timer,
+    models::diesel::{NewTimer, Timer},
     schema::timers::dsl as ti,
-    shared_variables::START_TIME,
-    utils::{diesel::establish_connection, format_timestamp},
+    utils::diesel::establish_connection,
 };
 
 pub struct TimerCommand;
@@ -28,7 +29,7 @@ impl Command for TimerCommand {
         vec![
             "new".to_string(),
             "delete".to_string(),
-            "edit".to_string(),
+            "message".to_string(),
             "interval".to_string(),
             "toggle".to_string(),
             "info".to_string(),
@@ -62,8 +63,6 @@ impl Command for TimerCommand {
             None => return Err(ResponseError::NotEnoughArguments),
         };
 
-        let mut response: String = "".into();
-
         let conn = &mut establish_connection();
         let timers = Timer::belonging_to(&request.channel)
             .filter(ti::name.eq(&name_id))
@@ -72,122 +71,148 @@ impl Command for TimerCommand {
 
         let timer = timers.iter().find(|x| x.name.eq(&name_id));
 
-        if timer.is_some() {
-            let timer = timer.unwrap();
+        let response = match (timer, message_split.len(), subcommand_id.as_str()) {
+            (Some(t), 0, "delete") => {
+                delete(ti::timers.find(&t.id))
+                    .execute(conn)
+                    .expect(format!("Failed to delete the timer ID {}", t.id.to_string()).as_str());
 
-            if message_split.len() == 0 {
-                match subcommand_id.as_str() {
-                    "delete" => {
-                        delete(ti::timers.find(&timer.id))
-                            .execute(conn)
-                            .expect("Failed to delete timer ID ");
-
-                        response = instance_bundle
-                            .localizator
-                            .get_formatted_text(
-                                request.channel_preference.language.as_str(),
-                                LineId::CommandTimerDeleted,
-                                vec![timer.name.clone(), timer.id.to_string()],
-                            )
-                            .unwrap();
-                    }
-                    "toggle" => {
-                        update(ti::timers.find(&timer.id))
-                            .set(ti::is_enabled.eq(!timer.is_enabled))
-                            .execute(conn)
-                            .expect("Failed to toggle timer ID ");
-
-                        response = instance_bundle
-                            .localizator
-                            .get_formatted_text(
-                                request.channel_preference.language.as_str(),
-                                if !timer.is_enabled {
-                                    LineId::CommandTimerDisabled
-                                } else {
-                                    LineId::CommandTimerEnabled
-                                },
-                                vec![timer.name.clone(), timer.id.to_string()],
-                            )
-                            .unwrap();
-                    }
-                    "info" => {
-                        response = instance_bundle
-                            .localizator
-                            .get_formatted_text(
-                                request.channel_preference.language.as_str(),
-                                LineId::CommandTimerInfo,
-                                vec![
-                                    timer.name.clone(),
-                                    timer.id.to_string(),
-                                    timer.interval_sec.to_string(),
-                                    if timer.is_enabled {
-                                        "✅".to_string()
-                                    } else {
-                                        "❌".to_string()
-                                    },
-                                    timer.messages.get(0).unwrap().clone(),
-                                ],
-                            )
-                            .unwrap();
-                    }
-                    "call" => {
-                        response = timer.messages.get(0).unwrap().clone();
-                    }
-                    _ => {}
-                }
-            } else if message_split.len() == 1 {
-                let second_arg = message_split.get(0).unwrap().to_string();
-                message_split.remove(0);
-
-                match subcommand_id.as_str() {
-                    "interval" => {
-                        let interval = match second_arg.parse::<i64>() {
-                            Ok(v) => v,
-                            Err(_) => return Err(ResponseError::NotEnoughArguments),
-                        };
-
-                        update(ti::timers.find(&timer.id))
-                            .set(ti::interval_sec.eq(interval))
-                            .execute(conn)
-                            .expect("Failed to update the interval of timer ID ");
-
-                        response = instance_bundle
-                            .localizator
-                            .get_formatted_text(
-                                request.channel_preference.language.as_str(),
-                                LineId::CommandTimerInterval,
-                                vec![
-                                    timer.name.clone(),
-                                    timer.id.to_string(),
-                                    timer.interval_sec.to_string(),
-                                    if timer.is_enabled {
-                                        "✅".to_string()
-                                    } else {
-                                        "❌".to_string()
-                                    },
-                                    timer.messages.get(0).unwrap().clone(),
-                                ],
-                            )
-                            .unwrap();
-                    }
-                    _ => {}
-                }
-            } else {
-                let second_arg = message_split.get(0).unwrap().to_string();
-                message_split.remove(0);
-
-                if message_split.is_empty() {
-                    return Err(ResponseError::NoMessage);
-                }
-
-                let third_arg = message_split.join(" ");
-
-                match subcommand_id.as_str() {
-                    "edit" => {}
-                    _ => {}
-                }
+                instance_bundle
+                    .localizator
+                    .get_formatted_text(
+                        request.channel_preference.language.as_str(),
+                        LineId::CommandTimerDeleted,
+                        vec![t.name.clone(), t.id.to_string()],
+                    )
+                    .unwrap()
             }
-        }
+            (Some(t), 0, "toggle") => {
+                update(ti::timers.find(&t.id))
+                    .set(ti::is_enabled.eq(!t.is_enabled))
+                    .execute(conn)
+                    .expect(format!("Failed to toggle the timer ID {}", t.id.to_string()).as_str());
+
+                instance_bundle
+                    .localizator
+                    .get_formatted_text(
+                        request.channel_preference.language.as_str(),
+                        if !t.is_enabled {
+                            LineId::CommandTimerEnabled
+                        } else {
+                            LineId::CommandTimerDisabled
+                        },
+                        vec![t.name.clone(), t.id.to_string()],
+                    )
+                    .unwrap()
+            }
+            (Some(t), 0, "info") => instance_bundle
+                .localizator
+                .get_formatted_text(
+                    request.channel_preference.language.as_str(),
+                    LineId::CommandTimerInfo,
+                    vec![
+                        if t.is_enabled {
+                            "✅".to_string()
+                        } else {
+                            "❌".to_string()
+                        },
+                        t.name.clone(),
+                        t.id.to_string(),
+                        t.interval_sec.to_string(),
+                        t.messages.get(0).clone().unwrap().to_owned(),
+                    ],
+                )
+                .unwrap(),
+            (Some(t), 0, "call") => t.messages.get(0).clone().unwrap().to_owned(),
+
+            (Some(t), 1, "interval") => {
+                let interval_sec = message_split.get(0).unwrap().to_string();
+                let interval_sec = match interval_sec.parse::<i64>() {
+                    Ok(v) => v,
+                    Err(_) => return Err(ResponseError::WrongArguments),
+                };
+
+                update(ti::timers.find(&t.id))
+                    .set(ti::interval_sec.eq(interval_sec))
+                    .execute(conn)
+                    .expect(
+                        format!(
+                            "Failed to update the interval for timer ID {}",
+                            t.id.to_string()
+                        )
+                        .as_str(),
+                    );
+
+                instance_bundle
+                    .localizator
+                    .get_formatted_text(
+                        request.channel_preference.language.as_str(),
+                        LineId::CommandTimerInterval,
+                        vec![t.name.clone(), t.id.to_string()],
+                    )
+                    .unwrap()
+            }
+
+            (Some(t), _, "message") if !message_split.is_empty() => {
+                let message = message_split.join(" ");
+                update(ti::timers.find(&t.id))
+                    .set(ti::messages.eq(vec![message]))
+                    .execute(conn)
+                    .expect(
+                        format!(
+                            "Failed to update the messages for timer ID {}",
+                            t.id.to_string()
+                        )
+                        .as_str(),
+                    );
+
+                instance_bundle
+                    .localizator
+                    .get_formatted_text(
+                        request.channel_preference.language.as_str(),
+                        LineId::CommandTimerMessage,
+                        vec![t.name.clone(), t.id.to_string()],
+                    )
+                    .unwrap()
+            }
+
+            (None, _, "new") if message_split.len() > 1 => {
+                let interval_sec = message_split.get(0).unwrap().to_string();
+                message_split.remove(0);
+
+                let interval_sec = match interval_sec.parse::<i64>() {
+                    Ok(v) => v,
+                    Err(_) => return Err(ResponseError::WrongArguments),
+                };
+
+                let message = message_split.join(" ");
+
+                insert_into(ti::timers)
+                    .values([NewTimer {
+                        name: name_id.clone(),
+                        channel_id: request.channel.id,
+                        messages: vec![message],
+                        interval_sec,
+                    }])
+                    .execute(conn)
+                    .expect("Failed to insert a new timer");
+
+                instance_bundle
+                    .localizator
+                    .get_formatted_text(
+                        request.channel_preference.language.as_str(),
+                        LineId::CommandTimerNew,
+                        vec![name_id],
+                    )
+                    .unwrap()
+            }
+
+            (Some(_), _, "new") => {
+                return Err(ResponseError::Custom(LineId::TimerAlreadyExistsError))
+            }
+
+            _ => return Err(ResponseError::WrongArguments),
+        };
 
         Ok(Response::Single(response))
     }
