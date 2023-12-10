@@ -1,8 +1,11 @@
+use crate::localization::LineId;
+
 pub enum Response {
     Single(String),
     Multiple(Vec<String>),
 }
 
+#[derive(Debug)]
 pub enum ResponseError {
     NotEnoughArguments,
     NoSubcommand,
@@ -12,4 +15,7 @@ pub enum ResponseError {
     HttpResponse,
 
     SomethingWentWrong,
+
+    WrongArguments,
+    Custom(LineId),
 }
