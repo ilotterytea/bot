@@ -109,3 +109,24 @@ pub struct NewTimer {
     pub messages: Vec<String>,
     pub interval_sec: i64,
 }
+
+#[derive(Queryable, Identifiable, Associations, Clone)]
+#[diesel(belongs_to(Channel, foreign_key = channel_id))]
+#[diesel(table_name = custom_commands)]
+pub struct CustomCommand {
+    pub id: i32,
+    pub channel_id: i32,
+    pub name: String,
+    pub messages: Vec<String>,
+    pub is_enabled: bool,
+    pub created_at: NaiveDateTime,
+    pub last_executed_at: Option<NaiveDateTime>,
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = custom_commands)]
+pub struct NewCustomCommand {
+    pub channel_id: i32,
+    pub name: String,
+    pub messages: Vec<String>,
+}
