@@ -1,13 +1,13 @@
 use chrono::Utc;
-use diesel::{update, BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::{update, BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 use twitch_irc::message::PrivmsgMessage;
 
 use crate::{
     commands::{request::Request, response::Response, CommandLoader},
     instance_bundle::InstanceBundle,
     message::ParsedPrivmsgMessage,
-    models::diesel::{Channel, Timer},
-    schema::{channels::dsl as ch, timers::dsl as ti},
+    models::diesel::{Channel, CustomCommand, Timer},
+    schema::{channels::dsl as ch, custom_commands::dsl as cc, timers::dsl as ti},
     utils::diesel::{create_action, establish_connection},
 };
 
@@ -47,6 +47,8 @@ pub async fn handle_chat_message(
             Err(_) => {}
         }
     }
+
+    handle_custom_commands(conn, &instance_bundle, &message).await;
 }
 
 pub async fn handle_timers(instance_bundle: &InstanceBundle) {
@@ -82,6 +84,37 @@ pub async fn handle_timers(instance_bundle: &InstanceBundle) {
                 .set(ti::last_executed_at.eq(current_timestamp))
                 .execute(conn)
                 .expect("Failed to update the timer with ID");
+        }
+    }
+}
+
+pub async fn handle_custom_commands(
+    conn: &mut PgConnection,
+    instance_bundle: &InstanceBundle,
+    message: &PrivmsgMessage,
+) {
+    let message_text = message.message_text.clone();
+
+    let alias_id = message.channel_id.parse::<i32>().unwrap();
+    let channels = ch::channels
+        .filter(ch::alias_id.eq(&alias_id))
+        .load::<Channel>(conn)
+        .expect(format!("Failed to load channel data with alias ID {}", alias_id).as_str());
+
+    if let Some(channel) = channels.first() {
+        let commands = CustomCommand::belonging_to(&channel)
+            .filter(cc::is_enabled.eq(true))
+            .load::<CustomCommand>(conn)
+            .expect("Failed to load custom commands");
+
+        if let Some(command) = commands.iter().find(|x| x.name.eq(&message_text)) {
+            for line in &command.messages {
+                instance_bundle
+                    .twitch_irc_client
+                    .say(message.channel_login.clone(), line.clone())
+                    .await
+                    .expect("Failed to send a message");
+            }
         }
     }
 }
