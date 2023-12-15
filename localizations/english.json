@@ -17,5 +17,12 @@
   "cmd.timer.interval": "The interval for \"{}\" (ID {}) timer has been changed!",
   "cmd.timer.message": "The message for \"{}\" (ID {}) timer has been changed!",
   "cmd.timer.new": "A new timer with \"{}\" name has been successfully created!",
-  "error.timer.already_exists": "The timer with the same name has already exists."
+  "error.timer.already_exists": "The timer with the same name has already exists.",
+  "cmd.customcommand.deleted": "The \"{}\" (ID {}) custom command has been deleted!",
+  "cmd.customcommand.enabled": "The \"{}\" (ID {}) custom command has been enabled!",
+  "cmd.customcommand.disabled": "The \"{}\" (ID {}) custom command has been disabled!",
+  "cmd.customcommand.info": "{} {} (ID {}) | Message: {}",
+  "cmd.customcommand.message": "The message for \"{}\" (ID {}) custom command has been changed!",
+  "cmd.customcommand.new": "A new custom command with \"{}\" name has been successfully created!",
+  "error.customcommand.already_exists": "The custom command with the same name has already exists."
 }
