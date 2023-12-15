@@ -17,5 +17,12 @@
   "cmd.timer.interval": "Интервал для таймера \"{}\" (ID {}) был изменен!",
   "cmd.timer.message": "Сообщение для таймера \"{}\" (ID {}) было изменено!",
   "cmd.timer.new": "Новый таймер под названием \"{}\" был успешно создан!",
-  "error.timer.already_exists": "Таймер с похожим именем уже существует."
+  "error.timer.already_exists": "Таймер с похожим именем уже существует.",
+  "cmd.customcommand.deleted": "Команда \"{}\" (ID {}) была удалена!",
+  "cmd.customcommand.enabled": "Команда \"{}\" (ID {}) теперь включена!",
+  "cmd.customcommand.disabled": "Команда \"{}\" (ID {}) теперь выключена!",
+  "cmd.customcommand.info": "{} {} (ID {}) | Сообщение: {}",
+  "cmd.customcommand.message": "Сообщение для команды \"{}\" (ID {}) было изменено!",
+  "cmd.customcommand.new": "Новая команда под названием \"{}\" была успешно создана!",
+  "error.customcommand.already_exists": "Команда с похожим именем уже существует."
 }

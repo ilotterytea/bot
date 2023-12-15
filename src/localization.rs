@@ -23,7 +23,15 @@ pub enum LineId {
     CommandTimerMessage,
     CommandTimerNew,
 
+    CommandCustomCommandDeleted,
+    CommandCustomCommandEnabled,
+    CommandCustomCommandDisabled,
+    CommandCustomCommandInfo,
+    CommandCustomCommandMessage,
+    CommandCustomCommandNew,
+
     TimerAlreadyExistsError,
+    CustomCommandAlreadyExistsError,
 }
 
 impl LineId {
@@ -47,7 +55,13 @@ impl LineId {
             "cmd.timer.interval" => Some(Self::CommandTimerInterval),
             "cmd.timer.message" => Some(Self::CommandTimerMessage),
             "cmd.timer.new" => Some(Self::CommandTimerNew),
-            "error.timer.already_exists" => Some(Self::TimerAlreadyExistsError),
+            "cmd.customcommand.deleted" => Some(Self::CommandCustomCommandDeleted),
+            "cmd.customcommand.enabled" => Some(Self::CommandCustomCommandEnabled),
+            "cmd.customcommand.disabled" => Some(Self::CommandCustomCommandDisabled),
+            "cmd.customcommand.info" => Some(Self::CommandCustomCommandInfo),
+            "cmd.customcommand.message" => Some(Self::CommandCustomCommandMessage),
+            "cmd.customcommand.new" => Some(Self::CommandCustomCommandNew),
+            "error.customcommands.already_exists" => Some(Self::CustomCommandAlreadyExistsError),
             _ => None,
         }
     }
