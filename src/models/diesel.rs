@@ -130,3 +130,57 @@ pub struct NewCustomCommand {
     pub name: String,
     pub messages: Vec<String>,
 }
+
+#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq)]
+#[ExistingTypePath = "crate::schema::sql_types::EventType"]
+pub enum EventType {
+    Live,
+    Offline,
+    Title,
+    Category,
+    Custom,
+}
+
+#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq)]
+#[ExistingTypePath = "crate::schema::sql_types::EventFlag"]
+pub enum EventFlag {
+    Massping,
+}
+
+#[derive(Queryable, Identifiable, Associations)]
+#[diesel(belongs_to(Channel, foreign_key = channel_id))]
+pub struct Event {
+    pub id: i32,
+    pub channel_id: i32,
+    pub target_alias_id: Option<i32>,
+    pub custom_alias_id: Option<String>,
+    pub event_type: EventType,
+    pub flags: Vec<EventFlag>,
+    pub message: String,
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = events)]
+pub struct NewEvent {
+    pub channel_id: i32,
+    pub target_alias_id: Option<i32>,
+    pub custom_alias_id: Option<String>,
+    pub event_type: EventType,
+    pub message: String,
+}
+
+#[derive(Queryable, Identifiable, Associations)]
+#[diesel(belongs_to(Event, foreign_key = event_id))]
+#[diesel(belongs_to(User, foreign_key = user_id))]
+pub struct EventSubscription {
+    pub id: i32,
+    pub event_id: i32,
+    pub user_id: i32,
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = event_subscriptions)]
+pub struct NewEventSubscription {
+    pub event_id: i32,
+    pub user_id: i32,
+}

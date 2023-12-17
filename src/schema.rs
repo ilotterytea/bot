@@ -4,6 +4,14 @@ pub mod sql_types {
     #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "action_statuses"))]
     pub struct ActionStatuses;
+
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "event_flag"))]
+    pub struct EventFlag;
+
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "event_type"))]
+    pub struct EventType;
 }
 
 diesel::table! {
@@ -55,6 +63,30 @@ diesel::table! {
 }
 
 diesel::table! {
+    event_subscriptions (id) {
+        id -> Int4,
+        event_id -> Int4,
+        user_id -> Int4,
+    }
+}
+
+diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::EventType;
+    use super::sql_types::EventFlag;
+
+    events (id) {
+        id -> Int4,
+        channel_id -> Int4,
+        target_alias_id -> Nullable<Int4>,
+        custom_alias_id -> Nullable<Varchar>,
+        event_type -> EventType,
+        flags -> Array<EventFlag>,
+        message -> Varchar,
+    }
+}
+
+diesel::table! {
     timers (id) {
         id -> Int4,
         name -> Varchar,
@@ -80,6 +112,9 @@ diesel::joinable!(actions -> channels (channel_id));
 diesel::joinable!(actions -> users (user_id));
 diesel::joinable!(channel_preferences -> channels (channel_id));
 diesel::joinable!(custom_commands -> channels (channel_id));
+diesel::joinable!(event_subscriptions -> events (event_id));
+diesel::joinable!(event_subscriptions -> users (user_id));
+diesel::joinable!(events -> channels (channel_id));
 diesel::joinable!(timers -> channels (channel_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
@@ -87,6 +122,8 @@ diesel::allow_tables_to_appear_in_same_query!(
     channel_preferences,
     channels,
     custom_commands,
+    event_subscriptions,
+    events,
     timers,
     users,
 );
