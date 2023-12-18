@@ -24,7 +24,7 @@ use twitch_irc::{
     login::StaticLoginCredentials, message::ServerMessage, ClientConfig, SecureTCPTransport,
     TwitchIRCClient,
 };
-use websockets::WebsocketData;
+use websockets::{livestream::TwitchLivestreamClient, WebsocketData};
 
 mod commands;
 mod handlers;
@@ -169,6 +169,14 @@ async fn main() {
         }
     });
 
+    let mut livestream_client = TwitchLivestreamClient::new(instances.clone())
+        .await
+        .unwrap();
+
+    let livestream_thread = tokio::spawn(async move {
+        livestream_client.run().await.unwrap();
+    });
+
     let irc_thread = tokio::spawn(async move {
         while let Some(irc_message) = irc_incoming_messages.recv().await {
             match irc_message {
@@ -185,5 +193,5 @@ async fn main() {
         }
     });
 
-    tokio::join!(irc_thread, timer_thread);
+    tokio::join!(irc_thread, timer_thread, livestream_thread);
 }
