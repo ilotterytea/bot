@@ -1,14 +1,25 @@
+use std::{collections::HashSet, sync::Arc};
+
 use chrono::Utc;
 use diesel::{update, BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
+use twitch_api::{types::UserId, helix::chat::GetChattersRequest};
 use twitch_irc::message::PrivmsgMessage;
 
 use crate::{
     commands::{request::Request, response::Response, CommandLoader},
     instance_bundle::InstanceBundle,
     message::ParsedPrivmsgMessage,
-    models::diesel::{Channel, CustomCommand, Timer},
-    schema::{channels::dsl as ch, custom_commands::dsl as cc, timers::dsl as ti},
-    utils::diesel::{create_action, establish_connection},
+    models::diesel::{
+        Channel, CustomCommand, Event, EventFlag, EventSubscription, EventType, Timer, User,
+    },
+    schema::{
+        channels::dsl as ch, custom_commands::dsl as cc, event_subscriptions::dsl as evs,
+        events::dsl as ev, timers::dsl as ti, users::dsl as us,
+    },
+    utils::{
+        diesel::{create_action, establish_connection},
+        split_and_wrap_lines,
+    },
 };
 
 pub async fn handle_chat_message(
@@ -44,7 +55,9 @@ pub async fn handle_chat_message(
                     }
                 }
             },
-            Err(_) => {}
+            Err(e) => {
+                println!("!!! nahhh: {:?}", e);
+            }
         }
     }
 
@@ -116,5 +129,123 @@ pub async fn handle_custom_commands(
                     .expect("Failed to send a message");
             }
         }
+    }
+}
+
+pub async fn handle_stream_event(
+    conn: &mut PgConnection,
+    instance_bundle: Arc<InstanceBundle>,
+    target_id: UserId,
+    event_type: EventType,
+) {
+    let target_id = target_id.take().parse::<i32>().unwrap();
+    let events = match ev::events
+        .filter(ev::target_alias_id.eq(&target_id))
+        .filter(ev::event_type.eq(&event_type))
+        .load::<Event>(conn)
+    {
+        Ok(v) => v,
+        Err(e) => {
+            println!("[STREAM EVENT HANDLER] Failed to get events: {}", e);
+            return;
+        }
+    };
+
+    for event in events {
+        tokio::spawn({
+            let instance_bundle = instance_bundle.clone();
+            let channel = match ch::channels.find(event.channel_id).first::<Channel>(conn) {
+                Ok(v) => v,
+                Err(e) => {
+                    println!(
+                        "[STREAM EVENT HANDLER] Failed to get channel for event ID {}: {}",
+                        event.id, e
+                    );
+                    continue;
+                }
+            };
+            let subs = match EventSubscription::belonging_to(&event).load::<EventSubscription>(conn)
+            {
+                Ok(v) => v,
+                Err(e) => {
+                    println!(
+                        "[STREAM EVENT HANDLER] Failed to get subscriptions for event ID {}: {}",
+                        event.id, e
+                    );
+                    continue;
+                }
+            };
+
+            let users = match us::users.load::<User>(conn) {
+                Ok(v) => v,
+                Err(e) => {
+                    println!(
+                        "[STREAM EVENT HANDLER] Failed to get users for event ID {}: {}",
+                        event.id, e
+                    );
+                    continue;
+                }
+            };
+
+            let users = users
+                .iter()
+                .filter(|x| subs.iter().any(|y| y.user_id == x.id))
+                .map(|x| format!("@{}", x.alias_name))
+                .collect::<Vec<String>>();
+
+            let mut subs: HashSet<String> = HashSet::new();
+
+            subs.extend(users);
+
+            async move {
+                if event.flags.contains(&EventFlag::Massping) {
+                    let broadcaster_id = channel.alias_id.to_string();
+                    let moderator_id = instance_bundle.twitch_api_token.user_id.clone().take();
+
+                    let chatters = match instance_bundle.twitch_api_client.req_get(GetChattersRequest::new(broadcaster_id.as_str(), moderator_id.as_str()), &*instance_bundle.twitch_api_token).await {
+                        Ok(v) => v,
+                        Err(e) => {
+                            println!("[STREAM EVENT HANDLER] Failed to get chatters for channel ID {}: {}", channel.id, e);
+                            return; 
+                        }
+                    };
+
+                    let chatters = chatters.data.iter().map(|x| format!("@{}", x.user_login)).collect::<HashSet<String>>();
+
+                    subs.extend(chatters);
+                }
+
+                if subs.is_empty() {
+                    instance_bundle
+                        .twitch_irc_client
+                        .say(channel.alias_name.clone(), format!("⚡ {}", event.message))
+                        .await
+                        .expect("Failed to send a message");
+                    return;
+                }
+
+                let formatted_subs = split_and_wrap_lines(
+                    subs.into_iter()
+                        .collect::<Vec<String>>()
+                        .join(", ")
+                        .as_str(),
+                    ", ",
+                    300 - event.message.len(),
+                );
+
+                for formatted_sub in formatted_subs {
+                    instance_bundle
+                        .twitch_irc_client
+                        .say(
+                            channel.alias_name.clone(),
+                            format!("⚡ {} · {}", event.message, formatted_sub),
+                        )
+                        .await
+                        .expect("Failed to send a message");
+                }
+            }
+        })
+        .await
+        .unwrap();
     }
 }
