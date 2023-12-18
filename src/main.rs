@@ -130,16 +130,18 @@ async fn main() {
         }
     }
 
+    let instances = Arc::new(InstanceBundle {
+        twitch_irc_client: irc_client.clone(),
+        twitch_api_token: helix_token.clone(),
+        twitch_api_client: helix_client.clone(),
+        localizator: localizator.clone(),
+    });
+
     let timer_thread = tokio::spawn({
-        let instance_bundle = InstanceBundle {
-            twitch_irc_client: irc_client.clone(),
-            twitch_api_client: helix_client.clone(),
-            twitch_api_token: helix_token.clone(),
-            localizator: localizator.clone(),
-        };
+        let instances = instances.clone();
         async move {
             loop {
-                handle_timers(&instance_bundle).await;
+                handle_timers(&instances).await;
                 tokio::time::sleep(Duration::from_secs(TIMER_CHECK_DELAY)).await;
             }
         }
@@ -150,14 +152,9 @@ async fn main() {
             match irc_message {
                 ServerMessage::Privmsg(message) => {
                     println!("received message: {:?}", message);
-                    let instance_bundle = InstanceBundle {
-                        twitch_irc_client: irc_client.clone(),
-                        twitch_api_client: helix_client.clone(),
-                        twitch_api_token: helix_token.clone(),
-                        localizator: localizator.clone(),
-                    };
+                    let instances = instances.clone();
 
-                    handle_chat_message(instance_bundle, &command_loader, message).await;
+                    handle_chat_message(instances, &command_loader, message).await;
                 }
                 _ => {
                     println!("not handled message: {:?}", irc_message);
