@@ -6,23 +6,25 @@ use crate::{
     instance_bundle::InstanceBundle,
     localization::Localizator,
     models::diesel::NewChannel,
-    schema::channels::dsl as ch,
+    schema::{channels::dsl as ch, events::dsl as ev},
     shared_variables::{START_TIME, TIMER_CHECK_DELAY},
     utils::diesel::establish_connection,
 };
 use diesel::{insert_into, ExpressionMethods, QueryDsl, RunQueryDsl};
 use eyre::Context;
 use reqwest::Client;
+use tokio::sync::Mutex;
 use twitch_api::{
     client::ClientDefault,
     twitch_oauth2::{AccessToken, UserToken},
-    types::UserIdRef,
+    types::{UserId, UserIdRef},
     HelixClient,
 };
 use twitch_irc::{
     login::StaticLoginCredentials, message::ServerMessage, ClientConfig, SecureTCPTransport,
     TwitchIRCClient,
 };
+use websockets::WebsocketData;
 
 mod commands;
 mod handlers;
@@ -34,6 +36,7 @@ mod modules;
 mod schema;
 mod shared_variables;
 mod utils;
+mod websockets;
 
 #[tokio::main]
 async fn main() {
@@ -129,12 +132,31 @@ async fn main() {
             );
         }
     }
+    let livestream_data = Arc::new(Mutex::new({
+        let mut data = WebsocketData::default();
+
+        let ids = ev::events
+            .filter(ev::target_alias_id.is_not_null())
+            .select(ev::target_alias_id)
+            .load::<Option<i32>>(conn)
+            .expect("Failed to get events");
+
+        let ids = ids
+            .iter()
+            .map(|x| UserId::new(x.unwrap().to_string()))
+            .collect::<Vec<UserId>>();
+
+        data.awaiting_channel_ids.extend(ids);
+
+        data
+    }));
 
     let instances = Arc::new(InstanceBundle {
         twitch_irc_client: irc_client.clone(),
         twitch_api_token: helix_token.clone(),
         twitch_api_client: helix_client.clone(),
         localizator: localizator.clone(),
+        twitch_livestream_websocket_data: livestream_data.clone(),
     });
 
     let timer_thread = tokio::spawn({
