@@ -12,7 +12,7 @@ use crate::{
 };
 
 pub async fn handle_chat_message(
-    instance_bundle: InstanceBundle,
+    instance_bundle: Arc<InstanceBundle>,
     command_loader: &CommandLoader,
     message: PrivmsgMessage,
 ) {
