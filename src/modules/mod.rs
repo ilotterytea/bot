@@ -3,6 +3,7 @@ pub mod event;
 pub mod holiday;
 pub mod join;
 pub mod massping;
+pub mod notify;
 pub mod ping;
 pub mod spam;
 pub mod timer;
