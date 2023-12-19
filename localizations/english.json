@@ -24,5 +24,8 @@
   "cmd.customcommand.info": "{} {} (ID {}) | Message: {}",
   "cmd.customcommand.message": "The message for \"{}\" (ID {}) custom command has been changed!",
   "cmd.customcommand.new": "A new custom command with \"{}\" name has been successfully created!",
-  "error.customcommand.already_exists": "The custom command with the same name has already exists."
+  "error.customcommand.already_exists": "The custom command with the same name has already exists.",
+  "event.on": "{}: A new \"{}:{}\" event has been successfully created! It will send a message when the event occurs.",
+  "event.off": "{}: The \"{}:{}\" event has been successfully deleted.",
+  "event.already_exists": "{}: An event with the same name and type already exists on this channel."
 }

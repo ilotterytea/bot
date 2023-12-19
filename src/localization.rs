@@ -30,6 +30,10 @@ pub enum LineId {
     CommandCustomCommandMessage,
     CommandCustomCommandNew,
 
+    EventOn,
+    EventOff,
+
+    EventAlreadyExistsError,
     TimerAlreadyExistsError,
     CustomCommandAlreadyExistsError,
 }
@@ -62,6 +66,9 @@ impl LineId {
             "cmd.customcommand.message" => Some(Self::CommandCustomCommandMessage),
             "cmd.customcommand.new" => Some(Self::CommandCustomCommandNew),
             "error.customcommands.already_exists" => Some(Self::CustomCommandAlreadyExistsError),
+            "event.on" => Some(Self::EventOn),
+            "event.off" => Some(Self::EventOff),
+            "event.already_exists" => Some(Self::EventAlreadyExistsError),
             _ => None,
         }
     }
