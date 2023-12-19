@@ -1,4 +1,5 @@
 pub mod custom_command;
+pub mod event;
 pub mod holiday;
 pub mod join;
 pub mod massping;
