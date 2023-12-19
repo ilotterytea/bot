@@ -4,8 +4,8 @@ use crate::{
     models::diesel::{Channel, ChannelPreference, User},
     modules::{
         custom_command::CustomCommandsCommand, event::EventCommand, holiday::HolidayCommand,
-        join::JoinCommand, massping::MasspingCommand, ping::PingCommand, spam::SpamCommand,
-        timer::TimerCommand,
+        join::JoinCommand, massping::MasspingCommand, notify::NotifyCommand, ping::PingCommand,
+        spam::SpamCommand, timer::TimerCommand,
     },
     shared_variables::{
         DEFAULT_COMMAND_DELAY_SEC, DEFAULT_COMMAND_OPTIONS, DEFAULT_COMMAND_SUBCOMMANDS,
@@ -58,6 +58,7 @@ impl CommandLoader {
                 Box::new(TimerCommand),
                 Box::new(CustomCommandsCommand),
                 Box::new(EventCommand),
+                Box::new(NotifyCommand),
             ],
         }
     }
