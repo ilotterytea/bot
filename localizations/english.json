@@ -27,5 +27,11 @@
   "error.customcommand.already_exists": "The custom command with the same name has already exists.",
   "event.on": "{}: A new \"{}:{}\" event has been successfully created! It will send a message when the event occurs.",
   "event.off": "{}: The \"{}:{}\" event has been successfully deleted.",
-  "event.already_exists": "{}: An event with the same name and type already exists on this channel."
+  "event.already_exists": "{}: An event with the same name and type already exists on this channel.",
+  "notify.sub": "{}: You have successfully subscribed to the \"{}:{}\" event!",
+  "notify.unsub": "{}: You have successfully unsubscribed from the \"{}:{}\" event!",
+  "notify.already_sub": "{}: You're already a subscriber to the \"{}:{}\" event.",
+  "notify.already_unsub": "{}: You're not subscribed to the \"{}:{}\" event.",
+  "notify.subs": "{}: Your subscriptions: {}",
+  "notify.no_subs": "{}: You're not subscribed to any events."
 }
