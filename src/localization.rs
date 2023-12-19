@@ -33,6 +33,13 @@ pub enum LineId {
     EventOn,
     EventOff,
 
+    NotifySub,
+    NotifyAlreadySub,
+    NotifyUnsub,
+    NotifyAlreadyUnsub,
+    NotifySubs,
+    NotifyNoSubs,
+
     EventAlreadyExistsError,
     TimerAlreadyExistsError,
     CustomCommandAlreadyExistsError,
@@ -69,6 +76,12 @@ impl LineId {
             "event.on" => Some(Self::EventOn),
             "event.off" => Some(Self::EventOff),
             "event.already_exists" => Some(Self::EventAlreadyExistsError),
+            "notify.sub" => Some(Self::NotifySub),
+            "notify.already_sub" => Some(Self::NotifyAlreadySub),
+            "notify.unsub" => Some(Self::NotifyUnsub),
+            "notify.already_unsub" => Some(Self::NotifyAlreadyUnsub),
+            "notify.subs" => Some(Self::NotifySubs),
+            "notify.no_subs" => Some(Self::NotifyNoSubs),
             _ => None,
         }
     }
