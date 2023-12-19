@@ -1,3 +1,5 @@
+use std::{error::Error, str::FromStr};
+
 use crate::schema::*;
 use chrono::NaiveDateTime;
 use diesel::{Associations, Identifiable, Insertable, Queryable};
@@ -131,7 +133,7 @@ pub struct NewCustomCommand {
     pub messages: Vec<String>,
 }
 
-#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq)]
+#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq, Clone)]
 #[ExistingTypePath = "crate::schema::sql_types::EventType"]
 pub enum EventType {
     Live,
@@ -139,6 +141,33 @@ pub enum EventType {
     Title,
     Category,
     Custom,
+}
+
+impl FromStr for EventType {
+    type Err = eyre::Report;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "live" => Ok(Self::Live),
+            "offline" => Ok(Self::Offline),
+            "title" => Ok(Self::Title),
+            "category" => Ok(Self::Category),
+            _ => Ok(Self::Custom),
+        }
+    }
+}
+
+impl ToString for EventType {
+    fn to_string(&self) -> String {
+        let x = match self {
+            Self::Live => "live",
+            Self::Offline => "offline",
+            Self::Title => "title",
+            Self::Category => "category",
+            Self::Custom => "custom",
+        };
+
+        x.to_string()
+    }
 }
 
 #[derive(diesel_derive_enum::DbEnum, Debug, PartialEq)]
