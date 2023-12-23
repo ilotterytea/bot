@@ -7,6 +7,7 @@ use crate::{
     localization::Localizator,
     models::diesel::NewChannel,
     schema::{channels::dsl as ch, events::dsl as ev},
+    seventv::api::SevenTVAPIClient,
     shared_variables::{START_TIME, TIMER_CHECK_DELAY},
     utils::diesel::establish_connection,
 };
@@ -152,12 +153,35 @@ async fn main() {
         data
     }));
 
+    let seventv_data = Arc::new(Mutex::new({
+        let mut data = WebsocketData::default();
+
+        let ids = ch::channels
+            .filter(ch::opt_outed_at.is_null())
+            .select(ch::alias_id)
+            .load::<i32>(conn)
+            .expect("Failed to get channels");
+
+        let ids = ids
+            .iter()
+            .map(|x| UserId::new(x.to_string()))
+            .collect::<Vec<UserId>>();
+
+        data.awaiting_channel_ids.extend(ids);
+
+        data
+    }));
+
+    let seventv_api = Arc::new(SevenTVAPIClient::new(Client::new()));
+
     let instances = Arc::new(InstanceBundle {
         twitch_irc_client: irc_client.clone(),
         twitch_api_token: helix_token.clone(),
         twitch_api_client: helix_client.clone(),
         localizator: localizator.clone(),
         twitch_livestream_websocket_data: livestream_data.clone(),
+        seventv_api_client: seventv_api.clone(),
+        seventv_eventapi_data: seventv_data.clone(),
     });
 
     let timer_thread = tokio::spawn({
