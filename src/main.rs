@@ -7,7 +7,7 @@ use crate::{
     localization::Localizator,
     models::diesel::NewChannel,
     schema::{channels::dsl as ch, events::dsl as ev},
-    seventv::api::SevenTVAPIClient,
+    seventv::{api::SevenTVAPIClient, SevenTVWebsocketClient},
     shared_variables::{START_TIME, TIMER_CHECK_DELAY},
     utils::diesel::establish_connection,
 };
@@ -202,6 +202,14 @@ async fn main() {
         livestream_client.run().await.unwrap();
     });
 
+    let mut seventv_client = SevenTVWebsocketClient::new(instances.clone())
+        .await
+        .unwrap();
+
+    let seventv_thread = tokio::spawn(async move {
+        seventv_client.run().await.unwrap();
+    });
+
     let irc_thread = tokio::spawn(async move {
         while let Some(irc_message) = irc_incoming_messages.recv().await {
             match irc_message {
@@ -218,5 +226,5 @@ async fn main() {
         }
     });
 
-    tokio::join!(irc_thread, timer_thread, livestream_thread);
+    tokio::join!(irc_thread, timer_thread, livestream_thread, seventv_thread);
 }
