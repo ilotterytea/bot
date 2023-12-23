@@ -1,4 +1,8 @@
 {
+  "provider.7tv": "(7TV)",
+  "emotes.update": "{} {} updated the emote name from {} to {}",
+  "emotes.push": "{} {} added the {} emote",
+  "emotes.pull": "{} {} removed the {} emote",
   "msg.error": "🚨 {}: Error occurred when executing the command: {}",
   "msg.no_message": "{}: No message specified for command",
   "cmd.ping.response": "{}: DankPoke 🦀 Rust {} · Uptime: {} · Memory usage: {}MB",

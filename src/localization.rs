@@ -3,6 +3,12 @@ use std::{collections::HashMap, str::from_utf8};
 
 #[derive(PartialEq, Eq, Hash, Debug)]
 pub enum LineId {
+    EmotesPushed,
+    EmotesUpdated,
+    EmotesPulled,
+
+    Provider7TV,
+
     MsgError,
     MsgNoMessage,
     CommandPingResponse,
@@ -48,6 +54,10 @@ pub enum LineId {
 impl LineId {
     pub fn from_string(value: String) -> Option<Self> {
         match value.as_str() {
+            "provider.7tv" => Some(Self::Provider7TV),
+            "emotes.update" => Some(Self::EmotesUpdated),
+            "emotes.pull" => Some(Self::EmotesPulled),
+            "emotes.push" => Some(Self::EmotesPushed),
             "msg.error" => Some(Self::MsgError),
             "msg.no_message" => Some(Self::MsgNoMessage),
             "cmd.ping.response" => Some(Self::CommandPingResponse),
