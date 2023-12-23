@@ -1,2 +1,335 @@
 pub mod api;
 pub(super) mod schema;
+
+use futures::SinkExt;
+use serde_json::Value;
+use std::{collections::HashSet, sync::Arc};
+
+use eyre::Context;
+use reqwest::Url;
+use tokio::net::TcpStream;
+use tokio_tungstenite::{
+    connect_async_with_config,
+    tungstenite::{protocol::WebSocketConfig, Message},
+    MaybeTlsStream, WebSocketStream,
+};
+use twitch_api::types::UserId;
+
+use crate::{
+    instance_bundle::InstanceBundle, localization::LineId, seventv::schema::Payload,
+    shared_variables::SEVENTV_WEBSOCKET_URL,
+};
+
+use self::schema::*;
+
+async fn connect(url: Url) -> Result<WebSocketStream<MaybeTlsStream<TcpStream>>, eyre::Error> {
+    let config = WebSocketConfig::default();
+
+    let (socket, _) = connect_async_with_config(url, Some(config), false).await?;
+
+    Ok(socket)
+}
+
+pub struct SevenTVWebsocketClient {
+    socket: WebSocketStream<MaybeTlsStream<TcpStream>>,
+    session_id: Option<String>,
+    instance_bundle: Arc<InstanceBundle>,
+    reconnect_url: Url,
+}
+
+impl SevenTVWebsocketClient {
+    pub async fn new(instance_bundle: Arc<InstanceBundle>) -> Result<Self, eyre::Error> {
+        let reconnect_url = Url::parse(SEVENTV_WEBSOCKET_URL).unwrap();
+
+        Ok(Self {
+            instance_bundle,
+            socket: connect(reconnect_url.clone()).await?,
+            session_id: None,
+            reconnect_url,
+        })
+    }
+
+    pub async fn run(&mut self) -> Result<(), eyre::Error> {
+        loop {
+            self.process_awaiting_channels().await?;
+            tokio::select!(
+                Some(msg) = futures::StreamExt::next(&mut self.socket) => {
+                    let msg = match msg {
+                        Err(tungstenite::Error::Protocol(tungstenite::error::ProtocolError::ResetWithoutClosingHandshake)) => {
+                            self.socket = connect(self.reconnect_url.clone()).await.context("when reestablishing connection")?;
+                            continue
+                        }
+                        _ => msg.context("when getting message")?,
+                    };
+                    self.process_message(msg).await?
+                }
+            )
+        }
+    }
+
+    pub async fn process_message(&mut self, msg: Message) -> Result<(), eyre::Report> {
+        match msg {
+            Message::Text(s) => {
+                println!("received 7tv text message: {s}");
+
+                if let Ok(e) = serde_json::from_str::<Payload<Value>>(s.as_str()) {
+                    let d = e.d.to_string();
+                    let d = d.as_str();
+
+                    match e.op {
+                        // Dispatch
+                        0 => {
+                            if let Ok(d) = serde_json::from_str::<Dispatch>(d) {
+                                self.handle_dispatch(d).await?;
+                            }
+                        }
+                        // Hello
+                        1 => {
+                            if let Ok(d) = serde_json::from_str::<Hello>(d) {
+                                if self.session_id.is_none() {
+                                    self.session_id = Some(d.session_id);
+                                    self.process_awaiting_channels().await?;
+                                } else {
+                                    self.resume_session().await?;
+                                }
+                            }
+                        }
+                        // Heartbeat
+                        2 => println!("[7TV EventAPI] Heartbeat!"),
+                        // Reconnect
+                        4 => println!("[7TV EventAPI] Reconnect!"),
+                        // Error
+                        6 => println!("[7TV EventAPI] Error: {}", e.d),
+                        // End of Stream
+                        7 => {
+                            println!("[7TV EventAPI] The host has closed the connection! Reason: ")
+                        }
+                        _ => println!(
+                            "[7TV EventAPI] Unhandled opcode: {}. Payload: {}",
+                            e.op, e.d
+                        ),
+                    }
+                }
+            }
+            Message::Close(e) => {
+                let e = if e.is_some() {
+                    let unwrapped_e = e.unwrap();
+
+                    format!("{} {}", unwrapped_e.code, unwrapped_e.reason)
+                } else {
+                    "No reason".to_string()
+                };
+
+                println!("The connection to 7TV EventAPI was refused: {e}");
+            }
+            _ => {}
+        }
+
+        Ok(())
+    }
+
+    async fn handle_dispatch(&mut self, body: Dispatch) -> Result<(), eyre::Error> {
+        if body.event_type != "emote_set.update".to_string() {
+            println!("[7TV EventAPI] Unhandled body type: {}", body.event_type);
+            return Ok(());
+        }
+
+        let api = self.instance_bundle.seventv_api_client.clone();
+
+        if let Some(emote_set) = api.get_emote_set(body.body.id).await {
+            if let Some(emote_set_owner) = emote_set.owner {
+                if let Some(emote_set_owner) = api.get_user(emote_set_owner.id).await {
+                    if let Some(owner) = emote_set_owner
+                        .connections
+                        .iter()
+                        .find(|x| x.platform.eq("TWITCH"))
+                    {
+                        let actor_name = if let Some(connection) = body
+                            .body
+                            .actor
+                            .connections
+                            .iter()
+                            .find(|x| x.platform.eq("TWITCH"))
+                        {
+                            connection.username.clone()
+                        } else {
+                            body.body.actor.username
+                        };
+
+                        let mut messages: Vec<String> = Vec::new();
+
+                        if let Some(pushed) = body.body.pushed {
+                            for e in pushed {
+                                let emote_name = e.value.unwrap().name;
+
+                                messages.push(
+                                    self.instance_bundle
+                                        .localizator
+                                        .get_formatted_text(
+                                            "english",
+                                            LineId::EmotesPushed,
+                                            vec![
+                                                self.instance_bundle
+                                                    .localizator
+                                                    .get_literal_text(
+                                                        "english",
+                                                        LineId::Provider7TV,
+                                                    )
+                                                    .unwrap(),
+                                                actor_name.clone(),
+                                                emote_name,
+                                            ],
+                                        )
+                                        .unwrap(),
+                                );
+                            }
+                        }
+
+                        if let Some(pulled) = body.body.pulled {
+                            for e in pulled {
+                                let emote_name = e.old_value.unwrap().name;
+
+                                messages.push(
+                                    self.instance_bundle
+                                        .localizator
+                                        .get_formatted_text(
+                                            "english",
+                                            LineId::EmotesPulled,
+                                            vec![
+                                                self.instance_bundle
+                                                    .localizator
+                                                    .get_literal_text(
+                                                        "english",
+                                                        LineId::Provider7TV,
+                                                    )
+                                                    .unwrap(),
+                                                actor_name.clone(),
+                                                emote_name,
+                                            ],
+                                        )
+                                        .unwrap(),
+                                )
+                            }
+                        }
+
+                        if let Some(updated) = body.body.updated {
+                            for e in updated {
+                                let emote_name = e.value.unwrap().name;
+                                let old_emote_name = e.old_value.unwrap().name;
+
+                                messages.push(
+                                    self.instance_bundle
+                                        .localizator
+                                        .get_formatted_text(
+                                            "english",
+                                            LineId::EmotesUpdated,
+                                            vec![
+                                                self.instance_bundle
+                                                    .localizator
+                                                    .get_literal_text(
+                                                        "english",
+                                                        LineId::Provider7TV,
+                                                    )
+                                                    .unwrap(),
+                                                actor_name.clone(),
+                                                old_emote_name,
+                                                emote_name,
+                                            ],
+                                        )
+                                        .unwrap(),
+                                )
+                            }
+                        }
+
+                        for m in messages {
+                            self.instance_bundle
+                                .twitch_irc_client
+                                .say(owner.username.clone(), m)
+                                .await
+                                .expect("Failed to send a message");
+                        }
+                    }
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    async fn process_awaiting_channels(&mut self) -> Result<(), eyre::Error> {
+        let mut data = self.instance_bundle.seventv_eventapi_data.lock().await;
+
+        let ids = data
+            .awaiting_channel_ids
+            .iter()
+            .filter(|x| !data.listening_channel_ids.iter().any(|y| y.eq(*x)))
+            .cloned()
+            .collect::<Vec<UserId>>();
+
+        data.awaiting_channel_ids = ids.clone();
+
+        drop(data);
+
+        if !ids.is_empty() {
+            for id in ids {
+                self.listen_channel(id).await?;
+            }
+        }
+
+        Ok(())
+    }
+
+    async fn listen_channel(&mut self, channel_id: UserId) -> Result<(), eyre::Error> {
+        if let Some(user) = self
+            .instance_bundle
+            .seventv_api_client
+            .get_user_by_twitch_id(channel_id.clone().take())
+            .await
+        {
+            let emote_set_id = user.emote_set.id;
+
+            let data = Payload {
+                op: 35,
+                d: Subscribe {
+                    event_type: "emote_set.update".to_string(),
+                    condition: SubscribeCondition {
+                        object_id: emote_set_id,
+                    },
+                },
+            };
+
+            println!("{:?}", serde_json::to_string(&data).unwrap());
+            self.socket
+                .send(Message::Text(serde_json::to_string(&data).unwrap()))
+                .await?;
+
+            println!("Listening 7TV events for {}'s emote set", user.username);
+
+            let mut data = self.instance_bundle.seventv_eventapi_data.lock().await;
+            data.listening_channel_ids.push(channel_id);
+        }
+
+        Ok(())
+    }
+
+    async fn resume_session(&mut self) -> Result<(), eyre::Error> {
+        if self.session_id.is_none() {
+            println!("[7TV EventAPI] Failed to resume a session because session_id is none!");
+
+            return Ok(());
+        }
+
+        let data = Payload {
+            op: 34,
+            d: Resume {
+                session_id: self.session_id.clone().unwrap(),
+            },
+        };
+
+        self.socket
+            .send(Message::Text(serde_json::to_string(&data)?))
+            .await?;
+
+        Ok(())
+    }
+}
