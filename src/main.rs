@@ -34,6 +34,7 @@ mod message;
 mod models;
 mod modules;
 mod schema;
+mod seventv;
 mod shared_variables;
 mod utils;
 mod websockets;
