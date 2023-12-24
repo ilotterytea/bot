@@ -67,6 +67,19 @@ impl SevenTVWebsocketClient {
         }
     }
 
+    async fn flip_channels(&self) {
+        let mut data = self.instance_bundle.seventv_eventapi_data.lock().await;
+
+        let mut set_a: HashSet<UserId> =
+            HashSet::from_iter(data.awaiting_channel_ids.iter().cloned());
+        let set_b: HashSet<UserId> = HashSet::from_iter(data.listening_channel_ids.iter().cloned());
+
+        set_a.extend(set_b);
+
+        data.awaiting_channel_ids = Vec::from_iter(set_a.into_iter());
+        data.listening_channel_ids.clear();
+    }
+
     pub async fn process_message(&mut self, msg: Message) -> Result<(), eyre::Report> {
         match msg {
             Message::Text(s) => {
@@ -97,7 +110,13 @@ impl SevenTVWebsocketClient {
                         // Heartbeat
                         2 => println!("[7TV EventAPI] Heartbeat!"),
                         // Reconnect
-                        4 => println!("[7TV EventAPI] Reconnect!"),
+                        4 => {
+                            println!("[7TV EventAPI] Reconnect!");
+
+                            self.flip_channels().await;
+                            self.socket.close(None).await?;
+                            self.socket = connect(self.reconnect_url.clone()).await?;
+                        }
                         // Error
                         6 => println!("[7TV EventAPI] Error: {}", e.d),
                         // End of Stream
