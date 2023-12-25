@@ -29,7 +29,7 @@ pub async fn handle_chat_message(
 ) {
     let conn = &mut establish_connection();
 
-    if let Some(request) = Request::try_from(&message, "~", command_loader, conn) {
+    if let Some(request) = Request::try_from(&message, command_loader, conn) {
         let response = command_loader
             .execute_command(&instance_bundle, request.clone())
             .await;
