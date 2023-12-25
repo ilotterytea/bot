@@ -46,6 +46,9 @@ pub enum LineId {
     NotifySubs,
     NotifyNoSubs,
 
+    SettingsPrefix,
+    SettingsLocale,
+
     EventAlreadyExistsError,
     TimerAlreadyExistsError,
     CustomCommandAlreadyExistsError,
@@ -92,6 +95,8 @@ impl LineId {
             "notify.already_unsub" => Some(Self::NotifyAlreadyUnsub),
             "notify.subs" => Some(Self::NotifySubs),
             "notify.no_subs" => Some(Self::NotifyNoSubs),
+            "settings.prefix" => Some(Self::SettingsPrefix),
+            "settings.locale" => Some(Self::SettingsLocale),
             _ => None,
         }
     }
