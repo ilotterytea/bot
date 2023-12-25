@@ -5,5 +5,6 @@ pub mod join;
 pub mod massping;
 pub mod notify;
 pub mod ping;
+pub mod settings;
 pub mod spam;
 pub mod timer;
