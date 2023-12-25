@@ -1,7 +1,7 @@
 use include_dir::{include_dir, Dir};
 use std::{collections::HashMap, str::from_utf8};
 
-#[derive(PartialEq, Eq, Hash, Debug)]
+#[derive(PartialEq, Eq, Hash, Debug, Clone)]
 pub enum LineId {
     EmotesPushed,
     EmotesUpdated,
