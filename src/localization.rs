@@ -1,6 +1,8 @@
 use include_dir::{include_dir, Dir};
 use std::{collections::HashMap, str::from_utf8};
 
+use crate::commands::request::Request;
+
 #[derive(PartialEq, Eq, Hash, Debug, Clone)]
 pub enum LineId {
     EmotesPushed,
@@ -141,29 +143,134 @@ impl Localizator {
         None
     }
 
-    pub fn get_formatted_text(
+    pub fn get_formatted_text<P>(
         &self,
         locale_id: &str,
         line_id: LineId,
-        parameters: Vec<String>,
-    ) -> Option<String> {
-        if let Some(line) = self.get_literal_text(locale_id, line_id) {
-            let new_line =
-                line.split("{}")
-                    .enumerate()
-                    .fold(String::new(), |mut acc: String, (i, part)| {
-                        acc.push_str(part);
+        parameters: Vec<P>,
+    ) -> Option<String>
+    where
+        P: ToString,
+    {
+        Some(self.format_text_internal(locale_id, line_id, parameters, None))
+    }
 
-                        if i < parameters.len() {
-                            acc.push_str(parameters.get(i).unwrap());
-                        }
+    pub fn formatted_text_by_request<P>(
+        &self,
+        request: &Request,
+        line_id: LineId,
+        parameters: Vec<P>,
+    ) -> String
+    where
+        P: ToString,
+    {
+        self.format_text_internal(
+            request.channel_preference.language.as_str(),
+            line_id,
+            parameters,
+            Some(request),
+        )
+    }
 
-                        acc
-                    });
+    fn format_text_internal<P>(
+        &self,
+        locale_id: &str,
+        line_id: LineId,
+        parameters: Vec<P>,
+        request: Option<&Request>,
+    ) -> String
+    where
+        P: ToString,
+    {
+        if let Some(line) = self.get_literal_text(locale_id, line_id.clone()) {
+            let placeholders = self.parse_placeholders(&line);
+            let parameters = parameters
+                .iter()
+                .map(|x| x.to_string())
+                .collect::<Vec<String>>();
 
-            return Some(new_line);
+            return self.replace_placeholders(line, placeholders, parameters, request);
         }
-        None
+
+        format!(
+            "🚨 No localization line for {:?} in {}!",
+            line_id, locale_id
+        )
+    }
+
+    fn parse_placeholders(&self, line: &String) -> Vec<LinePlaceholder> {
+        let mut reading_placeholder = false;
+        let mut placeholder_buffer = String::new();
+
+        let mut placeholders: Vec<LinePlaceholder> = Vec::new();
+
+        for c in line.chars() {
+            match c {
+                '{' => reading_placeholder = true,
+                '}' => {
+                    reading_placeholder = false;
+
+                    if let Some(placeholder) = LinePlaceholder::from_string(&placeholder_buffer) {
+                        placeholders.push(placeholder);
+                    }
+
+                    placeholder_buffer.clear();
+                }
+                _ => {
+                    if reading_placeholder {
+                        placeholder_buffer.push(c);
+                    }
+                }
+            }
+        }
+
+        placeholders
+    }
+
+    fn replace_placeholders(
+        &self,
+        mut line: String,
+        placeholders: Vec<LinePlaceholder>,
+        parameters: Vec<String>,
+        request: Option<&Request>,
+    ) -> String {
+        for placeholder in placeholders {
+            let string = format!("{{{}}}", placeholder.to_string());
+
+            let replacement = match (request, placeholder) {
+                (_, LinePlaceholder::Argument(v)) => {
+                    if let Some(value) = parameters.get(v as usize) {
+                        value.clone()
+                    } else {
+                        string.clone()
+                    }
+                }
+                (Some(r), LinePlaceholder::SenderAliasName) => r.sender.alias_name.clone(),
+                (Some(r), LinePlaceholder::SenderAliasId) => r.sender.alias_id.to_string(),
+                (Some(r), LinePlaceholder::TargetAliasName) => r.channel.alias_name.clone(),
+                (Some(r), LinePlaceholder::TargetAliasId) => r.channel.alias_id.to_string(),
+                (Some(r), LinePlaceholder::RequestMessage) => {
+                    if let Some(message) = r.message.clone() {
+                        message
+                    } else {
+                        "".to_string()
+                    }
+                }
+                (Some(r), LinePlaceholder::RequestSubcommandId) => {
+                    if let Some(subcommand_id) = r.subcommand_id.clone() {
+                        subcommand_id
+                    } else {
+                        "".to_string()
+                    }
+                }
+                (Some(r), LinePlaceholder::RequestCommand) => r.command_id.clone(),
+                _ => string.clone(),
+            };
+
+            line = line.replace(string.as_str(), replacement.as_str());
+        }
+
+        line
     }
 
     pub fn localization_names(&self) -> Vec<&String> {
