@@ -170,3 +170,49 @@ impl Localizator {
         self.localizations.keys().collect::<Vec<&String>>()
     }
 }
+
+enum LinePlaceholder {
+    SenderAliasName,
+    SenderAliasId,
+
+    TargetAliasName,
+    TargetAliasId,
+
+    RequestMessage,
+    RequestSubcommandId,
+    RequestCommand,
+
+    Argument(u8),
+}
+
+impl LinePlaceholder {
+    pub fn from_string(value: &String) -> Option<Self> {
+        if let Ok(value) = value.parse::<u8>() {
+            return Some(Self::Argument(value));
+        }
+
+        match value.as_str() {
+            "sender.alias_name" => Some(Self::SenderAliasName),
+            "sender.alias_id" => Some(Self::SenderAliasId),
+            "target.alias_name" => Some(Self::TargetAliasName),
+            "target.alias_id" => Some(Self::TargetAliasId),
+            "request.message" => Some(Self::RequestMessage),
+            "request.subcommand_id" => Some(Self::RequestSubcommandId),
+            "request.command" => Some(Self::RequestCommand),
+            _ => None,
+        }
+    }
+
+    pub fn to_string(&self) -> String {
+        match self {
+            Self::SenderAliasName => "sender.alias_name".to_string(),
+            Self::SenderAliasId => "sender.alias_id".to_string(),
+            Self::TargetAliasName => "target.alias_name".to_string(),
+            Self::TargetAliasId => "target.alias_id".to_string(),
+            Self::RequestMessage => "request.message".to_string(),
+            Self::RequestSubcommandId => "request.subcommand_id".to_string(),
+            Self::RequestCommand => "request.command".to_string(),
+            Self::Argument(v) => v.to_string(),
+        }
+    }
+}
