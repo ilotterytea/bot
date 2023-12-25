@@ -5,7 +5,7 @@ use twitch_irc::message::PrivmsgMessage;
 use crate::{
     models::diesel::{Channel, ChannelPreference, NewChannel, NewChannelPreference, NewUser, User},
     schema::{channel_preferences::dsl as chp, channels::dsl as ch, users::dsl as us},
-    shared_variables::DEFAULT_LANGUAGE,
+    shared_variables::{DEFAULT_LANGUAGE, DEFAULT_PREFIX},
 };
 
 use super::CommandLoader;
@@ -24,7 +24,6 @@ pub struct Request {
 impl Request {
     pub fn try_from(
         message: &PrivmsgMessage,
-        prefix: &str,
         command_loader: &CommandLoader,
         conn: &mut PgConnection,
     ) -> Option<Request> {
@@ -52,7 +51,7 @@ impl Request {
                 insert_into(chp::channel_preferences)
                     .values(vec![NewChannelPreference {
                         channel_id: channel.id,
-                        prefix: prefix.to_string(),
+                        prefix: DEFAULT_PREFIX.to_string(),
                         language: DEFAULT_LANGUAGE.to_string(),
                     }])
                     .execute(conn)
@@ -80,6 +79,8 @@ impl Request {
                     .first::<User>(conn)
                     .expect("Failed to get a user after creating it")
             });
+
+        let prefix = channel_preference.prefix.as_str();
 
         if !message.message_text.starts_with(prefix) {
             return None;
