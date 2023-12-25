@@ -165,4 +165,8 @@ impl Localizator {
         }
         None
     }
+
+    pub fn localization_names(&self) -> Vec<&String> {
+        self.localizations.keys().collect::<Vec<&String>>()
+    }
 }
