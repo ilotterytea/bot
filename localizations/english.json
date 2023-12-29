@@ -1,4 +1,6 @@
 {
+  "misc.ascending": "ascending",
+  "misc.descending": "descending",
   "provider.7tv": "(7TV)",
   "emotes.update": "{} {} updated the emote name from {} to {}",
   "emotes.push": "{} {} added the {} emote",
@@ -41,5 +43,7 @@
   "settings.locale": "{}: Successfully set the chat language to English!",
   "settings.prefix": "{}: Successfully set the chat prefix to \"{}\"!",
   "emote_count.usage": "{sender.alias_name}: {0} Emote {1} has been used {2} times",
-  "emote_count.not_found": "{sender.alias_name}: {0} Emote {1} not found in the database"
+  "emote_count.not_found": "{sender.alias_name}: {0} Emote {1} not found in the database",
+  "emote_top.response": "{sender.alias_name}: {0} {1}'s top {2} emotes ({3}): {4}",
+  "emote_top.no_emotes": "{sender.alias_name}: {0} No emotes have been used in {1}'s chat."
 }

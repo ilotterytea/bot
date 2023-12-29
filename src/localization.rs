@@ -5,6 +5,9 @@ use crate::commands::request::Request;
 
 #[derive(PartialEq, Eq, Hash, Debug, Clone)]
 pub enum LineId {
+    MiscDescending,
+    MiscAscending,
+
     EmotesPushed,
     EmotesUpdated,
     EmotesPulled,
@@ -54,6 +57,9 @@ pub enum LineId {
     EmoteCountUsage,
     EmoteCountNotFound,
 
+    EmoteTopResponse,
+    EmoteTopNoEmotes,
+
     EventAlreadyExistsError,
     TimerAlreadyExistsError,
     CustomCommandAlreadyExistsError,
@@ -62,6 +68,8 @@ pub enum LineId {
 impl LineId {
     pub fn from_string(value: String) -> Option<Self> {
         match value.as_str() {
+            "misc.descending" => Some(Self::MiscDescending),
+            "misc.ascending" => Some(Self::MiscAscending),
             "provider.7tv" => Some(Self::Provider7TV),
             "emotes.update" => Some(Self::EmotesUpdated),
             "emotes.pull" => Some(Self::EmotesPulled),
@@ -104,6 +112,8 @@ impl LineId {
             "settings.locale" => Some(Self::SettingsLocale),
             "emote_count.usage" => Some(Self::EmoteCountUsage),
             "emote_count.not_found" => Some(Self::EmoteCountNotFound),
+            "emote_top.response" => Some(Self::EmoteTopResponse),
+            "emote_top.no_emotes" => Some(Self::EmoteTopNoEmotes),
             _ => None,
         }
     }
