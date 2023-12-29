@@ -17,5 +17,7 @@ pub enum ResponseError {
     SomethingWentWrong,
 
     WrongArguments,
+    ExternalAPIError(u32, Option<String>),
+
     Custom(LineId),
 }
