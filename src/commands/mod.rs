@@ -3,8 +3,9 @@ use crate::{
     message::ParsedPrivmsgMessage,
     models::diesel::{Channel, ChannelPreference, User},
     modules::{
-        custom_command::CustomCommandsCommand, ecount::EmoteCountCommand, etop::EmoteTopCommand,
-        event::EventCommand, holiday::HolidayCommand, join::JoinCommand, massping::MasspingCommand,
+        custom_command::CustomCommandsCommand, ecount::EmoteCountCommand,
+        esim::EmoteSimilarityCommand, etop::EmoteTopCommand, event::EventCommand,
+        holiday::HolidayCommand, join::JoinCommand, massping::MasspingCommand,
         notify::NotifyCommand, ping::PingCommand, settings::SettingsCommand, spam::SpamCommand,
         timer::TimerCommand,
     },
@@ -63,6 +64,7 @@ impl CommandLoader {
                 Box::new(SettingsCommand),
                 Box::new(EmoteCountCommand),
                 Box::new(EmoteTopCommand),
+                Box::new(EmoteSimilarityCommand),
             ],
         }
     }
