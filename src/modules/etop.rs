@@ -1,0 +1,216 @@
+use async_trait::async_trait;
+use eyre::Result;
+use twitch_api::types::NicknameRef;
+
+use crate::{
+    commands::{
+        request::Request,
+        response::{Response, ResponseError},
+        Command,
+    },
+    instance_bundle::InstanceBundle,
+    localization::LineId,
+    models::stats::{ChannelEmote, ChannelEmoteUsage, Response as StatsResponse},
+    shared_variables::STATS_API_V1_URL,
+};
+
+pub struct EmoteTopCommand;
+
+#[async_trait]
+impl Command for EmoteTopCommand {
+    fn get_name(&self) -> String {
+        "etop".to_string()
+    }
+
+    fn get_subcommands(&self) -> Vec<String> {
+        vec!["desc".to_string(), "asc".to_string()]
+    }
+
+    async fn execute(
+        &self,
+        instance_bundle: &InstanceBundle,
+        request: Request,
+    ) -> Result<Response, ResponseError> {
+        let subcommand_id = match request.subcommand_id.clone() {
+            Some(v) => v,
+            None => "desc".to_string(),
+        };
+
+        let message = request.message.clone().unwrap_or_default();
+        let message_split = message.split_ascii_whitespace().collect::<Vec<&str>>();
+
+        let mut amount: usize = 10;
+
+        let origin_name = match message_split.first() {
+            Some(v) => {
+                let v = if let Ok(x) = v.to_string().parse::<usize>() {
+                    amount = x;
+                    request.channel.alias_name.clone()
+                } else {
+                    v.to_string()
+                };
+
+                v
+            }
+            None => request.channel.alias_name.clone(),
+        };
+
+        match message_split.get(1) {
+            Some(v) => {
+                if let Ok(x) = v.to_string().parse::<usize>() {
+                    amount = x;
+                }
+            }
+            None => {}
+        }
+
+        if let Ok(Some(user)) = instance_bundle
+            .twitch_api_client
+            .get_user_from_login(
+                NicknameRef::from_str(origin_name.as_str()),
+                &*instance_bundle.twitch_api_token,
+            )
+            .await
+        {
+            let channel_id = user.id.take();
+
+            if let Some(response) = self.fetch_channel_emotes(channel_id.clone()).await {
+                if response.status_code != 200 {
+                    return Err(ResponseError::ExternalAPIError(
+                        response.status_code,
+                        response.message,
+                    ));
+                }
+
+                let emotes = response.data.unwrap_or_default();
+
+                if let Some(response) = self.fetch_channel_emote_usages(channel_id).await {
+                    if response.status_code != 200 {
+                        return Err(ResponseError::ExternalAPIError(
+                            response.status_code,
+                            response.message,
+                        ));
+                    }
+
+                    let mut emote_usages = response.data.unwrap_or_default();
+
+                    if subcommand_id.eq("asc") {
+                        emote_usages.sort();
+                    } else {
+                        emote_usages.sort_by(|a, b| b.usage_count.cmp(&a.usage_count));
+                    }
+
+                    if amount > 50 {
+                        amount = 50;
+                    }
+
+                    if amount > emote_usages.len() {
+                        amount = emote_usages.len()
+                    }
+
+                    emote_usages.drain(amount..);
+
+                    let mut message_parts: Vec<String> = Vec::new();
+
+                    for usage in &emote_usages {
+                        if let Some(emote) = emotes.iter().find(|x| x.emote_id.eq(&usage.emote_id))
+                        {
+                            message_parts.push(format!("{} ({})", emote.name, usage.usage_count));
+                        }
+                    }
+
+                    if message_parts.is_empty() {
+                        return Ok(Response::Single(
+                            instance_bundle.localizator.formatted_text_by_request(
+                                &request,
+                                LineId::EmoteTopNoEmotes,
+                                vec![
+                                    instance_bundle
+                                        .localizator
+                                        .get_literal_text(
+                                            request.channel_preference.language.as_str(),
+                                            LineId::Provider7TV,
+                                        )
+                                        .unwrap(),
+                                    origin_name,
+                                ],
+                            ),
+                        ));
+                    }
+
+                    return Ok(Response::Single(
+                        instance_bundle.localizator.formatted_text_by_request(
+                            &request,
+                            LineId::EmoteTopResponse,
+                            vec![
+                                instance_bundle
+                                    .localizator
+                                    .get_literal_text(
+                                        request.channel_preference.language.as_str(),
+                                        LineId::Provider7TV,
+                                    )
+                                    .unwrap(),
+                                origin_name,
+                                amount.to_string(),
+                                instance_bundle
+                                    .localizator
+                                    .get_literal_text(
+                                        request.channel_preference.language.as_str(),
+                                        if subcommand_id.eq("asc") {
+                                            LineId::MiscAscending
+                                        } else {
+                                            LineId::MiscDescending
+                                        },
+                                    )
+                                    .unwrap(),
+                                message_parts.join(", "),
+                            ],
+                        ),
+                    ));
+                }
+            }
+        }
+
+        Err(ResponseError::NoMessage)
+    }
+}
+
+impl EmoteTopCommand {
+    async fn fetch_channel_emotes(
+        &self,
+        channel_id: String,
+    ) -> Option<StatsResponse<Vec<ChannelEmote>>> {
+        let url = format!(
+            "{}/api/v1/channel/twitch/{}/emotes",
+            STATS_API_V1_URL, channel_id
+        );
+
+        if let Ok(response) = reqwest::get(url).await {
+            if let Ok(data) = response.json::<StatsResponse<Vec<ChannelEmote>>>().await {
+                return Some(data);
+            }
+        }
+
+        None
+    }
+    async fn fetch_channel_emote_usages(
+        &self,
+        channel_id: String,
+    ) -> Option<StatsResponse<Vec<ChannelEmoteUsage>>> {
+        let url = format!(
+            "{}/api/v1/channel/twitch/{}/emotes/usage",
+            STATS_API_V1_URL, channel_id
+        );
+
+        if let Ok(response) = reqwest::get(url).await {
+            if let Ok(data) = response
+                .json::<StatsResponse<Vec<ChannelEmoteUsage>>>()
+                .await
+            {
+                return Some(data);
+            }
+        }
+
+        None
+    }
+}

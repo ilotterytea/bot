@@ -1,4 +1,6 @@
 {
+  "misc.ascending": "по возрастанию",
+  "misc.descending": "по убыванию",
   "provider.7tv": "(7TV)",
   "emotes.update": "{} {} переименовал эмоут {} на {}",
   "emotes.push": "{} {} добавил эмоут {}",
@@ -41,5 +43,7 @@
   "settings.locale": "{}: Успешно установил язык чата на русский!",
   "settings.prefix": "{}: Успешно установил префикс чата на \"{}\"!",
   "emote_count.usage": "{sender.alias_name}: {0} Эмоут {1} был использован {2} раз.",
-  "emote_count.not_found": "{sender.alias_name}: {0} Эмоут {1} не найден в базе данных."
+  "emote_count.not_found": "{sender.alias_name}: {0} Эмоут {1} не найден в базе данных.",
+  "emote_top.response": "{sender.alias_name}: {0} Топ {2} эмоутов канала {1} ({3}): {4}",
+  "emote_top.no_emotes": "{sender.alias_name}: {0} Никакой эмоут ещё не использовали в чате {1}."
 }
