@@ -1,4 +1,4 @@
-pub(super) mod schema;
+pub(crate) mod schema;
 
 use reqwest::Client;
 
