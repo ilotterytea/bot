@@ -39,5 +39,7 @@
   "notify.subs": "{}: Your subscriptions: {}",
   "notify.no_subs": "{}: You're not subscribed to any events.",
   "settings.locale": "{}: Successfully set the chat language to English!",
-  "settings.prefix": "{}: Successfully set the chat prefix to \"{}\"!"
+  "settings.prefix": "{}: Successfully set the chat prefix to \"{}\"!",
+  "emote_count.usage": "{sender.alias_name}: {0} Emote {1} has been used {2} times",
+  "emote_count.not_found": "{sender.alias_name}: {0} Emote {1} not found in the database"
 }

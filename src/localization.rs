@@ -51,6 +51,9 @@ pub enum LineId {
     SettingsPrefix,
     SettingsLocale,
 
+    EmoteCountUsage,
+    EmoteCountNotFound,
+
     EventAlreadyExistsError,
     TimerAlreadyExistsError,
     CustomCommandAlreadyExistsError,
@@ -99,6 +102,8 @@ impl LineId {
             "notify.no_subs" => Some(Self::NotifyNoSubs),
             "settings.prefix" => Some(Self::SettingsPrefix),
             "settings.locale" => Some(Self::SettingsLocale),
+            "emote_count.usage" => Some(Self::EmoteCountUsage),
+            "emote_count.not_found" => Some(Self::EmoteCountNotFound),
             _ => None,
         }
     }
