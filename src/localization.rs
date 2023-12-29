@@ -60,6 +60,9 @@ pub enum LineId {
     EmoteTopResponse,
     EmoteTopNoEmotes,
 
+    EmoteSimilaritySetSimilar,
+    EmoteSimilaritySetNotSimilar,
+
     EventAlreadyExistsError,
     TimerAlreadyExistsError,
     CustomCommandAlreadyExistsError,
@@ -114,6 +117,8 @@ impl LineId {
             "emote_count.not_found" => Some(Self::EmoteCountNotFound),
             "emote_top.response" => Some(Self::EmoteTopResponse),
             "emote_top.no_emotes" => Some(Self::EmoteTopNoEmotes),
+            "emote_similarity.set_similar" => Some(Self::EmoteSimilaritySetSimilar),
+            "emote_similarity.set_not_similar" => Some(Self::EmoteSimilaritySetNotSimilar),
             _ => None,
         }
     }
