@@ -1,4 +1,11 @@
 {
+  "argument.subcommand": "Подкоманда",
+  "argument.message": "Сообщение",
+  "argument.interval": "Интервал",
+  "argument.name": "Имя",
+  "argument.target": "Цель",
+  "argument.value": "Значение",
+  "argument.amount": "Количество",
   "misc.ascending": "по возрастанию",
   "misc.descending": "по убыванию",
   "provider.7tv": "(7TV)",

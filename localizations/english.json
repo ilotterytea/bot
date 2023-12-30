@@ -1,4 +1,11 @@
 {
+  "argument.subcommand": "Subcommand",
+  "argument.message": "Message",
+  "argument.interval": "Interval",
+  "argument.name": "Name",
+  "argument.target": "Target",
+  "argument.value": "Value",
+  "argument.amount": "Amount",
   "misc.ascending": "ascending",
   "misc.descending": "descending",
   "provider.7tv": "(7TV)",

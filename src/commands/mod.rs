@@ -1,5 +1,6 @@
 use crate::{
     instance_bundle::InstanceBundle,
+    localization::LineId,
     message::ParsedPrivmsgMessage,
     models::diesel::{Channel, ChannelPreference, User},
     modules::{
@@ -84,3 +85,29 @@ impl CommandLoader {
         Err(ResponseError::SomethingWentWrong)
     }
 }
+
+#[derive(Debug)]
+pub enum CommandArgument {
+    Subcommand,
+    Message,
+    Interval,
+    Name,
+    Target,
+    Value,
+    Amount,
+}
+
+impl CommandArgument {
+    pub fn to_line_id(&self) -> LineId {
+        match self {
+            Self::Subcommand => LineId::ArgumentSubcommand,
+            Self::Message => LineId::ArgumentMessage,
+            Self::Interval => LineId::ArgumentInterval,
+            Self::Name => LineId::ArgumentName,
+            Self::Target => LineId::ArgumentTarget,
+            Self::Value => LineId::ArgumentValue,
+            Self::Amount => LineId::ArgumentAmount,
+        }
+    }
+}
+
