@@ -56,7 +56,9 @@ pub async fn handle_chat_message(
                 }
             },
             Err(e) => {
-                println!("!!! nahhh: {:?}", e);
+                let response = e.formatted_message(&request, instance_bundle.localizator.clone());
+
+                instance_bundle.twitch_irc_client.say(message.channel_login.clone(), response).await.expect("Failed to send message");
             }
         }
     }
