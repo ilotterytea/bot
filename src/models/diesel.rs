@@ -214,7 +214,7 @@ pub struct NewEventSubscription {
     pub user_id: i32,
 }
 
-#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq, Clone)]
+#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq, Clone, Eq, PartialOrd, Ord)]
 #[ExistingTypePath = "crate::schema::sql_types::LevelOfRights"]
 pub enum LevelOfRights {
     Suspended,
