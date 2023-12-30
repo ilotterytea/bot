@@ -36,7 +36,7 @@ pub enum LineId {
     ErrorIncompatibleName,
     ErrorNamesakeCreation,
     ErrorExternalAPIError,
-    ErrorUserNotFound,
+    ErrorNotFound,
     ErrorInsufficientRights,
     ErrorSomethingWentWrong,
 
@@ -132,7 +132,7 @@ impl LineId {
             "error.incompatible_name" => Some(Self::ErrorIncompatibleName),
             "error.namesake_creation" => Some(Self::ErrorNamesakeCreation),
             "error.external_api_error" => Some(Self::ErrorExternalAPIError),
-            "error.user_not_found" => Some(Self::ErrorUserNotFound),
+            "error.not_found" => Some(Self::ErrorNotFound),
             "error.insufficient_rights" => Some(Self::ErrorInsufficientRights),
             "error.something_went_wrong" => Some(Self::ErrorSomethingWentWrong),
             "misc.descending" => Some(Self::MiscDescending),

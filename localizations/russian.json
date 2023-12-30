@@ -26,7 +26,7 @@
   "error.incompatible_name": "Несовместимое название ({0})",
   "error.namesake_creation": "Одноимённое название ({0})",
   "error.external_api_error": "Ошибка стороннего API ({0}{1})",
-  "error.user_not_found": "Пользователь не найден ({0})",
+  "error.not_found": "Не найден ({0})",
   "error.insufficient_rights": "Недостаточно прав для этой команды",
   "error.something_went_wrong": "Что-то произошло не так",
   "misc.ascending": "по возрастанию",
