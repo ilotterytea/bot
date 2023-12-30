@@ -25,7 +25,7 @@
   "error.incorrect_argument": "Incorrect argument ({0})",
   "error.incompatible_name": "Incompatible name ({0})",
   "error.namesake_creation": "Namesake creation ({0})",
-  "error.external_api_error": "External API error ({0}{1})",
+  "error.external_api_error": "External API error ({0} {1})",
   "error.not_found": "Not found ({0})",
   "error.insufficient_rights": "Insufficient rights for this command",
   "error.something_went_wrong": "Something went wrong",
