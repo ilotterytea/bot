@@ -2,7 +2,7 @@ use crate::{
     instance_bundle::InstanceBundle,
     localization::LineId,
     message::ParsedPrivmsgMessage,
-    models::diesel::{Channel, ChannelPreference, User},
+    models::diesel::{Channel, ChannelPreference, LevelOfRights, User},
     modules::{
         custom_command::CustomCommandsCommand, ecount::EmoteCountCommand,
         esim::EmoteSimilarityCommand, etop::EmoteTopCommand, event::EventCommand,
@@ -11,7 +11,8 @@ use crate::{
         timer::TimerCommand,
     },
     shared_variables::{
-        DEFAULT_COMMAND_DELAY_SEC, DEFAULT_COMMAND_OPTIONS, DEFAULT_COMMAND_SUBCOMMANDS,
+        DEFAULT_COMMAND_DELAY_SEC, DEFAULT_COMMAND_LEVEL_OF_RIGHTS, DEFAULT_COMMAND_OPTIONS,
+        DEFAULT_COMMAND_SUBCOMMANDS,
     },
 };
 use async_trait::async_trait;
@@ -37,6 +38,9 @@ pub trait Command {
     }
     fn get_subcommands(&self) -> Vec<String> {
         DEFAULT_COMMAND_SUBCOMMANDS
+    }
+    fn required_rights(&self) -> LevelOfRights {
+        DEFAULT_COMMAND_LEVEL_OF_RIGHTS
     }
     async fn execute(
         &self,

@@ -1,10 +1,17 @@
-use diesel::{insert_into, BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{
+    insert_into, update, BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl,
+};
 use substring::Substring;
 use twitch_irc::message::PrivmsgMessage;
 
 use crate::{
-    models::diesel::{Channel, ChannelPreference, NewChannel, NewChannelPreference, NewUser, User},
-    schema::{channel_preferences::dsl as chp, channels::dsl as ch, users::dsl as us},
+    models::diesel::{
+        Channel, ChannelPreference, LevelOfRights, NewChannel, NewChannelPreference, NewRight,
+        NewUser, Right, User,
+    },
+    schema::{
+        channel_preferences::dsl as chp, channels::dsl as ch, rights::dsl as ri, users::dsl as us,
+    },
     shared_variables::{DEFAULT_LANGUAGE, DEFAULT_PREFIX},
 };
 
@@ -19,6 +26,7 @@ pub struct Request {
     pub sender: User,
     pub channel: Channel,
     pub channel_preference: ChannelPreference,
+    pub rights: Right,
 }
 
 impl Request {
@@ -80,6 +88,43 @@ impl Request {
                     .expect("Failed to get a user after creating it")
             });
 
+        let mut badges_iter = message.badges.iter();
+
+        let level_of_rights = if sender.alias_id == channel.alias_id {
+            LevelOfRights::Broadcaster
+        } else if badges_iter.any(|x| x.name.eq("moderator")) {
+            LevelOfRights::Moderator
+        } else if badges_iter.any(|x| x.name.eq("vip")) {
+            LevelOfRights::Vip
+        } else if badges_iter.any(|x| x.name.eq("subscriber")) {
+            LevelOfRights::Subscriber
+        } else {
+            LevelOfRights::User
+        };
+
+        let mut rights = ri::rights
+            .filter(ri::user_id.eq(&sender.id))
+            .get_result::<Right>(conn)
+            .unwrap_or_else(|_| {
+                insert_into(ri::rights)
+                    .values([NewRight {
+                        user_id: sender.id,
+                        channel_id: channel.id,
+                        level: level_of_rights.clone(),
+                    }])
+                    .get_result::<Right>(conn)
+                    .expect("Failed to insert a new rights")
+            });
+
+        if rights.level != LevelOfRights::Suspended && rights.level != level_of_rights {
+            rights.level = level_of_rights.clone();
+
+            update(ri::rights.find(&rights.id))
+                .set(ri::level.eq(level_of_rights))
+                .execute(conn)
+                .expect("Failed to update rights");
+        }
+
         let prefix = channel_preference.prefix.as_str();
 
         if !message.message_text.starts_with(prefix) {
@@ -114,6 +159,10 @@ impl Request {
             .find(|x| x.get_name().eq(&command_id))
             .unwrap();
 
+        if command.required_rights() > rights.level {
+            return None;
+        }
+
         message_split.remove(0);
 
         let subcommand_id = if let Some(v) = message_split.get(0) {
@@ -140,6 +189,7 @@ impl Request {
             sender,
             channel,
             channel_preference,
+            rights,
         })
     }
 }
