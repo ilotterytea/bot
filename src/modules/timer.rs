@@ -52,7 +52,7 @@ impl Command for TimerCommand {
         };
 
         if request.message.is_none() {
-            return Err(ResponseError::NotEnoughArguments(CommandArgument::Message));
+            return Err(ResponseError::NotEnoughArguments(CommandArgument::Name));
         }
         let message = request.message.unwrap();
         let mut message_split = message.split(" ").collect::<Vec<&str>>();
@@ -212,6 +212,18 @@ impl Command for TimerCommand {
             }
 
             (Some(_), _, "new") => return Err(ResponseError::NamesakeCreation(name_id)),
+            (Some(_), 0, "message") => {
+                return Err(ResponseError::NotEnoughArguments(CommandArgument::Message))
+            }
+            (None, _, _) if subcommand_id.ne("new") => {
+                return Err(ResponseError::NotFound(name_id))
+            }
+            (_, 0, _) if subcommand_id.eq("interval") || subcommand_id.eq("new") => {
+                return Err(ResponseError::NotEnoughArguments(CommandArgument::Interval))
+            }
+            (None, 1, "new") => {
+                return Err(ResponseError::NotEnoughArguments(CommandArgument::Message))
+            }
 
             _ => return Err(ResponseError::SomethingWentWrong),
         };

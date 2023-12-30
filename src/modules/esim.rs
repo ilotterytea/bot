@@ -115,7 +115,11 @@ impl Command for EmoteSimilarityCommand {
                             ],
                         ),
                     ));
+                } else {
+                    return Err(ResponseError::NotFound(target_channel));
                 }
+            } else {
+                return Err(ResponseError::NotFound(origin_channel));
             }
         }
 

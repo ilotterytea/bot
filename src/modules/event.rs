@@ -48,7 +48,7 @@ impl Command for EventCommand {
         };
 
         if request.message.is_none() {
-            return Err(ResponseError::NotEnoughArguments(CommandArgument::Message));
+            return Err(ResponseError::NotEnoughArguments(CommandArgument::Target));
         }
 
         let message = request.message.unwrap();
@@ -92,7 +92,7 @@ impl Command for EventCommand {
         let name_and_type = format!("{}:{}", target_name, event_type.to_string());
 
         if target_id == -1 && event_type != EventType::Custom {
-            return Err(ResponseError::IncorrectArgument(name_and_type));
+            return Err(ResponseError::NotFound(target_name));
         }
 
         let conn = &mut establish_connection();
