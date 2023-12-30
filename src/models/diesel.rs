@@ -213,3 +213,33 @@ pub struct NewEventSubscription {
     pub event_id: i32,
     pub user_id: i32,
 }
+
+#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq, Clone)]
+#[ExistingTypePath = "crate::schema::sql_types::LevelOfRights"]
+pub enum LevelOfRights {
+    Suspended,
+    Subscriber,
+    User,
+    Vip,
+    Moderator,
+    Broadcaster,
+}
+
+#[derive(Queryable, Identifiable, Associations, Clone)]
+#[diesel(belongs_to(User, foreign_key = user_id))]
+#[diesel(belongs_to(Channel, foreign_key = channel_id))]
+pub struct Right {
+    pub id: i32,
+    pub user_id: i32,
+    pub channel_id: i32,
+    pub level: LevelOfRights,
+    pub is_fixed: bool,
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = rights)]
+pub struct NewRight {
+    pub user_id: i32,
+    pub channel_id: i32,
+    pub level: LevelOfRights,
+}
