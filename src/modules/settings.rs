@@ -6,7 +6,7 @@ use crate::{
     commands::{
         request::Request,
         response::{Response, ResponseError},
-        Command,
+        Command, CommandArgument,
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
@@ -33,11 +33,15 @@ impl Command for SettingsCommand {
     ) -> Result<Response, ResponseError> {
         let subcommand_id = match request.subcommand_id {
             Some(v) => v,
-            None => return Err(ResponseError::NoSubcommand),
+            None => {
+                return Err(ResponseError::NotEnoughArguments(
+                    CommandArgument::Subcommand,
+                ))
+            }
         };
 
         if request.message.is_none() {
-            return Err(ResponseError::NoMessage);
+            return Err(ResponseError::NotEnoughArguments(CommandArgument::Value));
         }
 
         let message = request.message.unwrap();
@@ -49,7 +53,7 @@ impl Command for SettingsCommand {
                 let locales = instance_bundle.localizator.localization_names();
 
                 if !locales.contains(&&message) {
-                    return Err(ResponseError::WrongArguments);
+                    return Err(ResponseError::NotFound(message));
                 }
 
                 request.channel_preference.language = message.clone();
@@ -83,7 +87,7 @@ impl Command for SettingsCommand {
                     )
                     .unwrap()
             }
-            _ => return Err(ResponseError::WrongArguments),
+            _ => return Err(ResponseError::SomethingWentWrong),
         };
 
         Ok(Response::Single(response))

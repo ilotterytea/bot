@@ -12,7 +12,7 @@ use crate::{
     commands::{
         request::Request,
         response::{Response, ResponseError},
-        Command,
+        Command, CommandArgument,
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
@@ -40,11 +40,15 @@ impl Command for EventCommand {
     ) -> Result<Response, ResponseError> {
         let subcommand_id = match request.subcommand_id {
             Some(v) => v,
-            None => return Err(ResponseError::NoSubcommand),
+            None => {
+                return Err(ResponseError::NotEnoughArguments(
+                    CommandArgument::Subcommand,
+                ))
+            }
         };
 
         if request.message.is_none() {
-            return Err(ResponseError::NoMessage);
+            return Err(ResponseError::NotEnoughArguments(CommandArgument::Message));
         }
 
         let message = request.message.unwrap();
@@ -67,10 +71,10 @@ impl Command for EventCommand {
                             EventType::from_str(event_type).unwrap(),
                         )
                     }
-                    _ => return Err(ResponseError::WrongArguments),
+                    _ => return Err(ResponseError::IncorrectArgument(v)),
                 }
             }
-            None => return Err(ResponseError::NotEnoughArguments),
+            None => return Err(ResponseError::NotEnoughArguments(CommandArgument::Target)),
         };
 
         let target_id = match instance_bundle
@@ -85,8 +89,10 @@ impl Command for EventCommand {
             _ => -1,
         };
 
+        let name_and_type = format!("{}:{}", target_name, event_type.to_string());
+
         if target_id == -1 && event_type != EventType::Custom {
-            return Err(ResponseError::WrongArguments);
+            return Err(ResponseError::IncorrectArgument(name_and_type));
         }
 
         let conn = &mut establish_connection();
@@ -127,22 +133,24 @@ impl Command for EventCommand {
                     let broadcaster_id = request.channel.alias_id.to_string();
                     let moderator_id = instance_bundle.twitch_api_token.user_id.clone().take();
 
-                    let chatters = instance_bundle
+                    if let Ok(chatters) = instance_bundle
                         .twitch_api_client
                         .req_get(
                             GetChattersRequest::new(broadcaster_id.as_str(), moderator_id.as_str()),
                             &*instance_bundle.twitch_api_token,
                         )
                         .await
-                        .expect("Failed to get chatters");
+                    {
+                        let chatters = chatters
+                            .data
+                            .iter()
+                            .map(|x| format!("@{}", x.user_login))
+                            .collect::<HashSet<String>>();
 
-                    let chatters = chatters
-                        .data
-                        .iter()
-                        .map(|x| format!("@{}", x.user_login))
-                        .collect::<HashSet<String>>();
-
-                    subs.extend(chatters);
+                        subs.extend(chatters);
+                    } else {
+                        return Err(ResponseError::InsufficientRights);
+                    }
                 }
 
                 if subs.is_empty() {
@@ -166,12 +174,12 @@ impl Command for EventCommand {
                 Response::Multiple(formatted_subs)
             }
 
-            ("on", Some(_)) => return Err(ResponseError::Custom(LineId::EventAlreadyExistsError)),
+            ("on", Some(_)) => return Err(ResponseError::NamesakeCreation(name_and_type)),
             ("on", None) => {
                 let message = message_split.join(" ");
 
                 if message.is_empty() {
-                    return Err(ResponseError::NoMessage);
+                    return Err(ResponseError::NotEnoughArguments(CommandArgument::Message));
                 }
 
                 insert_into(ev::events)
@@ -243,8 +251,9 @@ impl Command for EventCommand {
                         .unwrap(),
                 )
             }
+            ("off", None) => return Err(ResponseError::NotFound(name_and_type)),
             _ => {
-                return Err(ResponseError::WrongArguments);
+                return Err(ResponseError::SomethingWentWrong);
             }
         };
 

@@ -8,7 +8,7 @@ use crate::{
     commands::{
         request::Request,
         response::{Response, ResponseError},
-        Command,
+        Command, CommandArgument,
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
@@ -42,11 +42,15 @@ impl Command for CustomCommandsCommand {
     ) -> Result<Response, ResponseError> {
         let subcommand_id = match request.subcommand_id {
             Some(v) => v,
-            None => return Err(ResponseError::NoSubcommand),
+            None => {
+                return Err(ResponseError::NotEnoughArguments(
+                    CommandArgument::Subcommand,
+                ))
+            }
         };
 
         if request.message.is_none() {
-            return Err(ResponseError::NoMessage);
+            return Err(ResponseError::NotEnoughArguments(CommandArgument::Message));
         }
         let message = request.message.unwrap();
         let mut message_split = message.split(" ").collect::<Vec<&str>>();
@@ -58,7 +62,7 @@ impl Command for CustomCommandsCommand {
                 message_split.remove(0);
                 v
             }
-            None => return Err(ResponseError::NotEnoughArguments),
+            None => return Err(ResponseError::NotEnoughArguments(CommandArgument::Name)),
         };
 
         let conn = &mut establish_connection();
@@ -177,13 +181,9 @@ impl Command for CustomCommandsCommand {
                     .unwrap()
             }
 
-            (Some(_), _, "new") => {
-                return Err(ResponseError::Custom(
-                    LineId::CustomCommandAlreadyExistsError,
-                ))
-            }
+            (Some(_), _, "new") => return Err(ResponseError::NamesakeCreation(name_id)),
 
-            _ => return Err(ResponseError::WrongArguments),
+            _ => return Err(ResponseError::SomethingWentWrong),
         };
 
         Ok(Response::Single(response))

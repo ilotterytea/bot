@@ -8,7 +8,7 @@ use crate::{
     commands::{
         request::Request,
         response::{Response, ResponseError},
-        Command,
+        Command, CommandArgument,
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
@@ -119,7 +119,7 @@ impl Command for EmoteSimilarityCommand {
             }
         }
 
-        Err(ResponseError::NoMessage)
+        Err(ResponseError::NotEnoughArguments(CommandArgument::Target))
     }
 }
 
