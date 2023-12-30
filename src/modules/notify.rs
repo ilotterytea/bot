@@ -86,10 +86,8 @@ impl Command for NotifyCommand {
             _ => -1,
         };
 
-        let name_and_type = format!("{}:{}", target_name, event_type.to_string());
-
         if target_id == -1 && event_type != EventType::Custom {
-            return Err(ResponseError::IncorrectArgument(name_and_type));
+            return Err(ResponseError::NotFound(target_name));
         }
 
         let conn = &mut establish_connection();
@@ -177,6 +175,13 @@ impl Command for NotifyCommand {
                         ],
                     )
                     .unwrap()
+            }
+            (_, None) => {
+                return Err(ResponseError::NotFound(format!(
+                    "{}:{}",
+                    target_name,
+                    event_type.to_string()
+                )))
             }
 
             _ => return Err(ResponseError::SomethingWentWrong),
