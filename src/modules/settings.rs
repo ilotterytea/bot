@@ -10,6 +10,7 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
+    models::diesel::LevelOfRights,
     schema::channel_preferences::dsl as chp,
     utils::diesel::establish_connection,
 };
@@ -20,6 +21,10 @@ pub struct SettingsCommand;
 impl Command for SettingsCommand {
     fn get_name(&self) -> String {
         "set".to_string()
+    }
+
+    fn required_rights(&self) -> LevelOfRights {
+        LevelOfRights::Broadcaster
     }
 
     fn get_subcommands(&self) -> Vec<String> {

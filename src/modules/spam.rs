@@ -9,6 +9,7 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
+    models::diesel::LevelOfRights,
 };
 
 pub struct SpamCommand;
@@ -17,6 +18,10 @@ pub struct SpamCommand;
 impl Command for SpamCommand {
     fn get_name(&self) -> String {
         "spam".to_string()
+    }
+
+    fn required_rights(&self) -> LevelOfRights {
+        LevelOfRights::Moderator
     }
 
     async fn execute(

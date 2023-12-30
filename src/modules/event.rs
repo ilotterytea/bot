@@ -16,7 +16,9 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    models::diesel::{Event, EventFlag, EventSubscription, EventType, NewEvent, User},
+    models::diesel::{
+        Event, EventFlag, EventSubscription, EventType, LevelOfRights, NewEvent, User,
+    },
     schema::{events::dsl as ev, users::dsl as us},
     utils::{diesel::establish_connection, split_and_wrap_lines},
 };
@@ -27,6 +29,10 @@ pub struct EventCommand;
 impl Command for EventCommand {
     fn get_name(&self) -> String {
         "event".to_string()
+    }
+
+    fn required_rights(&self) -> LevelOfRights {
+        LevelOfRights::Moderator
     }
 
     fn get_subcommands(&self) -> Vec<String> {

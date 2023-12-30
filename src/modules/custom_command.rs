@@ -12,7 +12,7 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    models::diesel::{CustomCommand, NewCustomCommand},
+    models::diesel::{CustomCommand, LevelOfRights, NewCustomCommand},
     schema::custom_commands::dsl as cc,
     utils::diesel::establish_connection,
 };
@@ -23,6 +23,10 @@ pub struct CustomCommandsCommand;
 impl Command for CustomCommandsCommand {
     fn get_name(&self) -> String {
         "cmd".to_string()
+    }
+
+    fn required_rights(&self) -> LevelOfRights {
+        LevelOfRights::Moderator
     }
 
     fn get_subcommands(&self) -> Vec<String> {
