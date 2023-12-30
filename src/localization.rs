@@ -5,6 +5,14 @@ use crate::commands::request::Request;
 
 #[derive(PartialEq, Eq, Hash, Debug, Clone)]
 pub enum LineId {
+    ArgumentSubcommand,
+    ArgumentMessage,
+    ArgumentInterval,
+    ArgumentName,
+    ArgumentTarget,
+    ArgumentValue,
+    ArgumentAmount,
+
     MiscDescending,
     MiscAscending,
 
@@ -71,6 +79,13 @@ pub enum LineId {
 impl LineId {
     pub fn from_string(value: String) -> Option<Self> {
         match value.as_str() {
+            "argument.subcommand" => Some(Self::ArgumentSubcommand),
+            "argument.message" => Some(Self::ArgumentMessage),
+            "argument.interval" => Some(Self::ArgumentInterval),
+            "argument.name" => Some(Self::ArgumentName),
+            "argument.target" => Some(Self::ArgumentTarget),
+            "argument.value" => Some(Self::ArgumentValue),
+            "argument.amount" => Some(Self::ArgumentAmount),
             "misc.descending" => Some(Self::MiscDescending),
             "misc.ascending" => Some(Self::MiscAscending),
             "provider.7tv" => Some(Self::Provider7TV),
