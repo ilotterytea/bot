@@ -9,7 +9,7 @@ use crate::{
     commands::{
         request::Request,
         response::{Response, ResponseError},
-        Command,
+        Command, CommandArgument,
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
@@ -38,11 +38,15 @@ impl Command for NotifyCommand {
     ) -> Result<Response, ResponseError> {
         let subcommand_id = match request.subcommand_id {
             Some(v) => v,
-            None => return Err(ResponseError::NoSubcommand),
+            None => {
+                return Err(ResponseError::NotEnoughArguments(
+                    CommandArgument::Subcommand,
+                ))
+            }
         };
 
         if request.message.is_none() {
-            return Err(ResponseError::NoMessage);
+            return Err(ResponseError::NotEnoughArguments(CommandArgument::Target));
         }
         let message = request.message.unwrap();
         let mut message_split = message.split(" ").collect::<Vec<&str>>();
@@ -64,10 +68,10 @@ impl Command for NotifyCommand {
                             EventType::from_str(event_type).unwrap(),
                         )
                     }
-                    _ => return Err(ResponseError::WrongArguments),
+                    _ => return Err(ResponseError::IncorrectArgument(v)),
                 }
             }
-            None => return Err(ResponseError::NotEnoughArguments),
+            None => return Err(ResponseError::NotEnoughArguments(CommandArgument::Target)),
         };
 
         let target_id = match instance_bundle
@@ -82,8 +86,10 @@ impl Command for NotifyCommand {
             _ => -1,
         };
 
+        let name_and_type = format!("{}:{}", target_name, event_type.to_string());
+
         if target_id == -1 && event_type != EventType::Custom {
-            return Err(ResponseError::WrongArguments);
+            return Err(ResponseError::IncorrectArgument(name_and_type));
         }
 
         let conn = &mut establish_connection();
@@ -173,7 +179,7 @@ impl Command for NotifyCommand {
                     .unwrap()
             }
 
-            _ => return Err(ResponseError::WrongArguments),
+            _ => return Err(ResponseError::SomethingWentWrong),
         };
 
         Ok(Response::Single(response))

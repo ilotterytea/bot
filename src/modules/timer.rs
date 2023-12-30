@@ -8,7 +8,7 @@ use crate::{
     commands::{
         request::Request,
         response::{Response, ResponseError},
-        Command,
+        Command, CommandArgument,
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
@@ -44,11 +44,15 @@ impl Command for TimerCommand {
     ) -> Result<Response, ResponseError> {
         let subcommand_id = match request.subcommand_id {
             Some(v) => v,
-            None => return Err(ResponseError::NoSubcommand),
+            None => {
+                return Err(ResponseError::NotEnoughArguments(
+                    CommandArgument::Subcommand,
+                ))
+            }
         };
 
         if request.message.is_none() {
-            return Err(ResponseError::NoMessage);
+            return Err(ResponseError::NotEnoughArguments(CommandArgument::Message));
         }
         let message = request.message.unwrap();
         let mut message_split = message.split(" ").collect::<Vec<&str>>();
@@ -60,7 +64,7 @@ impl Command for TimerCommand {
                 message_split.remove(0);
                 v
             }
-            None => return Err(ResponseError::NotEnoughArguments),
+            None => return Err(ResponseError::NotEnoughArguments(CommandArgument::Name)),
         };
 
         let conn = &mut establish_connection();
@@ -127,10 +131,10 @@ impl Command for TimerCommand {
 
             (Some(t), 1, "interval") => {
                 let interval_sec = message_split.get(0).unwrap().to_string();
-                let interval_sec = match interval_sec.parse::<i64>() {
+                let interval_sec = match interval_sec.parse::<u64>() {
                     Ok(v) => v,
-                    Err(_) => return Err(ResponseError::WrongArguments),
-                };
+                    Err(_) => return Err(ResponseError::IncorrectArgument(interval_sec)),
+                } as i64;
 
                 update(ti::timers.find(&t.id))
                     .set(ti::interval_sec.eq(interval_sec))
@@ -180,10 +184,10 @@ impl Command for TimerCommand {
                 let interval_sec = message_split.get(0).unwrap().to_string();
                 message_split.remove(0);
 
-                let interval_sec = match interval_sec.parse::<i64>() {
+                let interval_sec = match interval_sec.parse::<u64>() {
                     Ok(v) => v,
-                    Err(_) => return Err(ResponseError::WrongArguments),
-                };
+                    Err(_) => return Err(ResponseError::IncorrectArgument(interval_sec)),
+                } as i64;
 
                 let message = message_split.join(" ");
 
@@ -207,11 +211,9 @@ impl Command for TimerCommand {
                     .unwrap()
             }
 
-            (Some(_), _, "new") => {
-                return Err(ResponseError::Custom(LineId::TimerAlreadyExistsError))
-            }
+            (Some(_), _, "new") => return Err(ResponseError::NamesakeCreation(name_id)),
 
-            _ => return Err(ResponseError::WrongArguments),
+            _ => return Err(ResponseError::SomethingWentWrong),
         };
 
         Ok(Response::Single(response))

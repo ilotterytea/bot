@@ -169,9 +169,11 @@ impl Command for EmoteTopCommand {
                     ));
                 }
             }
+        } else {
+            return Err(ResponseError::NotFound(origin_name));
         }
 
-        Err(ResponseError::NoMessage)
+        Err(ResponseError::SomethingWentWrong)
     }
 }
 

@@ -37,16 +37,7 @@ impl Command for MasspingCommand {
         {
             Ok(response) => response.data,
             Err(e) => {
-                return Ok(Response::Single(
-                    instance_bundle
-                        .localizator
-                        .get_formatted_text(
-                            request.channel_preference.language.as_str(),
-                            LineId::MsgError,
-                            vec![request.sender.alias_name, e.to_string()],
-                        )
-                        .unwrap(),
-                ))
+                return Err(ResponseError::InsufficientRights);
             }
         };
 
