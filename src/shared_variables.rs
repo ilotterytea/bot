@@ -2,6 +2,8 @@ use std::time::Instant;
 
 use lazy_static::lazy_static;
 
+use crate::models::diesel::LevelOfRights;
+
 lazy_static! {
     pub static ref START_TIME: Instant = Instant::now();
 }
@@ -9,6 +11,7 @@ lazy_static! {
 pub const DEFAULT_COMMAND_DELAY_SEC: i32 = 5;
 pub const DEFAULT_COMMAND_OPTIONS: Vec<String> = Vec::new();
 pub const DEFAULT_COMMAND_SUBCOMMANDS: Vec<String> = Vec::new();
+pub const DEFAULT_COMMAND_LEVEL_OF_RIGHTS: LevelOfRights = LevelOfRights::User;
 
 pub const DEFAULT_PREFIX: &str = "~";
 pub const DEFAULT_LANGUAGE: &str = "english";
