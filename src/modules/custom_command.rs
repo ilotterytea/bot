@@ -50,7 +50,7 @@ impl Command for CustomCommandsCommand {
         };
 
         if request.message.is_none() {
-            return Err(ResponseError::NotEnoughArguments(CommandArgument::Message));
+            return Err(ResponseError::NotEnoughArguments(CommandArgument::Name));
         }
         let message = request.message.unwrap();
         let mut message_split = message.split(" ").collect::<Vec<&str>>();
@@ -179,6 +179,14 @@ impl Command for CustomCommandsCommand {
                         vec![name_id],
                     )
                     .unwrap()
+            }
+
+            (None, 0, _) if subcommand_id.ne("new") => {
+                return Err(ResponseError::NotFound(name_id))
+            }
+
+            (None, 0, "new") => {
+                return Err(ResponseError::NotEnoughArguments(CommandArgument::Message))
             }
 
             (Some(_), _, "new") => return Err(ResponseError::NamesakeCreation(name_id)),
