@@ -23,12 +23,12 @@ pub enum ResponseError {
     UnknownSubcommand,
 
     HttpResponse,
+    NotFound(String),
 
     SomethingWentWrong,
 
     WrongArguments,
     ExternalAPIError(u32, Option<String>),
-    UserNotFound(String),
     InsufficientRights,
 
     Custom(LineId),
@@ -74,9 +74,9 @@ impl ResponseError {
                 params.push(arg.clone());
                 (11, LineId::ErrorNamesakeCreation)
             }
-            Self::UserNotFound(arg) => {
+            Self::NotFound(arg) => {
                 params.push(arg.clone());
-                (12, LineId::ErrorUserNotFound)
+                (12, LineId::ErrorNotFound)
             }
             Self::ExternalAPIError(code, reason) => {
                 params.push(code.to_string());
