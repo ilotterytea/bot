@@ -17,21 +17,12 @@ pub enum ResponseError {
 
     IncompatibleName(String),
     NamesakeCreation(String),
-
-    NoSubcommand,
-    NoMessage,
-    UnknownSubcommand,
-
-    HttpResponse,
     NotFound(String),
 
     SomethingWentWrong,
 
-    WrongArguments,
     ExternalAPIError(u32, Option<String>),
     InsufficientRights,
-
-    Custom(LineId),
 }
 
 impl ResponseError {
