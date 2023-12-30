@@ -12,7 +12,7 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    models::diesel::{NewTimer, Timer},
+    models::diesel::{LevelOfRights, NewTimer, Timer},
     schema::timers::dsl as ti,
     utils::diesel::establish_connection,
 };
@@ -23,6 +23,10 @@ pub struct TimerCommand;
 impl Command for TimerCommand {
     fn get_name(&self) -> String {
         "timer".to_string()
+    }
+
+    fn required_rights(&self) -> LevelOfRights {
+        LevelOfRights::Moderator
     }
 
     fn get_subcommands(&self) -> Vec<String> {

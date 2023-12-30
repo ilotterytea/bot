@@ -10,6 +10,7 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
+    models::diesel::LevelOfRights,
 };
 
 pub struct MasspingCommand;
@@ -18,6 +19,10 @@ pub struct MasspingCommand;
 impl Command for MasspingCommand {
     fn get_name(&self) -> String {
         "massping".to_string()
+    }
+
+    fn required_rights(&self) -> LevelOfRights {
+        LevelOfRights::Moderator
     }
 
     async fn execute(
