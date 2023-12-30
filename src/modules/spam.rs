@@ -21,40 +21,43 @@ impl Command for SpamCommand {
 
     async fn execute(
         &self,
-        instance_bundle: &InstanceBundle,
+        _instance_bundle: &InstanceBundle,
         request: Request,
     ) -> Result<Response, ResponseError> {
-        let msg = request.message.unwrap();
-        let mut s = msg.split(' ').collect::<Vec<&str>>();
+        if let Some(msg) = request.message {
+            let mut s = msg.split(' ').collect::<Vec<&str>>();
 
-        let count = if let Some(c) = s.first() {
-            if let Ok(c) = c.parse::<u32>() {
-                s.remove(0);
+            let count = if let Some(c) = s.first() {
+                if let Ok(c) = c.parse::<u32>() {
+                    s.remove(0);
 
-                if c > 100 {
-                    100
+                    if c > 100 {
+                        100
+                    } else {
+                        c
+                    }
                 } else {
-                    c
+                    10
                 }
             } else {
-                10
+                return Err(ResponseError::NotEnoughArguments(CommandArgument::Amount));
+            };
+
+            let msg = s.join(" ");
+
+            if msg.is_empty() {
+                return Err(ResponseError::NotEnoughArguments(CommandArgument::Message));
             }
-        } else {
-            return Err(ResponseError::NotEnoughArguments(CommandArgument::Amount));
-        };
 
-        let msg = s.join(" ");
+            let mut msgs = Vec::<String>::new();
 
-        if msg.is_empty() {
-            return Err(ResponseError::NotEnoughArguments(CommandArgument::Message));
+            for _ in 0..count {
+                msgs.push(msg.clone());
+            }
+
+            return Ok(Response::Multiple(msgs));
         }
 
-        let mut msgs = Vec::<String>::new();
-
-        for _ in 0..count {
-            msgs.push(msg.clone());
-        }
-
-        Ok(Response::Multiple(msgs))
+        Err(ResponseError::NotEnoughArguments(CommandArgument::Message))
     }
 }

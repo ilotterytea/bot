@@ -41,7 +41,7 @@ impl Command for MasspingCommand {
             }
         };
 
-        let message = request.message.unwrap();
+        let message = request.message.unwrap_or_default();
         let mut lines: Vec<String> = vec!["".to_string()];
         let mut index = 0;
 
