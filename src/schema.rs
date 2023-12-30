@@ -12,6 +12,10 @@ pub mod sql_types {
     #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "event_type"))]
     pub struct EventType;
+
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "level_of_rights"))]
+    pub struct LevelOfRights;
 }
 
 diesel::table! {
@@ -87,6 +91,19 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::LevelOfRights;
+
+    rights (id) {
+        id -> Int4,
+        user_id -> Int4,
+        channel_id -> Int4,
+        level -> LevelOfRights,
+        is_fixed -> Bool,
+    }
+}
+
+diesel::table! {
     timers (id) {
         id -> Int4,
         name -> Varchar,
@@ -115,6 +132,8 @@ diesel::joinable!(custom_commands -> channels (channel_id));
 diesel::joinable!(event_subscriptions -> events (event_id));
 diesel::joinable!(event_subscriptions -> users (user_id));
 diesel::joinable!(events -> channels (channel_id));
+diesel::joinable!(rights -> channels (channel_id));
+diesel::joinable!(rights -> users (user_id));
 diesel::joinable!(timers -> channels (channel_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
@@ -124,6 +143,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     custom_commands,
     event_subscriptions,
     events,
+    rights,
     timers,
     users,
 );
