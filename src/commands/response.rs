@@ -45,7 +45,17 @@ impl ResponseError {
         let mut params: Vec<String> = Vec::new();
 
         let error_line_id: (u8, LineId) = match self {
-            Self::NotEnoughArguments(arg) => (0, arg.to_line_id()),
+            Self::NotEnoughArguments(arg) => {
+                params.push(
+                    localizator
+                        .get_literal_text(
+                            request.channel_preference.language.as_str(),
+                            arg.to_line_id(),
+                        )
+                        .unwrap(),
+                );
+                (0, LineId::ErrorNotEnoughArguments)
+            }
             Self::WrongArgumentType(arg, pos) => {
                 params.push(arg.clone());
                 params.push(pos.clone());
