@@ -76,5 +76,7 @@
   "emote_top.response": "{sender.alias_name}: {0} {1}'s top {2} emotes ({3}): {4}",
   "emote_top.no_emotes": "{sender.alias_name}: {0} No emotes have been used in {1}'s chat.",
   "emote_similarity.set_similar": "{sender.alias_name}: {0} {1}'s emote set is {5}% similar to {2}'s emote set ({3} of {4})",
-  "emote_similarity.set_not_similar": "{sender.alias_name}: {0} {1}'s emote set is not similar to {3}'s emote set"
+  "emote_similarity.set_not_similar": "{sender.alias_name}: {0} {1}'s emote set is not similar to {3}'s emote set",
+  "userid.found": "{sender.alias_name}: {0} {1} ({2}){3}",
+  "userid.chat_ban": "| {0} Banned in chat{1}"
 }

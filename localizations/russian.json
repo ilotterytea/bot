@@ -76,5 +76,7 @@
   "emote_top.response": "{sender.alias_name}: {0} Топ {2} эмоутов канала {1} ({3}): {4}",
   "emote_top.no_emotes": "{sender.alias_name}: {0} Никакой эмоут ещё не использовали в чате {1}.",
   "emote_similarity.set_similar": "{sender.alias_name}: {0} Набор эмоутов {1} похож на {5}% набору эмоутов {2} ({3} из {4})",
-  "emote_similarity.set_not_similar": "{sender.alias_name}: {0} Набор эмоутов {1} не похож на набор эмоутов {3}"
+  "emote_similarity.set_not_similar": "{sender.alias_name}: {0} Набор эмоутов {1} не похож на набор эмоутов {3}",
+  "userid.found": "{sender.alias_name}: {0} {1} ({2}){3}",
+  "userid.chat_ban": "| {0} Забанен в чате{1}"
 }

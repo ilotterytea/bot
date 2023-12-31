@@ -11,3 +11,4 @@ pub mod ping;
 pub mod settings;
 pub mod spam;
 pub mod timer;
+pub mod userid;
