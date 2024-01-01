@@ -7,8 +7,8 @@ use crate::{
         custom_command::CustomCommandsCommand, ecount::EmoteCountCommand,
         esim::EmoteSimilarityCommand, etop::EmoteTopCommand, event::EventCommand,
         holiday::HolidayCommand, join::JoinCommand, massping::MasspingCommand,
-        notify::NotifyCommand, ping::PingCommand, settings::SettingsCommand, spam::SpamCommand,
-        timer::TimerCommand, userid::UserIdCommand,
+        mcsrv::MinecraftServerCommand, notify::NotifyCommand, ping::PingCommand,
+        settings::SettingsCommand, spam::SpamCommand, timer::TimerCommand, userid::UserIdCommand,
     },
     shared_variables::{
         DEFAULT_COMMAND_DELAY_SEC, DEFAULT_COMMAND_LEVEL_OF_RIGHTS, DEFAULT_COMMAND_OPTIONS,
@@ -71,6 +71,7 @@ impl CommandLoader {
                 Box::new(EmoteTopCommand),
                 Box::new(EmoteSimilarityCommand),
                 Box::new(UserIdCommand),
+                Box::new(MinecraftServerCommand),
             ],
         }
     }

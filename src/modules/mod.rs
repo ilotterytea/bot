@@ -6,6 +6,7 @@ pub mod event;
 pub mod holiday;
 pub mod join;
 pub mod massping;
+pub mod mcsrv;
 pub mod notify;
 pub mod ping;
 pub mod settings;
