@@ -1,4 +1,5 @@
 pub mod diesel;
+pub mod mcsrv;
 pub mod stats;
 
 use serde::Deserialize;
