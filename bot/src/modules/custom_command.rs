@@ -12,9 +12,12 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    models::diesel::{CustomCommand, LevelOfRights, NewCustomCommand},
-    schema::custom_commands::dsl as cc,
     utils::diesel::establish_connection,
+};
+
+use common::{
+    models::{CustomCommand, LevelOfRights, NewCustomCommand},
+    schema::custom_commands::dsl as cc,
 };
 
 pub struct CustomCommandsCommand;

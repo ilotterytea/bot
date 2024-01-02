@@ -13,9 +13,12 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    models::diesel::{Event, EventSubscription, EventType, NewEventSubscription},
-    schema::{event_subscriptions::dsl as evs, events::dsl as ev},
     utils::diesel::establish_connection,
+};
+
+use common::{
+    models::{Event, EventSubscription, EventType, NewEventSubscription},
+    schema::{event_subscriptions::dsl as evs, events::dsl as ev},
 };
 
 pub struct NotifyCommand;

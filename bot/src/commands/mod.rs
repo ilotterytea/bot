@@ -2,7 +2,6 @@ use crate::{
     instance_bundle::InstanceBundle,
     localization::LineId,
     message::ParsedPrivmsgMessage,
-    models::diesel::{Channel, ChannelPreference, LevelOfRights, User},
     modules::{
         custom_command::CustomCommandsCommand, ecount::EmoteCountCommand,
         esim::EmoteSimilarityCommand, etop::EmoteTopCommand, event::EventCommand,
@@ -16,6 +15,7 @@ use crate::{
     },
 };
 use async_trait::async_trait;
+use common::models::{Channel, ChannelPreference, LevelOfRights, User};
 use eyre::Result;
 use twitch_irc::message::PrivmsgMessage;
 
@@ -116,4 +116,3 @@ impl CommandArgument {
         }
     }
 }
-

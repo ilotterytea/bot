@@ -10,10 +10,10 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    models::diesel::LevelOfRights,
-    schema::channel_preferences::dsl as chp,
     utils::diesel::establish_connection,
 };
+
+use common::{models::LevelOfRights, schema::channel_preferences::dsl as chp};
 
 pub struct SettingsCommand;
 

@@ -12,9 +12,12 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    models::diesel::{LevelOfRights, NewTimer, Timer},
-    schema::timers::dsl as ti,
     utils::diesel::establish_connection,
+};
+
+use common::{
+    models::{LevelOfRights, NewTimer, Timer},
+    schema::timers::dsl as ti,
 };
 
 pub struct TimerCommand;

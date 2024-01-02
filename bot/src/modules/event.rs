@@ -16,11 +16,12 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    models::diesel::{
-        Event, EventFlag, EventSubscription, EventType, LevelOfRights, NewEvent, User,
-    },
-    schema::{events::dsl as ev, users::dsl as us},
     utils::{diesel::establish_connection, split_and_wrap_lines},
+};
+
+use common::{
+    models::{Event, EventFlag, EventSubscription, EventType, LevelOfRights, NewEvent, User},
+    schema::{events::dsl as ev, users::dsl as us},
 };
 
 pub struct EventCommand;

@@ -4,15 +4,16 @@ use diesel::{
 use substring::Substring;
 use twitch_irc::message::PrivmsgMessage;
 
-use crate::{
-    models::diesel::{
+use crate::shared_variables::{DEFAULT_LANGUAGE, DEFAULT_PREFIX};
+
+use common::{
+    models::{
         Channel, ChannelPreference, LevelOfRights, NewChannel, NewChannelPreference, NewRight,
         NewUser, Right, User,
     },
     schema::{
         channel_preferences::dsl as chp, channels::dsl as ch, rights::dsl as ri, users::dsl as us,
     },
-    shared_variables::{DEFAULT_LANGUAGE, DEFAULT_PREFIX},
 };
 
 use super::CommandLoader;

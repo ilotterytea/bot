@@ -3,9 +3,10 @@ use std::env;
 use chrono::{NaiveDateTime, Utc};
 use diesel::{insert_into, Connection, PgConnection, RunQueryDsl};
 
-use crate::{
-    message::ParsedPrivmsgMessage,
-    models::diesel::{ActionStatus, NewAction},
+use crate::message::ParsedPrivmsgMessage;
+
+use common::{
+    models::{ActionStatus, NewAction},
     schema::actions::dsl as ac,
 };
 
