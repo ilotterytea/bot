@@ -112,6 +112,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "bot"
+version = "1.0.0"
+dependencies = [
+ "async-trait",
+ "chrono",
+ "diesel",
+ "diesel-derive-enum",
+ "dotenvy",
+ "eyre",
+ "futures",
+ "futures-util",
+ "include_dir",
+ "lazy_static",
+ "psutil",
+ "rand",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "substring",
+ "tokio",
+ "tokio-tungstenite",
+ "tungstenite",
+ "twitch-irc",
+ "twitch_api",
+ "version_check",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -157,6 +185,10 @@ dependencies = [
  "wasm-bindgen",
  "windows-targets",
 ]
+
+[[package]]
+name = "common"
+version = "1.0.0"
 
 [[package]]
 name = "core-foundation"
@@ -961,34 +993,6 @@ name = "pin-utils"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
-
-[[package]]
-name = "pinkpilled-bot"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "chrono",
- "diesel",
- "diesel-derive-enum",
- "dotenvy",
- "eyre",
- "futures",
- "futures-util",
- "include_dir",
- "lazy_static",
- "psutil",
- "rand",
- "reqwest",
- "serde",
- "serde_json",
- "substring",
- "tokio",
- "tokio-tungstenite",
- "tungstenite",
- "twitch-irc",
- "twitch_api",
- "version_check",
-]
 
 [[package]]
 name = "pkg-config"
