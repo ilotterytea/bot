@@ -195,7 +195,7 @@ pub struct Localizator {
     localizations: HashMap<String, HashMap<LineId, String>>,
 }
 
-const LOCALIZATION_DIR: Dir = include_dir!("localizations");
+const LOCALIZATION_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/localizations");
 
 impl Localizator {
     pub fn new() -> Self {

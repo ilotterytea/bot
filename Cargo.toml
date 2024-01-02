@@ -1,30 +1,9 @@
-[package]
-name = "pinkpilled-bot"
-version = "0.1.0"
+[workspace]
+members = ["common","bot"]
+
+[workspace.package]
+version = "1.0.0"
+authors = ["ilotterytea <ilotterytea@pm.me>"]
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-async-trait = "0.1.73"
-chrono = "0.4.31"
-diesel = { version = "2.1.2", features = ["postgres", "chrono"] }
-diesel-derive-enum = { version = "2.1.0", features = ["postgres"] }
-dotenvy = "0.15.7"
-eyre = "0.6.8"
-futures = "0.3.29"
-futures-util = "0.3.29"
-include_dir = "0.7.3"
-lazy_static = "1.4.0"
-psutil = "3.2.2"
-rand = "0.8.5"
-reqwest = { version = "0.11.18", features = ["json"] }
-serde = { version = "1.0.188", features = ["derive"] }
-serde_json = "1.0.107"
-substring = "1.4.5"
-tokio = { version = "1.32.0", features = ["full"] }
-tokio-tungstenite = { version = "0.21.0", features = ["native-tls"] }
-tungstenite = "0.21.0"
-twitch-irc = "5.0.1"
-twitch_api = { version = "0.7.0-rc.6", features = ["twitch_oauth2", "helix", "reqwest", "eventsub"] }
-version_check = "0.9.4"
+publish = false
+repository = "https://github.com/ilotterytea/bot"
