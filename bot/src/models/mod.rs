@@ -1,4 +1,3 @@
-pub mod diesel;
 pub mod mcsrv;
 pub mod stats;
 
