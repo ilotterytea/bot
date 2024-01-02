@@ -9,10 +9,13 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    models::diesel::{Channel, NewChannel, NewChannelPreference},
-    schema::{channel_preferences::dsl as chp, channels::dsl as ch},
     shared_variables::{DEFAULT_LANGUAGE, DEFAULT_PREFIX},
     utils::diesel::establish_connection,
+};
+
+use common::{
+    models::{Channel, NewChannel, NewChannelPreference},
+    schema::{channel_preferences::dsl as chp, channels::dsl as ch},
 };
 
 pub struct JoinCommand;

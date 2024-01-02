@@ -9,16 +9,21 @@ use crate::{
     commands::{request::Request, response::Response, CommandLoader},
     instance_bundle::InstanceBundle,
     message::ParsedPrivmsgMessage,
-    models::diesel::{
+    
+    
+    utils::{
+        diesel::{create_action, establish_connection},
+        split_and_wrap_lines,
+    },
+};
+
+use common::{
+    models::{
         Channel, CustomCommand, Event, EventFlag, EventSubscription, EventType, Timer, User,
     },
     schema::{
         channels::dsl as ch, custom_commands::dsl as cc, event_subscriptions::dsl as evs,
         events::dsl as ev, timers::dsl as ti, users::dsl as us,
-    },
-    utils::{
-        diesel::{create_action, establish_connection},
-        split_and_wrap_lines,
     },
 };
 

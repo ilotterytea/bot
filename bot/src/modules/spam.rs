@@ -9,8 +9,9 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    models::diesel::LevelOfRights,
 };
+
+use common::models::LevelOfRights;
 
 pub struct SpamCommand;
 

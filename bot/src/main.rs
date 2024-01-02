@@ -5,11 +5,14 @@ use crate::{
     handlers::{handle_chat_message, handle_timers},
     instance_bundle::InstanceBundle,
     localization::Localizator,
-    models::diesel::NewChannel,
-    schema::{channels::dsl as ch, events::dsl as ev},
     seventv::{api::SevenTVAPIClient, SevenTVWebsocketClient},
     shared_variables::{START_TIME, TIMER_CHECK_DELAY},
     utils::diesel::establish_connection,
+};
+
+use common::{
+    models::NewChannel,
+    schema::{channels::dsl as ch, events::dsl as ev},
 };
 use diesel::{insert_into, ExpressionMethods, QueryDsl, RunQueryDsl};
 use eyre::Context;
