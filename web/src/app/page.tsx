@@ -1,112 +1,151 @@
 import Image from 'next/image'
+import Navbar from '@/components/Navbar'
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main className="text-slate-800">
+      <Navbar />
+      <div className="flex w-screen justify-center">
+        <div className="flex flex-col max-w-3xl">
+          <div className="flex flex-row w-full bg-gray-100 p-5 border-solid border-2 border-slate-300 my-4">
+            <div className="h-full mr-1">
+                <Image
+                    src="/bot_avatar.png"
+                    width={128}
+                    height={128}
+                    style={{width: 'auto', height: '100%'}}
+                    alt="Logo"
+                />
+            </div>
+            <div className="w-full h-full justify-center">
+              <p>
+                <a href="https://twitch.tv/imteabot" className="text-teal-500 font-bold">@imteabot</a> is a multi-utility Twitch chat bot
+                that brings a lot of functionality into your chat.
+                Stream notifications, emote updates and more...
+              </p>
+              <p>
+                Type <a href="/cmd/join" className="command">!join</a> into any chat room that has
+                <a href="https://twitch.tv/imteabot" className="text-teal-500 font-bold"> @imteabot</a> or just <a href="/login" className="text-teal-500 font-bold">log in</a> if you want this bot
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-center items-center align-middle">
+            <h1 className="text-teal-500 font-bold text-4xl">Features</h1>
+          </div>
+
+          <div className="[&>*:nth-child(odd)]:bg-gray-200 [&>*]:bg-gray-100 [&>*:nth-child(odd)]:flex-row-reverse [&>*]:items-center">
+            <div className="flex flex-row items-center w-full bg-gray-100 p-5 border-solid border-2 border-slate-300 my-4">
+              <div className="h-full mr-1">
+                  <Image
+                      src="/stream.gif"
+                      width={128}
+                      height={128}
+                      style={{width: 'auto', height: '100%'}}
+                      alt="Logo"
+                  />
+              </div>
+              <div className="w-full h-full justify-center">
+              <h1 className="text-teal-500 font-bold text-2xl">Stream notifications</h1>
+                <p>
+                A convenient way to keep track of streams on Twitch.
+                Simply use the <a href="/cmd/event" className="command">!event</a> command to create a notification in chat about an upcoming stream.
+                To always be in the know, sign up for notifications using the <a href="/cmd/notify" className="command">!notify</a> command.
+                Never miss a moment and enjoy your streams on time!
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-row w-full bg-gray-100 p-5 border-solid border-2 border-slate-300 my-4">
+              <div className="h-full mr-1">
+                  <Image
+                      src="/emotes.gif"
+                      width={128}
+                      height={128}
+                      style={{width: 'auto', height: '100%'}}
+                      alt="Logo"
+                  />
+              </div>
+              <div className="w-full h-full justify-center">
+              <h1 className="text-teal-500 font-bold text-2xl">Emote updates</h1>
+                <p>
+                Instant updates on new changes to the emoji set.
+                The bot automatically notifies the chat about new emotes, deletion of existing emotes, and changes in their names.
+                </p>
+                <p className="font-bold text-amber-500">For now only for 7TV.</p>
+              </div>
+            </div>
+
+            <div className="flex flex-row w-full bg-gray-100 p-5 border-solid border-2 border-slate-300 my-4">
+              <div className="h-full mr-1">
+                  <Image
+                      src="/enhance.gif"
+                      width={128}
+                      height={128}
+                      style={{width: 'auto', height: '100%'}}
+                      alt="Logo"
+                  />
+              </div>
+              <div className="w-full h-full justify-center">
+              <h1 className="text-teal-500 font-bold text-2xl">Enhance your chat</h1>
+                <p>
+                With the <a href="/cmd/timer" className="command">!timer</a> command, you can set messages to be sent each interval.
+                The <a href="/cmd/cmd" className="command">!cmd</a> command allow the creation of personalized commands,
+                which adds interactivity and flexibility to communication by allowing channel owners to create their own commands.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-row w-full bg-gray-100 p-5 border-solid border-2 border-slate-300 my-4">
+              <div className="h-full mr-1">
+                  <Image
+                      src="/moderation.gif"
+                      width={128}
+                      height={128}
+                      style={{width: 'auto', height: '100%'}}
+                      alt="Logo"
+                  />
+              </div>
+              <div className="w-full h-full justify-center">
+              <h1 className="text-teal-500 font-bold text-2xl">Moderation stuff</h1>
+                <p>
+                  Functionality for moderators includes handy tools for maintaining order in the chat room.
+                </p>
+                <p>
+                  With the "<a href="/cmd/massping" className="command">!massping</a>" command, moderators can quickly notify all participants by mentioning them with an important message.
+                </p>
+                <p>
+                  In addition, the "<a href="/cmd/spam" className="command">!spam</a>" command provides the ability to repeat a message the desired number of times,
+                  which is useful for repetitive reminders or clarifications.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-row w-full bg-gray-100 p-5 border-solid border-2 border-slate-300 my-4">
+              <div className="h-full mr-1">
+                  <Image
+                      src="/soon.gif"
+                      width={128}
+                      height={128}
+                      style={{width: 'auto', height: '100%'}}
+                      alt="Logo"
+                  />
+              </div>
+              <div className="w-full h-full justify-center">
+              <h1 className="text-teal-500 font-bold text-2xl">More and coming soon...</h1>
+                <p>
+                  You can find out more commands in the <a href="/cmd" className="text-teal-500">"commands"</a> tab.
+                </p>
+                <p>
+                  The bot is at Beta stage of development, so there is very little functions so far.
+                  <a href="https://github.com/ilotterytea/bot" className="text-teal-500"> You can follow the development of the bot on GitHub.</a>
+                </p>
+              </div>
+            </div>
+          </div>
+
+
         </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
       </div>
     </main>
   )
