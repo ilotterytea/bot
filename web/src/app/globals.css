@@ -52,14 +52,29 @@ body {
   margin-left: 1.25rem;
 }
 
+.command-info li {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
 .command-info ul {
   list-style-type: disc;
 }
 
 .command-info code {
-  background-color: rgb(209 250 229);
-  padding: 0.25rem;
+  color: rgb(9 9 11);
+  background-color: rgb(209 213 219);
+
+  padding: 0 0.375rem;
 
   border-width: 2px;
-  border-color: rgb(167 243 208);
+  border-color: rgb(156 163 175);
+}
+
+.command-info blockquote {
+  border-left-width: 4px;
+  border-left-color: rgb(20 184 166);
+  background-color: rgb(209 213 219);
+  padding: 0.375rem 0;
+  margin: 1rem 0;
 }
