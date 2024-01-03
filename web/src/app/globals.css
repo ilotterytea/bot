@@ -18,10 +18,10 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background: rgb(var(--background-start-rgb));
+}
+
+.command {
+  color: rgb(20 184 166);
+  text-shadow: 0 0 2px rgb(17 94 89);
 }
