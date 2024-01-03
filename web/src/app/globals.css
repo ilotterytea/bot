@@ -25,3 +25,41 @@ body {
   color: rgb(20 184 166);
   text-shadow: 0 0 2px rgb(17 94 89);
 }
+
+.command-info h1, .command-info h2, .command-info h3 {
+  margin: 1rem 0;
+}
+
+.command-info h1 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 600;
+}
+
+.command-info h2 {
+  margin-left: 0.625rem;
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 2rem;
+
+  padding: 0.375rem 0;
+
+  border-bottom-width: 2px;
+  border-bottom-color: rgb(203 213 225);
+}
+
+.command-info p, .command-info ul, .command-info li {
+  margin-left: 1.25rem;
+}
+
+.command-info ul {
+  list-style-type: disc;
+}
+
+.command-info code {
+  background-color: rgb(209 250 229);
+  padding: 0.25rem;
+
+  border-width: 2px;
+  border-color: rgb(167 243 208);
+}
