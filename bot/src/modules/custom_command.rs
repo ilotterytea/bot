@@ -12,10 +12,10 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    utils::diesel::establish_connection,
 };
 
 use common::{
+    establish_connection,
     models::{CustomCommand, LevelOfRights, NewCustomCommand},
     schema::custom_commands::dsl as cc,
 };

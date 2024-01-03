@@ -12,10 +12,10 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    utils::diesel::establish_connection,
 };
 
 use common::{
+    establish_connection,
     models::{LevelOfRights, NewTimer, Timer},
     schema::timers::dsl as ti,
 };

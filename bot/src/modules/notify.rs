@@ -13,10 +13,10 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    utils::diesel::establish_connection,
 };
 
 use common::{
+    establish_connection,
     models::{Event, EventSubscription, EventType, NewEventSubscription},
     schema::{event_subscriptions::dsl as evs, events::dsl as ev},
 };

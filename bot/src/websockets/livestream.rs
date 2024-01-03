@@ -19,12 +19,9 @@ use twitch_api::{
     TWITCH_EVENTSUB_WEBSOCKET_URL,
 };
 
-use crate::{
-    handlers::handle_stream_event, instance_bundle::InstanceBundle,
-    utils::diesel::establish_connection,
-};
+use crate::{handlers::handle_stream_event, instance_bundle::InstanceBundle};
 
-use common::models::EventType;
+use common::{establish_connection, models::EventType};
 
 async fn connect(url: Url) -> Result<WebSocketStream<MaybeTlsStream<TcpStream>>, eyre::Error> {
     let config = WebSocketConfig::default();

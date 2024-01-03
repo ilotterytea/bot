@@ -16,10 +16,11 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    utils::{diesel::establish_connection, split_and_wrap_lines},
+    utils::split_and_wrap_lines,
 };
 
 use common::{
+    establish_connection,
     models::{Event, EventFlag, EventSubscription, EventType, LevelOfRights, NewEvent, User},
     schema::{events::dsl as ev, users::dsl as us},
 };

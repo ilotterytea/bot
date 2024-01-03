@@ -12,7 +12,7 @@ use crate::{
     
     
     utils::{
-        diesel::{create_action, establish_connection},
+        diesel::{create_action},
         split_and_wrap_lines,
     },
 };
@@ -25,6 +25,7 @@ use common::{
         channels::dsl as ch, custom_commands::dsl as cc, event_subscriptions::dsl as evs,
         events::dsl as ev, timers::dsl as ti, users::dsl as us,
     },
+    establish_connection
 };
 
 pub async fn handle_chat_message(

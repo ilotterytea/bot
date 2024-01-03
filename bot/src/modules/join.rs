@@ -10,10 +10,10 @@ use crate::{
     instance_bundle::InstanceBundle,
     localization::LineId,
     shared_variables::{DEFAULT_LANGUAGE, DEFAULT_PREFIX},
-    utils::diesel::establish_connection,
 };
 
 use common::{
+    establish_connection,
     models::{Channel, NewChannel, NewChannelPreference},
     schema::{channel_preferences::dsl as chp, channels::dsl as ch},
 };
