@@ -273,6 +273,13 @@ name = "api"
 version = "1.0.0"
 dependencies = [
  "actix-web",
+ "chrono",
+ "common",
+ "diesel",
+ "dotenvy",
+ "include_dir",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -1620,9 +1627,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.107"
+version = "1.0.110"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b420ce6e3d8bd882e9b243c6eed35dbc9a6110c9769e74b584e0d68d1f20c65"
+checksum = "6fbd975230bada99c8bb618e0c365c2eefa219158d5c6c29610fd09ff1833257"
 dependencies = [
  "itoa",
  "ryu",
