@@ -7,10 +7,10 @@ use crate::{
     localization::Localizator,
     seventv::{api::SevenTVAPIClient, SevenTVWebsocketClient},
     shared_variables::{START_TIME, TIMER_CHECK_DELAY},
-    utils::diesel::establish_connection,
 };
 
 use common::{
+    establish_connection,
     models::NewChannel,
     schema::{channels::dsl as ch, events::dsl as ev},
 };
