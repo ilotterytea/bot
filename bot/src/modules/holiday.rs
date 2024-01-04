@@ -1,8 +1,9 @@
 use async_trait::async_trait;
-use chrono::{Datelike, Utc};
+use chrono::{Datelike, Duration, Utc};
 use eyre::Result;
-use rand::Rng;
-use reqwest::Client;
+use rand::seq::SliceRandom;
+use reqwest::StatusCode;
+use substring::Substring;
 
 use crate::{
     commands::{
@@ -28,77 +29,85 @@ impl Command for HolidayCommand {
         instance_bundle: &InstanceBundle,
         request: Request,
     ) -> Result<Response, ResponseError> {
-        let msg = request.message.clone().unwrap();
-        let split_msg = msg.split('.').collect::<Vec<&str>>();
+        let mut today = Utc::now();
 
-        let date = Utc::now();
-
-        let day = if let Some(day) = split_msg.get(0) {
-            if let Ok(day) = day.parse::<u32>() {
-                day
-            } else {
-                date.day()
+        let (month, day) = match request.message.clone() {
+            Some(message) if message.eq("tommorow") => {
+                today += Duration::days(1);
+                (today.month(), today.day())
             }
-        } else {
-            date.day()
+
+            Some(message) if message.eq("yesterday") => {
+                today -= Duration::days(1);
+                (today.month(), today.day())
+            }
+
+            Some(message) if message.starts_with('.') => {
+                let message = message.substring(1, message.len());
+
+                match message.parse::<u32>() {
+                    Ok(v) if (1..=12).contains(&v) => (v, today.day()),
+                    _ => (today.month(), today.day()),
+                }
+            }
+
+            Some(message) => {
+                let message_split = message.split('.').collect::<Vec<&str>>();
+
+                match (message_split.first(), message_split.get(1)) {
+                    (Some(d), Some(m)) => match (d.parse::<u32>(), m.parse::<u32>()) {
+                        (Ok(d), Ok(m)) => (m, d),
+                        _ => (today.month(), today.day()),
+                    },
+                    (Some(d), _) => match d.parse::<u32>() {
+                        Ok(d) => (today.month(), d),
+                        _ => (today.month(), today.day()),
+                    },
+                    _ => (today.month(), today.day()),
+                }
+            }
+
+            _ => (today.month(), today.day()),
         };
 
-        let month = if let Some(month) = split_msg.get(1) {
-            if let Ok(month) = month.parse::<u32>() {
-                month
-            } else {
-                date.month()
-            }
-        } else {
-            date.month()
-        };
+        let url = format!("{}/{}/{}", HOLIDAY_V1_API_URL, month, day);
 
-        let client = Client::default();
+        match reqwest::get(url).await {
+            Ok(response) if response.status() == StatusCode::NOT_FOUND => Err(
+                ResponseError::IncorrectArgument(format!("{}.{}", day, month)),
+            ),
+            Ok(response) => match response.json::<Vec<String>>().await {
+                Ok(value) => {
+                    let mut rng = rand::thread_rng();
+                    let holiday = value.choose(&mut rng);
 
-        let holidays = if let Ok(response) = client
-            .get(format!("{}/{}/{}", HOLIDAY_V1_API_URL, month, day))
-            .send()
-            .await
-        {
-            if let Ok(parsed_json) = response.json::<Vec<String>>().await {
-                parsed_json
-            } else {
-                Vec::new()
-            }
-        } else {
-            Vec::new()
-        };
+                    Ok(Response::Single(
+                        instance_bundle.localizator.formatted_text_by_request(
+                            &request,
+                            if holiday.is_none() {
+                                LineId::CommandHolidayEmpty
+                            } else {
+                                LineId::CommandHolidayResponse
+                            },
+                            if let Some(holiday) = holiday {
+                                let position = value.iter().position(|x| x.eq(holiday)).unwrap();
 
-        if holidays.is_empty() {
-            return Ok(Response::Single(
-                instance_bundle
-                    .localizator
-                    .get_formatted_text(
-                        request.channel_preference.language.as_str(),
-                        LineId::CommandHolidayEmpty,
-                        vec![
-                            request.sender.alias_name.clone(),
-                            day.to_string(),
-                            month.to_string(),
-                        ],
-                    )
-                    .unwrap(),
-            ));
+                                vec![
+                                    day.to_string(),
+                                    month.to_string(),
+                                    position.to_string(),
+                                    value.len().to_string(),
+                                    holiday.clone(),
+                                ]
+                            } else {
+                                vec![day.to_string(), month.to_string()]
+                            },
+                        ),
+                    ))
+                }
+                Err(_) => Err(ResponseError::SomethingWentWrong),
+            },
+            Err(e) => Err(ResponseError::ExternalAPIError(0, Some(e.to_string()))),
         }
-
-        let mut rand = rand::thread_rng();
-        let index = rand.gen_range(0..holidays.len());
-        let holiday = holidays.get(index).unwrap();
-
-        Ok(Response::Single(
-            instance_bundle
-                .localizator
-                .get_formatted_text(
-                    request.channel_preference.language.as_str(),
-                    LineId::CommandHolidayResponse,
-                    vec![request.sender.alias_name.clone(), holiday.into()],
-                )
-                .unwrap(),
-        ))
     }
 }
