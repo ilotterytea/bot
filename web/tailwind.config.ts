@@ -13,6 +13,21 @@ const config: Config = {
         'gradient-conic':
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
+      animation: {
+        'mainscreen': 'mainscreen 10s ease infinite'
+      },
+      keyframes: {
+        'mainscreen': {
+          '0%, 100%': {
+            'background-size':'200% 200%',
+             'background-position': 'top center'
+          },
+          '50%': {
+              'background-size':'200% 200%',
+              'background-position': 'bottom center'
+          }
+        }
+      }
     },
   },
   plugins: [],
