@@ -193,3 +193,38 @@ body {
 .wiki-content blockquote code {
   background-color: rgb(209 213 219);
 }
+
+@media (prefers-color-scheme: dark) {
+  .sidebar {
+    background-color: rgb(28 25 23);
+  }
+
+  .wiki-content {
+    background-color: rgb(41 37 36);
+  }
+  
+  .wiki-content blockquote, .wiki-content code {
+    background-color: rgb(68 64 60);
+    color: rgb(231 229 228);
+  }
+
+  .wiki-content blockquote {
+    border-color: rgb(168 162 158);
+  }
+
+  .wiki-content blockquote code {
+    background-color: rgb(41 37 36);
+  }
+
+  .sidebar h1, .sidebar h2, .wiki-content h1, .wiki-content h2 {
+    border-color: rgb(68 64 60);
+  }
+  
+  .sidebar a, .wiki-content a {
+    color: rgb(168 162 158);
+  }
+
+  .sidebar a:hover, .wiki-content a:hover {
+    color: rgb(120 113 108);
+  }
+}
