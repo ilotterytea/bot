@@ -1,3 +1,5 @@
+# [Introduction](/wiki)
+
 # Commands
 
 ## Channel management
