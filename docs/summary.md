@@ -1,12 +1,13 @@
 # [Introduction](/wiki)
 
++ [How do I make the bot join my chat?](/wiki/join)
+
 # Commands
 
 ## Channel management
 
 + [Custom commands](/wiki/channel/custom-commands)
 + [Timers](/wiki/channel/timer)
-+ [Join](/wiki/channel/join)
 + [Settings](/wiki/channel/settings)
 
 ## Stream features
