@@ -23,11 +23,9 @@ async fn main() -> Result<()> {
     HttpServer::new(move || {
         App::new().app_data(command_docs.clone()).service(
             web::scope("/v1").service(
-                web::scope("/docs").service(
-                    web::scope("/commands")
-                        .service(web::resource("").get(get_available_docs))
-                        .service(web::resource("/{name}").get(get_command_docs)),
-                ),
+                web::scope("/docs")
+                    .service(web::resource("").get(get_available_docs))
+                    .service(web::resource("/{name:.*}").get(get_doc)),
             ),
         )
     })
