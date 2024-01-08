@@ -1,73 +1,84 @@
 use std::collections::HashMap;
 
-use actix_web::{web, HttpResponse, Result};
-use common::establish_connection;
-use include_dir::{include_dir, Dir};
-use serde::{Deserialize, Serialize};
+use actix_web::{web, HttpResponse};
+use include_dir::{include_dir, Dir, DirEntry};
+use serde::Serialize;
 
 use crate::Response;
 
-#[derive(Deserialize, Serialize, Clone)]
-pub struct CommandDocData {
-    pub name_id: String,
-    pub styled_name: String,
-    pub short: String,
+#[derive(Serialize)]
+pub struct CommandDoc {
+    pub name: String,
+    pub content: String,
 }
 
 const COMMAND_DOCS: Dir = include_dir!("$CARGO_MANIFEST_DIR/../docs");
 
 pub struct CommandDocInstance {
-    pub data: Vec<CommandDocData>,
-    pub md: HashMap<String, String>,
+    pub data: HashMap<String, String>,
 }
 
 impl CommandDocInstance {
     pub fn new() -> Self {
-        let mut data: Vec<CommandDocData> = Vec::new();
-        let mut md: HashMap<String, String> = HashMap::new();
+        let mut data: HashMap<String, String> = HashMap::new();
 
-        for file in COMMAND_DOCS.files() {
-            let file_name = file.path();
-            let name = file_name.file_stem().and_then(|s| s.to_str()).unwrap();
-
-            if let Some(content) = file.contents_utf8() {
-                if let Ok(json) = serde_json::from_str::<CommandDocData>(content) {
-                    data.push(json);
-                } else {
-                    md.insert(name.to_string(), content.to_string());
-                }
-            }
+        for entry in COMMAND_DOCS.entries() {
+            handle_entry(entry, &mut data);
         }
 
-        Self { md, data }
+        Self { data }
     }
 }
 
-// /v1/docs/commands
-pub async fn get_available_docs(docs: web::Data<CommandDocInstance>) -> HttpResponse {
+fn handle_entry(entry: &DirEntry<'_>, data: &mut HashMap<String, String>) {
+    if let Some(dir) = entry.as_dir() {
+        handle_dir(dir.entries(), data);
+    }
+
+    if let Some(file) = entry.as_file() {
+        if let Some(path) = file.path().to_str() {
+            if let Some(contents) = file.contents_utf8() {
+                let path = if path.ends_with(".md") {
+                    path[..path.len() - 3].to_string()
+                } else {
+                    path.to_string()
+                };
+
+                data.insert(path, contents.to_string());
+            }
+        }
+    }
+}
+
+fn handle_dir(entries: &[DirEntry<'_>], data: &mut HashMap<String, String>) {
+    for entry in entries {
+        handle_entry(entry, data);
+    }
+}
+
+pub async fn get_available_docs(data: web::Data<CommandDocInstance>) -> HttpResponse {
     HttpResponse::Ok().json(Response {
         status_code: 200,
         message: None,
-        data: Some(docs.data.clone()),
+        data: Some(data.data.keys().cloned().collect::<Vec<String>>()),
     })
 }
 
-// /v1/docs/command/ping
-pub async fn get_command_docs(
-    name: web::Path<String>,
-    docs: web::Data<CommandDocInstance>,
-) -> HttpResponse {
-    if let Some(md) = docs.md.get(&*name) {
+pub async fn get_doc(path: web::Path<String>, data: web::Data<CommandDocInstance>) -> HttpResponse {
+    if let Some(entry) = data.data.get(&*path) {
         return HttpResponse::Ok().json(Response {
             status_code: 200,
             message: None,
-            data: Some(md.clone()),
+            data: Some(CommandDoc {
+                name: path.clone(),
+                content: entry.clone(),
+            }),
         });
     }
 
-    HttpResponse::BadRequest().json(Response {
-        status_code: 401,
-        message: Some(format!("\"{}\" documentation not found", name)),
-        data: None::<Vec<String>>,
+    HttpResponse::NotFound().json(Response {
+        status_code: 404,
+        message: Some(format!("Documentation \"{}\" does not exist!", path)),
+        data: None::<CommandDoc>,
     })
 }
