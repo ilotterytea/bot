@@ -47,6 +47,8 @@ async fn main() {
     // Activating static variable
     *START_TIME;
 
+    env_logger::init();
+
     println!("Hello, world!");
     dotenvy::dotenv().expect("Failed to load .env file");
 

@@ -34,3 +34,5 @@ twitch-irc = "5.0.1"
 twitch_api = { version = "0.7.0-rc.6", features = ["twitch_oauth2", "helix", "reqwest", "eventsub"] }
 version_check = "0.9.4"
 toml = "0.8.8"
+env_logger = "0.10.1"
+log = "0.4.20"
