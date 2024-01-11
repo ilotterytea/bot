@@ -282,6 +282,7 @@ dependencies = [
  "serde",
  "serde_json",
  "toml",
+ "twitch_api",
 ]
 
 [[package]]
