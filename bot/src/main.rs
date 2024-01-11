@@ -2,6 +2,7 @@ use std::{env, sync::Arc, time::Duration};
 
 use crate::{
     commands::CommandLoader,
+    config::{Configuration, BOT_CONFIGURATION_FILE},
     handlers::{handle_chat_message, handle_timers},
     instance_bundle::InstanceBundle,
     localization::Localizator,
@@ -16,6 +17,7 @@ use common::{
 };
 use diesel::{insert_into, ExpressionMethods, QueryDsl, RunQueryDsl};
 use eyre::Context;
+use log::info;
 use reqwest::Client;
 use tokio::sync::Mutex;
 use twitch_api::{
@@ -31,6 +33,7 @@ use twitch_irc::{
 use websockets::{livestream::TwitchLivestreamClient, WebsocketData};
 
 mod commands;
+mod config;
 mod handlers;
 mod instance_bundle;
 mod localization;
@@ -49,7 +52,13 @@ async fn main() {
 
     env_logger::init();
 
-    println!("Hello, world!");
+    info!("Starting Twitch bot...");
+
+    let config = match toml::from_str::<Configuration>(BOT_CONFIGURATION_FILE) {
+        Ok(v) => v,
+        Err(e) => panic!("Failed to parse TOML configuration file: {}", e),
+    };
+
     dotenvy::dotenv().expect("Failed to load .env file");
 
     let localizator = Arc::new(Localizator::new());
