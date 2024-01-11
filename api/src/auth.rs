@@ -28,6 +28,33 @@ pub struct AuthenticationSuccess {
     pub state: String,
 }
 
+#[derive(Deserialize)]
+pub struct AuthenticationFail {
+    pub error: String,
+    pub error_description: String,
+    pub state: String,
+}
+
+pub async fn authenticate(
+    config: web::Data<Configuration>,
+    success: Option<web::Query<AuthenticationSuccess>>,
+    fail: Option<web::Query<AuthenticationFail>>,
+) -> HttpResponse {
+    if let Some(success) = success {
+        return authenticate_success(config, success).await;
+    }
+
+    if let Some(fail) = fail {
+        return authenticate_fail(fail).await;
+    }
+
+    HttpResponse::BadRequest().json(Response {
+        status_code: 400,
+        message: None,
+        data: None::<AuthenticationResponse>,
+    })
+}
+
 #[derive(Deserialize, Debug)]
 pub struct TwitchAccessTokenResponse {
     pub access_token: String,
@@ -156,4 +183,40 @@ pub async fn authenticate_success(
             data: None::<AuthenticationResponse>,
         }),
     }
+}
+
+pub async fn authenticate_fail(query: web::Query<AuthenticationFail>) -> HttpResponse {
+    let conn = &mut establish_connection();
+
+    let q_state = query.state.clone();
+
+    match ss::session_states
+        .find(&q_state)
+        .get_result::<SessionState>(conn)
+    {
+        Ok(v) => {
+            delete(ss::session_states.find(&v.state))
+                .execute(conn)
+                .expect("Failed to delete state");
+        }
+        Err(_) => {
+            return HttpResponse::BadRequest().json(Response {
+                status_code: 400,
+                message: Some(format!(
+                    "The provided state \"{}\" isn't registered in my database.",
+                    q_state
+                )),
+                data: None::<AuthenticationResponse>,
+            })
+        }
+    }
+
+    HttpResponse::BadRequest().json(Response {
+        status_code: 400,
+        message: Some(format!(
+            "Failed to retrieve the code. Error: {}. Reason: {}",
+            query.error, query.error_description
+        )),
+        data: None::<AuthenticationResponse>,
+    })
 }
