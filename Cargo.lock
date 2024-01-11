@@ -278,6 +278,7 @@ dependencies = [
  "diesel",
  "dotenvy",
  "include_dir",
+ "rand",
  "reqwest",
  "serde",
  "serde_json",
