@@ -66,11 +66,8 @@ async fn main() {
     let (mut irc_incoming_messages, irc_client) =
         TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(
             ClientConfig::new_simple(StaticLoginCredentials::new(
-                env::var("BOT_USERNAME")
-                    .unwrap_or_else(|_| panic!("No BOT_USERNAME value specified in .env file!")),
-                Some(env::var("BOT_OAUTH2_TOKEN").unwrap_or_else(|_| {
-                    panic!("No BOT_OAUTH2_TOKEN value specified in .env file!")
-                })),
+                config.credentials.username.clone(),
+                Some(config.credentials.password.clone()),
             )),
         );
 
@@ -85,20 +82,17 @@ async fn main() {
     .wrap_err_with(|| "when creating client")
     .unwrap();
 
-    let helix_token =
-        Arc::new(
-            match UserToken::from_token(
-                &reqwest_client,
-                AccessToken::new(env::var("BOT_ACCESS_TOKEN").unwrap_or_else(|_| {
-                    panic!("No BOT_ACCESS_TOKEN value specified in .env file!")
-                })),
-            )
-            .await
-            {
-                Ok(token) => token,
-                Err(e) => panic!("Failed to construct user token: {}", e),
-            },
-        );
+    let helix_token = Arc::new(
+        match UserToken::from_token(
+            &reqwest_client,
+            AccessToken::from(config.credentials.password.clone()),
+        )
+        .await
+        {
+            Ok(token) => token,
+            Err(e) => panic!("Failed to construct user token: {}", e),
+        },
+    );
 
     let helix_client = Arc::new(HelixClient::with_client(reqwest_client));
 
