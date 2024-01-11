@@ -89,6 +89,13 @@ impl Request {
                     .expect("Failed to get a user after creating it")
             });
 
+        if sender.alias_name.ne(&message.sender.login) {
+            update(us::users.find(sender.id))
+                .set(us::alias_name.eq(&message.sender.login))
+                .execute(conn)
+                .expect("Failed to update user name");
+        }
+
         let mut badges_iter = message.badges.iter();
 
         let level_of_rights = if sender.alias_id == channel.alias_id {
