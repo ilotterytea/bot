@@ -2,7 +2,6 @@ use std::{env, sync::Arc, time::Duration};
 
 use crate::{
     commands::CommandLoader,
-    config::{Configuration, BOT_CONFIGURATION_FILE},
     handlers::{handle_chat_message, handle_timers},
     instance_bundle::InstanceBundle,
     localization::Localizator,
@@ -11,6 +10,7 @@ use crate::{
 };
 
 use common::{
+    config::{Configuration, BOT_CONFIGURATION_FILE},
     establish_connection,
     models::NewChannel,
     schema::{channels::dsl as ch, events::dsl as ev},
@@ -33,7 +33,6 @@ use twitch_irc::{
 use websockets::{livestream::TwitchLivestreamClient, WebsocketData};
 
 mod commands;
-mod config;
 mod handlers;
 mod instance_bundle;
 mod localization;
