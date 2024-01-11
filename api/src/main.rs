@@ -3,6 +3,7 @@ use std::io::Result;
 
 use actix_web::{web, App, HttpServer};
 use common::config::{Configuration, BOT_CONFIGURATION_FILE};
+use dotenvy::dotenv;
 use serde::{Deserialize, Serialize};
 
 mod commands;
@@ -16,6 +17,7 @@ pub struct Response<T> {
 
 #[actix_web::main]
 async fn main() -> Result<()> {
+    dotenv().expect("Failed to load .env");
     let (host, port) = ("0.0.0.0", 8085);
     println!("Running the API server at {}:{}", host, port);
 
