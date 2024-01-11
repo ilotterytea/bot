@@ -15,9 +15,9 @@ use common::{
     models::NewChannel,
     schema::{channels::dsl as ch, events::dsl as ev},
 };
-use diesel::{insert_into, ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::{insert_into, update, ExpressionMethods, QueryDsl, RunQueryDsl};
 use eyre::Context;
-use log::info;
+use log::{debug, error, info};
 use reqwest::Client;
 use tokio::sync::Mutex;
 use twitch_api::{
@@ -98,46 +98,54 @@ async fn main() {
 
     let conn = &mut establish_connection();
 
-    let mut channel_alias_ids = ch::channels
+    let mut channels: Vec<common::models::Channel> = ch::channels
         .filter(ch::opt_outed_at.is_null())
-        .select(ch::alias_id)
-        .load::<i32>(conn)
+        .load::<common::models::Channel>(conn)
         .expect("Failed to get alias IDs");
 
     let bot_user_id = helix_token.user_id.clone().take().parse::<i32>().unwrap();
 
-    if channel_alias_ids
-        .iter()
-        .find(|x| x == &&bot_user_id)
-        .is_none()
-    {
-        insert_into(ch::channels)
-            .values([NewChannel {
-                alias_id: bot_user_id,
-                alias_name: helix_token.login.clone().take(),
-            }])
-            .execute(conn)
-            .expect("Failed to create a bot channel data");
-
-        channel_alias_ids.push(bot_user_id);
+    if !channels.iter().any(|x| x.alias_id == bot_user_id) {
+        channels.push(
+            insert_into(ch::channels)
+                .values([NewChannel {
+                    alias_id: bot_user_id,
+                    alias_name: helix_token.login.clone().take(),
+                }])
+                .get_result(conn)
+                .expect("Failed to create a bot channel data"),
+        );
     }
 
-    for id in channel_alias_ids {
-        let id = id.to_string();
-
+    for mut channel in channels {
         if let Ok(Some(user)) = helix_client
-            .get_user_from_id(UserIdRef::from_str(id.as_str()), &*helix_token)
+            .get_user_from_id(
+                UserIdRef::from_str(channel.alias_id.to_string().as_str()),
+                &*helix_token,
+            )
             .await
         {
-            irc_client
-                .join(user.login.to_string())
-                .expect("Failed to join a channel");
+            let login = user.login.to_string();
 
-            println!("Successfully joined #{}", &user.login);
+            if channel.alias_name.ne(&login) {
+                update(ch::channels.find(&channel.id))
+                    .set(ch::alias_name.eq(&login))
+                    .execute(conn)
+                    .expect("Failed to update channel name");
+
+                channel.alias_name = login.clone();
+            }
+
+            irc_client.join(login).expect("Failed to join a channel");
+
+            info!(
+                "Joined chat room: ID: {}, alias ID: {}, alias name: {}",
+                channel.id, channel.alias_id, channel.alias_name
+            );
         } else {
-            println!(
-                "Failed to get user data with ID {} when joining channels",
-                id
+            error!(
+                "Failed to join chat room: ID: {}, alias ID: {}, alias name: {}",
+                channel.id, channel.alias_id, channel.alias_name
             );
         }
     }
