@@ -1,4 +1,4 @@
-use crate::commands::*;
+use crate::{auth::*, commands::*};
 use std::io::Result;
 
 use actix_web::{web, App, HttpServer};
@@ -6,6 +6,7 @@ use common::config::{Configuration, BOT_CONFIGURATION_FILE};
 use dotenvy::dotenv;
 use serde::{Deserialize, Serialize};
 
+mod auth;
 mod commands;
 
 #[derive(Deserialize, Serialize)]
@@ -35,11 +36,16 @@ async fn main() -> Result<()> {
             .app_data(command_docs.clone())
             .app_data(config_data.clone())
             .service(
-                web::scope("/v1").service(
-                    web::scope("/docs")
-                        .service(web::resource("").get(get_available_docs))
-                        .service(web::resource("/{name:.*}").get(get_doc)),
-                ),
+                web::scope("/v1")
+                    .service(
+                        web::scope("/docs")
+                            .service(web::resource("").get(get_available_docs))
+                            .service(web::resource("/{name:.*}").get(get_doc)),
+                    )
+                    .service(
+                        web::scope("/authenticate")
+                            .service(web::resource("").get(authenticate_success)),
+                    ),
             )
     })
     .bind((host, port))?
