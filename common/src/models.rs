@@ -3,8 +3,9 @@ use std::{error::Error, str::FromStr};
 use crate::schema::*;
 use chrono::NaiveDateTime;
 use diesel::{Associations, Identifiable, Insertable, Queryable};
+use serde::Serialize;
 
-#[derive(Queryable, Identifiable, Clone)]
+#[derive(Serialize, Queryable, Identifiable, Clone)]
 pub struct Channel {
     pub id: i32,
     pub alias_id: i32,
@@ -20,7 +21,7 @@ pub struct NewChannel {
     pub alias_name: String,
 }
 
-#[derive(Queryable, Identifiable, Associations, Clone)]
+#[derive(Serialize, Queryable, Identifiable, Associations, Clone)]
 #[diesel(belongs_to(Channel, foreign_key = channel_id))]
 #[diesel(table_name = channel_preferences)]
 pub struct ChannelPreference {
@@ -38,7 +39,7 @@ pub struct NewChannelPreference {
     pub language: String,
 }
 
-#[derive(Queryable, Clone)]
+#[derive(Serialize, Queryable, Clone)]
 pub struct User {
     pub id: i32,
     pub alias_id: i32,
@@ -54,14 +55,14 @@ pub struct NewUser {
     pub alias_name: String,
 }
 
-#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq)]
+#[derive(Serialize, diesel_derive_enum::DbEnum, Debug, PartialEq)]
 #[ExistingTypePath = "crate::schema::sql_types::ActionStatuses"]
 pub enum ActionStatus {
     Ok,
     Error,
 }
 
-#[derive(Queryable, Identifiable, Associations)]
+#[derive(Serialize, Queryable, Identifiable, Associations)]
 #[diesel(belongs_to(Channel, foreign_key = channel_id))]
 #[diesel(belongs_to(User, foreign_key = user_id))]
 #[diesel(table_name = actions)]
@@ -90,7 +91,7 @@ pub struct NewAction {
     pub processed_at: NaiveDateTime,
 }
 
-#[derive(Queryable, Identifiable, Associations, Clone)]
+#[derive(Serialize, Queryable, Identifiable, Associations, Clone)]
 #[diesel(belongs_to(Channel, foreign_key = channel_id))]
 #[diesel(table_name = timers)]
 pub struct Timer {
@@ -112,7 +113,7 @@ pub struct NewTimer {
     pub interval_sec: i64,
 }
 
-#[derive(Queryable, Identifiable, Associations, Clone)]
+#[derive(Serialize, Queryable, Identifiable, Associations, Clone)]
 #[diesel(belongs_to(Channel, foreign_key = channel_id))]
 #[diesel(table_name = custom_commands)]
 pub struct CustomCommand {
@@ -133,7 +134,7 @@ pub struct NewCustomCommand {
     pub messages: Vec<String>,
 }
 
-#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq, Clone)]
+#[derive(Serialize, diesel_derive_enum::DbEnum, Debug, PartialEq, Clone)]
 #[ExistingTypePath = "crate::schema::sql_types::EventType"]
 pub enum EventType {
     Live,
@@ -170,13 +171,13 @@ impl ToString for EventType {
     }
 }
 
-#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq)]
+#[derive(Serialize, diesel_derive_enum::DbEnum, Debug, PartialEq)]
 #[ExistingTypePath = "crate::schema::sql_types::EventFlag"]
 pub enum EventFlag {
     Massping,
 }
 
-#[derive(Queryable, Identifiable, Associations)]
+#[derive(Serialize, Queryable, Identifiable, Associations)]
 #[diesel(belongs_to(Channel, foreign_key = channel_id))]
 pub struct Event {
     pub id: i32,
@@ -198,7 +199,7 @@ pub struct NewEvent {
     pub message: String,
 }
 
-#[derive(Queryable, Identifiable, Associations)]
+#[derive(Serialize, Queryable, Identifiable, Associations)]
 #[diesel(belongs_to(Event, foreign_key = event_id))]
 #[diesel(belongs_to(User, foreign_key = user_id))]
 pub struct EventSubscription {
@@ -214,7 +215,7 @@ pub struct NewEventSubscription {
     pub user_id: i32,
 }
 
-#[derive(diesel_derive_enum::DbEnum, Debug, PartialEq, Clone, Eq, PartialOrd, Ord)]
+#[derive(Serialize, diesel_derive_enum::DbEnum, Debug, PartialEq, Clone, Eq, PartialOrd, Ord)]
 #[ExistingTypePath = "crate::schema::sql_types::LevelOfRights"]
 pub enum LevelOfRights {
     Suspended,
@@ -225,7 +226,7 @@ pub enum LevelOfRights {
     Broadcaster,
 }
 
-#[derive(Queryable, Identifiable, Associations, Clone)]
+#[derive(Serialize, Queryable, Identifiable, Associations, Clone)]
 #[diesel(belongs_to(User, foreign_key = user_id))]
 #[diesel(belongs_to(Channel, foreign_key = channel_id))]
 pub struct Right {
@@ -244,7 +245,7 @@ pub struct NewRight {
     pub level: LevelOfRights,
 }
 
-#[derive(Queryable, Identifiable, Associations)]
+#[derive(Serialize, Queryable, Identifiable, Associations)]
 #[diesel(belongs_to(User, foreign_key = user_id))]
 pub struct Session {
     pub id: i32,
@@ -265,7 +266,7 @@ pub struct NewSession {
     pub expires_at: NaiveDateTime,
 }
 
-#[derive(Queryable)]
+#[derive(Serialize, Queryable)]
 pub struct SessionState {
     pub state: String,
     pub created_at: NaiveDateTime,
