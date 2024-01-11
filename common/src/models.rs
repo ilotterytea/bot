@@ -264,3 +264,15 @@ pub struct NewSession {
     pub scopes: Vec<Option<String>>,
     pub expires_at: NaiveDateTime,
 }
+
+#[derive(Queryable)]
+pub struct SessionState {
+    pub state: String,
+    pub created_at: NaiveDateTime,
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = session_states)]
+pub struct NewSessionState {
+    pub state: String,
+}
