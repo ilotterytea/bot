@@ -104,6 +104,13 @@ diesel::table! {
 }
 
 diesel::table! {
+    session_states (state) {
+        state -> Varchar,
+        created_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     sessions (id) {
         id -> Int4,
         user_id -> Int4,
@@ -156,6 +163,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     event_subscriptions,
     events,
     rights,
+    session_states,
     sessions,
     timers,
     users,
