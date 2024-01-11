@@ -104,6 +104,17 @@ diesel::table! {
 }
 
 diesel::table! {
+    sessions (id) {
+        id -> Int4,
+        user_id -> Int4,
+        access_token -> Varchar,
+        refresh_token -> Varchar,
+        scopes -> Array<Nullable<Text>>,
+        expires_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     timers (id) {
         id -> Int4,
         name -> Varchar,
@@ -134,6 +145,7 @@ diesel::joinable!(event_subscriptions -> users (user_id));
 diesel::joinable!(events -> channels (channel_id));
 diesel::joinable!(rights -> channels (channel_id));
 diesel::joinable!(rights -> users (user_id));
+diesel::joinable!(sessions -> users (user_id));
 diesel::joinable!(timers -> channels (channel_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
@@ -144,6 +156,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     event_subscriptions,
     events,
     rights,
+    sessions,
     timers,
     users,
 );
