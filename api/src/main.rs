@@ -2,6 +2,7 @@ use crate::commands::*;
 use std::io::Result;
 
 use actix_web::{web, App, HttpServer};
+use common::config::{Configuration, BOT_CONFIGURATION_FILE};
 use serde::{Deserialize, Serialize};
 
 mod commands;
@@ -20,14 +21,24 @@ async fn main() -> Result<()> {
 
     let command_docs = web::Data::new(CommandDocInstance::new());
 
+    let config: Configuration = match toml::from_str(BOT_CONFIGURATION_FILE) {
+        Ok(v) => v,
+        Err(e) => panic!("Failed to parse TOML configuration file: {}", e),
+    };
+
+    let config_data = web::Data::new(config);
+
     HttpServer::new(move || {
-        App::new().app_data(command_docs.clone()).service(
-            web::scope("/v1").service(
-                web::scope("/docs")
-                    .service(web::resource("").get(get_available_docs))
-                    .service(web::resource("/{name:.*}").get(get_doc)),
-            ),
-        )
+        App::new()
+            .app_data(command_docs.clone())
+            .app_data(config_data.clone())
+            .service(
+                web::scope("/v1").service(
+                    web::scope("/docs")
+                        .service(web::resource("").get(get_available_docs))
+                        .service(web::resource("/{name:.*}").get(get_doc)),
+                ),
+            )
     })
     .bind((host, port))?
     .run()
