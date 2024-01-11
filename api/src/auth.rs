@@ -66,7 +66,7 @@ pub struct TwitchAccessTokenResponse {
     pub access_token: String,
     pub refresh_token: String,
     pub expires_in: i64,
-    pub scope: Vec<String>,
+    pub scope: Option<Vec<String>>,
 }
 
 pub async fn authenticate_success(
@@ -152,13 +152,19 @@ pub async fn authenticate_success(
                             .expect("Failed to insert a new user")
                     });
 
+                let scopes: Vec<Option<String>> = if let Some(scopes) = json.scope {
+                    scopes.iter().cloned().map(|x| Some(x)).collect()
+                } else {
+                    Vec::new()
+                };
+
                 let s = insert_into(se::sessions)
                     .values([NewSession {
                         access_token: json.access_token.clone(),
                         refresh_token: json.refresh_token,
                         expires_at,
                         user_id: user.id,
-                        scopes: json.scope.iter().cloned().map(|x| Some(x)).collect(),
+                        scopes,
                     }])
                     .get_result::<Session>(conn)
                     .expect("Failed to insert a new session");
