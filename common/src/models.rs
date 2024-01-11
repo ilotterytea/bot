@@ -243,3 +243,24 @@ pub struct NewRight {
     pub channel_id: i32,
     pub level: LevelOfRights,
 }
+
+#[derive(Queryable, Identifiable, Associations)]
+#[diesel(belongs_to(User, foreign_key = user_id))]
+pub struct Session {
+    pub id: i32,
+    pub user_id: i32,
+    pub access_token: String,
+    pub refresh_token: String,
+    pub scopes: Vec<Option<String>>,
+    pub expires_at: NaiveDateTime,
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = sessions)]
+pub struct NewSession {
+    pub user_id: i32,
+    pub access_token: String,
+    pub refresh_token: String,
+    pub scopes: Vec<Option<String>>,
+    pub expires_at: NaiveDateTime,
+}
