@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
                             .service(web::resource("/{name:.*}").get(get_doc)),
                     )
                     .service(
-                        web::scope("/authenticate").service(web::resource("").get(authenticate)),
+                        web::scope("/authenticate").service(web::resource("").to(authenticate)),
                     ),
             )
     })
