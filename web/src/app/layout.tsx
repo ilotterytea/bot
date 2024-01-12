@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { CookiesProvider } from 'next-client-cookies/server';
+import { NextUIProvider } from '@nextui-org/react';
+import { Providers } from './providers';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,7 +21,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <CookiesProvider>{children}</CookiesProvider>
+        <CookiesProvider>
+          <Providers>
+            {children}
+          </Providers>
+        </CookiesProvider>
       </body>
     </html>
   )
