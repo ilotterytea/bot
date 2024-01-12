@@ -16,6 +16,7 @@ use crate::Response;
 
 #[derive(Serialize)]
 pub struct AuthenticationResponse {
+    pub client_id: String,
     pub token: String,
     pub expires_at: NaiveDateTime,
     pub id: i32,
@@ -111,7 +112,7 @@ pub async fn authenticate_success(
 
     let client = reqwest::Client::new();
     let form = vec![
-        ("client_id", twitch_app_credentials.client_id),
+        ("client_id", twitch_app_credentials.client_id.clone()),
         ("client_secret", twitch_app_credentials.client_secret),
         ("code", query.code.clone()),
         ("grant_type", "authorization_code".into()),
@@ -173,6 +174,7 @@ pub async fn authenticate_success(
                     status_code: 200,
                     message: None,
                     data: Some(AuthenticationResponse {
+                        client_id: twitch_app_credentials.client_id,
                         token: json.access_token,
                         expires_at: s.expires_at,
                         id: s.id,
