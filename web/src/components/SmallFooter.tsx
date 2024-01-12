@@ -10,7 +10,7 @@ export const SmallFooter = (): JSX.Element => (
                 <Link href={"https://git.ilotterytea.kz/tea/bot"} className="text-teal-500 hover:text-teal-600 transition-colors">
                     Powered by ITB2.
                 </Link>
-                <p>Licensed under MIT.</p>
+                <p>Licensed under WTFPL.</p>
             </div>
         </div>
     </div>
