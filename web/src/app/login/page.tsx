@@ -52,7 +52,7 @@ function retrieveTwitchCode(router: AppRouterInstance) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    "scopes": []
+                    "scopes": ["user:read:moderated_channels"]
                 })
             })
                 .then((response) => response.json())
