@@ -23,9 +23,10 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     );
 
     let j = await r.json();
+    let user = j.data[0];
 
     // maybe it can be done better
-    response.cookies.set("twitch_user_data", JSON.stringify(j));
+    response.cookies.set("twitch_user_data", JSON.stringify(user));
 
     return response;
 }
