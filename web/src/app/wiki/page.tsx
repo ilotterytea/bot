@@ -1,3 +1,5 @@
+"use client";
+
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar"
 import { MDXRemote } from "next-mdx-remote/rsc";
