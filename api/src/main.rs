@@ -1,4 +1,4 @@
-use crate::{auth::*, commands::*};
+use crate::{auth::*, channels::*, commands::*};
 use std::io::Result;
 
 use actix_web::{web, App, HttpServer};
@@ -7,6 +7,7 @@ use dotenvy::dotenv;
 use serde::{Deserialize, Serialize};
 
 mod auth;
+mod channels;
 mod commands;
 
 #[derive(Deserialize, Serialize)]
@@ -44,7 +45,8 @@ async fn main() -> Result<()> {
                     )
                     .service(
                         web::scope("/authenticate").service(web::resource("").to(authenticate)),
-                    ),
+                    )
+                    .service(web::scope("/channels").service(web::resource("").get(get_channels))),
             )
     })
     .bind((host, port))?
