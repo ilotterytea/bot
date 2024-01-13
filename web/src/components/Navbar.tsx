@@ -85,17 +85,25 @@ const Navbar = () : JSX.Element => {
                                     (
                                         <DropdownSection showDivider={true}>
                                             {
-                                                channels.filter((_, index) => index !== channelIndex).map((value, index) => (
-                                                    <DropdownItem key={index}>
-                                                        <User
-                                                            name={value.login}
-                                                            avatarProps={{
-                                                                src: value.profile_image_url,
-                                                                size: "sm"
-                                                            }}
-                                                        />
-                                                    </DropdownItem>
-                                                ))
+                                                channels.map((value, index) => 
+                                                index !== channelIndex ?
+                                                (<DropdownItem key={index}>
+                                                    <User
+                                                        name={value.login}
+                                                        avatarProps={{
+                                                            src: value.profile_image_url,
+                                                            size: "sm"
+                                                        }}
+                                                        onClick={e => {
+                                                            setChannelIndex(index);
+                                                            console.log(index);
+                                                            console.log(channelIndex);
+                                                        }}
+                                                    />
+                                                </DropdownItem>)
+                                                // uuuuh
+                                                : (<DropdownItem className="hidden" />)
+                                                )
                                             }
                                         </DropdownSection>
                                     )
