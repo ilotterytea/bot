@@ -1,17 +1,17 @@
 'use client'
 
-import Navbar from '@/components/Navbar'
 import { ReactNode } from 'react';
 import ChatBox from '@/components/ChatEmulation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { faBell, faClock, faKeyboard, faMessage } from '@fortawesome/free-solid-svg-icons';
 import Footer from '@/components/Footer';
+import AppNavbar from '@/components/Navbar';
 
 export default function Home() {
   return (
     <main>
-      <Navbar />
+      <AppNavbar />
       <div className="w-full min-h-screen flex flex-col text-lg space-y-64">
         {
           // Join promotion

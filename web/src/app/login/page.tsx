@@ -1,6 +1,6 @@
 "use client";
 
-import Navbar from "@/components/Navbar";
+import AppNavbar from "@/components/Navbar";
 import { SmallFooter } from "@/components/SmallFooter";
 import { faCheck, faCircleNotch, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -24,7 +24,7 @@ export default function Page() {
 
     return (
         <main className="w-full min-h-screen flex flex-col animate-mainscreen bg-gradient-to-b from-neutral-50 dark:from-neutral-950 via-teal-50 dark:via-teal-950 to-neutral-100 dark:to-neutral-900">
-            <Navbar />
+            <AppNavbar />
             <div className="w-full grow flex flex-row pt-16 justify-center items-center">
                 <div className="flex items-center flex-row space-x-4 p-4 bg-neutral-100 dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 border-2 rounded-lg">
                     {
