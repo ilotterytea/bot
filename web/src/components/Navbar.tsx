@@ -41,12 +41,6 @@ const AppNavbar = () : JSX.Element => {
                         Home
                     </Link>
                 </NavbarItem>
-                <NavbarItem>
-                    <Link href={"/wiki"}>
-                        Wiki
-                    </Link>
-                </NavbarItem>
-
             </NavbarContent>
         </Navbar>
     );
