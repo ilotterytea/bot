@@ -1,7 +1,7 @@
 "use client";
 
 import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar"
+import AppNavbar from "@/components/Navbar";
 import { MDXRemote } from "next-mdx-remote/rsc";
 
 export default async function Page() {
@@ -14,8 +14,8 @@ export async function wikiPage(name: string): Promise<JSX.Element> {
 
     return (
         <main className="w-full min-h-screen flex flex-col">
-            <Navbar />
-            <div className="w-full h-full flex flex-row pt-16">
+            <AppNavbar />
+            <div className="w-full h-full flex flex-row">
                 {
                     // Sidebar
                 }

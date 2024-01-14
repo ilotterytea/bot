@@ -1,11 +1,12 @@
 import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Avatar, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, User } from "@nextui-org/react";
+import { Avatar, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Navbar, NavbarBrand, NavbarContent, NavbarItem, User } from "@nextui-org/react";
 import { useCookies } from "next-client-cookies";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-const Navbar = () : JSX.Element => {
+const AppNavbar = () : JSX.Element => {
     const cookies = useCookies();
 
     const [channels, setChannels] = useState([]);
@@ -27,19 +28,36 @@ const Navbar = () : JSX.Element => {
     });
 
     return (
+        <Navbar isBordered>
+            <NavbarBrand>
+                <Avatar
+                    src={"/bot_avatar.png"}
+                    radius="lg"
+                />
+            </NavbarBrand>
+            <NavbarContent className="hidden sm:flex gap-4" justify="center">
+                <NavbarItem>
+                    <Link href={"/"}>
+                        Home
+                    </Link>
+                </NavbarItem>
+                <NavbarItem>
+                    <Link href={"/wiki"}>
+                        Wiki
+                    </Link>
+                </NavbarItem>
+
+            </NavbarContent>
+        </Navbar>
+    );
+
+    return (
         <div className="w-full h-16 flex justify-around items-center text-lg fixed dark:bg-neutral-900 dark:bg-opacity-50 backdrop-blur-xl">
             {
                 // Logo
             }
             <div className="flex h-full p-2">
-                <Image
-                    alt={"@imteabot"}
-                    src={"/bot_avatar.png"}
-                    width={128}
-                    height={128}
-
-                    className="rounded-lg h-full w-fit"
-                />
+                
             </div>
 
             {
@@ -128,4 +146,4 @@ const NavbarButton = ({stylized_name, url}: {stylized_name: string, url: string}
     </a>
 );
 
-export default Navbar;
+export default AppNavbar;
