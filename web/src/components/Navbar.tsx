@@ -96,8 +96,7 @@ const Navbar = () : JSX.Element => {
                                                         }}
                                                         onClick={e => {
                                                             setChannelIndex(index);
-                                                            console.log(index);
-                                                            console.log(channelIndex);
+                                                            cookies.set("ttv_moderating_index", index.toString());
                                                         }}
                                                     />
                                                 </DropdownItem>)
