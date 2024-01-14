@@ -12,6 +12,15 @@ const nextConfig = {
         hostname: "static-cdn.jtvnw.net"
       }
     ]
+  },
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/under-construction",
+        permanent: false
+      }
+    ]
   }
 }
  
