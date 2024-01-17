@@ -92,31 +92,45 @@ impl Command for EmoteTopCommand {
                         ));
                     }
 
-                    let mut emote_usages = response.data.unwrap_or_default();
+                    let emote_usages = response.data.unwrap_or_default();
+
+                    let mut usages: Vec<(String, i32)> = Vec::new();
+
+                    for usage in emote_usages {
+                        if let Some(emote) = emotes.iter().find(|x| x.emote_id.eq(&usage.emote_id))
+                        {
+                            if let Some(u_emote) = usages.iter_mut().find(|x| x.0.eq(&emote.name)) {
+                                if u_emote.1 < usage.usage_count {
+                                    u_emote.1 = usage.usage_count;
+                                }
+
+                                continue;
+                            }
+
+                            usages.push((emote.name.clone(), usage.usage_count));
+                        }
+                    }
 
                     if subcommand_id.eq("asc") {
-                        emote_usages.sort();
+                        usages.sort();
                     } else {
-                        emote_usages.sort_by(|a, b| b.usage_count.cmp(&a.usage_count));
+                        usages.sort_by(|a, b| b.1.cmp(&a.1));
                     }
 
                     if amount > 50 {
                         amount = 50;
                     }
 
-                    if amount > emote_usages.len() {
-                        amount = emote_usages.len()
+                    if amount > usages.len() {
+                        amount = usages.len()
                     }
 
-                    emote_usages.drain(amount..);
+                    usages.drain(amount..);
 
                     let mut message_parts: Vec<String> = Vec::new();
 
-                    for usage in &emote_usages {
-                        if let Some(emote) = emotes.iter().find(|x| x.emote_id.eq(&usage.emote_id))
-                        {
-                            message_parts.push(format!("{} ({})", emote.name, usage.usage_count));
-                        }
+                    for usage in usages {
+                        message_parts.push(format!("{} ({})", usage.0, usage.1));
                     }
 
                     if message_parts.is_empty() {
