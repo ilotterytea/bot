@@ -1,4 +1,4 @@
-use std::{env, sync::Arc, time::Duration};
+use std::{env, process::exit, sync::Arc, time::Duration};
 
 use crate::{
     commands::CommandLoader,
@@ -15,7 +15,9 @@ use common::{
     models::NewChannel,
     schema::{channels::dsl as ch, events::dsl as ev},
 };
-use diesel::{insert_into, update, ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::{
+    insert_into, update, Connection, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl,
+};
 use eyre::Context;
 use log::{debug, error, info};
 use reqwest::Client;
@@ -58,7 +60,28 @@ async fn main() {
         Err(e) => panic!("Failed to parse TOML configuration file: {}", e),
     };
 
-    dotenvy::dotenv().expect("Failed to load .env file");
+    let database_url = format!(
+        "postgres://{}:{}@{}/{}",
+        config.database_connection.username,
+        config.database_connection.password,
+        config.database_connection.hostname,
+        config.database_connection.database_name
+    );
+
+    match PgConnection::establish(&database_url) {
+        Ok(v) => {
+            info!("PostgreSQL connection looks good!");
+            env::set_var("DATABASE_URL", database_url);
+            drop(v);
+        }
+        Err(_) => {
+            error!(
+                "Failed to connect to PostgreSQL database on {}",
+                database_url
+            );
+            exit(1);
+        }
+    }
 
     let localizator = Arc::new(Localizator::new());
     let command_loader = CommandLoader::new();
