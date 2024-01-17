@@ -111,11 +111,13 @@ impl Command for EmoteTopCommand {
                         }
                     }
 
-                    if subcommand_id.eq("asc") {
-                        usages.sort();
-                    } else {
-                        usages.sort_by(|a, b| b.1.cmp(&a.1));
-                    }
+                    usages.sort_by(|a, b| {
+                        if subcommand_id.eq("asc") {
+                            a.1.cmp(&b.1)
+                        } else {
+                            b.1.cmp(&a.1)
+                        }
+                    });
 
                     if amount > 50 {
                         amount = 50;
