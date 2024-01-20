@@ -4,6 +4,7 @@ use crate::schema::*;
 use chrono::NaiveDateTime;
 use diesel::{Associations, Identifiable, Insertable, Queryable};
 use serde::Serialize;
+use uuid::Uuid;
 
 #[derive(Serialize, Queryable, Identifiable, Clone)]
 pub struct Channel {
@@ -276,4 +277,11 @@ pub struct SessionState {
 #[diesel(table_name = session_states)]
 pub struct NewSessionState {
     pub state: String,
+}
+
+#[derive(Queryable)]
+pub struct UserToken {
+    pub user_id: i32,
+    pub token: Uuid,
+    pub created_at: NaiveDateTime,
 }
