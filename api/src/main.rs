@@ -46,7 +46,13 @@ async fn main() -> Result<()> {
                     .service(
                         web::scope("/authenticate").service(web::resource("").to(authenticate)),
                     )
-                    .service(web::scope("/channels").service(web::resource("").get(get_channels))),
+                    .service(
+                        web::scope("/channels")
+                            .service(web::resource("").get(get_channels))
+                            .service(
+                                web::resource("/alias_id/{name}").get(get_channels_by_alias_ids),
+                            ),
+                    ),
             )
     })
     .bind((host, port))?
