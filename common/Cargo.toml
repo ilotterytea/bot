@@ -11,8 +11,9 @@ edition.workspace = true
 
 [dependencies]
 chrono = { version = "0.4.31", features = ["serde"] }
-diesel = { version = "2.1.4", features = ["postgres", "chrono"] }
+diesel = { version = "2.1.4", features = ["postgres", "chrono", "uuid"] }
 diesel-derive-enum = { version = "2.1.0", features = ["postgres"] }
 dotenvy = "0.15.7"
 eyre = "0.6.11"
 serde = { version = "1.0.194", features = ["derive"] }
+uuid = "1.7.0"
