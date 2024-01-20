@@ -13,7 +13,7 @@ edition.workspace = true
 common = { path = "../common" }
 async-trait = "0.1.73"
 chrono = "0.4.31"
-diesel = { version = "2.1.2", features = ["postgres", "chrono"] }
+diesel = { version = "2.1.2", features = ["postgres", "chrono", "uuid"] }
 diesel-derive-enum = { version = "2.1.0", features = ["postgres"] }
 dotenvy = "0.15.7"
 eyre = "0.6.8"
@@ -36,3 +36,4 @@ version_check = "0.9.4"
 toml = "0.8.8"
 env_logger = "0.10.1"
 log = "0.4.20"
+uuid = "1.7.0"
