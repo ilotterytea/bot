@@ -134,6 +134,14 @@ diesel::table! {
 }
 
 diesel::table! {
+    user_tokens (user_id) {
+        user_id -> Int4,
+        token -> Uuid,
+        created_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     users (id) {
         id -> Int4,
         alias_id -> Int4,
@@ -154,6 +162,7 @@ diesel::joinable!(rights -> channels (channel_id));
 diesel::joinable!(rights -> users (user_id));
 diesel::joinable!(sessions -> users (user_id));
 diesel::joinable!(timers -> channels (channel_id));
+diesel::joinable!(user_tokens -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     actions,
@@ -166,5 +175,6 @@ diesel::allow_tables_to_appear_in_same_query!(
     session_states,
     sessions,
     timers,
+    user_tokens,
     users,
 );
