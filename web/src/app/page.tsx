@@ -16,7 +16,7 @@ export default function Home() {
         {
           // Join promotion
         }
-        <div className="w-full min-h-screen flex flex-col justify-center items-center pb-24 pt-48 animate-mainscreen bg-gradient-to-b from-teal-200 to-teal-300">
+        <div className="w-full min-h-screen flex flex-col justify-center items-center pb-24 animate-mainscreen bg-gradient-to-b from-teal-200 to-teal-300">
           <div className="flex flex-col justify-center items-center text-slate-900">
             <h1 className="text-7xl font-medium my-4">Enhance your chat</h1>
             <p>A multi-utility Twitch chat bot that brings a lot of functionality into your chat.</p>
