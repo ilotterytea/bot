@@ -112,14 +112,23 @@ function authorizeTwitchCode(router: AppRouterInstance, params: ReadonlyURLSearc
             .then((json) => {
                 const data = json.data;
 
+                const twitch_data = data.twitch;
+                const internal_data = data.internal;
+
                 setData(data);
 
                 const settings = {
-                    expires: new Date(data.expires_at + "Z")
+                    expires: new Date(twitch_data.expires_at + "Z")
                 };
 
-                cookies.set("token", data.token, settings);
-                cookies.set("client_id", data.client_id, settings);
+                const clientTokenExpiration = new Date();
+                clientTokenExpiration.setMonth((clientTokenExpiration.getMonth() + 1) % 12);
+
+                cookies.set("ttv_token", twitch_data.token, settings);
+                cookies.set("ttv_client_id", twitch_data.client_id, settings);
+                cookies.set("client_token", internal_data.token, {
+                    expires: clientTokenExpiration
+                });
             }).catch((err) => {
                 console.error(err);
 
@@ -150,7 +159,7 @@ function authorizeTwitchCode(router: AppRouterInstance, params: ReadonlyURLSearc
                     />
                 </div>
                 <div>
-                    <h1 className="text-xl">Welcome home, {data.user.alias_name}</h1>
+                    <h1 className="text-xl">Welcome home, {data.internal.user.alias_name}</h1>
                     <Link href="/dashboard">
                         <div className="w-full flex justify-center items-center p-2 mt-3 bg-teal-200 dark:bg-teal-400 hover:bg-teal-300 dark:hover:bg-teal-500 border-teal-300 dark:border-teal-500 hover:border-teal-400 dark:hover:border-teal-600 border-2 rounded-lg transition">
                             <p>Go to dashboard</p>
