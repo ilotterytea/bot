@@ -285,3 +285,9 @@ pub struct UserToken {
     pub token: Uuid,
     pub created_at: NaiveDateTime,
 }
+
+#[derive(Insertable)]
+#[diesel(table_name = user_tokens)]
+pub struct NewUserToken {
+    pub user_id: i32,
+}
