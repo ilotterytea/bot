@@ -4,8 +4,8 @@ use common::config::Configuration;
 use common::establish_connection;
 use common::models::{NewSessionState, Session};
 use common::{
-    models::{NewSession, NewUser, SessionState, User},
-    schema::{session_states::dsl as ss, sessions::dsl as se, users::dsl as us},
+    models::{NewSession, NewUser, SessionState, User, UserToken as ClientToken, NewUserToken as NewClientToken},
+    schema::{session_states::dsl as ss, sessions::dsl as se, users::dsl as us, user_tokens::dsl as ut},
 };
 use diesel::{delete, insert_into, ExpressionMethods, QueryDsl, RunQueryDsl};
 use rand::Rng;
@@ -16,11 +16,21 @@ use crate::Response;
 
 #[derive(Serialize)]
 pub struct AuthenticationResponse {
-    pub client_id: String,
+    pub twitch: TwitchTokenResponsePart,
+    pub internal: InternalUserResponsePart,
+}
+
+#[derive(Serialize)]
+pub struct TwitchTokenResponsePart {
     pub token: String,
-    pub expires_at: NaiveDateTime,
-    pub id: i32,
+    pub client_id: String,
+    pub expires_at: NaiveDateTime
+}
+
+#[derive(Serialize)]
+pub struct InternalUserResponsePart {
     pub user: User,
+    pub token: String
 }
 
 #[derive(Deserialize)]
@@ -170,15 +180,32 @@ pub async fn authenticate_success(
                     .get_result::<Session>(conn)
                     .expect("Failed to insert a new session");
 
+                
+                let t = match ut::user_tokens.find(&user.id).get_result::<ClientToken>(conn) {
+                    Ok(v) => v,
+                    Err(_) => {
+                        insert_into(ut::user_tokens)
+                            .values(NewClientToken {
+                                user_id: user.id
+                            })
+                        .get_result::<ClientToken>(conn)
+                            .expect("Failed to create a user token")
+                    }
+                };
+
                 HttpResponse::Ok().json(Response {
                     status_code: 200,
                     message: None,
                     data: Some(AuthenticationResponse {
-                        client_id: twitch_app_credentials.client_id,
-                        token: json.access_token,
-                        expires_at: s.expires_at,
-                        id: s.id,
-                        user
+                        twitch: TwitchTokenResponsePart {
+                            token: json.access_token,
+                            client_id: twitch_app_credentials.client_id,
+                            expires_at: s.expires_at,
+                        },
+                        internal: InternalUserResponsePart {
+                            user,
+                            token: t.token.simple().to_string()
+                        }
                     })
                 })
             }
