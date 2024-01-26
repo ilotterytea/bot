@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 export async function middleware(request: NextRequest): Promise<NextResponse> {
     const cookies = request.cookies;
 
-    const token = cookies.get("token");
-    const client_id = cookies.get("client_id");
+    const token = cookies.get("ttv_token");
+    const client_id = cookies.get("ttv_client_id");
 
     if (!token || !client_id) {
         return NextResponse.rewrite(new URL("/login", request.url));
