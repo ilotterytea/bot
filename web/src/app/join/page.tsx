@@ -16,8 +16,8 @@ export default function Page() {
             const originalUserCookie = cookies.get("twitch_user_data");
             const originalUser = JSON.parse(originalUserCookie); 
 
-            const clientId = cookies.get("client_id");
-            const token = cookies.get("token");
+            const clientId = cookies.get("ttv_client_id");
+            const token = cookies.get("ttv_token");
 
             const headers = {
                 "Client-Id": clientId,
