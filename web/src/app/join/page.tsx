@@ -146,6 +146,7 @@ export default function Page() {
                             channels.map((value, index) => (
                                 <Tooltip key={index} color={"success"} content={value.already_joined ? "Already joined!" : "uuh"} isDisabled={!value.already_joined}>
                                     <Card
+                                        isFooterBlurred
                                         shadow="sm"
                                         isPressable={!value.is_in_process || !value.already_joined}
                                         isDisabled={value.is_in_process || value.already_joined}
@@ -160,18 +161,16 @@ export default function Page() {
                                             :
                                             (<></>)
                                         }
-                                        <CardBody className="overflow-visible p-0">
-                                            <Image
-                                                src={value.profile_image_url}
-                                                alt={value.login + "'s pfp"}
-                                                width="100%"
-                                                radius="lg"
-                                                shadow="sm"
-                                                className="w-full object-cover h-fit"
-                                            />
-                                        </CardBody>
-                                        <CardFooter className="text-small">
-                                            <p>{value.login}</p>
+                                        <Image
+                                            src={value.profile_image_url}
+                                            alt={value.login + "'s pfp"}
+                                            width="100%"
+                                            radius="lg"
+                                            shadow="sm"
+                                            className="w-full object-cover h-fit"
+                                        />
+                                        <CardFooter className="text-small justify-center bg-slate-900/50 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
+                                            <p className="text-stone-100">{value.login}</p>
                                         </CardFooter>
                                     </Card>
                                 </Tooltip>
