@@ -236,8 +236,17 @@ body {
   background-color: rgb(204 251 241)
 }
 
+.joined-channel p {
+  color: transparent;
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
+}
+
 .not-joined-channel {
   background-color: rgb(241 245 249)
+}
+
+.joined-channel img {
+  filter: saturate(50%) blur(2px);
 }
 
 @media (prefers-color-scheme: dark) {
