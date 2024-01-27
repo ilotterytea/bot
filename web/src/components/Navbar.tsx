@@ -49,6 +49,69 @@ const AppNavbar = () : JSX.Element => {
                 </NavbarItem>
             </NavbarContent>
 
+            <NavbarContent as={"div"} justify={"end"}>
+                {
+                    channels.length > 0 ?
+                    (
+                        
+                            <Dropdown placement="bottom-end">
+                                <DropdownTrigger>
+                                    <Avatar
+                                        isBordered
+                                        as={"button"}
+                                        color="primary"
+                                        name={channels[channelIndex].login}
+                                        src={channels[channelIndex].profile_image_url}
+                                    />
+                                </DropdownTrigger>
+                                <DropdownMenu aria-label="Profile Actions" variant="flat">
+                                    {
+                                        channels.length > 1 ?
+                                        (
+                                            <DropdownSection title={"Moderated channels"}>
+                                                {
+                                                    channels.map((v, i) => {
+                                                        return i != channelIndex ?
+                                                        (
+                                                            <DropdownItem key={v.login} onPress={() => {
+                                                                setChannelIndex(i);
+                                                                cookies.set("ttv_moderating_index", i.toString());
+                                                            }}>
+                                                                <User
+                                                                    name={v.login}
+                                                                    avatarProps={{
+                                                                        src: v.profile_image_url,
+                                                                        size: "sm"
+                                                                    }}
+                                                                    
+                                                                />
+                                                            </DropdownItem>
+                                                        )
+                                                        :
+                                                        // uuuuhhhhh
+                                                        (<DropdownItem className="hidden" />);
+                                                    })
+                                                }
+                                            </DropdownSection>
+                                        )
+                                        :
+                                        (<></>)
+                                    }
+
+                                    <DropdownSection title={"My account"}>
+                                        <DropdownItem key={"settings"}>Settings</DropdownItem>
+                                        <DropdownItem key={"logout"} color="danger">Log out</DropdownItem>
+                                    </DropdownSection>
+                                </DropdownMenu>
+
+                            </Dropdown>
+                    )
+                    :
+                    (<></>)
+                }
+
+            </NavbarContent>
+
         </Navbar>
     );
 }
