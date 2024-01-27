@@ -1,6 +1,6 @@
-import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { faBook, faChevronDown, faHand, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Avatar, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Navbar, NavbarBrand, NavbarContent, NavbarItem, User } from "@nextui-org/react";
+import { Avatar, Button, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Navbar, NavbarBrand, NavbarContent, NavbarItem, User } from "@nextui-org/react";
 import { useCookies } from "next-client-cookies";
 import Image from "next/image";
 import Link from "next/link";
@@ -27,6 +27,19 @@ const AppNavbar = () : JSX.Element => {
        }
     });
 
+    const navbarItems = [
+        {
+            "name": "Wiki",
+            "icon": faBook,
+            "url": "/wiki"
+        },
+        {
+            "name": "Add to a channel",
+            "icon": faHand,
+            "url": "/join"
+        }
+    ];
+
     return (
         <Navbar isBordered>
             <NavbarBrand>
@@ -37,16 +50,38 @@ const AppNavbar = () : JSX.Element => {
             </NavbarBrand>
 
             <NavbarContent className="hidden sm:flex gap-4" justify="center">
-                <NavbarItem>
-                    <Link href={"/"}>
-                        Home
-                    </Link>
-                </NavbarItem>
-                <NavbarItem>
-                    <Link href={"/wiki"}>
-                        Wiki
-                    </Link>
-                </NavbarItem>
+                {
+                    channels.length > 0 ?
+                    (
+                        <>
+                            <NavbarItem>
+                                <Link href={"/dashboard"}>Dashboard</Link>
+                            </NavbarItem>
+                            <Dropdown placement="bottom-start">
+                                <DropdownTrigger>
+                                    <Button>More <FontAwesomeIcon icon={faChevronDown} /></Button>
+                                </DropdownTrigger>
+                                <DropdownMenu aria-label="More" variant="flat">
+                                    {
+                                        navbarItems.map((v, i) => (
+                                            <DropdownItem key={v.name}>
+                                                <Link href={v.url}><p><FontAwesomeIcon icon={v.icon} /> {v.name}</p></Link>
+                                            </DropdownItem>
+                                        ))
+                                    }
+                                </DropdownMenu>
+                            </Dropdown>
+                        </>
+                    )
+                    :
+                    (
+                        navbarItems.map((v, i) => (
+                            <NavbarItem key={i}>
+                                <Link href={v.url}>{v.name}</Link>
+                            </NavbarItem>
+                        ))
+                    )
+                }
             </NavbarContent>
 
             <NavbarContent as={"div"} justify={"end"}>
