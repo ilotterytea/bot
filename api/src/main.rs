@@ -1,4 +1,4 @@
-use crate::{auth::*, channels::*, commands::*};
+use crate::{auth::*, channels::*, commands::*, join::*};
 use std::io::Result;
 
 use actix_web::{web, App, HttpServer};
@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 mod auth;
 mod channels;
 mod commands;
+mod join;
 
 #[derive(Deserialize, Serialize)]
 pub struct Response<T> {
@@ -51,7 +52,8 @@ async fn main() -> Result<()> {
                             .service(web::resource("").get(get_channels))
                             .service(
                                 web::resource("/alias_id/{name}").get(get_channels_by_alias_ids),
-                            ),
+                            )
+                            .service(web::resource("/join").post(join_channel)),
                     ),
             )
     })
