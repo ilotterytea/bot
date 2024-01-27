@@ -228,3 +228,26 @@ body {
     color: rgb(120 113 108);
   }
 }
+
+/**
+* /join related shit
+*/
+.joined-channel {
+  background-color: rgb(204 251 241)
+}
+
+.not-joined-channel {
+  background-color: rgb(241 245 249)
+}
+
+@media (prefers-color-scheme: dark) {
+  .joined-channel {
+    color: rgb(231 229 228);
+    background-color: rgb(4 47 46);
+  }
+  
+  .not-joined-channel {
+    color: rgb(231 229 228);
+    background-color: rgb(28 25 23);
+  }
+}

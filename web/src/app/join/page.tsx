@@ -2,13 +2,13 @@
 
 import AppNavbar from "@/components/Navbar";
 import { SmallFooter } from "@/components/SmallFooter";
-import { Card, CardBody, CardFooter, Image, Skeleton } from "@nextui-org/react";
+import { Card, CardBody, CardFooter, Image, Skeleton, Spinner, Tooltip } from "@nextui-org/react";
 import { useCookies } from "next-client-cookies";
 import { useEffect, useRef, useState } from "react";
 
 export default function Page() {
     const cookies = useCookies();
-    const [channels, setChannels] = useState();
+    const [channels, setChannels] = useState([]);
     const initialized = useRef(false);
 
     useEffect(() => {
@@ -43,15 +43,93 @@ export default function Page() {
                         .then(response => response.json())
                         .then(json => {
                             json.data.push(originalUser);
-                            setChannels(json.data);
-                            initialized.current = true;
+
+                            const tc = json.data;
+
+                            const ids = json.data.map((v) => v.id);
+
+                            fetch("http://0.0.0.0:8085/v1/channels/alias_id/" + ids.join(","))
+                                .then(response => response.json())
+                                .then(data => {
+                                    const c = data.data;
+
+                                    let cc = tc.map((x) => {
+                                        x.already_joined = c.some((y) => y.alias_id === Number(x.id) && !y.opt_outed_at);
+                                        return x;
+                                    });
+
+                                    cc.sort((a, b) => {
+                                        return b.already_joined === a.already_joined ? 0 : b.already_joined ? -1 : 1;
+                                    });
+
+                                    setChannels(cc);
+                                })
+                                .catch((err) => console.error(err));
                         })
                         .catch((err) => console.error(err));
 
                 })
                 .catch((err) => console.error(err));
+
+
+            initialized.current = true;
         }
     }, []);
+
+    // "me when i'm in a worst code competition and my opponent is ilotterytea's code" ahhh code
+    useEffect(() => {
+        const channelsToJoin = channels.filter((v) => v.is_in_process);
+
+        if (channelsToJoin.length !== 0) {
+            const token = cookies.get("client_token");
+
+            for (const channel of channelsToJoin) {
+                fetch("http://0.0.0.0:8085/v1/channels/join", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": token,
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({alias_id: Number(channel.id)}),
+                })
+                .then(response => response.json())
+                .then(() => {
+                    const channelIndex = channels.findIndex((v) => v.id === channel.id);
+
+                    if (channelIndex !== -1 && channels[channelIndex].is_in_process) {
+                        const updatedChannels = [
+                            channels[channelIndex],
+                            ...channels.slice(0, channelIndex),
+                            ...channels.slice(channelIndex + 1)
+                        ];
+
+                        updatedChannels[0].is_in_process = false;
+                        updatedChannels[0].already_joined = true;
+
+                        setChannels(updatedChannels);
+                    }
+                })
+                .catch((err) => console.error(err));
+            }
+        }
+    }, [channels]);
+
+    const joinChannel = (alias_id: string) => {
+        const channelIndex = channels.findIndex((v) => v.id === alias_id);
+
+        if (channelIndex !== -1 && !channels[channelIndex].is_in_process && !channels[channelIndex].already_joined) {
+            const updatedChannels = [
+                channels[channelIndex],
+                ...channels.slice(0, channelIndex),
+                ...channels.slice(channelIndex + 1)
+            ];
+
+            updatedChannels[0].is_in_process = true;
+
+            setChannels(updatedChannels);
+        }
+    };
 
     return (
         <main>
@@ -64,9 +142,39 @@ export default function Page() {
                     </div>
                     <div className="grid grid-cols-3 xl:grid-cols-6 gap-4">
                         {
-                            channels ?
+                            channels.length > 0 ?
                             channels.map((value, index) => (
-                                <UserCard name={value.login} pfp={value.profile_image_url} id={3} key={index} />
+                                <Tooltip key={index} color={"success"} content={value.already_joined ? "Already joined!" : "uuh"} isDisabled={!value.already_joined}>
+                                    <Card
+                                        shadow="sm"
+                                        isPressable={!value.is_in_process || !value.already_joined}
+                                        isDisabled={value.is_in_process || value.already_joined}
+                                        onPress={() => joinChannel(value.id)}
+                                        className={value.already_joined ? "joined-channel" : "not-joined-channel"}
+                                    >
+                                        {
+                                            value.is_in_process ?
+                                            (
+                                                <Spinner size={"lg"} className="w-full h-full absolute z-50"/>
+                                            )
+                                            :
+                                            (<></>)
+                                        }
+                                        <CardBody className="overflow-visible p-0">
+                                            <Image
+                                                src={value.profile_image_url}
+                                                alt={value.login + "'s pfp"}
+                                                width="100%"
+                                                radius="lg"
+                                                shadow="sm"
+                                                className="w-full object-cover h-fit"
+                                            />
+                                        </CardBody>
+                                        <CardFooter className="text-small">
+                                            <p>{value.login}</p>
+                                        </CardFooter>
+                                    </Card>
+                                </Tooltip>
                             ))
                             :
                             Array.from({length: 6}).map((_, i) => (
@@ -90,24 +198,4 @@ export default function Page() {
             <SmallFooter />
         </main>
     )
-}
-
-const UserCard = ({name, pfp, id, key}: {name: string, pfp: string, id: number, key: number}): JSX.Element => {
-    return (
-        <Card shadow="sm" key={key} isPressable>
-            <CardBody className="overflow-visible p-0">
-                <Image
-                    src={pfp}
-                    alt={name + "'s pfp"}
-                    width="100%"
-                    radius="lg"
-                    shadow="sm"
-                    className="w-full object-cover h-fit"
-                />
-            </CardBody>
-            <CardFooter className="text-small">
-                <p>{name}</p>
-            </CardFooter>
-        </Card>
-    );
 }
