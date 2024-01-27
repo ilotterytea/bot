@@ -41,7 +41,10 @@ const AppNavbar = () : JSX.Element => {
     ];
 
     return (
-        <Navbar isBordered>
+        <Navbar isBordered classNames={{
+            wrapper: "justify-start",
+            brand: "grow-0",
+        }}>
             <NavbarBrand>
                 <Avatar
                     src={"/bot_avatar.png"}
