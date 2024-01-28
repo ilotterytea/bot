@@ -2,77 +2,110 @@
 
 import AppNavbar from "@/components/Navbar";
 import { SmallFooter } from "@/components/SmallFooter";
-import { Avatar, Card, CardBody, CardFooter, Image, Spinner, Tab, Tabs } from "@nextui-org/react";
+import { Avatar, Card, CardBody, CardFooter, Image, Skeleton, Spinner, Tab, Tabs } from "@nextui-org/react";
+import { useCookies } from "next-client-cookies";
+import { useEffect, useRef, useState } from "react";
 
 export default function Page() {
-    const events = [
-        {
-            alias_id: 191400264,
-            alias_name: "ilotterytea",
-            event_type: "live"
-        },
-        {
-            alias_id: 191400264,
-            alias_name: "ilotterytea",
-            event_type: "live"
-        },
-        {
-            alias_id: 191400264,
-            alias_name: "ilotterytea",
-            event_type: "live"
-        },
-        {
-            alias_id: 191400264,
-            alias_name: "ilotterytea",
-            event_type: "live"
-        },
-        {
-            alias_id: 191400264,
-            alias_name: "ilotterytea",
-            event_type: "live"
-        },
-    ];
+    const cookies = useCookies();
+
+    const [channels, setChannels] = useState(null);
+    const [channelIndex, setChannelIndex] = useState(null);
+
+    const [internalChannel, setInternalChannel] = useState(null);
+
+    const firstInitialization = useRef(false);
+
+    useEffect(() => {
+        if (!firstInitialization.current) {
+            const moderatingChannelsCookie = cookies.get("ttv_moderated_channels");
+            const moderatingChannelIndexCookie = cookies.get("ttv_moderating_index");
+
+            const moderatingChannels = JSON.parse(moderatingChannelsCookie);
+            const moderatingChannelIndex = JSON.parse(moderatingChannelIndexCookie);
+
+            setChannels(moderatingChannels);
+            setChannelIndex(moderatingChannelIndex);
+
+            const channel = moderatingChannels[moderatingChannelIndex];
+
+            fetch("http://0.0.0.0:8085/v1/channels/alias_id/" + channel.id)
+                .then(response => response.json())
+                .then(json => {
+                    if (json.status_code === 200) {
+                        setInternalChannel(json.data);
+                        firstInitialization.current = true;
+                    }
+                })
+                .catch((err) => console.error(err));
+        }
+    }, []);
 
     const tabs = [
         {
             name: "Events",
-            content: (<EventListComponent data={events} />)
+            content: (<EventListComponent data={null} />)
         }
     ];
 
     return (
         <main>
             <AppNavbar />
-            <div className="w-full min-h-screen flex flex-row justify-center align-center text-lg space-y-64">
-                <div className="w-full px-6 xl:px-0 xl:w-[50%] flex flex-col">
-                    <div className="w-full flex flex-row py-4 space-x-4">
-                        <Avatar
-                            src="/bot_avatar.png"
-                        />
-                        <h1 className="text-4xl font-semibold">ilotterytea's dashboard</h1>
-                    </div>
-                    <div className="w-full flex flex-row grow space-x-4">
-                        <Tabs color={"primary"} variant={"light"} aria-label="Dashboard options" classNames={{
-                            tabList: "flex-col w-full",
-                            base: "min-w-[20%]",
-                            panel: "p-0 grow",
-                            tab: "justify-start"
-                        }}>
-                            {
-                                tabs.map((v) => (
-                                    <Tab key={v.name} title={v.name}>
-                                        <Card >
-                                            <CardBody>
-                                                {v.content}
-                                            </CardBody>
-                                        </Card>
-                                    </Tab>
-                                ))
-                            }
-                        </Tabs>
+                    <div className="w-full min-h-screen flex flex-row justify-center align-center text-lg space-y-64">
+                        <div className="w-full px-6 xl:px-0 xl:w-[50%] flex flex-col">
+                        {
+                            firstInitialization.current ?
+                            (
+                            <>
+                                <div className="w-full flex flex-row py-4 space-x-4">
+                                    <Avatar
+                                        src={channels[channelIndex].profile_image_url}
+                                    />
+                                    <h1 className="text-4xl font-semibold">{channels[channelIndex].login}'s dashboard</h1>
+                                </div>
+                                <div className="w-full flex flex-row grow space-x-4">
+                                    <Tabs color={"primary"} variant={"light"} aria-label="Dashboard options" classNames={{
+                                        tabList: "flex-col w-full",
+                                        base: "min-w-[20%]",
+                                        panel: "p-0 grow",
+                                        tab: "justify-start"
+                                    }}>
+                                        {
+                                            tabs.map((v) => (
+                                                <Tab key={v.name} title={v.name}>
+                                                    <Card >
+                                                        <CardBody>
+                                                            {v.content}
+                                                        </CardBody>
+                                                    </Card>
+                                                </Tab>
+                                            ))
+                                        }
+                                    </Tabs>
+                                </div>
+                            </>
+                            ):
+                        (
+                            <div className="flex flex-col w-full space-y-4">
+                                <div className="w-full flex flex-row space-x-4">
+                                    <Skeleton className="w-16 h-16 rounded-full" />
+                                    <Skeleton className="grow h-16 rounded-large" />
+                                </div>
+                                <div className="w-full flex flex-row space-x-4">
+                                    <div className="w-[20%] space-y-4">
+                                        <Skeleton className="w-full h-8 rounded-large" />
+                                        <Skeleton className="w-full h-8 rounded-large" />
+                                        <Skeleton className="w-full h-8 rounded-large" />
+                                    </div>
+                                    <div className="grow">
+                                        <Skeleton className="w-full h-full rounded-large" />
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    }
                     </div>
                 </div>
-            </div>
             <SmallFooter />
         </main>
     );
