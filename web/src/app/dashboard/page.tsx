@@ -41,6 +41,24 @@ export default function Page() {
         }
     }, []);
 
+    // i dont know if it could be done better
+    // but this is the first thing that came to my mind
+    // for code that synchronizes index changes
+    useEffect(() => {
+        const checkIndexes = () => {
+            const indexCookie = cookies.get("ttv_moderating_index");
+            const index: number = JSON.parse(indexCookie);
+
+            if (index !== channelIndex) {
+                setChannelIndex(index);
+            }
+        };
+
+        const interval = setInterval(checkIndexes, 1000);
+
+        return () => clearInterval(interval);
+    }, []);
+
     const tabs = [
         {
             name: "Events",
