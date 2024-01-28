@@ -133,7 +133,12 @@ const AppNavbar = () : JSX.Element => {
                                             </DropdownSection>
                                         )
                                         :
-                                        (<></>)
+                                        // omg im so fucking tired of random "cannot convert symbol to string" errors
+                                        // i dont know why <></> is causing this error
+                                        // AND THERE'S NO PROPER REASON FOR IT ON THE INTERNET
+                                        (<DropdownSection className="hidden">
+                                            <DropdownItem className="hidden" />
+                                        </DropdownSection>)
                                     }
 
                                     <DropdownSection title={"My account"}>
