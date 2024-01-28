@@ -1,4 +1,4 @@
-use crate::{auth::*, channels::*, commands::*, join::*};
+use crate::{auth::*, channels::*, commands::*, events::*, join::*};
 use std::io::Result;
 
 use actix_web::{web, App, HttpServer};
@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 mod auth;
 mod channels;
 mod commands;
+mod events;
 mod join;
 
 #[derive(Deserialize, Serialize)]
@@ -57,7 +58,8 @@ async fn main() -> Result<()> {
                     )
                     .service(
                         web::scope("/channel/{id}")
-                            .service(web::resource("").get(get_channel_by_id)),
+                            .service(web::resource("").get(get_channel_by_id))
+                            .service(web::resource("/events").get(get_channel_events)),
                     ),
             )
     })
