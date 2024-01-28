@@ -12,6 +12,10 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
     let response = NextResponse.next();
 
+    if (cookies.get("ttv_moderated_channels") && cookies.get("ttv_moderating_index")) {
+        return response;
+    }
+
     const headers = {
         "Authorization": "Bearer " + token.value,
         "Client-Id": client_id.value
