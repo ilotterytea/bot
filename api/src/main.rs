@@ -54,6 +54,10 @@ async fn main() -> Result<()> {
                                 web::resource("/alias_id/{name}").get(get_channels_by_alias_ids),
                             )
                             .service(web::resource("/join").post(join_channel)),
+                    )
+                    .service(
+                        web::scope("/channel/{id}")
+                            .service(web::resource("").get(get_channel_by_id)),
                     ),
             )
     })

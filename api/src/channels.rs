@@ -44,3 +44,20 @@ pub async fn get_channels_by_alias_ids(ids: web::Path<String>) -> HttpResponse {
         }),
     }
 }
+
+pub async fn get_channel_by_id(id: web::Path<i32>) -> HttpResponse {
+    let conn = &mut establish_connection();
+
+    match ch::channels.find(&*id).get_result::<Channel>(conn) {
+        Ok(v) => HttpResponse::Ok().json(Response {
+            status_code: 200,
+            message: None,
+            data: Some(v),
+        }),
+        Err(_) => HttpResponse::NotFound().json(Response {
+            status_code: 404,
+            message: None,
+            data: None::<Channel>,
+        }),
+    }
+}
