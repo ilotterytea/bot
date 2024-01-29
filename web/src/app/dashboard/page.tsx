@@ -176,7 +176,7 @@ const EventListComponent = ({data}: {data: any[] | null}): JSX.Element => {
         (
             <div className="grid grid-cols-3 xl:grid-cols-5 gap-4">
             {
-                data.map((v, i) => (
+                data.filter((v) => v.twitch_user !== null).map((v, i) => (
                     <Card
                         isFooterBlurred
                         shadow="sm"
@@ -184,7 +184,7 @@ const EventListComponent = ({data}: {data: any[] | null}): JSX.Element => {
                         onPress={() => console.log("hi")}
                     >
                         <Image
-                            src={"/bot_avatar.png"}
+                            src={v.twitch_user.profile_image_url}
                             alt={v.target_alias_id + "'s pfp"}
                             width="100%"
                             radius="lg"
@@ -192,7 +192,7 @@ const EventListComponent = ({data}: {data: any[] | null}): JSX.Element => {
                             className="w-full object-cover h-fit"
                         />
                         <CardFooter className="text-small justify-between bg-slate-900/50 border-white/20 border-1 overflow-hidden py-1 absolute rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
-                            <p className="text-stone-100 font-medium">{v.target_alias_id}</p>
+                            <p className="text-stone-100 font-medium">{v.twitch_user.login}</p>
                             <p className="text-teal-100">{v.event_type}</p>
                         </CardFooter>
                     </Card>
