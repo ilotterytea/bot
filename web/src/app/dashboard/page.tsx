@@ -36,6 +36,8 @@ export default function Page() {
     useEffect(() => {
         if (channels !== null && channelIndex !== null) {
             const channel = channels[channelIndex];
+            const token = cookies.get("ttv_token");
+            const client_id = cookies.get("ttv_client_id");
 
             fetch("http://0.0.0.0:8085/v1/channels/alias_id/" + channel.id)
                 .then(response => response.json())
@@ -48,7 +50,31 @@ export default function Page() {
                         fetch("http://0.0.0.0:8085/v1/channel/" + channel.id + "/events")
                             .then(response => response.json())
                             .then(json => {
-                                setEvents(json.data);
+                                const aliasIds = json.data.filter((v) => v.target_alias_id !== null).map((v) => "id=" + v.target_alias_id);
+
+                                const data = json.data;
+
+                                data.forEach((v) => {
+                                    v.twitch_user = null;
+                                });
+
+                                fetch("https://api.twitch.tv/helix/users?" + aliasIds.join("&"), {
+                                    headers: {
+                                        "Authorization": "Bearer " + token,
+                                        "Client-Id": client_id
+                                    }
+                                })
+                                    .then(response => response.json())
+                                    .then(ttv_json => {
+                                        for (const user of ttv_json.data) {
+                                            const internalUserIndex = data.findIndex((v) => v.target_alias_id === Number(user.id));
+
+                                            data[internalUserIndex].twitch_user = user;
+                                        }
+
+                                        setEvents(data);
+                                    })
+                                    .catch((err) => console.error("Failed to get Twitch users when receiving channel events: " + err));
                             })
                             .catch((err) => console.error("Failed to get channel events: " + err));
                     }
