@@ -26,8 +26,12 @@ export default function Page() {
 
             setChannels(moderatingChannels);
             setChannelIndex(moderatingChannelIndex);
+        }
+    }, []);
 
-            const channel = moderatingChannels[moderatingChannelIndex];
+    useEffect(() => {
+        if (channels !== null && channelIndex !== null) {
+            const channel = channels[channelIndex];
 
             fetch("http://0.0.0.0:8085/v1/channels/alias_id/" + channel.id)
                 .then(response => response.json())
@@ -39,7 +43,7 @@ export default function Page() {
                 })
                 .catch((err) => console.error(err));
         }
-    }, []);
+    }, [channels, channelIndex]);
 
     // i dont know if it could be done better
     // but this is the first thing that came to my mind
