@@ -14,6 +14,8 @@ export default function Page() {
 
     const [internalChannel, setInternalChannel] = useState(null);
 
+    const [events, setEvents] = useState(null);
+
     const firstInitialization = useRef(false);
 
     useEffect(() => {
@@ -26,6 +28,8 @@ export default function Page() {
 
             setChannels(moderatingChannels);
             setChannelIndex(moderatingChannelIndex);
+
+            firstInitialization.current = true;
         }
     }, []);
 
@@ -37,8 +41,16 @@ export default function Page() {
                 .then(response => response.json())
                 .then(json => {
                     if (json.status_code === 200) {
-                        setInternalChannel(json.data);
-                        firstInitialization.current = true;
+                        const channel = json.data[0];
+                        setInternalChannel(channel);
+
+                        // getting events
+                        fetch("http://0.0.0.0:8085/v1/channel/" + channel.id + "/events")
+                            .then(response => response.json())
+                            .then(json => {
+                                setEvents(json.data);
+                            })
+                            .catch((err) => console.error("Failed to get channel events: " + err));
                     }
                 })
                 .catch((err) => console.error(err));
@@ -66,7 +78,7 @@ export default function Page() {
     const tabs = [
         {
             name: "Events",
-            content: (<EventListComponent data={null} />)
+            content: (<EventListComponent data={events} />)
         }
     ];
 
@@ -147,14 +159,14 @@ const EventListComponent = ({data}: {data: any[] | null}): JSX.Element => {
                     >
                         <Image
                             src={"/bot_avatar.png"}
-                            alt={v.alias_name + "'s pfp"}
+                            alt={v.target_alias_id + "'s pfp"}
                             width="100%"
                             radius="lg"
                             shadow="sm"
                             className="w-full object-cover h-fit"
                         />
                         <CardFooter className="text-small justify-between bg-slate-900/50 border-white/20 border-1 overflow-hidden py-1 absolute rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
-                            <p className="text-stone-100 font-medium">{v.alias_name}</p>
+                            <p className="text-stone-100 font-medium">{v.target_alias_id}</p>
                             <p className="text-teal-100">{v.event_type}</p>
                         </CardFooter>
                     </Card>
