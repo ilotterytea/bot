@@ -2,7 +2,7 @@
 
 import AppNavbar from "@/components/Navbar";
 import { SmallFooter } from "@/components/SmallFooter";
-import { Avatar, Card, CardBody, CardFooter, Image, Skeleton, Spinner, Tab, Tabs } from "@nextui-org/react";
+import { Avatar, Card, CardBody, CardFooter, Image, Skeleton, Spinner, Tab, Tabs, Tooltip } from "@nextui-org/react";
 import { useCookies } from "next-client-cookies";
 import { useEffect, useRef, useState } from "react";
 
@@ -192,8 +192,12 @@ const EventListComponent = ({data}: {data: any[] | null}): JSX.Element => {
                             className="w-full object-cover h-fit"
                         />
                         <CardFooter className="text-small justify-between bg-slate-900/50 border-white/20 border-1 overflow-hidden py-1 absolute rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
-                            <p className="text-stone-100 font-medium">{v.twitch_user.login}</p>
-                            <p className="text-teal-100">{v.event_type}</p>
+                            <Tooltip content="Twitch username">
+                                <p className="text-stone-100 font-medium">{v.twitch_user.login}</p>
+                            </Tooltip>
+                            <Tooltip content="Event type">
+                                <p className="text-teal-100">{v.event_type}</p>
+                            </Tooltip>
                         </CardFooter>
                     </Card>
                 ))
