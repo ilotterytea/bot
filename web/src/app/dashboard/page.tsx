@@ -52,6 +52,11 @@ export default function Page() {
                             .then(json => {
                                 const aliasIds = json.data.filter((v) => v.target_alias_id !== null).map((v) => "id=" + v.target_alias_id);
 
+                                if (aliasIds.length === 0) {
+                                    setEvents(json.data);
+                                    return;
+                                }
+
                                 const data = json.data;
 
                                 data.forEach((v) => {
@@ -172,9 +177,25 @@ export default function Page() {
 }
 
 const EventListComponent = ({data}: {data: any[] | null}): JSX.Element => {
-    return data ?
-        (
-            <div className="grid grid-cols-3 xl:grid-cols-5 gap-4">
+    console.log(data);
+    if (data === null) {
+        return (
+            <div className="flex flex-col justify-center items-center space-y-4 w-full py-4">
+                <Spinner />
+            </div>
+        );
+    }
+
+    if (data.length === 0) {
+        return (
+            <div className="flex flex-col justify-center items-center space-y-4 w-full py-4">
+                <p>buh</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="grid grid-cols-3 xl:grid-cols-5 gap-4">
             {
                 data.filter((v) => v.twitch_user !== null).map((v, i) => (
                     <Card
@@ -202,13 +223,6 @@ const EventListComponent = ({data}: {data: any[] | null}): JSX.Element => {
                     </Card>
                 ))
             }
-            </div>
-        )
-        :
-        (
-            <div className="flex flex-col justify-center items-center space-y-4 w-full py-4">
-                <Spinner />
-            </div>
-        )
-    ;
+        </div>
+    );
 };
