@@ -281,7 +281,7 @@ const EventListComponent = ({data}: {data: any[] | null}): JSX.Element => {
     }
 
     return (
-        <div>
+        <div className="space-y-4">
             {stream_events}
             {custom_events}
         </div>
