@@ -203,35 +203,48 @@ const EventListComponent = ({data}: {data: any[] | null}): JSX.Element => {
         );
     }
 
-    return (
-        <div className="grid grid-cols-3 xl:grid-cols-5 gap-4">
-            {
-                data.filter((v) => v.twitch_user !== null).map((v, i) => (
-                    <Card
-                        isFooterBlurred
-                        shadow="sm"
-                        isPressable
-                        onPress={() => console.log("hi")}
-                    >
-                        <Image
-                            src={v.twitch_user.profile_image_url}
-                            alt={v.target_alias_id + "'s pfp"}
-                            width="100%"
-                            radius="lg"
+    let stream_events = <></>;
+    const stream_events_d = data.filter((v) => v.twitch_user !== null);
+
+    if (stream_events_d.length > 0) {
+        stream_events = (
+            <div>
+                <div className="grid grid-cols-3 xl:grid-cols-5 gap-4">
+                {
+                    stream_events_d.map((v, i) => (
+                        <Card
+                            isFooterBlurred
                             shadow="sm"
-                            className="w-full object-cover h-fit"
-                        />
-                        <CardFooter className="text-small justify-between bg-slate-900/50 border-white/20 border-1 overflow-hidden py-1 absolute rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
-                            <Tooltip content="Twitch username">
-                                <p className="text-stone-100 font-medium">{v.twitch_user.login}</p>
-                            </Tooltip>
-                            <Tooltip content="Event type">
-                                <p className="text-teal-100">{v.event_type}</p>
-                            </Tooltip>
-                        </CardFooter>
-                    </Card>
-                ))
-            }
+                            isPressable
+                            onPress={() => console.log("hi")}
+                        >
+                            <Image
+                                src={v.twitch_user.profile_image_url}
+                                alt={v.target_alias_id + "'s pfp"}
+                                width="100%"
+                                radius="lg"
+                                shadow="sm"
+                                className="w-full object-cover h-fit"
+                            />
+                            <CardFooter className="text-small justify-between bg-slate-900/50 border-white/20 border-1 overflow-hidden py-1 absolute rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
+                                <Tooltip content="Twitch username">
+                                    <p className="text-stone-100 font-medium">{v.twitch_user.login}</p>
+                                </Tooltip>
+                                <Tooltip content="Event type">
+                                    <p className="text-teal-100">{v.event_type}</p>
+                                </Tooltip>
+                            </CardFooter>
+                        </Card>
+                    ))
+                }
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div>
+            {stream_events}
         </div>
     );
 };
