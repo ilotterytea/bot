@@ -209,6 +209,10 @@ const EventListComponent = ({data}: {data: any[] | null}): JSX.Element => {
     if (stream_events_d.length > 0) {
         stream_events = (
             <div>
+                <div>
+                    <h1 className="text-2xl font-medium">Stream events</h1>
+                    <Divider className="mb-4 mt-2" />
+                </div>
                 <div className="grid grid-cols-3 xl:grid-cols-5 gap-4">
                 {
                     stream_events_d.map((v, i) => (
