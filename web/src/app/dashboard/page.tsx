@@ -2,6 +2,8 @@
 
 import AppNavbar from "@/components/Navbar";
 import { SmallFooter } from "@/components/SmallFooter";
+import { faSatellite } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Avatar, Card, CardBody, CardFooter, Divider, Image, Skeleton, Spinner, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs, Tooltip } from "@nextui-org/react";
 import { useCookies } from "next-client-cookies";
 import Link from "next/link";
@@ -210,7 +212,7 @@ const EventListComponent = ({data}: {data: any[] | null}): JSX.Element => {
         stream_events = (
             <div>
                 <div>
-                    <h1 className="text-2xl font-medium">Stream events</h1>
+                    <h1 className="text-2xl font-medium"><FontAwesomeIcon icon={faSatellite} /> Stream events</h1>
                     <Divider className="mb-4 mt-2" />
                 </div>
                 <div className="grid grid-cols-3 xl:grid-cols-5 gap-4">
