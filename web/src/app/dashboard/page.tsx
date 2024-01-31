@@ -2,7 +2,7 @@
 
 import AppNavbar from "@/components/Navbar";
 import { SmallFooter } from "@/components/SmallFooter";
-import { Avatar, Card, CardBody, CardFooter, Image, Skeleton, Spinner, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs, Tooltip } from "@nextui-org/react";
+import { Avatar, Card, CardBody, CardFooter, Divider, Image, Skeleton, Spinner, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs, Tooltip } from "@nextui-org/react";
 import { useCookies } from "next-client-cookies";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -248,6 +248,10 @@ const EventListComponent = ({data}: {data: any[] | null}): JSX.Element => {
     if (custom_events_d.length > 0) {
         custom_events = (
             <div>
+                <div>
+                    <h1 className="text-2xl font-medium">Custom events</h1>
+                    <Divider className="mb-4 mt-2" />
+                </div>
                 <div>
                     <Table>
                         <TableHeader>
