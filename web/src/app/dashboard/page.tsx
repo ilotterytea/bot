@@ -4,6 +4,7 @@ import AppNavbar from "@/components/Navbar";
 import { SmallFooter } from "@/components/SmallFooter";
 import { Avatar, Card, CardBody, CardFooter, Image, Skeleton, Spinner, Tab, Tabs, Tooltip } from "@nextui-org/react";
 import { useCookies } from "next-client-cookies";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 export default function Page() {
@@ -189,7 +190,15 @@ const EventListComponent = ({data}: {data: any[] | null}): JSX.Element => {
     if (data.length === 0) {
         return (
             <div className="flex flex-col justify-center items-center space-y-4 w-full py-4">
-                <p>buh</p>
+                <div className="max-w-16 aspect-square p-2 rounded-large bg-stone-200">
+                    <Image
+                        src={"/emojis/pensive.png"}
+                    />
+                </div>
+                <div className="flex flex-col justify-center items-center">
+                    <h1 className="text-2xl font-medium">No events were found!</h1>
+                    <p><Link href={"/wiki/stream/events"} className="text-teal-600 hover:text-teal-800 transition-colors">The wiki</Link> can give you some knowledge on how to create them...</p>
+                </div>
             </div>
         );
     }
