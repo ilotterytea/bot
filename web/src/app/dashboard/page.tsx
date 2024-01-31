@@ -55,16 +55,16 @@ export default function Page() {
                             .then(json => {
                                 const aliasIds = json.data.filter((v) => v.target_alias_id !== null).map((v) => "id=" + v.target_alias_id);
 
-                                if (aliasIds.length === 0) {
-                                    setEvents(json.data);
-                                    return;
-                                }
-
                                 const data = json.data;
 
                                 data.forEach((v) => {
                                     v.twitch_user = null;
                                 });
+
+                                if (aliasIds.length === 0) {
+                                    setEvents(json.data);
+                                    return;
+                                }
 
                                 fetch("https://api.twitch.tv/helix/users?" + aliasIds.join("&"), {
                                     headers: {
