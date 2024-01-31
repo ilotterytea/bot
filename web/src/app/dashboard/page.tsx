@@ -2,7 +2,7 @@
 
 import AppNavbar from "@/components/Navbar";
 import { SmallFooter } from "@/components/SmallFooter";
-import { faSatellite } from "@fortawesome/free-solid-svg-icons";
+import { faPuzzlePiece, faSatellite } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Avatar, Card, CardBody, CardFooter, Divider, Image, Skeleton, Spinner, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs, Tooltip } from "@nextui-org/react";
 import { useCookies } from "next-client-cookies";
@@ -255,7 +255,7 @@ const EventListComponent = ({data}: {data: any[] | null}): JSX.Element => {
         custom_events = (
             <div>
                 <div>
-                    <h1 className="text-2xl font-medium">Custom events</h1>
+                    <h1 className="text-2xl font-medium"><FontAwesomeIcon icon={faPuzzlePiece} /> Custom events</h1>
                     <Divider className="mb-4 mt-2" />
                 </div>
                 <div>
