@@ -2,7 +2,7 @@
 
 import AppNavbar from "@/components/Navbar";
 import { SmallFooter } from "@/components/SmallFooter";
-import { Avatar, Card, CardBody, CardFooter, Image, Skeleton, Spinner, Tab, Tabs, Tooltip } from "@nextui-org/react";
+import { Avatar, Card, CardBody, CardFooter, Image, Skeleton, Spinner, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs, Tooltip } from "@nextui-org/react";
 import { useCookies } from "next-client-cookies";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -242,9 +242,38 @@ const EventListComponent = ({data}: {data: any[] | null}): JSX.Element => {
         );
     }
 
+    let custom_events = <></>;
+    const custom_events_d = data.filter((v) => v.custom_alias_id !== null);
+
+    if (custom_events_d.length > 0) {
+        custom_events = (
+            <div>
+                <div>
+                    <Table>
+                        <TableHeader>
+                            <TableColumn>NAME</TableColumn>
+                            <TableColumn>MESSAGE</TableColumn>
+                        </TableHeader>
+                        <TableBody>
+                        {
+                            custom_events_d.map((v, i) => (
+                                <TableRow key={i}>
+                                    <TableCell>{v.custom_alias_id}</TableCell>
+                                    <TableCell>{v.message}</TableCell>
+                                </TableRow>
+                            ))
+                        }
+                        </TableBody>
+                    </Table>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div>
             {stream_events}
+            {custom_events}
         </div>
     );
 };
