@@ -2,7 +2,7 @@
 
 import AppNavbar from "@/components/Navbar";
 import { SmallFooter } from "@/components/SmallFooter";
-import { faPuzzlePiece, faSatellite } from "@fortawesome/free-solid-svg-icons";
+import { faCode, faPuzzlePiece, faSatellite } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Avatar, Card, CardBody, CardFooter, Divider, Image, Skeleton, Spinner, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs, Tooltip } from "@nextui-org/react";
 import { useCookies } from "next-client-cookies";
@@ -283,6 +283,69 @@ const EventListComponent = ({data}: {data: any[] | null}): JSX.Element => {
     return (
         <div className="space-y-4">
             {stream_events}
+            {custom_events}
+        </div>
+    );
+};
+
+const CustomCommandListComponent = ({data}: {data: any[] | null}): JSX.Element => {
+    if (data === null) {
+        return (
+            <div className="flex flex-col justify-center items-center space-y-4 w-full py-4">
+                <Spinner />
+            </div>
+        );
+    }
+
+    if (data.length === 0) {
+        return (
+            <div className="flex flex-col justify-center items-center space-y-4 w-full py-4">
+                <div className="max-w-16 aspect-square p-2 rounded-large bg-stone-200">
+                    <Image
+                        src={"/emojis/pensive.png"}
+                    />
+                </div>
+                <div className="flex flex-col justify-center items-center">
+                    <h1 className="text-2xl font-medium">No custom commands were found!</h1>
+                    <p><Link href={"/wiki/channel/custom-commands"} className="text-teal-600 hover:text-teal-800 transition-colors">The wiki</Link> can give you some knowledge on how to create them...</p>
+                </div>
+            </div>
+        );
+    }
+
+    let custom_events = <></>;
+
+    if (data.length > 0) {
+        custom_events = (
+            <div>
+                <div>
+                    <h1 className="text-2xl font-medium"><FontAwesomeIcon icon={faCode} /> Custom commands</h1>
+                    <Divider className="mb-4 mt-2" />
+                </div>
+                <div>
+                    <Table>
+                        <TableHeader>
+                            <TableColumn>NAME</TableColumn>
+                            <TableColumn>MESSAGE</TableColumn>
+                        </TableHeader>
+                        <TableBody>
+                        {
+                            data.map((v, i) => (
+                                <TableRow key={i}>
+                                    <TableCell>{v.name}</TableCell>
+                                    <TableCell>{v.messages}</TableCell>
+                                </TableRow>
+                            ))
+                        }
+                        </TableBody>
+                    </Table>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div>
             {custom_events}
         </div>
     );
