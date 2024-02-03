@@ -85,6 +85,14 @@ export default function Page() {
                                     .catch((err) => console.error("Failed to get Twitch users when receiving channel events: " + err));
                             })
                             .catch((err) => console.error("Failed to get channel events: " + err));
+
+                        // getting custom commands
+                        fetch("http://0.0.0.0:8085/v1/channel/" + channel.id + "/custom-commands")
+                            .then(response => response.json())
+                            .then(json => {
+                                setCustomCommands(json.data);
+                            })
+                            .catch((err) => console.error("Failed to get channel custom commands: " + err));
                     }
                 })
                 .catch((err) => console.error(err));
