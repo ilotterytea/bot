@@ -18,6 +18,7 @@ export default function Page() {
     const [internalChannel, setInternalChannel] = useState(null);
 
     const [events, setEvents] = useState(null);
+    const [customCommands, setCustomCommands] = useState(null);
 
     const firstInitialization = useRef(false);
 
@@ -121,6 +122,10 @@ export default function Page() {
         {
             name: "Events",
             content: (<EventListComponent data={events} />)
+        },
+        {
+            name: "Custom commands",
+            content: (<CustomCommandListComponent data={customCommands} />)
         }
     ];
 
