@@ -153,10 +153,27 @@ export default function Page() {
                                     }}>
                                         {
                                             tabs.map((v) => (
-                                                <Tab key={v.name} title={v.name}>
+                                                <Tab key={v.name} title={v.name} isDisabled={!channels[channelIndex].internal_data}>
                                                     <Card >
                                                         <CardBody>
-                                                            {v.content}
+                                                            {
+                                                                !channels[channelIndex].internal_data ?
+                                                                (
+                                                                    <div className="flex flex-col justify-center items-center space-y-4 w-full py-4">
+                                                                        <div className="max-w-16 aspect-square p-2 rounded-large bg-stone-200">
+                                                                            <Image
+                                                                                src={"/emojis/alien.png"}
+                                                                            />
+                                                                        </div>
+                                                                        <div className="flex flex-col justify-center items-center">
+                                                                            <h1 className="text-2xl font-medium">Hi, {channels[channelIndex].login}!</h1>
+                                                                            <p>To get to this page, the bot must <Link href={"/join"} className="text-teal-600 hover:text-teal-800 transition-colors">join your chat room</Link>.</p>
+                                                                        </div>
+                                                                    </div>
+                                                                )
+                                                                :
+                                                                v.content
+                                                            }
                                                         </CardBody>
                                                     </Card>
                                                 </Tab>
