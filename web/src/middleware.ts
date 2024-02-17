@@ -73,9 +73,17 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
         );
 
         const users_json = await users_response.json();
-        const users_data = users_json.data;
+        const users_data: any[] = users_json.data;
 
-        response.cookies.set("ttv_moderated_channels", JSON.stringify(users_data));
+        const users_data_new = users_data.map((v) => {
+            const x = bot_channels.find((y) => y.alias_id == v.id);
+
+            v.internal_data = x;
+
+            return v;
+        });
+
+        response.cookies.set("ttv_moderated_channels", JSON.stringify(users_data_new));
         response.cookies.set("ttv_moderating_index", "0");
     }
 
