@@ -6,11 +6,13 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     const token = cookies.get("ttv_token");
     const client_id = cookies.get("ttv_client_id");
 
-    if (!token || !client_id) {
-        return NextResponse.rewrite(new URL("/login", request.url));
-    }
-
     let response = NextResponse.next();
+
+    if (!token || !client_id) {
+        response = NextResponse.rewrite(new URL("/login", request.url));
+        response.cookies.set("redirect_url", request.url);
+        return response;
+    }
 
     if (cookies.get("ttv_moderated_channels") && cookies.get("ttv_moderating_index")) {
         return response;
