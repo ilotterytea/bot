@@ -58,7 +58,16 @@ const AppNavbar = () : JSX.Element => {
                     (
                         <>
                             <NavbarItem>
-                                <Link href={"/dashboard"}>Dashboard</Link>
+                                {
+                                    channels[channelIndex].internal_data ?
+                                    (
+                                        <Link href={"/dashboard"}>Dashboard</Link>
+                                    )
+                                    :
+                                    (
+                                        <Link href={"/join"}>Join channel</Link>
+                                    )
+                                }
                             </NavbarItem>
                             <Dropdown placement="bottom-start">
                                 <DropdownTrigger>
@@ -142,7 +151,12 @@ const AppNavbar = () : JSX.Element => {
                                     }
 
                                     <DropdownSection title={"My account"}>
-                                        <DropdownItem key={"settings"}>Settings</DropdownItem>
+                                        {
+                                            channels[channelIndex].internal_data ?
+                                            (<DropdownItem key={"settings"}>Settings</DropdownItem>)
+                                            :
+                                            (<DropdownItem className="hidden" />)
+                                        }
                                         <DropdownItem key={"logout"} color="danger">Log out</DropdownItem>
                                     </DropdownSection>
                                 </DropdownMenu>
