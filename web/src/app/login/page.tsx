@@ -100,12 +100,15 @@ function authorizeTwitchCode(router: AppRouterInstance, params: ReadonlyURLSearc
     const state = params.get("state");
 
     const [data, setData] = useState();
+    const [redirectUrl, setRedirectUrl] = useState();
     const initialized = useRef(false);
 
     useEffect(() => {
         if (!initialized.current) {
             initialized.current = true;
 
+            const redirect_url = cookies.get("redirect_url");
+            setRedirectUrl(redirect_url);
 
             fetch(`http://localhost:8085/v1/authenticate?code=${code}&scope=${scope}&state=${state}`)
             .then((response) => response.json())
@@ -129,6 +132,11 @@ function authorizeTwitchCode(router: AppRouterInstance, params: ReadonlyURLSearc
                 cookies.set("client_token", internal_data.token, {
                     expires: clientTokenExpiration
                 });
+
+                if (redirect_url) {
+                    router.push(redirect_url);
+                    cookies.remove("redirect_url");
+                }
             }).catch((err) => {
                 console.error(err);
 
@@ -149,8 +157,21 @@ function authorizeTwitchCode(router: AppRouterInstance, params: ReadonlyURLSearc
         }
     }, []);
 
-
-    if (data) {
+    if (data && redirectUrl) {
+        return (
+            <>
+                <div className="text-4xl mx-4">
+                    <FontAwesomeIcon
+                        icon={faCheck}
+                    />
+                </div>
+                <div>
+                    <h1 className="text-xl">Welcome home, {data.internal.user.alias_name}</h1>
+                    <p>You will be redirected soon...</p>
+                </div>
+            </>
+        );
+    } else if (data) {
         return (
             <>
                 <div className="text-4xl mx-4">
