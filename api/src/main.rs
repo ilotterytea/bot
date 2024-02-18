@@ -1,4 +1,4 @@
-use crate::{auth::*, channels::*, commands::*, customcommands::*, events::*, join::*};
+use crate::{auth::*, channels::*, commands::*, customcommands::*, events::*, join::*, users::*};
 use std::io::Result;
 
 use actix_web::{web, App, HttpServer};
@@ -12,6 +12,7 @@ mod commands;
 mod customcommands;
 mod events;
 mod join;
+mod users;
 
 #[derive(Deserialize, Serialize)]
 pub struct Response<T> {
@@ -62,6 +63,10 @@ async fn main() -> Result<()> {
                             .service(web::resource("").get(get_channel_by_id))
                             .service(web::resource("/events").get(get_channel_events))
                             .service(web::resource("/custom-commands").get(get_custom_commands)),
+                    )
+                    .service(
+                        web::scope("/user")
+                            .service(web::resource("").get(get_user_by_client_token)),
                     ),
             )
     })
