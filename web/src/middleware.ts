@@ -91,5 +91,5 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 }
 
 export const config = {
-    matcher: ["/dashboard/:path*", "/join"]
+    matcher: ["/dashboard/:path*", "/settings/:path*", "/join"]
 }
