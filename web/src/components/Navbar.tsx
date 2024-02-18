@@ -151,12 +151,9 @@ const AppNavbar = () : JSX.Element => {
                                     }
 
                                     <DropdownSection title={"My account"}>
-                                        {
-                                            channels[channelIndex].internal_data ?
-                                            (<DropdownItem key={"settings"}>Settings</DropdownItem>)
-                                            :
-                                            (<DropdownItem className="hidden" />)
-                                        }
+                                        <DropdownItem key={"settings"}>
+                                            <Link href={"/settings"}>Settings</Link>
+                                        </DropdownItem>
                                         <DropdownItem key={"logout"} color="danger">Log out</DropdownItem>
                                     </DropdownSection>
                                 </DropdownMenu>
