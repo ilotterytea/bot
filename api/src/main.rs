@@ -66,7 +66,8 @@ async fn main() -> Result<()> {
                     )
                     .service(
                         web::scope("/user")
-                            .service(web::resource("").get(get_user_by_client_token)),
+                            .service(web::resource("").get(get_user_by_client_token))
+                            .service(web::resource("/settings").get(get_user_settings)),
                     ),
             )
     })
