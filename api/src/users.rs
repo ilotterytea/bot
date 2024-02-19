@@ -71,22 +71,10 @@ pub async fn get_user_by_client_token(request: HttpRequest) -> HttpResponse {
     }
 }
 
-#[derive(Hash, PartialEq, Eq)]
+#[derive(Serialize, Hash, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
 pub enum SettingsScopeType {
     Chatters,
-}
-
-impl Serialize for SettingsScopeType {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        let str = match *self {
-            Self::Chatters => "chatters",
-        };
-
-        serializer.serialize_str(str)
-    }
 }
 
 #[derive(Serialize, PartialEq, Eq, Hash)]
