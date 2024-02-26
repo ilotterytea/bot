@@ -1,9 +1,6 @@
-use std::time::Instant;
-
 use async_trait::async_trait;
 use eyre::Result;
 use psutil::process::processes;
-use version_check::Version;
 
 use crate::{
     commands::{
@@ -13,7 +10,7 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    shared_variables::START_TIME,
+    shared_variables::{COMPILE_TIMESTAMP, COMPILE_VERSION, START_TIME},
     utils::format_timestamp,
 };
 
@@ -30,11 +27,6 @@ impl Command for PingCommand {
         instance_bundle: &InstanceBundle,
         request: Request,
     ) -> Result<Response, ResponseError> {
-        let rust_version = match Version::read() {
-            Some(version) => version.to_string(),
-            None => "N/A".to_string(),
-        };
-
         // Getting uptime
         let uptime = START_TIME.elapsed().as_secs();
 
@@ -61,24 +53,24 @@ impl Command for PingCommand {
             -1.0
         };
 
+        let compile_timestamp = chrono::Utc::now().timestamp() - COMPILE_TIMESTAMP as i64;
+        let compile_timestamp = format_timestamp(compile_timestamp as u64);
+
         Ok(Response::Single(
-            instance_bundle
-                .localizator
-                .get_formatted_text(
-                    request.channel_preference.language.as_str(),
-                    LineId::CommandPingResponse,
-                    vec![
-                        request.sender.alias_name,
-                        rust_version,
-                        format_timestamp(uptime),
-                        if used_memory_mb > -1.0 {
-                            used_memory_mb.to_string()
-                        } else {
-                            "N/A".to_string()
-                        },
-                    ],
-                )
-                .unwrap(),
+            instance_bundle.localizator.formatted_text_by_request(
+                &request,
+                LineId::CommandPingResponse,
+                vec![
+                    COMPILE_VERSION.to_string(),
+                    format_timestamp(uptime),
+                    if used_memory_mb > -1.0 {
+                        used_memory_mb.to_string()
+                    } else {
+                        "N/A".to_string()
+                    },
+                    compile_timestamp,
+                ],
+            ),
         ))
     }
 }
