@@ -24,7 +24,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <CookiesProvider>
           <Providers>
-            <div className="w-full min-h-[100vh] flex flex-col justify-center items-center bg-gradient-to-t from-stone-100 dark:from-stone-950  to-stone-50 dark:to-stone-900 bg-fixed">
+            <div className="w-full min-h-[100vh] flex flex-col justify-center items-center bg-[url('/backgrounds/bg.png')] bg-stone-100 dark:bg-stone-950  bg-fixed">
               <NavigationBar />
 
               <div className="w-full grow min-h-[100vh] lg:w-[50%]">
