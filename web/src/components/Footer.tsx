@@ -5,8 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 
 const Footer = (): JSX.Element => (
-    <div className="w-full flex justify-center py-16 mt-16 font-anta bg-gradient-to-t from-stone-50 dark:from-zinc-900 to-stone-200 dark:to-zinc-950">
-        <div className="w-[50%] flex flex-col space-y-8 lg:space-y-0 lg:flex-row justify-between">
+    <div className="w-full flex justify-center px-8 lg:px-0 py-16 mt-16 font-anta bg-gradient-to-t from-stone-50 dark:from-zinc-900 to-stone-200 dark:to-zinc-950">
+        <div className="w-full lg:w-[50%] flex flex-col space-y-8 lg:space-y-0 lg:flex-row justify-between">
             {
                 // Developer information
             }
