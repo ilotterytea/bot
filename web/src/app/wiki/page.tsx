@@ -1,8 +1,8 @@
 "use client";
 
-import { faBook } from "@fortawesome/free-solid-svg-icons";
+import { faArrowDown, faBook } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Skeleton } from "@nextui-org/react";
+import { Button, Skeleton } from "@nextui-org/react";
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import { useEffect, useRef, useState } from "react";
@@ -14,6 +14,7 @@ export default function Page() {
 export function wikiPage(name: string): JSX.Element {
     const [summary, setSummary] = useState();
     const [content, setContent] = useState();
+    const [sidebarVisible, setSidebarVisible] = useState(true);
     const summaryLoaded = useRef(false);
     const contentLoaded = useRef(false);
 
@@ -54,6 +55,21 @@ export function wikiPage(name: string): JSX.Element {
         }
     }, []);
 
+
+    const addWindowListener = () => {
+        if (window) {
+            window
+                .matchMedia("(min-width: 1024px)")
+                .addEventListener('change', e => setSidebarVisible(e.matches));
+        } else {
+            setTimeout(addWindowListener, 1000);
+        }
+    };
+
+    useEffect(() => {
+        addWindowListener();
+    }, []);
+
     return (
         <main className="w-full min-h-screen flex flex-col shadow-lg bg-stone-100 dark:bg-stone-900">
             <div className="bg-gradient-to-t from-emerald-300 to-teal-200 p-2 pl-8 shadow-lg">
@@ -61,14 +77,25 @@ export function wikiPage(name: string): JSX.Element {
                     <FontAwesomeIcon icon={faBook} /> Wiki
                 </h1>
             </div>
-            <div className="w-full min-h-screen grid grid-cols-[250px_1fr]">
+            <div className="w-full min-h-screen flex flex-col lg:flex-row">
                 {
                     // Sidebar
                     summaryLoaded.current
                     ? (
-                        <div className="sidebar bg-stone-200 dark:bg-stone-800">
-                            <p className="font-anta mt-2">PAGES</p>
-                            <MDXRemote {...summary} components={{}} />
+                        <div className="sidebar flex flex-col lg:sticky lg:top-0 overflow-y-scroll px-6 lg:max-h-[100vh] bg-stone-200 dark:bg-stone-800">
+                            <Button className="lg:hidden my-4 text-left flex justify-between" onClick={() => setSidebarVisible(!sidebarVisible)}>
+                                PAGES
+                                <FontAwesomeIcon icon={faArrowDown} />
+                            </Button>
+                            {
+                                sidebarVisible ?
+                                <>
+                                    <p className="font-anta mt-2">PAGES</p>
+                                    <MDXRemote {...summary} components={{}} />
+                                </>
+                                :
+                                <></>
+                            }
                         </div>
                     )
                     : (

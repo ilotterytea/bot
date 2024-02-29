@@ -209,16 +209,7 @@ body {
 /**
 * S I D E  B A R
 */
-.sidebar {
-  max-height: 100vh;
-  position: sticky;
-  top: 0px;
-
-  overflow-y: scroll;
-
-  padding-left: 1.5rem; /* 24px */
-  padding-right: 1.5rem; /* 24px */
-}
+.sidebar {}
 
 .sidebar h2 {
   color: rgb(68 64 60);
