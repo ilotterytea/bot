@@ -1,7 +1,7 @@
 "use client";
 
-import Footer from "@/components/Footer";
-import AppNavbar from "@/components/Navbar";
+import { faBook } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Skeleton } from "@nextui-org/react";
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
@@ -55,26 +55,30 @@ export function wikiPage(name: string): JSX.Element {
     }, []);
 
     return (
-        <main className="w-full min-h-screen flex flex-col">
-            <AppNavbar />
-            <div className="w-full h-full flex flex-row">
+        <main className="w-full min-h-screen flex flex-col shadow-lg bg-stone-100 dark:bg-stone-900">
+            <div className="bg-gradient-to-t from-emerald-300 to-teal-200 p-2 pl-8 shadow-lg">
+                <h1 className="text-2xl font-anta">
+                    <FontAwesomeIcon icon={faBook} /> Wiki
+                </h1>
+            </div>
+            <div className="w-full min-h-screen grid grid-cols-[250px_1fr]">
                 {
                     // Sidebar
                     summaryLoaded.current
                     ? (
-                        <div className="sidebar">
+                        <div className="sidebar bg-stone-200 dark:bg-stone-800">
+                            <p className="font-anta mt-2">PAGES</p>
                             <MDXRemote {...summary} components={{}} />
                         </div>
                     )
                     : (
-                        <Skeleton className="min-h-screen w-[25%] p-4 mb-5">
+                        <Skeleton>
                             <div className="h-12 w-full rounded-lg bg-default-300" />
                         </Skeleton>
                     )
                 }
                 
-                <div className="wiki-content flex justify-center">
-                    <div className="w-full xl:w-[75%]">
+                <div className="wiki-content">
                     {
                         // Main content
                         contentLoaded.current
@@ -82,7 +86,7 @@ export function wikiPage(name: string): JSX.Element {
                             <MDXRemote {...content} components={{}} />
                         )
                         : (
-                            <div className="space-y-2">
+                            <div className="space-y-2 my-5">
                                 <Skeleton className="rounded-lg mb-5">
                                     <div className="h-12 w-full rounded-lg bg-default-300" />
                                 </Skeleton>
@@ -94,10 +98,8 @@ export function wikiPage(name: string): JSX.Element {
                             </div>
                         )
                     }
-                    </div>
                 </div>
             </div>
-            <Footer />
         </main>
     );
 }
