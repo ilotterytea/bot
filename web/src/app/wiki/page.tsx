@@ -82,7 +82,7 @@ export function wikiPage(name: string): JSX.Element {
                     // Sidebar
                     summaryLoaded.current
                     ? (
-                        <div className="sidebar flex flex-col lg:sticky lg:top-0 overflow-y-scroll px-6 lg:max-h-[100vh] bg-stone-200 dark:bg-stone-800">
+                        <div className="sidebar flex flex-col lg:sticky lg:top-0 overflow-y-scroll px-6 min-w-56 lg:max-h-[100vh] bg-stone-200 dark:bg-stone-800">
                             <Button className="lg:hidden my-4 text-left flex justify-between" onClick={() => setSidebarVisible(!sidebarVisible)}>
                                 PAGES
                                 <FontAwesomeIcon icon={faArrowDown} />
