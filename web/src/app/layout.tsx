@@ -3,8 +3,9 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { CookiesProvider } from 'next-client-cookies/server';
-import { NextUIProvider } from '@nextui-org/react';
 import { Providers } from './providers';
+import { NavigationBar } from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -23,7 +24,15 @@ export default function RootLayout({
       <body className={inter.className}>
         <CookiesProvider>
           <Providers>
-            {children}
+            <div className="w-full min-h-[100vh] flex flex-col justify-center items-center bg-gradient-to-t from-stone-100 dark:from-stone-950  to-stone-50 dark:to-stone-900 bg-fixed">
+              <NavigationBar />
+
+              <div className="w-full grow min-h-[100vh] lg:w-[50%]">
+                {children}
+              </div>
+
+              <Footer />
+            </div>
           </Providers>
         </CookiesProvider>
       </body>
