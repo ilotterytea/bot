@@ -126,7 +126,7 @@ export default function Home() {
               }
 
               <div className="w-full flex flex-col justify-center items-center">
-                <div className="w-full x-16 lg:px-0 flex flex-col space-y-6 lg:grid lg:grid-cols-2 lg:gap-6">
+                <div className="w-full x-16 lg:px-0 flex flex-col space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6">
                   <SmallFeatureItem
                     name="@everyone in your chat"
                     description={(
