@@ -82,28 +82,19 @@ body {
 }
 
 /**
-  S I D E  B A R
-  (and wiki content)
+  W I K I  C O N T E N T
 */
-.sidebar, .wiki-content {
-  background-color: rgb(243 244 246);
-  
-  padding: 2rem 1rem;
+.wiki-content {
+  padding-left: 1.25rem; /* 20px */
+  padding-right: 1.25rem; /* 20px */
 
   font-size: 1.125rem;
   line-height: 1.75rem;
 
   overflow-y: scroll;
-
-  min-height: 100vh;
 }
 
-.wiki-content {
-  background-color: rgb(249, 250, 251);
-  width: 100%;
-}
-
-.sidebar h1, .wiki-content h1 {
+.wiki-content h1 {
   font-weight: 600;
 
   font-size: 1.5rem;
@@ -120,16 +111,7 @@ body {
   font-size: 2rem;
 }
 
-.sidebar h1:nth-child(n+2) {
-  margin-top: 0.5rem;
-}
-
-.sidebar h1:last-child {
-  border-bottom-width: 0px;
-  border-top-width: 2px;
-}
-
-.sidebar h2, .wiki-content h2 {
+.wiki-content h2 {
   font-weight: 500;
 
   font-size: 1.25rem;
@@ -153,7 +135,7 @@ body {
   margin: 0.75rem 0;
 }
 
-.sidebar ul, .sidebar li, .wiki-content ul, .wiki-content li {
+.wiki-content ul, .wiki-content li {
   margin-left: 1rem;
 }
 
@@ -197,14 +179,6 @@ body {
 }
 
 @media (prefers-color-scheme: dark) {
-  .sidebar {
-    background-color: rgb(28 25 23);
-  }
-
-  .wiki-content {
-    background-color: rgb(41 37 36);
-  }
-  
   .wiki-content blockquote, .wiki-content code {
     background-color: rgb(68 64 60);
     color: rgb(231 229 228);
@@ -227,8 +201,35 @@ body {
   }
 
   .sidebar a:hover, .wiki-content a:hover {
-    color: rgb(120 113 108);
+    color: rgb(110 231 183);
   }
+}
+
+
+/**
+* S I D E  B A R
+*/
+.sidebar {
+  max-height: 100vh;
+  position: sticky;
+  top: 0px;
+
+  overflow-y: scroll;
+
+  padding-left: 1.5rem; /* 24px */
+  padding-right: 1.5rem; /* 24px */
+}
+
+.sidebar h2 {
+  color: rgb(68 64 60);
+  margin-left: 0.25rem; /* 4px */
+}
+
+.sidebar ul {
+  margin: 0.5rem; /* 8px */
+
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.25rem; /* 20px */
 }
 
 /**
