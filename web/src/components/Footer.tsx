@@ -1,8 +1,12 @@
+import { faGit } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Button } from "@nextui-org/react";
 import Image from "next/image";
+import Link from "next/link";
 
 const Footer = (): JSX.Element => (
-    <div className="w-full flex justify-center py-16 bg-gradient-to-t from-neutral-200 dark:from-zinc-900 to-neutral-300 dark:to-zinc-950">
-        <div className="w-full px-16 lg:w/2 flex flex-row justify-between">
+    <div className="w-full flex justify-center py-16 mt-16 bg-gradient-to-t from-stone-50 dark:from-zinc-900 to-stone-200 dark:to-zinc-950">
+        <div className="w-[50%] flex flex-col space-y-8 lg:space-y-0 lg:flex-row justify-between">
             {
                 // Developer information
             }
@@ -22,9 +26,22 @@ const Footer = (): JSX.Element => (
                         </div>
                     </div>
                 </div>
-                <p>
+                <p className="mt-2">
                     Maintained and developed by <a href="https://ilotterytea.kz" className="text-teal-500 hover:text-teal-800 transition">@ilotterytea</a>
                 </p>
+            </div>
+
+            {
+                // Links
+            }
+            <div className="flex lg:justify-center items-center space-y-4">
+                <div className="flex justify-end">
+                    <Link href={"https://git.ilotterytea.kz/tea/bot"}>
+                        <Button className="text-2xl min-w-0 p-2 hover:bg-teal-400 dark:hover:bg-teal-200 dark:hover:text-stone-900">
+                            <FontAwesomeIcon icon={faGit} />
+                        </Button>
+                    </Link>
+                </div>
             </div>
         </div>
     </div>
