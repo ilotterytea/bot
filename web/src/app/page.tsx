@@ -18,8 +18,8 @@ export default function Home() {
           {
             // Introduction
           }
-          <div className="w-full flex flex-row justify-around items-center px-8 py-[96px] bg-gradient-to-t from-green-500 to-teal-200 animate-mainscreen shadow-lg">
-            <div className="flex justify-center items-center">
+          <div className="w-full flex flex-row justify-around items-center lg:px-8 py-[96px] bg-gradient-to-t from-green-500 to-teal-200 animate-mainscreen shadow-lg">
+            <div className="hidden lg:flex justify-center items-center">
               <Image
                 src={"/bot_avatar.png"}
                 width={256}
@@ -27,7 +27,7 @@ export default function Home() {
                 alt="bot's avatar"
               />
             </div>
-            <div className="flex flex-col space-y-8 text-right w-[50%]">
+            <div className="flex flex-col space-y-8 text-center lg:text-right lg:w-[50%]">
               <div>
                 <h1 className="text-3xl font-medium [text-shadow:_1px_1px_3px_rgb(0_0_0_/_40%)]">Enhance your chat with <span className="text-rose-800">teabot</span></h1>
                 <p className="text-md [text-shadow:_1px_1px_3px_rgb(0_0_0_/_40%)]">A multi-utility Twitch chat bot that brings<br/>a lot of functionality into your chat.</p>
@@ -58,7 +58,7 @@ export default function Home() {
                 // Big features
               }
               <div className="w-full flex flex-col px-16 lg:px-0">
-                <div className="w-full space-y-16 [&>div:nth-child(even)]:flex-row-reverse">
+                <div className="w-full space-y-16">
                   {
                     // Stream notifications
                   }
@@ -126,7 +126,7 @@ export default function Home() {
               }
 
               <div className="w-full flex flex-col justify-center items-center">
-                <div className="w-full x-16 lg:px-0 grid grid-cols-2 gap-6">
+                <div className="w-full x-16 lg:px-0 flex flex-col space-y-6 lg:grid lg:grid-cols-2 lg:gap-6">
                   <SmallFeatureItem
                     name="@everyone in your chat"
                     description={(
@@ -187,14 +187,14 @@ const FeatureItem = (
   {name, description, children}:
   {name: ReactNode, description: ReactNode, children: ReactNode}
 ): JSX.Element => (
-  <div className="w-full flex flex-row justify-between items-center">
+  <div className="w-full flex flex-col lg:flex-row justify-between items-center">
     <div className="px-6">
       <h1 className="text-4xl font-medium mb-6 dark:text-teal-300">
         {name}
       </h1>
       {description}
     </div>
-    <div>
+    <div className="my-4 lg:my-0">
       {children}
     </div>
   </div>
