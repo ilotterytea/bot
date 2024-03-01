@@ -10,7 +10,7 @@ use crate::{
 };
 
 use common::{
-    config::{Configuration, BOT_CONFIGURATION_FILE},
+    config::get_configuration,
     establish_connection,
     models::NewChannel,
     schema::{channels::dsl as ch, events::dsl as ev},
@@ -55,23 +55,16 @@ async fn main() {
 
     info!("Starting Twitch bot...");
 
-    let config = match toml::from_str::<Configuration>(BOT_CONFIGURATION_FILE) {
+    let config = match get_configuration() {
         Ok(v) => v,
         Err(e) => panic!("Failed to parse TOML configuration file: {}", e),
     };
 
-    let database_url = format!(
-        "postgres://{}:{}@{}/{}",
-        config.database_connection.username,
-        config.database_connection.password,
-        config.database_connection.hostname,
-        config.database_connection.database_name
-    );
+    let database_url = env::var("DATABASE_URL").unwrap();
 
-    match PgConnection::establish(&database_url) {
+    match PgConnection::establish(database_url.as_str()) {
         Ok(v) => {
             info!("PostgreSQL connection looks good!");
-            env::set_var("DATABASE_URL", database_url);
             drop(v);
         }
         Err(_) => {
