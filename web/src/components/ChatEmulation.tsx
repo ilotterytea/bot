@@ -4,7 +4,7 @@ const ChatBox = ({lines, animate}: {lines: {name: ReactNode, msg: ReactNode}[], 
     let l = lines;
 
     if (animate) {
-        const [lines_2, setLines] = useState([]);
+        const [lines_2, setLines] = useState<{name: ReactNode, msg: ReactNode}[]>([]);
 
         useEffect(() => {
             let index = 0;
