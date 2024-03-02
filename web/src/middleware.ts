@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
-    const cookies = request.cookies;
+   /**const cookies = request.cookies;
 
     const token = cookies.get("ttv_token");
     const client_id = cookies.get("ttv_client_id");
@@ -87,9 +87,10 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
         response.cookies.set("ttv_moderating_index", "0");
     }
 
-    return response;
+    return response;*/
+    return NextResponse.next();
 }
 
 export const config = {
-    matcher: ["/dashboard/:path*", "/settings/:path*", "/join"]
+    matcher: ["/:path*"]
 }
