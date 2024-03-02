@@ -1,12 +1,12 @@
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
-const ChatBox = ({lines, animate}: {lines: {name: ReactNode, msg: ReactNode}[], animate: boolean}): JSX.Element => {
+const ChatBox = ({ lines, animate }: { lines: { name: ReactNode, msg: ReactNode }[], animate: boolean }): JSX.Element => {
     let l = lines;
 
-    if (animate) {
-        const [lines_2, setLines] = useState<{name: ReactNode, msg: ReactNode}[]>([]);
+    const [lines_2, setLines] = useState<{ name: ReactNode, msg: ReactNode }[]>([]);
 
-        useEffect(() => {
+    useEffect(() => {
+        if (animate) {
             let index = 0;
 
             const addLine = () => {
@@ -24,23 +24,25 @@ const ChatBox = ({lines, animate}: {lines: {name: ReactNode, msg: ReactNode}[], 
             const interval = setInterval(addLine, 5000);
 
             return () => clearInterval(interval);
-        }, []);
+        }
+    }, [lines, animate]);
 
+    if (animate) {
         l = lines_2;
     }
-    
+
     return (<div className="h-48 min-w-80 flex flex-col-reverse bg-neutral-900 border-2 border-neutral-950 rounded-lg text-gray-50 text-sm [&>*:nth-child(even)]:bg-neutral-800 overflow-y-scroll">
         <div>
-        {
-            l.map(({name, msg}, index) => (
-                <ChatLine name={name} message={msg} color="text-teal-500" key={index} />
-            ))
-        }
+            {
+                l.map(({ name, msg }, index) => (
+                    <ChatLine name={name} message={msg} color="text-teal-500" key={index} />
+                ))
+            }
         </div>
     </div>);
 };
 
-const ChatLine = ({name, message, color}: {name: ReactNode, message: ReactNode, color: string}): JSX.Element => (
+const ChatLine = ({ name, message, color }: { name: ReactNode, message: ReactNode, color: string }): JSX.Element => (
     <div className="flex flex-row p-1 border-b-2 border-neutral-700 min-w-80 h-10">
         <p className={"m-1 font-medium " + color}>{name + ": "}</p> {message}
     </div>
