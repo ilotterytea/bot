@@ -2,7 +2,6 @@ use std::env;
 
 use diesel::{Connection, PgConnection};
 
-pub mod config;
 pub mod models;
 pub mod schema;
 
