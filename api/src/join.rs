@@ -1,7 +1,8 @@
+use std::env;
+
 use actix_web::{web, HttpRequest, HttpResponse};
 use chrono::NaiveDateTime;
 use common::{
-    config::Configuration,
     establish_connection,
     models::{Channel, NewChannel, Session, User, UserToken as ClientToken},
     schema::{channels::dsl as ch, sessions::dsl as se, user_tokens::dsl as ut, users::dsl as us},
@@ -30,11 +31,7 @@ pub struct JoinRequest {
     pub alias_id: i32,
 }
 
-pub async fn join_channel(
-    config: web::Data<Configuration>,
-    body: web::Json<JoinRequest>,
-    request: HttpRequest,
-) -> HttpResponse {
+pub async fn join_channel(body: web::Json<JoinRequest>, request: HttpRequest) -> HttpResponse {
     let headers = request.headers();
 
     let auth_token = match headers.get("Authorization") {
@@ -133,9 +130,9 @@ pub async fn join_channel(
 
         let b_id = body.alias_id.to_string();
 
-        let client_id = match config.credentials.twitch_app.clone() {
-            Some(v) => v.client_id,
-            None => return HttpResponse::InternalServerError().json(Response {
+        let client_id = match env::var("BOT_CLIENT_ID") {
+            Ok(v) => v,
+            Err(_) => return HttpResponse::InternalServerError().json(Response {
                 status_code: 500,
                 message: Some("The required parameters were not set in the server settings. Contact the owner of this instance.".to_string()),
                 data: None::<Channel>

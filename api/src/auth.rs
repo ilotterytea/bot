@@ -1,6 +1,7 @@
+use std::env;
+
 use actix_web::{web, HttpResponse};
 use chrono::{Duration, NaiveDateTime, Utc};
-use common::config::Configuration;
 use common::establish_connection;
 use common::models::{NewSessionState, Session};
 use common::{
@@ -48,13 +49,12 @@ pub struct AuthenticationFail {
 }
 
 pub async fn authenticate(
-    config: web::Data<Configuration>,
     success: Option<web::Query<AuthenticationSuccess>>,
     fail: Option<web::Query<AuthenticationFail>>,
     request: Option<web::Json<AuthenticationRequest>>,
 ) -> HttpResponse {
     if let Some(success) = success {
-        return authenticate_success(config, success).await;
+        return authenticate_success(success).await;
     }
 
     if let Some(fail) = fail {
@@ -62,7 +62,7 @@ pub async fn authenticate(
     }
 
     if let Some(request) = request {
-        return generate_authentication(config, request).await;
+        return generate_authentication(request).await;
     }
 
     HttpResponse::BadRequest().json(Response {
@@ -81,12 +81,11 @@ pub struct TwitchAccessTokenResponse {
 }
 
 pub async fn authenticate_success(
-    config: web::Data<Configuration>,
     query: web::Query<AuthenticationSuccess>,
 ) -> HttpResponse {
-    let twitch_app_credentials = match config.credentials.twitch_app.clone() {
-        Some(v) => v,
-        None => {
+    let (client_id, client_secret, redirect_uri) = match (env::var("BOT_CLIENT_ID"), env::var("BOT_CLIENT_SECRET"), env::var("BOT_REDIRECT_URI")){
+        (Ok(x), Ok(y), Ok(z)) => (x, y, z),
+        _ => {
             return HttpResponse::InternalServerError().json(Response {
                 status_code: 500,
                 message: Some("Secrets for Twitch API are not set on this instance".into()),
@@ -122,11 +121,11 @@ pub async fn authenticate_success(
 
     let client = reqwest::Client::new();
     let form = vec![
-        ("client_id", twitch_app_credentials.client_id.clone()),
-        ("client_secret", twitch_app_credentials.client_secret),
+        ("client_id", client_id.clone()),
+        ("client_secret", client_secret),
         ("code", query.code.clone()),
         ("grant_type", "authorization_code".into()),
-        ("redirect_uri", twitch_app_credentials.redirect_uri),
+        ("redirect_uri", redirect_uri),
     ];
 
     match client
@@ -199,7 +198,7 @@ pub async fn authenticate_success(
                     data: Some(AuthenticationResponse {
                         twitch: TwitchTokenResponsePart {
                             token: json.access_token,
-                            client_id: twitch_app_credentials.client_id,
+                            client_id,
                             expires_at: s.expires_at,
                         },
                         internal: InternalUserResponsePart {
@@ -274,12 +273,11 @@ pub struct AuthenticationRequestRes {
 }
 
 pub async fn generate_authentication(
-    config: web::Data<Configuration>,
     req: web::Json<AuthenticationRequest>,
 ) -> HttpResponse {
-    let twitch_app_credentials = match config.credentials.twitch_app.clone() {
-        Some(v) => v,
-        None => {
+    let (client_id, redirect_uri) = match (env::var("BOT_CLIENT_ID"), env::var("BOT_REDIRECT_URI")) {
+        (Ok(x), Ok(y)) => (x, y),
+        _ => {
             return HttpResponse::InternalServerError().json(Response {
                 status_code: 500,
                 message: Some("Secrets for Twitch API are not set on this instance".into()),
@@ -319,8 +317,8 @@ pub async fn generate_authentication(
 
     let url = format!(
         "https://id.twitch.tv/oauth2/authorize?response_type=code&redirect_uri={}&client_id={}&scope={}&state={}",
-        twitch_app_credentials.redirect_uri,
-        twitch_app_credentials.client_id,
+        redirect_uri,
+        client_id,
         req.scopes.join("%20"),
         state,
     );

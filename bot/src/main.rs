@@ -10,7 +10,6 @@ use crate::{
 };
 
 use common::{
-    config::get_configuration,
     establish_connection,
     models::NewChannel,
     schema::{channels::dsl as ch, events::dsl as ev},
@@ -50,17 +49,27 @@ mod websockets;
 async fn main() {
     // Activating static variable
     *START_TIME;
+    dotenvy::dotenv().expect("Failed to load .env file");
 
     env_logger::init();
 
     info!("Starting Twitch bot...");
 
-    let config = match get_configuration() {
-        Ok(v) => v,
-        Err(e) => panic!("Failed to parse TOML configuration file: {}", e),
-    };
+    let database_url = if let Ok(v) = env::var("DATABASE_URL") {
+        v
+    } else {
+        let x = format!(
+            "postgres://{}:{}@{}/{}",
+            env::var("POSTGRES_USER").expect("POSTGRES_USER must be set"),
+            env::var("POSTGRES_PASSWORD").expect("POSTGRES_PASSWORD must be set"),
+            env::var("POSTGRES_HOSTNAME").expect("POSTGRES_HOSTNAME must be set"),
+            env::var("POSTGRES_DB").expect("POSTGRES_DB must be set"),
+        );
 
-    let database_url = env::var("DATABASE_URL").unwrap();
+        env::set_var("DATABASE_URL", x.clone());
+
+        x
+    };
 
     match PgConnection::establish(database_url.as_str()) {
         Ok(v) => {
@@ -81,8 +90,8 @@ async fn main() {
     let (mut irc_incoming_messages, irc_client) =
         TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(
             ClientConfig::new_simple(StaticLoginCredentials::new(
-                config.credentials.username.clone(),
-                Some(config.credentials.password.clone()),
+                env::var("BOT_USERNAME").expect("BOT_USERNAME must be set"),
+                Some(env::var("BOT_PASSWORD").expect("BOT_PASSWORD must be set")),
             )),
         );
 
@@ -100,7 +109,7 @@ async fn main() {
     let helix_token = Arc::new(
         match UserToken::from_token(
             &reqwest_client,
-            AccessToken::from(config.credentials.password.clone()),
+            AccessToken::from(env::var("BOT_PASSWORD").expect("BOT_PASSWORD must be set")),
         )
         .await
         {
