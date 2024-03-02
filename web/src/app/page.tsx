@@ -131,7 +131,7 @@ export default function Home() {
                     name="@everyone in your chat"
                     description={(
                     <p>
-                      With the "<a href="/wiki/mod/mass-ping" className="command">!massping</a>" command,
+                      With the &quot;<a href="/wiki/mod/mass-ping" className="command">!massping</a>&quot; command,
                       moderators can quickly notify all participants by mentioning them with an important message.
                     </p>
                     )}
@@ -142,7 +142,7 @@ export default function Home() {
                     name="No Ctrl+Enter anymore"
                     description={(
                     <p>
-                      In addition, the "<a href="/wiki/mod/spam" className="command">!spam</a>" command provides the ability to repeat a message the desired number of times,
+                      In addition, the &quot;<a href="/wiki/mod/spam" className="command">!spam</a>&quot; command provides the ability to repeat a message the desired number of times,
                       which is useful for repetitive reminders or clarifications.
                     </p>
                     )}

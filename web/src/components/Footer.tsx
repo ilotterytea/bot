@@ -21,7 +21,7 @@ const Footer = (): JSX.Element => (
                     />
                     <div>
                         <div className="ml-2">
-                            <h2 className="text-2xl font-medium">iLotterytea's</h2>
+                            <h2 className="text-2xl font-medium">iLotterytea&apos;s</h2>
                             <h1 className="text-3xl font-semibold">Twitch bot</h1>
                         </div>
                     </div>
