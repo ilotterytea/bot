@@ -1,7 +1,7 @@
 "use client";
 
-import { wikiPage } from "../page";
+import { useWikiPageGenerator } from "../utils";
 
 export default function Page({params}: {params: {name: string[]}}) {
-    return wikiPage(params.name.join("/"));
+    return useWikiPageGenerator(params.name.join("/"));
 }
