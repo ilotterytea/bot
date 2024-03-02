@@ -1,7 +1,5 @@
-"use client";
-
-import { useWikiPageGenerator } from "./utils";
+import WikiPage from "./wiki";
 
 export default function Page() {
-    return useWikiPageGenerator("README");
+    return <><WikiPage page_id="README" /></>;
 }
