@@ -265,7 +265,5 @@ async fn main() {
         }
     });
 
-    if let Err(e) = tokio::try_join!(irc_thread, timer_thread, livestream_thread, seventv_thread) {
-        error!("An error occurred when async joining: {:?}", e);
-    }
+    let _ = tokio::join!(irc_thread, timer_thread, livestream_thread, seventv_thread);
 }
