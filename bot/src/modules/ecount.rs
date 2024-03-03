@@ -1,5 +1,8 @@
+use std::env;
+
 use async_trait::async_trait;
 use eyre::Result;
+use log::error;
 
 use crate::{
     commands::{
@@ -10,7 +13,6 @@ use crate::{
     instance_bundle::InstanceBundle,
     localization::LineId,
     models::stats::{ChannelEmote, ChannelEmoteUsage, Response as StatsResponse},
-    shared_variables::STATS_API_V1_URL,
 };
 
 pub struct EmoteCountCommand;
@@ -26,6 +28,11 @@ impl Command for EmoteCountCommand {
         instance_bundle: &InstanceBundle,
         request: Request,
     ) -> Result<Response, ResponseError> {
+        if env::var("STATS_API_HOSTNAME").is_err() {
+            error!("Tried to run the !ecount command, but STATS_API_HOSTNAME is not set in the .env file");
+            return Err(ResponseError::SomethingWentWrong);
+        }
+
         if let Some(message) = request.message.clone() {
             let channel_id = request.channel.alias_id.to_string();
             if let Some(response) = self.fetch_channel_emotes(channel_id.clone()).await {
@@ -105,10 +112,35 @@ impl EmoteCountCommand {
     ) -> Option<StatsResponse<Vec<ChannelEmote>>> {
         let url = format!(
             "{}/api/v1/channel/twitch/{}/emotes",
-            STATS_API_V1_URL, channel_id
+            env::var("STATS_API_HOSTNAME")
+                .expect("STATS_API_HOSTNAME must be set for !ecount command"),
+            channel_id
         );
 
-        if let Ok(response) = reqwest::get(url).await {
+        let client = reqwest::Client::default();
+        let mut request = client.get(url);
+
+        if let Ok(credentials) = env::var("STATS_API_PASSWORD") {
+            let mut split = credentials.split(':').collect::<Vec<&str>>();
+
+            if !split.is_empty() {
+                let name = split[0];
+                split.remove(0);
+
+                let password = split.join(":");
+
+                request = request.basic_auth(
+                    name,
+                    if password.is_empty() {
+                        None
+                    } else {
+                        Some(password)
+                    },
+                );
+            }
+        }
+
+        if let Ok(response) = request.send().await {
             if let Ok(data) = response.json::<StatsResponse<Vec<ChannelEmote>>>().await {
                 return Some(data);
             }
@@ -122,10 +154,35 @@ impl EmoteCountCommand {
     ) -> Option<StatsResponse<Vec<ChannelEmoteUsage>>> {
         let url = format!(
             "{}/api/v1/channel/twitch/{}/emotes/usage",
-            STATS_API_V1_URL, channel_id
+            env::var("STATS_API_HOSTNAME")
+                .expect("STATS_API_HOSTNAME must be set for !ecount command"),
+            channel_id
         );
 
-        if let Ok(response) = reqwest::get(url).await {
+        let client = reqwest::Client::default();
+        let mut request = client.get(url);
+
+        if let Ok(credentials) = env::var("STATS_API_PASSWORD") {
+            let mut split = credentials.split(':').collect::<Vec<&str>>();
+
+            if !split.is_empty() {
+                let name = split[0];
+                split.remove(0);
+
+                let password = split.join(":");
+
+                request = request.basic_auth(
+                    name,
+                    if password.is_empty() {
+                        None
+                    } else {
+                        Some(password)
+                    },
+                );
+            }
+        }
+
+        if let Ok(response) = request.send().await {
             if let Ok(data) = response
                 .json::<StatsResponse<Vec<ChannelEmoteUsage>>>()
                 .await

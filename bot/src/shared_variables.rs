@@ -18,7 +18,6 @@ pub const DEFAULT_LANGUAGE: &str = "english";
 
 pub const HOLIDAY_V1_API_URL: &str = "https://hol.ilotterytea.kz/api/v1";
 pub const SEVENTV_WEBSOCKET_URL: &str = "wss://events.7tv.io/v3";
-pub const STATS_API_V1_URL: &str = "https://stats.ilotterytea.kz";
 pub const IVR_API_V2_URL: &str = "https://api.ivr.fi/v2";
 pub const MCSRV_API_URL: &str = "https://api.mcsrvstat.us/3";
 
