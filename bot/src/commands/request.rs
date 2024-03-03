@@ -1,3 +1,5 @@
+use std::env;
+
 use diesel::{
     insert_into, update, BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl,
 };
@@ -60,8 +62,14 @@ impl Request {
                 insert_into(chp::channel_preferences)
                     .values(vec![NewChannelPreference {
                         channel_id: channel.id,
-                        prefix: DEFAULT_PREFIX.to_string(),
-                        language: DEFAULT_LANGUAGE.to_string(),
+                        prefix: match env::var("BOT_DEFAULT_PREFIX") {
+                            Ok(v) => v,
+                            Err(_) => DEFAULT_PREFIX.to_string(),
+                        },
+                        language: match env::var("BOT_DEFAULT_LANGUAGE") {
+                            Ok(v) => v,
+                            Err(_) => DEFAULT_LANGUAGE.to_string(),
+                        },
                     }])
                     .execute(conn)
                     .expect("Failed to create preferences for channel");
