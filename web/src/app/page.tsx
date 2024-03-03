@@ -29,7 +29,7 @@ export default function Home() {
             </div>
             <div className="flex flex-col space-y-8 text-center lg:text-right lg:w-[50%]">
               <div>
-                <h1 className="text-3xl font-medium [text-shadow:_1px_1px_3px_rgb(0_0_0_/_40%)]">Enhance your chat with <span className="text-rose-800">teabot</span></h1>
+                <h1 className="text-3xl font-medium [text-shadow:_1px_1px_3px_rgb(0_0_0_/_40%)]">Enhance your chat with <span className="text-rose-800">{process.env.NEXT_PUBLIC_BOT_USERNAME ?? "the bot"}</span></h1>
                 <p className="text-md [text-shadow:_1px_1px_3px_rgb(0_0_0_/_40%)]">A multi-utility Twitch chat bot that brings<br/>a lot of functionality into your chat.</p>
               </div>
               <Link href={"/wiki/join"} className="h-[64px]">
@@ -72,15 +72,15 @@ export default function Home() {
                     }>
                       <ChatBox animate={true} lines={[
                         {
-                          "name": "ImTeaBot",
+                          "name": process.env.NEXT_PUBLIC_BOT_USERNAME ?? "ThisBot",
                           "msg": "⚡ forsen live!"
                         },
                         {
-                          "name": "ImTeaBot",
+                          "name": process.env.NEXT_PUBLIC_BOT_USERNAME ?? "ThisBot",
                           "msg": "⚡ psp live yippeeeee · @juh, @buh"
                         },
                         {
-                          "name": "ImTeaBot",
+                          "name": process.env.NEXT_PUBLIC_BOT_USERNAME ?? "ThisBot",
                           "msg": "⚡ yo ! · @cuh"
                         }
                       ]}
@@ -103,15 +103,15 @@ export default function Home() {
                       }
                       <ChatBox animate={false} lines={[
                         {
-                          "name": "ImTeaBot",
+                          "name": process.env.NEXT_PUBLIC_BOT_USERNAME ?? "ThisBot",
                           "msg": "(7TV) EmoteExpert added the buh emote"
                         },
                         {
-                          "name": "ImTeaBot",
+                          "name": process.env.NEXT_PUBLIC_BOT_USERNAME ?? "ThisBot",
                           "msg": "(7TV) EmoteExpert updated the emote name from buh to buuuh"
                         },
                         {
-                          "name": "ImTeaBot",
+                          "name": process.env.NEXT_PUBLIC_BOT_USERNAME ?? "ThisBot",
                           "msg": "(7TV) EmoteExpert removed the buuuh emote"
                         }
 

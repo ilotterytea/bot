@@ -24,7 +24,7 @@ export function useWikiPageGenerator(name: string): JSX.Element {
         }
 
         if (!summaryLoaded.current) {
-            fetch("http://0.0.0.0:8085/v1/docs/summary")
+            fetch(`${process.env.NEXT_PUBLIC_WEB_BOT_API_HOSTNAME ?? "api"}/v1/docs/summary`)
                 .then((response) => response.json())
                 .then((json) => {
 
@@ -38,7 +38,7 @@ export function useWikiPageGenerator(name: string): JSX.Element {
         }
 
         if (!contentLoaded.current) {
-            fetch("http://0.0.0.0:8085/v1/docs/" + name)
+            fetch(`${process.env.NEXT_PUBLIC_WEB_BOT_API_HOSTNAME ?? "api"}/v1/docs/` + name)
                 .then((response) => response.json())
                 .then((json) => {
                     serializeSource((json.status_code !== 200) ? json.message : json.data.content)
