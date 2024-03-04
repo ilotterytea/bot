@@ -11,9 +11,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        "anta": ["Anta", "sans-serif"],
         "inter": ["Inter", "sans-serif"],
-        "manrope": ["Manrope", "sans-serif"]
+        "manrope": ["Manrope", "sans-serif"],
+        "zilla": ["Zilla Slab", "sans-serif"]
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
