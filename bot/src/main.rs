@@ -1,4 +1,4 @@
-use std::{env, process::exit, sync::Arc, time::Duration};
+use std::{collections::HashSet, env, process::exit, sync::Arc, time::Duration};
 
 use crate::{
     commands::CommandLoader,
@@ -18,6 +18,7 @@ use diesel::{
     insert_into, update, Connection, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl,
 };
 use eyre::Context;
+use livestream::TwitchLivestreamHelper;
 use log::{debug, error, info};
 use reqwest::Client;
 use tokio::sync::Mutex;
@@ -31,11 +32,13 @@ use twitch_irc::{
     login::StaticLoginCredentials, message::ServerMessage, ClientConfig, SecureTCPTransport,
     TwitchIRCClient,
 };
-use websockets::{livestream::TwitchLivestreamClient, WebsocketData};
+
+use websockets::WebsocketData;
 
 mod commands;
 mod handlers;
 mod instance_bundle;
+mod livestream;
 mod localization;
 mod message;
 mod models;
@@ -185,9 +188,9 @@ async fn main() {
         let ids = ids
             .iter()
             .map(|x| UserId::new(x.unwrap().to_string()))
-            .collect::<Vec<UserId>>();
+            .collect::<HashSet<UserId>>();
 
-        data.awaiting_channel_ids.extend(ids);
+        data.listening_channel_ids.extend(ids);
 
         data
     }));
@@ -233,12 +236,10 @@ async fn main() {
         }
     });
 
-    let mut livestream_client = TwitchLivestreamClient::new(instances.clone())
-        .await
-        .unwrap();
+    let mut livestream_helper = TwitchLivestreamHelper::new(instances.clone());
 
     let livestream_thread = tokio::spawn(async move {
-        livestream_client.run().await.unwrap();
+        livestream_helper.run().await;
     });
 
     let mut seventv_client = SevenTVWebsocketClient::new(instances.clone())
