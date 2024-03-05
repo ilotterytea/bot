@@ -42,12 +42,11 @@ impl Command for JoinCommand {
             return Ok(Response::Single(
                 instance_bundle
                     .localizator
-                    .get_formatted_text(
-                        request.channel_preference.language.as_str(),
+                    .formatted_text_by_request(
+                        &request,
                         LineId::CommandJoinResponse,
-                        vec![request.sender.alias_name.clone()],
-                    )
-                    .unwrap(),
+                        Vec::<String>::new(),
+                    ),
             ));
         }
 
@@ -84,12 +83,11 @@ impl Command for JoinCommand {
                 request.sender.alias_name.clone(),
                 instance_bundle
                     .localizator
-                    .get_formatted_text(
-                        request.channel_preference.language.as_str(),
+                    .formatted_text_by_request(
+                        &request,
                         LineId::CommandJoinResponseInChat,
-                        vec![request.sender.alias_name.clone()],
-                    )
-                    .unwrap(),
+                        Vec::<String>::new(),
+                    ),
             )
             .await
             .expect("Failed to send a message");
@@ -97,12 +95,11 @@ impl Command for JoinCommand {
         Ok(Response::Single(
             instance_bundle
                 .localizator
-                .get_formatted_text(
-                    request.channel_preference.language.as_str(),
+                .formatted_text_by_request(
+                    &request,
                     LineId::CommandJoinResponse,
-                    vec![request.sender.alias_name.clone()],
+                    Vec::<String>::new(),
                 )
-                .unwrap(),
         ))
     }
 }

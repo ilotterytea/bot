@@ -37,7 +37,7 @@ impl Command for SettingsCommand {
         instance_bundle: &InstanceBundle,
         mut request: Request,
     ) -> Result<Response, ResponseError> {
-        let subcommand_id = match request.subcommand_id {
+        let subcommand_id = match request.subcommand_id.clone() {
             Some(v) => v,
             None => {
                 return Err(ResponseError::NotEnoughArguments(
@@ -50,7 +50,7 @@ impl Command for SettingsCommand {
             return Err(ResponseError::NotEnoughArguments(CommandArgument::Value));
         }
 
-        let message = request.message.unwrap();
+        let message = request.message.clone().unwrap();
 
         let conn = &mut establish_connection();
 
@@ -69,14 +69,11 @@ impl Command for SettingsCommand {
                     .execute(conn)
                     .expect("Failed to update the channel preference");
 
-                instance_bundle
-                    .localizator
-                    .get_formatted_text(
-                        request.channel_preference.language.as_str(),
-                        LineId::SettingsLocale,
-                        vec![request.sender.alias_name],
-                    )
-                    .unwrap()
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::SettingsLocale,
+                    Vec::<String>::new(),
+                )
             }
             "prefix" => {
                 update(chp::channel_preferences)
@@ -84,14 +81,11 @@ impl Command for SettingsCommand {
                     .execute(conn)
                     .expect("Failed to update the channel preference");
 
-                instance_bundle
-                    .localizator
-                    .get_formatted_text(
-                        request.channel_preference.language.as_str(),
-                        LineId::SettingsPrefix,
-                        vec![request.sender.alias_name, message],
-                    )
-                    .unwrap()
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::SettingsPrefix,
+                    vec![message],
+                )
             }
             _ => return Err(ResponseError::SomethingWentWrong),
         };
