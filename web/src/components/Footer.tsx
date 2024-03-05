@@ -19,13 +19,13 @@ const Footer = (): JSX.Element => {
 
     if (pathName === "/") {
         return (
-            <div className="w-full flex justify-center px-8 lg:px-0 py-16 mt-16 font-anta bg-gradient-to-t from-stone-50 dark:from-zinc-900 to-stone-200 dark:to-zinc-950">
+            <div className="w-full flex justify-center px-8 lg:px-0 py-16 mt-16 font-manrope font-medium bg-gradient-to-t from-stone-50 dark:from-zinc-900 to-stone-200 dark:to-zinc-950">
                 <div className="w-full lg:w-[50%] flex flex-col space-y-8 lg:space-y-0 lg:flex-row justify-between">
                     {
                         // Developer information
                     }
                     <div>
-                        <div className="flex flex-row items-center">
+                        <div className="flex flex-row items-center font-zilla">
                             <Image
                                 src={"/itb.png"}
                                 width={54}
@@ -35,8 +35,8 @@ const Footer = (): JSX.Element => {
                             />
                             <div>
                                 <div className="ml-2">
-                                    <h2 className="text-2xl font-medium">iLotterytea&apos;s</h2>
-                                    <h1 className="text-3xl font-semibold">Twitch bot</h1>
+                                    <h2 className="text-2xl font-semibold">iLotterytea&apos;s</h2>
+                                    <h1 className="text-3xl font-bold">Twitch bot</h1>
                                 </div>
                             </div>
                         </div>

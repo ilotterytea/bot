@@ -25,7 +25,7 @@ export function NavigationBar(): JSX.Element {
     ];
 
     return (
-        <div className="w-full flex justify-center items-center p-4 font-anta">
+        <div className="w-full flex justify-center items-center p-4 font-zilla font-normal">
             <div className="w-full lg:w-[50%] flex flex-row items-center">
                 {
                     pathname != "/" ?
