@@ -53,6 +53,7 @@ services:
       - db
       - migration
     build:
+      context: .
       dockerfile: ./docker/bot.Dockerfile
     command: "cargo run --release --package bot"
     env_file:
