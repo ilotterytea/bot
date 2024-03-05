@@ -71,7 +71,7 @@ export function useWikiPageGenerator(name: string): JSX.Element {
     return (
         <main className="w-full min-h-screen flex flex-col shadow-lg bg-stone-100 dark:bg-stone-900">
             <div className="bg-gradient-to-t from-emerald-300 to-teal-200 p-2 pl-8 shadow-lg">
-                <h1 className="text-2xl font-anta">
+                <h1 className="text-2xl font-zilla font-semibold">
                     <FontAwesomeIcon icon={faBook} /> Wiki
                 </h1>
             </div>
@@ -88,7 +88,7 @@ export function useWikiPageGenerator(name: string): JSX.Element {
                             {
                                 sidebarVisible ?
                                 <>
-                                    <p className="font-anta mt-2">PAGES</p>
+                                    <p className="font-zilla mt-2">PAGES</p>
                                     <MDXRemote {...summary} components={{}} />
                                 </>
                                 :

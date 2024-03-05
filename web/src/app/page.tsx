@@ -18,7 +18,7 @@ export default function Home() {
           {
             // Introduction
           }
-          <div className="w-full flex flex-row justify-around items-center lg:px-8 py-[96px] bg-gradient-to-t from-green-500 to-teal-200 animate-mainscreen shadow-lg">
+          <div className="w-full flex flex-row justify-around items-center lg:px-8 py-[96px] bg-gradient-to-t from-green-300 to-teal-100 animate-mainscreen shadow-lg">
             <div className="hidden lg:flex justify-center items-center">
               <Image
                 src={"/bot_avatar.png"}
@@ -29,11 +29,11 @@ export default function Home() {
             </div>
             <div className="flex flex-col space-y-8 text-center lg:text-right lg:w-[50%]">
               <div>
-                <h1 className="text-3xl font-medium [text-shadow:_1px_1px_3px_rgb(0_0_0_/_40%)]">Enhance your chat with <span className="text-rose-800">{process.env.NEXT_PUBLIC_BOT_USERNAME ?? "the bot"}</span></h1>
+                <h1 className="text-4xl font-semibold font-zilla [text-shadow:_1px_1px_3px_rgb(0_0_0_/_40%)]">Enhance your chat with <span className="text-rose-800">{process.env.NEXT_PUBLIC_BOT_USERNAME ?? "the bot"}</span></h1>
                 <p className="text-md [text-shadow:_1px_1px_3px_rgb(0_0_0_/_40%)]">A multi-utility Twitch chat bot that brings<br/>a lot of functionality into your chat.</p>
               </div>
               <Link href={"/wiki/join"} className="h-[64px]">
-                <Button className="bg-rose-800 text-stone-50 h-full text-lg font-anta rounded-lg shadow-lg [text-shadow:_1px_1px_3px_rgb(0_0_0_/_40%)]">
+                <Button className="bg-rose-800 text-stone-50 h-full text-lg font-zilla font-semibold text-xl rounded-lg shadow-lg [text-shadow:_1px_1px_3px_rgb(0_0_0_/_40%)]">
                   <FontAwesomeIcon icon={faRightToBracket} /> Add to my chat room
                 </Button>
               </Link>
@@ -48,7 +48,7 @@ export default function Home() {
               // Features header
             }
             <div className="w-full flex justify-center items-center p-6 bg-stone-300 dark:bg-green-400 font-anta">
-              <h1 className="text-4xl font-semibold text-stone-800 dark:text-green-900 [text-shadow:_1px_1px_3px_rgb(0_0_0_/_40%)]">Features</h1>
+              <h1 className="text-4xl font-manrope font-bold text-stone-800 dark:text-green-900 [text-shadow:_1px_1px_3px_rgb(0_0_0_/_40%)]">Features</h1>
             </div>
             {
               // Feature list
@@ -189,7 +189,7 @@ const FeatureItem = (
 ): JSX.Element => (
   <div className="w-full flex flex-col lg:flex-row justify-between items-center">
     <div className="px-6">
-      <h1 className="text-4xl font-medium mb-6 dark:text-teal-300">
+      <h1 className="text-4xl font-semibold mb-6 dark:text-teal-300">
         {name}
       </h1>
       {description}
@@ -206,7 +206,7 @@ const SmallFeatureItem = (
 ): JSX.Element => (
   <div className="flex flex-col min-w-80 p-8 space-y-4 rounded-lg bg-stone-300 dark:bg-stone-700 border-1 border-stone-300 dark:border-stone-900 shadow-[0_0px_4px_0px_rgba(0,0,0,0.3)]">
     {icon}
-    <h1 className="text-2xl font-medium dark:text-teal-200">
+    <h1 className="text-2xl font-semibold dark:text-teal-200">
       {name}
     </h1>
     {description}
