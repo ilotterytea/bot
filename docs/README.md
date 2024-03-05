@@ -12,7 +12,7 @@ Just use the commands to have a fun and interactive chat experience!
 ## How to get started
 
 + **Install the bot**\
-You can use an instance already running (like [@imteabot](https://twitch.tv/imteabot))
+You can use an instance already running (like [@teabot](https://twitch.tv/teabot))
 and install it in your chat by sending the command [!join](/wiki/join) in its chat,
 or you can self-host it using [these instructions](https://git.ilotterytea.kz/tea/bot/src/branch/master/README.md).
 
@@ -27,6 +27,6 @@ Customize the bot to suit your style.
 ## Updates
 
 The bot is **under active development**.
-Keep an eye on [Gitea](https://git.ilotterytea.kz/tea/bot) for updates.
+Keep an eye on [Git](https://git.ilotterytea.kz/tea/bot) for updates.
 If you have any questions or would like to suggest a new feature, [feel free to contact us](/contact).
 
