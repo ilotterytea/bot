@@ -39,7 +39,7 @@ impl Command for NotifyCommand {
         instance_bundle: &InstanceBundle,
         request: Request,
     ) -> Result<Response, ResponseError> {
-        let subcommand_id = match request.subcommand_id {
+        let subcommand_id = match request.subcommand_id.clone() {
             Some(v) => v,
             None => {
                 return Err(ResponseError::NotEnoughArguments(
@@ -51,7 +51,7 @@ impl Command for NotifyCommand {
         if request.message.is_none() {
             return Err(ResponseError::NotEnoughArguments(CommandArgument::Target));
         }
-        let message = request.message.unwrap();
+        let message = request.message.clone().unwrap();
         let mut message_split = message.split(" ").collect::<Vec<&str>>();
 
         let (target_name, event_type) = match message_split.first() {
@@ -122,43 +122,26 @@ impl Command for NotifyCommand {
                     .execute(conn)
                     .expect("Failed to create a new event subscription");
 
-                instance_bundle
-                    .localizator
-                    .get_formatted_text(
-                        request.channel_preference.language.as_str(),
-                        LineId::NotifySub,
-                        vec![
-                            request.sender.alias_name.clone(),
-                            target_name,
-                            event_type.to_string(),
-                        ],
-                    )
-                    .unwrap()
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::NotifySub,
+                    vec![target_name, event_type.to_string()],
+                )
             }
-            ("sub", Some(e)) if subs.iter().any(|x| x.event_id == e.id) => instance_bundle
-                .localizator
-                .get_formatted_text(
-                    request.channel_preference.language.as_str(),
+            ("sub", Some(e)) if subs.iter().any(|x| x.event_id == e.id) => {
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
                     LineId::NotifyAlreadySub,
-                    vec![
-                        request.sender.alias_name.clone(),
-                        target_name,
-                        event_type.to_string(),
-                    ],
+                    vec![target_name, event_type.to_string()],
                 )
-                .unwrap(),
-            ("unsub", Some(e)) if !subs.iter().any(|x| x.event_id == e.id) => instance_bundle
-                .localizator
-                .get_formatted_text(
-                    request.channel_preference.language.as_str(),
+            }
+            ("unsub", Some(e)) if !subs.iter().any(|x| x.event_id == e.id) => {
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
                     LineId::NotifyAlreadyUnsub,
-                    vec![
-                        request.sender.alias_name.clone(),
-                        target_name,
-                        event_type.to_string(),
-                    ],
+                    vec![target_name, event_type.to_string()],
                 )
-                .unwrap(),
+            }
             ("unsub", Some(e)) if subs.iter().any(|x| x.event_id == e.id) => {
                 let sub = subs.iter().find(|x| x.event_id == e.id).unwrap();
 
@@ -166,18 +149,11 @@ impl Command for NotifyCommand {
                     .execute(conn)
                     .expect("Failed to delete the event subscription");
 
-                instance_bundle
-                    .localizator
-                    .get_formatted_text(
-                        request.channel_preference.language.as_str(),
-                        LineId::NotifyUnsub,
-                        vec![
-                            request.sender.alias_name.clone(),
-                            target_name,
-                            event_type.to_string(),
-                        ],
-                    )
-                    .unwrap()
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::NotifyUnsub,
+                    vec![target_name, event_type.to_string()],
+                )
             }
             (_, None) => {
                 return Err(ResponseError::NotFound(format!(

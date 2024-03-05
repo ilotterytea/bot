@@ -46,7 +46,7 @@ impl Command for EventCommand {
         instance_bundle: &InstanceBundle,
         request: Request,
     ) -> Result<Response, ResponseError> {
-        let subcommand_id = match request.subcommand_id {
+        let subcommand_id = match request.subcommand_id.clone() {
             Some(v) => v,
             None => {
                 return Err(ResponseError::NotEnoughArguments(
@@ -59,7 +59,7 @@ impl Command for EventCommand {
             return Err(ResponseError::NotEnoughArguments(CommandArgument::Target));
         }
 
-        let message = request.message.unwrap();
+        let message = request.message.clone().unwrap();
         let mut message_split = message.split(" ").collect::<Vec<&str>>();
 
         let (target_name, event_type) = match message_split.first() {
@@ -221,20 +221,11 @@ impl Command for EventCommand {
                     drop(ids);
                 }
 
-                Response::Single(
-                    instance_bundle
-                        .localizator
-                        .get_formatted_text(
-                            request.channel_preference.language.as_str(),
-                            LineId::EventOn,
-                            vec![
-                                request.sender.alias_name.clone(),
-                                target_name,
-                                event_type.to_string(),
-                            ],
-                        )
-                        .unwrap(),
-                )
+                Response::Single(instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::EventOn,
+                    vec![target_name, event_type.to_string()],
+                ))
             }
 
             ("off", Some(e)) => {
@@ -244,20 +235,11 @@ impl Command for EventCommand {
 
                 // TODO: Delete a subscription from the websocket if it is the last subscriber
 
-                Response::Single(
-                    instance_bundle
-                        .localizator
-                        .get_formatted_text(
-                            request.channel_preference.language.as_str(),
-                            LineId::EventOff,
-                            vec![
-                                request.sender.alias_name.clone(),
-                                target_name,
-                                event_type.to_string(),
-                            ],
-                        )
-                        .unwrap(),
-                )
+                Response::Single(instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::EventOff,
+                    vec![target_name, event_type.to_string()],
+                ))
             }
             ("off", None) => return Err(ResponseError::NotFound(name_and_type)),
             _ => {

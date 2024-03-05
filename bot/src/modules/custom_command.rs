@@ -47,7 +47,7 @@ impl Command for CustomCommandsCommand {
         instance_bundle: &InstanceBundle,
         request: Request,
     ) -> Result<Response, ResponseError> {
-        let subcommand_id = match request.subcommand_id {
+        let subcommand_id = match request.subcommand_id.clone() {
             Some(v) => v,
             None => {
                 return Err(ResponseError::NotEnoughArguments(
@@ -59,7 +59,7 @@ impl Command for CustomCommandsCommand {
         if request.message.is_none() {
             return Err(ResponseError::NotEnoughArguments(CommandArgument::Name));
         }
-        let message = request.message.unwrap();
+        let message = request.message.clone().unwrap();
         let mut message_split = message.split(" ").collect::<Vec<&str>>();
 
         // Subcommands that requires one argument only
@@ -92,14 +92,11 @@ impl Command for CustomCommandsCommand {
                         .as_str(),
                     );
 
-                instance_bundle
-                    .localizator
-                    .get_formatted_text(
-                        request.channel_preference.language.as_str(),
-                        LineId::CommandCustomCommandDeleted,
-                        vec![c.name.clone(), c.id.to_string()],
-                    )
-                    .unwrap()
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::CommandCustomCommandDeleted,
+                    vec![c.name.clone(), c.id.to_string()],
+                )
             }
             (Some(c), 0, "toggle") => {
                 update(cc::custom_commands.find(&c.id))
@@ -113,36 +110,30 @@ impl Command for CustomCommandsCommand {
                         .as_str(),
                     );
 
-                instance_bundle
-                    .localizator
-                    .get_formatted_text(
-                        request.channel_preference.language.as_str(),
-                        if !c.is_enabled {
-                            LineId::CommandCustomCommandEnabled
-                        } else {
-                            LineId::CommandCustomCommandDisabled
-                        },
-                        vec![c.name.clone(), c.id.to_string()],
-                    )
-                    .unwrap()
-            }
-            (Some(c), 0, "info") => instance_bundle
-                .localizator
-                .get_formatted_text(
-                    request.channel_preference.language.as_str(),
-                    LineId::CommandCustomCommandInfo,
-                    vec![
-                        if c.is_enabled {
-                            "✅".to_string()
-                        } else {
-                            "❌".to_string()
-                        },
-                        c.name.clone(),
-                        c.id.to_string(),
-                        c.messages.get(0).clone().unwrap().to_owned(),
-                    ],
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    if !c.is_enabled {
+                        LineId::CommandCustomCommandEnabled
+                    } else {
+                        LineId::CommandCustomCommandDisabled
+                    },
+                    vec![c.name.clone(), c.id.to_string()],
                 )
-                .unwrap(),
+            }
+            (Some(c), 0, "info") => instance_bundle.localizator.formatted_text_by_request(
+                &request,
+                LineId::CommandCustomCommandInfo,
+                vec![
+                    if c.is_enabled {
+                        "✅".to_string()
+                    } else {
+                        "❌".to_string()
+                    },
+                    c.name.clone(),
+                    c.id.to_string(),
+                    c.messages.get(0).clone().unwrap().to_owned(),
+                ],
+            ),
             (Some(c), _, "message") if !message_split.is_empty() => {
                 let message = message_split.join(" ");
                 update(cc::custom_commands.find(&c.id))
@@ -156,14 +147,11 @@ impl Command for CustomCommandsCommand {
                         .as_str(),
                     );
 
-                instance_bundle
-                    .localizator
-                    .get_formatted_text(
-                        request.channel_preference.language.as_str(),
-                        LineId::CommandCustomCommandMessage,
-                        vec![c.name.clone(), c.id.to_string()],
-                    )
-                    .unwrap()
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::CommandCustomCommandMessage,
+                    vec![c.name.clone(), c.id.to_string()],
+                )
             }
 
             (None, _, "new") if !message_split.is_empty() => {
@@ -178,14 +166,11 @@ impl Command for CustomCommandsCommand {
                     .execute(conn)
                     .expect("Failed to insert a new custom command");
 
-                instance_bundle
-                    .localizator
-                    .get_formatted_text(
-                        request.channel_preference.language.as_str(),
-                        LineId::CommandCustomCommandNew,
-                        vec![name_id],
-                    )
-                    .unwrap()
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::CommandCustomCommandNew,
+                    vec![name_id],
+                )
             }
 
             (None, 0, _) if subcommand_id.ne("new") => {

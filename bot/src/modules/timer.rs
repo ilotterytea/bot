@@ -49,7 +49,7 @@ impl Command for TimerCommand {
         instance_bundle: &InstanceBundle,
         request: Request,
     ) -> Result<Response, ResponseError> {
-        let subcommand_id = match request.subcommand_id {
+        let subcommand_id = match request.subcommand_id.clone() {
             Some(v) => v,
             None => {
                 return Err(ResponseError::NotEnoughArguments(
@@ -61,7 +61,7 @@ impl Command for TimerCommand {
         if request.message.is_none() {
             return Err(ResponseError::NotEnoughArguments(CommandArgument::Name));
         }
-        let message = request.message.unwrap();
+        let message = request.message.clone().unwrap();
         let mut message_split = message.split(" ").collect::<Vec<&str>>();
 
         // Subcommands that requires one argument only
@@ -88,14 +88,11 @@ impl Command for TimerCommand {
                     .execute(conn)
                     .expect(format!("Failed to delete the timer ID {}", t.id.to_string()).as_str());
 
-                instance_bundle
-                    .localizator
-                    .get_formatted_text(
-                        request.channel_preference.language.as_str(),
-                        LineId::CommandTimerDeleted,
-                        vec![t.name.clone(), t.id.to_string()],
-                    )
-                    .unwrap()
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::CommandTimerDeleted,
+                    vec![t.name.clone(), t.id.to_string()],
+                )
             }
             (Some(t), 0, "toggle") => {
                 update(ti::timers.find(&t.id))
@@ -103,37 +100,31 @@ impl Command for TimerCommand {
                     .execute(conn)
                     .expect(format!("Failed to toggle the timer ID {}", t.id.to_string()).as_str());
 
-                instance_bundle
-                    .localizator
-                    .get_formatted_text(
-                        request.channel_preference.language.as_str(),
-                        if !t.is_enabled {
-                            LineId::CommandTimerEnabled
-                        } else {
-                            LineId::CommandTimerDisabled
-                        },
-                        vec![t.name.clone(), t.id.to_string()],
-                    )
-                    .unwrap()
-            }
-            (Some(t), 0, "info") => instance_bundle
-                .localizator
-                .get_formatted_text(
-                    request.channel_preference.language.as_str(),
-                    LineId::CommandTimerInfo,
-                    vec![
-                        if t.is_enabled {
-                            "✅".to_string()
-                        } else {
-                            "❌".to_string()
-                        },
-                        t.name.clone(),
-                        t.id.to_string(),
-                        t.interval_sec.to_string(),
-                        t.messages.get(0).clone().unwrap().to_owned(),
-                    ],
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    if !t.is_enabled {
+                        LineId::CommandTimerEnabled
+                    } else {
+                        LineId::CommandTimerDisabled
+                    },
+                    vec![t.name.clone(), t.id.to_string()],
                 )
-                .unwrap(),
+            }
+            (Some(t), 0, "info") => instance_bundle.localizator.formatted_text_by_request(
+                &request,
+                LineId::CommandTimerInfo,
+                vec![
+                    if t.is_enabled {
+                        "✅".to_string()
+                    } else {
+                        "❌".to_string()
+                    },
+                    t.name.clone(),
+                    t.id.to_string(),
+                    t.interval_sec.to_string(),
+                    t.messages.get(0).clone().unwrap().to_owned(),
+                ],
+            ),
             (Some(t), 0, "call") => t.messages.get(0).clone().unwrap().to_owned(),
 
             (Some(t), 1, "interval") => {
@@ -154,14 +145,11 @@ impl Command for TimerCommand {
                         .as_str(),
                     );
 
-                instance_bundle
-                    .localizator
-                    .get_formatted_text(
-                        request.channel_preference.language.as_str(),
-                        LineId::CommandTimerInterval,
-                        vec![t.name.clone(), t.id.to_string()],
-                    )
-                    .unwrap()
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::CommandTimerInterval,
+                    vec![t.name.clone(), t.id.to_string()],
+                )
             }
 
             (Some(t), _, "message") if !message_split.is_empty() => {
@@ -177,14 +165,11 @@ impl Command for TimerCommand {
                         .as_str(),
                     );
 
-                instance_bundle
-                    .localizator
-                    .get_formatted_text(
-                        request.channel_preference.language.as_str(),
-                        LineId::CommandTimerMessage,
-                        vec![t.name.clone(), t.id.to_string()],
-                    )
-                    .unwrap()
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::CommandTimerMessage,
+                    vec![t.name.clone(), t.id.to_string()],
+                )
             }
 
             (None, _, "new") if message_split.len() > 1 => {
@@ -208,14 +193,11 @@ impl Command for TimerCommand {
                     .execute(conn)
                     .expect("Failed to insert a new timer");
 
-                instance_bundle
-                    .localizator
-                    .get_formatted_text(
-                        request.channel_preference.language.as_str(),
-                        LineId::CommandTimerNew,
-                        vec![name_id],
-                    )
-                    .unwrap()
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::CommandTimerNew,
+                    vec![name_id],
+                )
             }
 
             (Some(_), _, "new") => return Err(ResponseError::NamesakeCreation(name_id)),
