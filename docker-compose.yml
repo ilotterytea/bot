@@ -23,6 +23,7 @@ services:
       db:
         condition: service_healthy
     build:
+      context: .
       dockerfile: ./docker/migration.Dockerfile
     command: "diesel setup --database-url \"postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOSTNAME}/${POSTGRES_DB}\" --migration-dir \".\""
     env_file:
@@ -36,6 +37,7 @@ services:
       - db
       - migration
     build:
+      context: .
       dockerfile: ./docker/api.Dockerfile
     command: "cargo run --release --package api"
     env_file:
@@ -61,6 +63,7 @@ services:
   web:
     restart: on-failure
     build:
+      context: .
       dockerfile: ./docker/web.Dockerfile
     command: "npm start"
     env_file:
