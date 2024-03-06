@@ -1,5 +1,6 @@
 use std::{sync::Arc, time::Duration};
 
+use chrono::{NaiveDateTime, Utc};
 use common::{establish_connection, models::EventType};
 use log::{error, info};
 use twitch_api::{
@@ -58,6 +59,21 @@ impl TwitchLivestreamHelper {
                 let streams = v.data;
 
                 for stream in &streams {
+                    // skip the stream if it started more than 2 minutes ago
+                    if let Ok(stream_timestamp) = NaiveDateTime::parse_from_str(
+                        stream.started_at.as_str(),
+                        "%Y-%m-%dT%H:%M:%SZ",
+                    ) {
+                        let timestamp_now = Utc::now().naive_utc();
+
+                        let difference_millis =
+                            timestamp_now.timestamp_millis() - stream_timestamp.timestamp_millis();
+
+                        if difference_millis > 2 * 60 * 1000 {
+                            continue;
+                        }
+                    }
+
                     if self.online_channels_cache.contains(&stream.user_id) {
                         continue;
                     }
