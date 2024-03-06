@@ -94,11 +94,22 @@ pub async fn handle_timers(instance_bundle: &InstanceBundle) {
             }
 
             for line in timer.messages {
-                instance_bundle
-                    .twitch_irc_client
-                    .say(channel.alias_name.clone(), line)
-                    .await
-                    .expect("Failed to send a message");
+                let mut split = line.split(' ').collect::<Vec<&str>>();
+                let first_line = split[0];
+                split.remove(0);
+
+                let s_line = split.join(" ");
+
+                if s_line.is_empty() {
+                    continue;
+                }
+
+                let channel_name = channel.alias_name.clone();
+
+                match first_line {
+                    "/me" => instance_bundle.twitch_irc_client.me(channel_name, s_line).await.expect("Failed to send a message"),
+                    _ => instance_bundle.twitch_irc_client.say(channel_name, line).await.expect("Failed to send a message")
+                };
             }
 
             update(ti::timers.filter(ti::id.eq(timer.id)))
