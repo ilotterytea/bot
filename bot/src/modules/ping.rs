@@ -69,6 +69,7 @@ impl Command for PingCommand {
                         "N/A".to_string()
                     },
                     compile_timestamp,
+                    env!("CARGO_PKG_VERSION").to_string(),
                 ],
             ),
         ))
