@@ -39,7 +39,7 @@
   "emotes.push": "{0} {1} added the {2} emote",
   "emotes.pull": "{0} {1} removed the {2} emote",
   "msg.no_message": "{sender.alias_name}: No message specified for command",
-  "cmd.ping.response": "{sender.alias_name}: DankPoke 🦀 Rust {0} · Uptime: {1} · Memory usage: {2}MB · Last updated {3} ago",
+  "cmd.ping.response": "{sender.alias_name}: DankPoke 🦀 Rust {0} · Uptime: {1} · Memory usage: {2}MB · Bot running on v{4} (Last updated {3} ago)",
   "cmd.spam.no_count": "{sender.alias_name}: No value specified for amount of messages",
   "cmd.spam.invalid_count": "{sender.alias_name}: Value \"{0}\" is not a number, less than or equal to zero",
   "cmd.spam.response": "{0}",
