@@ -237,10 +237,13 @@ pub async fn handle_stream_event(
                     subs.extend(chatters);
                 }
 
+                let placeholders = instance_bundle.localizator.parse_placeholders(&event.message);
+                let line = instance_bundle.localizator.replace_placeholders(event.message, placeholders, parameters, None);
+
                 if subs.is_empty() {
                     instance_bundle
                         .twitch_irc_client
-                        .say(channel.alias_name.clone(), format!("⚡ {}", event.message))
+                        .say(channel.alias_name.clone(), format!("⚡ {}", line))
                         .await
                         .expect("Failed to send a message");
                     return;
@@ -252,12 +255,8 @@ pub async fn handle_stream_event(
                         .join(", ")
                         .as_str(),
                     ", ",
-                    300 - event.message.len(),
+                    300 - line.len(),
                 );
-
-
-                let placeholders = instance_bundle.localizator.parse_placeholders(&event.message);
-                let line = instance_bundle.localizator.replace_placeholders(event.message, placeholders, parameters, None);
 
                 for formatted_sub in formatted_subs {
                     instance_bundle
