@@ -285,7 +285,7 @@ impl Localizator {
         )
     }
 
-    fn parse_placeholders(&self, line: &String) -> Vec<LinePlaceholder> {
+    pub fn parse_placeholders(&self, line: &String) -> Vec<LinePlaceholder> {
         let mut reading_placeholder = false;
         let mut placeholder_buffer = String::new();
 
@@ -314,7 +314,7 @@ impl Localizator {
         placeholders
     }
 
-    fn replace_placeholders(
+    pub fn replace_placeholders(
         &self,
         mut line: String,
         placeholders: Vec<LinePlaceholder>,
@@ -365,7 +365,7 @@ impl Localizator {
     }
 }
 
-enum LinePlaceholder {
+pub enum LinePlaceholder {
     SenderAliasName,
     SenderAliasId,
 
