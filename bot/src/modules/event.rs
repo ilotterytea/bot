@@ -215,8 +215,7 @@ impl Command for EventCommand {
                         .lock()
                         .await;
 
-                    ids.awaiting_channel_ids
-                        .push(UserId::new(target_id.to_string()));
+                    ids.insert(UserId::new(target_id.to_string()));
 
                     drop(ids);
                 }

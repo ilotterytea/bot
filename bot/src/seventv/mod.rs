@@ -35,6 +35,8 @@ pub struct SevenTVWebsocketClient {
     session_id: Option<String>,
     instance_bundle: Arc<InstanceBundle>,
     reconnect_url: Url,
+
+    listening_channel_ids: HashSet<UserId>,
 }
 
 impl SevenTVWebsocketClient {
@@ -46,6 +48,7 @@ impl SevenTVWebsocketClient {
             socket: connect(reconnect_url.clone()).await?,
             session_id: None,
             reconnect_url,
+            listening_channel_ids: HashSet::new(),
         })
     }
 
@@ -67,17 +70,16 @@ impl SevenTVWebsocketClient {
         }
     }
 
-    async fn flip_channels(&self) {
+    async fn flip_channels(&mut self) {
         let mut data = self.instance_bundle.seventv_eventapi_data.lock().await;
 
-        let mut set_a: HashSet<UserId> =
-            HashSet::from_iter(data.awaiting_channel_ids.iter().cloned());
-        let set_b: HashSet<UserId> = HashSet::from_iter(data.listening_channel_ids.iter().cloned());
+        let mut set_a: HashSet<UserId> = HashSet::from_iter(data.iter().cloned());
+        let set_b: HashSet<UserId> = HashSet::from_iter(self.listening_channel_ids.iter().cloned());
 
         set_a.extend(set_b);
 
-        data.awaiting_channel_ids = Vec::from_iter(set_a.into_iter());
-        data.listening_channel_ids.clear();
+        *data = HashSet::from_iter(set_a.into_iter());
+        self.listening_channel_ids.clear();
     }
 
     pub async fn process_message(&mut self, msg: Message) -> Result<(), eyre::Report> {
@@ -279,13 +281,12 @@ impl SevenTVWebsocketClient {
         let mut data = self.instance_bundle.seventv_eventapi_data.lock().await;
 
         let ids = data
-            .awaiting_channel_ids
             .iter()
-            .filter(|x| !data.listening_channel_ids.iter().any(|y| y.eq(*x)))
+            .filter(|x| !self.listening_channel_ids.iter().any(|y| y.eq(*x)))
             .cloned()
-            .collect::<Vec<UserId>>();
+            .collect::<HashSet<UserId>>();
 
-        data.awaiting_channel_ids = ids.clone();
+        *data = ids.clone();
 
         drop(data);
 
@@ -324,8 +325,7 @@ impl SevenTVWebsocketClient {
 
             println!("Listening 7TV events for {}'s emote set", user.username);
 
-            let mut data = self.instance_bundle.seventv_eventapi_data.lock().await;
-            data.listening_channel_ids.push(channel_id);
+            self.listening_channel_ids.insert(channel_id);
         }
 
         Ok(())
