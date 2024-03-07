@@ -62,7 +62,7 @@ export default function Page() {
                     className="bg-stone-200 dark:bg-stone-800 p-2 rounded-lg"
                 />
                 <h1 className="text-4xl font-manrope font-semibold">No contacts were found!</h1>
-                <p className="text-stone-400 font-inter text-xl text-center">The author of <Link href={"https://git.ilotterytea.kz/tea/bot"} className="text-teal-300 hover:text-teal-400">"ilotterytea's twitch bot" project</Link> is not responsible for this instance of the bot.</p>
+                <p className="text-stone-400 font-inter text-xl text-center">The author of <Link href={"https://git.ilotterytea.kz/tea/bot"} className="text-teal-300 hover:text-teal-400">&quot;ilotterytea&apos;s twitch bot&quot; project</Link> is not responsible for this instance of the bot.</p>
             </div>
         </div>;
     }
