@@ -37,7 +37,6 @@ impl TwitchLivestreamHelper {
         let data = self.bundle.twitch_livestream_websocket_data.lock().await;
 
         let channel_ids = data
-            .listening_channel_ids
             .iter()
             .map(|x| UserIdRef::from_str(x.as_str()))
             .collect::<Vec<&UserIdRef>>();
