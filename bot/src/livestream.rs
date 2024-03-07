@@ -84,6 +84,7 @@ impl TwitchLivestreamHelper {
                         self.bundle.clone(),
                         stream.user_id.clone(),
                         EventType::Live,
+                        Vec::new(),
                     )
                     .await;
                 }
