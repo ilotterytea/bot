@@ -65,6 +65,8 @@
   "error.customcommand.already_exists": "{sender.alias_name}: The custom command with the same name has already exists.",
   "event.on": "{sender.alias_name}: A new \"{0}:{1}\" event has been successfully created! It will send a message when the event occurs.",
   "event.off": "{sender.alias_name}: The \"{0}:{1}\" event has been successfully deleted.",
+  "event.flag.on": "{sender.alias_name}: The \"{0}\" flag is set for the\"{1}:{2}\" event.",
+  "event.flag.off": "{sender.alias_name}: The \"{0}\" flag has been removed from the \"{1}:{2}\" event.",
   "event.already_exists": "{sender.alias_name}: An event with the same name and type already exists on this channel.",
   "notify.sub": "{sender.alias_name}: You have successfully subscribed to the \"{0}:{1}\" event!",
   "notify.unsub": "{sender.alias_name}: You have successfully unsubscribed from the \"{0}:{1}\" event!",

@@ -77,6 +77,8 @@ pub enum LineId {
 
     EventOn,
     EventOff,
+    EventFlagOn,
+    EventFlagOff,
 
     NotifySub,
     NotifyAlreadySub,
@@ -169,6 +171,8 @@ impl LineId {
             "error.customcommands.already_exists" => Some(Self::CustomCommandAlreadyExistsError),
             "event.on" => Some(Self::EventOn),
             "event.off" => Some(Self::EventOff),
+            "event.flag.on" => Some(Self::EventFlagOn),
+            "event.flag.off" => Some(Self::EventFlagOff),
             "event.already_exists" => Some(Self::EventAlreadyExistsError),
             "notify.sub" => Some(Self::NotifySub),
             "notify.already_sub" => Some(Self::NotifyAlreadySub),
