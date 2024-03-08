@@ -15,6 +15,7 @@ pub struct TwitchLivestreamHelper {
 
     online_channels_cache: Vec<UserId>,
     title_channel_cache: HashMap<UserId, String>,
+    game_channel_cache: HashMap<UserId, String>,
 }
 
 impl TwitchLivestreamHelper {
@@ -23,6 +24,7 @@ impl TwitchLivestreamHelper {
             bundle,
             online_channels_cache: Vec::new(),
             title_channel_cache: HashMap::new(),
+            game_channel_cache: HashMap::new(),
         }
     }
 
@@ -158,7 +160,25 @@ impl TwitchLivestreamHelper {
                                 self.bundle.clone(),
                                 channel.broadcaster_id.clone(),
                                 EventType::Title,
-                                vec![old_title, channel.title.clone()],
+                                vec![old_title, channel.title],
+                            )
+                            .await;
+                        }
+                    }
+
+                    let game = channel.game_name.take();
+
+                    if let Some(old_game) = self
+                        .game_channel_cache
+                        .insert(channel.broadcaster_id.clone(), game.clone())
+                    {
+                        if old_game.ne(&game) {
+                            handle_stream_event(
+                                conn,
+                                self.bundle.clone(),
+                                channel.broadcaster_id.clone(),
+                                EventType::Category,
+                                vec![old_game, game],
                             )
                             .await;
                         }
