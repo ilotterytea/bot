@@ -172,10 +172,21 @@ impl ToString for EventType {
     }
 }
 
-#[derive(Serialize, diesel_derive_enum::DbEnum, Debug, PartialEq)]
+#[derive(Serialize, diesel_derive_enum::DbEnum, Debug, PartialEq, Clone)]
 #[ExistingTypePath = "crate::schema::sql_types::EventFlag"]
 pub enum EventFlag {
     Massping,
+}
+
+impl FromStr for EventFlag {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "massping" => Ok(Self::Massping),
+            _ => Err("Failed to parse an event flag".to_string()),
+        }
+    }
 }
 
 #[derive(Serialize, Queryable, Identifiable, Associations)]
