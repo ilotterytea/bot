@@ -3,7 +3,7 @@
 ## Join using the `!join` command:
 
 To invite the bot to your Twitch channel,
-the streamer or moderator must use the `!join` command **ONLY** in [the bot's chat](https://twitch.tv/teabot).
+**the streamer** must use the `!join` command **ONLY** in [the bot's chat](https://twitch.tv/teabot).
 Once this command is executed, the bot will join the channel and users can use its commands.
 
 ## Join via the website:
