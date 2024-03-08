@@ -11,6 +11,9 @@ The `!event` command gives broadcasters the ability to manage events for streams
 + category
 + custom
 
+## Event flags
++ `massping` - Massping everyone in chat regardless of their subscription to the event.
+
 ## Syntax
 
 ### Create a new event
@@ -25,6 +28,12 @@ The `!event` command gives broadcasters the ability to manage events for streams
 `!event off <name>:<type>`
 + `<name>` - Twitch username or event name *(custom type only)*.
 + `<type>` - [Event type](#event-types).
+
+### Flag/unflag the event
+`!event flag <name>:<type> <flag>`
++ `<name>` - Twitch username or event name *(custom type only)*.
++ `<type>` - [Event type](#event-types).
++ `<flag>` - [Event flag](#event-flags).
 
 ### Call the event
 
@@ -42,6 +51,9 @@ The `!event` command gives broadcasters the ability to manage events for streams
 ### Deleting the event
 + `!event off forsen:live`
 
+### Flag/unflag the event
++ `!event flag forsen:live massping`
+
 ### Calling the event
 + `!event call forsen:live`
 
@@ -52,6 +64,12 @@ The `!event` command gives broadcasters the ability to manage events for streams
 
 ### Deleting the event
 + `The "forsen:live" (ID ...) event has been successfully deleted!`
+
+### Adding the flag to the event
++ `Flag "massping" is set for the "forsen:live" event.`
+
+### Removing the flag from the event
++ `Flag "massping" has been removed from the "forsen:live" event.`
 
 ### Calling the event
 + `⚡ forsen live!` 
