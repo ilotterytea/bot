@@ -65,6 +65,8 @@
   "error.customcommand.already_exists": "{sender.alias_name}: Команда с похожим именем уже существует.",
   "event.on": "{sender.alias_name}: Новое событие \"{0}:{1}\" было успешно создано! Сообщение будет отправлено, когда событие произойдет.",
   "event.off": "{sender.alias_name}: Событие \"{0}:{1}\" было успешно удалено.",
+  "event.flag.on": "{sender.alias_name}: Флажок \"{0}\" установлен для события \"{1}:{2}\".",
+  "event.flag.off": "{sender.alias_name}: Флажок \"{0}\" убран с события \"{1}:{2}\".",
   "event.already_exists": "{sender.alias_name}: Событие с таким же названием и типом уже существует на этом канале.",
   "notify.sub": "{sender.alias_name}: Вы успешно подписались на событие \"{0}:{1}\"!",
   "notify.unsub": "{sender.alias_name}: Вы успешно отписались от события \"{0}:{1}\"!",
