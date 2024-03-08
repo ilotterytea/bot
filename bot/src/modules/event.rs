@@ -1,7 +1,9 @@
 use std::{collections::HashSet, str::FromStr};
 
 use async_trait::async_trait;
-use diesel::{delete, insert_into, BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::{
+    delete, insert_into, update, BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl,
+};
 use eyre::Result;
 use twitch_api::{
     helix::chat::GetChattersRequest,
@@ -38,7 +40,12 @@ impl Command for EventCommand {
     }
 
     fn get_subcommands(&self) -> Vec<String> {
-        vec!["on".to_string(), "off".to_string(), "call".to_string()]
+        vec![
+            "on".to_string(),
+            "off".to_string(),
+            "call".to_string(),
+            "flag".to_string(),
+        ]
     }
 
     async fn execute(
@@ -241,6 +248,39 @@ impl Command for EventCommand {
                 ))
             }
             ("off", None) => return Err(ResponseError::NotFound(name_and_type)),
+            ("flag", Some(e)) => {
+                let mut flags = e.flags.clone();
+                let flag_str = message_split.join(" ");
+
+                if let Ok(flag) = EventFlag::from_str(flag_str.as_str()) {
+                    let r = if let Some(position) = e.flags.iter().position(|x| x == &flag) {
+                        flags.remove(position);
+
+                        Response::Single(instance_bundle.localizator.formatted_text_by_request(
+                            &request,
+                            LineId::EventFlagOff,
+                            vec![flag_str, target_name, event_type.to_string()],
+                        ))
+                    } else {
+                        flags.push(flag);
+
+                        Response::Single(instance_bundle.localizator.formatted_text_by_request(
+                            &request,
+                            LineId::EventFlagOn,
+                            vec![flag_str, target_name, event_type.to_string()],
+                        ))
+                    };
+
+                    update(ev::events.find(&e.id))
+                        .set(ev::flags.eq(&flags))
+                        .execute(conn)
+                        .expect("Failed to update event flags");
+
+                    r
+                } else {
+                    return Err(ResponseError::IncorrectArgument(flag_str));
+                }
+            }
             _ => {
                 return Err(ResponseError::SomethingWentWrong);
             }
