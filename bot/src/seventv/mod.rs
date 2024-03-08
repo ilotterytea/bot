@@ -1,6 +1,11 @@
 pub mod api;
 pub(super) mod schema;
 
+use common::{
+    establish_connection,
+    schema::{channel_preferences::dsl as chp, channels::dsl as ch},
+};
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use futures::SinkExt;
 use serde_json::Value;
 use std::{collections::HashSet, sync::Arc};
@@ -177,6 +182,22 @@ impl SevenTVWebsocketClient {
                             body.body.actor.username
                         };
 
+                        let conn = &mut establish_connection();
+
+                        let owner_id = owner.id.parse::<i32>().unwrap();
+
+                        let channel = ch::channels
+                            .filter(ch::alias_id.eq(&owner_id))
+                            .select((ch::id, ch::alias_name))
+                            .get_result::<(i32, String)>(conn)
+                            .expect("Failed to get channel");
+
+                        let channel_language = chp::channel_preferences
+                            .filter(chp::channel_id.eq(&channel.0))
+                            .select(chp::language)
+                            .get_result::<String>(conn)
+                            .expect("Failed to get channel preference");
+
                         let mut messages: Vec<String> = Vec::new();
 
                         if let Some(pushed) = body.body.pushed {
@@ -187,13 +208,13 @@ impl SevenTVWebsocketClient {
                                     self.instance_bundle
                                         .localizator
                                         .get_formatted_text(
-                                            "english",
+                                            channel_language.as_str(),
                                             LineId::EmotesPushed,
                                             vec![
                                                 self.instance_bundle
                                                     .localizator
                                                     .get_literal_text(
-                                                        "english",
+                                                        channel_language.as_str(),
                                                         LineId::Provider7TV,
                                                     )
                                                     .unwrap(),
@@ -214,13 +235,13 @@ impl SevenTVWebsocketClient {
                                     self.instance_bundle
                                         .localizator
                                         .get_formatted_text(
-                                            "english",
+                                            channel_language.as_str(),
                                             LineId::EmotesPulled,
                                             vec![
                                                 self.instance_bundle
                                                     .localizator
                                                     .get_literal_text(
-                                                        "english",
+                                                        channel_language.as_str(),
                                                         LineId::Provider7TV,
                                                     )
                                                     .unwrap(),
@@ -242,13 +263,13 @@ impl SevenTVWebsocketClient {
                                     self.instance_bundle
                                         .localizator
                                         .get_formatted_text(
-                                            "english",
+                                            channel_language.as_str(),
                                             LineId::EmotesUpdated,
                                             vec![
                                                 self.instance_bundle
                                                     .localizator
                                                     .get_literal_text(
-                                                        "english",
+                                                        channel_language.as_str(),
                                                         LineId::Provider7TV,
                                                     )
                                                     .unwrap(),
@@ -265,7 +286,7 @@ impl SevenTVWebsocketClient {
                         for m in messages {
                             self.instance_bundle
                                 .twitch_irc_client
-                                .say(owner.username.clone(), m)
+                                .say(channel.1.clone(), m)
                                 .await
                                 .expect("Failed to send a message");
                         }
