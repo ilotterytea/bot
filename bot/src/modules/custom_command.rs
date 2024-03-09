@@ -63,7 +63,7 @@ impl Command for CustomCommandsCommand {
         let mut message_split = message.split(" ").collect::<Vec<&str>>();
 
         // Subcommands that requires one argument only
-        let name_id = match message_split.get(0) {
+        let name_id = match message_split.first() {
             Some(v) => {
                 let v = v.to_string();
                 message_split.remove(0);
@@ -119,7 +119,7 @@ impl Command for CustomCommandsCommand {
                     },
                     c.name.clone(),
                     c.id.to_string(),
-                    c.messages.get(0).clone().unwrap().to_owned(),
+                    c.messages.first().unwrap().to_owned(),
                 ],
             ),
             (Some(c), _, "message") if !message_split.is_empty() => {
