@@ -31,6 +31,16 @@ impl Command for JoinCommand {
         instance_bundle: &InstanceBundle,
         request: Request,
     ) -> Result<Response, ResponseError> {
+        if request.message.is_some() {
+            return Ok(Response::Single(
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::JoinOtherchatroom,
+                    Vec::<String>::new(),
+                ),
+            ));
+        }
+
         let conn = &mut establish_connection();
 
         let channel_query = ch::channels
