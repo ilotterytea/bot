@@ -1,5 +1,6 @@
 use std::env;
 
+use chrono::{NaiveDateTime, Utc};
 use diesel::{
     insert_into, update, BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl,
 };
@@ -14,7 +15,8 @@ use common::{
         NewUser, Right, User,
     },
     schema::{
-        channel_preferences::dsl as chp, channels::dsl as ch, rights::dsl as ri, users::dsl as us,
+        actions::dsl as ac, channel_preferences::dsl as chp, channels::dsl as ch,
+        rights::dsl as ri, users::dsl as us,
     },
 };
 
@@ -176,6 +178,23 @@ impl Request {
 
         if command.required_rights() > rights.level {
             return None;
+        }
+
+        let last_action_timestamp = ac::actions
+            .filter(ac::channel_id.eq(&channel.id))
+            .filter(ac::user_id.eq(&sender.id))
+            .filter(ac::command_name.eq(&command_id))
+            .select(ac::processed_at)
+            .order(ac::processed_at.desc())
+            .first::<NaiveDateTime>(conn);
+
+        if let Ok(last_action_timestamp) = last_action_timestamp {
+            let la_timestamp: i64 = last_action_timestamp.timestamp();
+            let now_timestamp: i64 = Utc::now().naive_utc().timestamp();
+
+            if now_timestamp - la_timestamp < command.get_delay_sec() as i64 {
+                return None;
+            }
         }
 
         message_split.remove(0);
