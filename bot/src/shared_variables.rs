@@ -24,4 +24,4 @@ pub const MCSRV_API_URL: &str = "https://api.mcsrvstat.us/3";
 pub const TIMER_CHECK_DELAY: u64 = 1;
 
 pub const COMPILE_TIMESTAMP: i32 = compile_time::unix!();
-pub const COMPILE_VERSION: &'static str = compile_time::rustc_version_str!();
+pub const COMPILE_VERSION: &str = compile_time::rustc_version_str!();
