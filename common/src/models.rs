@@ -1,4 +1,4 @@
-use std::{error::Error, str::FromStr};
+use std::str::FromStr;
 
 use crate::schema::*;
 use chrono::NaiveDateTime;

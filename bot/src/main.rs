@@ -19,7 +19,7 @@ use diesel::{
 };
 use eyre::Context;
 use livestream::TwitchLivestreamHelper;
-use log::{debug, error, info};
+use log::{error, info};
 use reqwest::Client;
 use tokio::sync::Mutex;
 use twitch_api::{

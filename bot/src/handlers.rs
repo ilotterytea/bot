@@ -16,7 +16,7 @@ use common::{
         Channel, CustomCommand, Event, EventFlag, EventSubscription, EventType, Timer, User,
     },
     schema::{
-        channels::dsl as ch, custom_commands::dsl as cc, event_subscriptions::dsl as evs,
+        channels::dsl as ch, custom_commands::dsl as cc,
         events::dsl as ev, timers::dsl as ti, users::dsl as us,
     },
     establish_connection
