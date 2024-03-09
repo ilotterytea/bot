@@ -8,7 +8,6 @@ use crate::{
         Command, CommandArgument,
     },
     instance_bundle::InstanceBundle,
-    localization::LineId,
 };
 
 use common::models::LevelOfRights;

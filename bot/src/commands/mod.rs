@@ -14,9 +14,8 @@ use crate::{
     },
 };
 use async_trait::async_trait;
-use common::models::{Channel, ChannelPreference, LevelOfRights, User};
+use common::models::LevelOfRights;
 use eyre::Result;
-use twitch_irc::message::PrivmsgMessage;
 
 use self::{
     request::Request,
