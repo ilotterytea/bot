@@ -48,6 +48,7 @@
   "cmd.join.already_joined": "{sender.alias_name}: Я уже в Вашем чате!",
   "cmd.join.response": "{sender.alias_name}: Успешно зашел в Ваш чат!",
   "cmd.join.response_in_chat": "Привет {target.alias_name}! С этого момента я внутри Вашего чата! Напишите !help, чтобы получить информацию о боте.",
+  "join.other_chat_room": "{sender.alias_name}: ⚠️  Бот не может войти в чужой чат, кроме вашего, из-за ограничений Twitch API.",
   "cmd.timer.deleted": "{sender.alias_name}: Таймер \"{0}\" (ID {1}) был удален!",
   "cmd.timer.enabled": "{sender.alias_name}: Таймер \"{0}\" (ID {1}) теперь включен!",
   "cmd.timer.disabled": "{sender.alias_name}: Таймер \"{0}\" (ID {1}) теперь выключен!",
