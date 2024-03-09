@@ -210,7 +210,7 @@ pub async fn authenticate_success(
             }
             Err(_) => HttpResponse::InternalServerError().json(Response {
                 status_code: 500,
-                message: Some(format!("Failed to parse Twitch API response. Reset the connection in your Twitch account settings and try again.")),
+                message: Some("Failed to parse Twitch API response. Reset the connection in your Twitch account settings and try again.".to_string()),
                 data: None::<AuthenticationResponse>
             }),
         },
