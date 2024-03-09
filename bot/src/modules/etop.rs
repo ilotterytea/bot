@@ -62,13 +62,10 @@ impl Command for EmoteTopCommand {
             None => request.channel.alias_name.clone(),
         };
 
-        match message_split.get(1) {
-            Some(v) => {
-                if let Ok(x) = v.to_string().parse::<usize>() {
-                    amount = x;
-                }
+        if let Some(v) = message_split.get(1) {
+            if let Ok(x) = v.to_string().parse::<usize>() {
+                amount = x;
             }
-            None => {}
         }
 
         if let Ok(Some(user)) = instance_bundle
