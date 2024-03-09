@@ -42,7 +42,7 @@ impl Command for MasspingCommand {
             .await
         {
             Ok(response) => response.data,
-            Err(e) => {
+            Err(_) => {
                 return Err(ResponseError::InsufficientRights);
             }
         };
