@@ -3,7 +3,10 @@ use std::str::FromStr;
 use async_trait::async_trait;
 use diesel::{delete, insert_into, BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl};
 use eyre::Result;
-use twitch_api::types::NicknameRef;
+use twitch_api::{
+    helix::users::GetUsersRequest,
+    types::{NicknameRef, UserId, UserIdRef},
+};
 
 use crate::{
     commands::{
@@ -30,8 +33,7 @@ impl Command for NotifyCommand {
     }
 
     fn get_subcommands(&self) -> Vec<String> {
-        // TODO: Make a "subs" subcommand
-        vec!["sub".to_string(), "unsub".to_string()]
+        vec!["sub".to_string(), "unsub".to_string(), "subs".to_string()]
     }
 
     async fn execute(
@@ -47,6 +49,90 @@ impl Command for NotifyCommand {
                 ))
             }
         };
+
+        let conn = &mut establish_connection();
+        match subcommand_id.as_str() {
+            "subs" => {
+                let subs: Vec<EventSubscription> = EventSubscription::belonging_to(&request.sender)
+                    .get_results::<EventSubscription>(conn)
+                    .expect("Failed to get event subscriptions");
+
+                let events: Vec<Event> = ev::events
+                    .filter(ev::channel_id.eq(&request.channel.id))
+                    .get_results::<Event>(conn)
+                    .expect("Failed to get events");
+
+                let events: Vec<&Event> = events
+                    .iter()
+                    .filter(|x| subs.iter().any(|y| x.id == y.event_id))
+                    .collect::<Vec<&Event>>();
+
+                if events.is_empty() {
+                    return Ok(Response::Single(
+                        instance_bundle.localizator.formatted_text_by_request(
+                            &request,
+                            LineId::NotifyNoSubs,
+                            Vec::<String>::new(),
+                        ),
+                    ));
+                }
+
+                let target_ids: Vec<UserId> = events
+                    .iter()
+                    .flat_map(|x| x.target_alias_id)
+                    .map(|x| UserId::new(x.to_string()))
+                    .collect::<Vec<UserId>>();
+
+                let target_ids = target_ids
+                    .iter()
+                    .map(|x| x.as_ref())
+                    .collect::<Vec<&UserIdRef>>();
+
+                let helix_request = GetUsersRequest::ids(target_ids.as_slice());
+
+                let mut t_subs: Vec<String> = Vec::new();
+
+                if let Ok(helix_response) = instance_bundle
+                    .twitch_api_client
+                    .req_get(helix_request, &*instance_bundle.twitch_api_token)
+                    .await
+                {
+                    let users = helix_response.data;
+
+                    for user in users {
+                        let id = user.id.take().parse::<i32>().unwrap();
+                        if let Some(e) = events
+                            .iter()
+                            .filter(|x| x.target_alias_id.is_some())
+                            .find(|x| x.target_alias_id.unwrap() == id)
+                        {
+                            t_subs.push(format!(
+                                "{}:{}",
+                                user.login.take(),
+                                e.event_type.to_string()
+                            ));
+                        }
+                    }
+                }
+
+                for event in events.iter().filter(|x| x.custom_alias_id.is_some()) {
+                    t_subs.push(format!(
+                        "{}:{} *",
+                        event.custom_alias_id.clone().unwrap(),
+                        event.event_type.to_string(),
+                    ));
+                }
+
+                return Ok(Response::Single(
+                    instance_bundle.localizator.formatted_text_by_request(
+                        &request,
+                        LineId::NotifySubs,
+                        vec![t_subs.join(", ")],
+                    ),
+                ));
+            }
+            _ => {}
+        }
 
         if request.message.is_none() {
             return Err(ResponseError::NotEnoughArguments(CommandArgument::Target));
@@ -93,7 +179,6 @@ impl Command for NotifyCommand {
             return Err(ResponseError::NotFound(target_name));
         }
 
-        let conn = &mut establish_connection();
         let events = Event::belonging_to(&request.channel)
             .filter(ev::event_type.eq(&event_type))
             .load::<Event>(conn)
