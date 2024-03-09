@@ -33,7 +33,12 @@ impl Command for NotifyCommand {
     }
 
     fn get_subcommands(&self) -> Vec<String> {
-        vec!["sub".to_string(), "unsub".to_string(), "subs".to_string()]
+        vec![
+            "sub".to_string(),
+            "unsub".to_string(),
+            "subs".to_string(),
+            "list".to_string(),
+        ]
     }
 
     async fn execute(
@@ -127,6 +132,77 @@ impl Command for NotifyCommand {
                     instance_bundle.localizator.formatted_text_by_request(
                         &request,
                         LineId::NotifySubs,
+                        vec![t_subs.join(", ")],
+                    ),
+                ));
+            }
+            // duplicated code bruh
+            "list" => {
+                let events: Vec<Event> = ev::events
+                    .filter(ev::channel_id.eq(&request.channel.id))
+                    .get_results::<Event>(conn)
+                    .expect("Failed to get events");
+
+                if events.is_empty() {
+                    return Ok(Response::Single(
+                        instance_bundle.localizator.formatted_text_by_request(
+                            &request,
+                            LineId::NotifyListEmpty,
+                            Vec::<String>::new(),
+                        ),
+                    ));
+                }
+
+                let target_ids: Vec<UserId> = events
+                    .iter()
+                    .flat_map(|x| x.target_alias_id)
+                    .map(|x| UserId::new(x.to_string()))
+                    .collect::<Vec<UserId>>();
+
+                let target_ids = target_ids
+                    .iter()
+                    .map(|x| x.as_ref())
+                    .collect::<Vec<&UserIdRef>>();
+
+                let helix_request = GetUsersRequest::ids(target_ids.as_slice());
+
+                let mut t_subs: Vec<String> = Vec::new();
+
+                if let Ok(helix_response) = instance_bundle
+                    .twitch_api_client
+                    .req_get(helix_request, &*instance_bundle.twitch_api_token)
+                    .await
+                {
+                    let users = helix_response.data;
+
+                    for user in users {
+                        let id = user.id.take().parse::<i32>().unwrap();
+                        if let Some(e) = events
+                            .iter()
+                            .filter(|x| x.target_alias_id.is_some())
+                            .find(|x| x.target_alias_id.unwrap() == id)
+                        {
+                            t_subs.push(format!(
+                                "{}:{}",
+                                user.login.take(),
+                                e.event_type.to_string()
+                            ));
+                        }
+                    }
+                }
+
+                for event in events.iter().filter(|x| x.custom_alias_id.is_some()) {
+                    t_subs.push(format!(
+                        "{}:{} *",
+                        event.custom_alias_id.clone().unwrap(),
+                        event.event_type.to_string(),
+                    ));
+                }
+
+                return Ok(Response::Single(
+                    instance_bundle.localizator.formatted_text_by_request(
+                        &request,
+                        LineId::NotifyList,
                         vec![t_subs.join(", ")],
                     ),
                 ));
