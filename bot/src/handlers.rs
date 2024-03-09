@@ -8,13 +8,7 @@ use twitch_irc::message::PrivmsgMessage;
 use crate::{
     commands::{request::Request, response::Response, CommandLoader},
     instance_bundle::InstanceBundle,
-    message::ParsedPrivmsgMessage,
-    
-    
-    utils::{
-        diesel::{create_action},
-        split_and_wrap_lines,
-    },
+    utils::split_and_wrap_lines,
 };
 
 use common::{

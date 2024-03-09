@@ -38,7 +38,6 @@ mod handlers;
 mod instance_bundle;
 mod livestream;
 mod localization;
-mod message;
 mod models;
 mod modules;
 mod seventv;
