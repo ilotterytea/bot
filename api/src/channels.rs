@@ -24,8 +24,7 @@ pub async fn get_channels_by_alias_ids(ids: web::Path<String>) -> HttpResponse {
 
     let ids = ids
         .iter()
-        .filter(|x| x.parse::<i32>().is_ok())
-        .map(|x| x.parse::<i32>().unwrap())
+        .filter_map(|x| x.parse::<i32>().ok())
         .collect::<Vec<i32>>();
 
     match ch::channels
