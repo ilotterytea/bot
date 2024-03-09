@@ -63,6 +63,8 @@
   "cmd.customcommand.info": "{sender.alias_name}: {0} {1} (ID {2}) | Message: {3}",
   "cmd.customcommand.message": "{sender.alias_name}: The message for \"{0}\" (ID {1}) custom command has been changed!",
   "cmd.customcommand.new": "{sender.alias_name}: A new custom command with \"{0}\" name has been successfully created!",
+  "customcommand.list": "{sender.alias_name}: Created commands: {0}",
+  "customcommand.list.empty": "{sender.alias_name}: Commands have not yet been created in this chat room.",
   "error.customcommand.already_exists": "{sender.alias_name}: The custom command with the same name has already exists.",
   "event.on": "{sender.alias_name}: A new \"{0}:{1}\" event has been successfully created! It will send a message when the event occurs.",
   "event.off": "{sender.alias_name}: The \"{0}:{1}\" event has been successfully deleted.",
