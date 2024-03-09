@@ -296,7 +296,7 @@ impl Localizator {
         )
     }
 
-    pub fn parse_placeholders(&self, line: &String) -> Vec<LinePlaceholder> {
+    pub fn parse_placeholders(&self, line: &str) -> Vec<LinePlaceholder> {
         let mut reading_placeholder = false;
         let mut placeholder_buffer = String::new();
 
@@ -391,12 +391,12 @@ pub enum LinePlaceholder {
 }
 
 impl LinePlaceholder {
-    pub fn from_string(value: &String) -> Option<Self> {
+    pub fn from_string(value: &str) -> Option<Self> {
         if let Ok(value) = value.parse::<u8>() {
             return Some(Self::Argument(value));
         }
 
-        match value.as_str() {
+        match value {
             "sender.alias_name" => Some(Self::SenderAliasName),
             "sender.alias_id" => Some(Self::SenderAliasId),
             "target.alias_name" => Some(Self::TargetAliasName),
