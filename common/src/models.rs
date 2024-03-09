@@ -40,7 +40,7 @@ pub struct NewChannelPreference {
     pub language: String,
 }
 
-#[derive(Serialize, Queryable, Clone)]
+#[derive(Serialize, Identifiable, Queryable, Clone)]
 pub struct User {
     pub id: i32,
     pub alias_id: i32,
