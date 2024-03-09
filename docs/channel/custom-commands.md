@@ -29,6 +29,9 @@ A prefix must be specified if you want a prefixed command, e.g. `!sub`, `!server
 `!cmd info <name>`
 + `<name>` - Name of custom command
 
+### Get the list of created custom commands
+`!cmd list`
+
 ## Usage
 
 ### Creating a new custom command
@@ -45,7 +48,6 @@ A prefix must be specified if you want a prefixed command, e.g. `!sub`, `!server
 
 ### Checking the information about the custom command
 + `!cmd info !sub`
-
 
 ## Responses
 
