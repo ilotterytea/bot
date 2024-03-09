@@ -39,6 +39,7 @@ impl Command for CustomCommandsCommand {
             "message".to_string(),
             "toggle".to_string(),
             "info".to_string(),
+            "list".to_string(),
         ]
     }
 
@@ -56,6 +57,37 @@ impl Command for CustomCommandsCommand {
             }
         };
 
+        let conn = &mut establish_connection();
+
+        if subcommand_id == "list" {
+            let cmds: Vec<CustomCommand> = CustomCommand::belonging_to(&request.channel)
+                .get_results(conn)
+                .expect("Failed to get custom commands");
+
+            if cmds.is_empty() {
+                return Ok(Response::Single(
+                    instance_bundle.localizator.formatted_text_by_request(
+                        &request,
+                        LineId::CustomcommandListEmpty,
+                        Vec::<String>::new(),
+                    ),
+                ));
+            }
+
+            let cmd_names = cmds
+                .iter()
+                .map(|x| format!("{}", x.name))
+                .collect::<Vec<String>>();
+
+            return Ok(Response::Single(
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::CustomcommandList,
+                    vec![cmd_names.join(", ")],
+                ),
+            ));
+        }
+
         if request.message.is_none() {
             return Err(ResponseError::NotEnoughArguments(CommandArgument::Name));
         }
@@ -72,7 +104,6 @@ impl Command for CustomCommandsCommand {
             None => return Err(ResponseError::NotEnoughArguments(CommandArgument::Name)),
         };
 
-        let conn = &mut establish_connection();
         let commands = CustomCommand::belonging_to(&request.channel)
             .filter(cc::name.eq(&name_id))
             .load::<CustomCommand>(conn)
