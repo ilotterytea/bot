@@ -56,7 +56,7 @@ impl Request {
                     .expect("Failed to get a channel after creating it")
             });
 
-        let mut channel_preference = ChannelPreference::belonging_to(&channel)
+        let channel_preference = ChannelPreference::belonging_to(&channel)
             .first::<ChannelPreference>(conn)
             .unwrap_or_else(|_| {
                 insert_into(chp::channel_preferences)
