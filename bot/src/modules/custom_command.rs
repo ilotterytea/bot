@@ -127,13 +127,12 @@ impl Command for CustomCommandsCommand {
                 update(cc::custom_commands.find(&c.id))
                     .set(cc::messages.eq(vec![message]))
                     .execute(conn)
-                    .expect(
-                        format!(
+                    .unwrap_or_else(|_| {
+                        panic!(
                             "Failed to update the messages for custom command ID {}",
                             c.id
                         )
-                        .as_str(),
-                    );
+                    });
 
                 instance_bundle.localizator.formatted_text_by_request(
                     &request,
