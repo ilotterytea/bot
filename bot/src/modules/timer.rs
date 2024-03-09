@@ -65,7 +65,7 @@ impl Command for TimerCommand {
         let mut message_split = message.split(" ").collect::<Vec<&str>>();
 
         // Subcommands that requires one argument only
-        let name_id = match message_split.get(0) {
+        let name_id = match message_split.first() {
             Some(v) => {
                 let v = v.to_string();
                 message_split.remove(0);
@@ -122,13 +122,13 @@ impl Command for TimerCommand {
                     t.name.clone(),
                     t.id.to_string(),
                     t.interval_sec.to_string(),
-                    t.messages.get(0).clone().unwrap().to_owned(),
+                    t.messages.first().unwrap().to_owned(),
                 ],
             ),
-            (Some(t), 0, "call") => t.messages.get(0).clone().unwrap().to_owned(),
+            (Some(t), 0, "call") => t.messages.first().unwrap().to_owned(),
 
             (Some(t), 1, "interval") => {
-                let interval_sec = message_split.get(0).unwrap().to_string();
+                let interval_sec = message_split.first().unwrap().to_string();
                 let interval_sec = match interval_sec.parse::<u64>() {
                     Ok(v) => v,
                     Err(_) => return Err(ResponseError::IncorrectArgument(interval_sec)),
@@ -165,7 +165,7 @@ impl Command for TimerCommand {
             }
 
             (None, _, "new") if message_split.len() > 1 => {
-                let interval_sec = message_split.get(0).unwrap().to_string();
+                let interval_sec = message_split.first().unwrap().to_string();
                 message_split.remove(0);
 
                 let interval_sec = match interval_sec.parse::<u64>() {

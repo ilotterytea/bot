@@ -153,7 +153,7 @@ impl Request {
             .to_string();
         let mut message_split = message.split(' ').collect::<Vec<&str>>();
 
-        let command_id = if let Some(word) = message_split.get(0) {
+        let command_id = if let Some(word) = message_split.first() {
             let word = word.to_string();
             if command_loader
                 .commands
@@ -181,7 +181,7 @@ impl Request {
 
         message_split.remove(0);
 
-        let subcommand_id = if let Some(v) = message_split.get(0) {
+        let subcommand_id = if let Some(v) = message_split.first() {
             let v = v.to_string();
 
             if command.get_subcommands().contains(&v) {
