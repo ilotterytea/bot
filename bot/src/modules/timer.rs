@@ -41,6 +41,7 @@ impl Command for TimerCommand {
             "toggle".to_string(),
             "info".to_string(),
             "call".to_string(),
+            "list".to_string(),
         ]
     }
 
@@ -58,6 +59,37 @@ impl Command for TimerCommand {
             }
         };
 
+        let conn = &mut establish_connection();
+
+        if subcommand_id == "list" {
+            let timers: Vec<Timer> = Timer::belonging_to(&request.channel)
+                .get_results(conn)
+                .expect("Failed to get timers");
+
+            if timers.is_empty() {
+                return Ok(Response::Single(
+                    instance_bundle.localizator.formatted_text_by_request(
+                        &request,
+                        LineId::TimerListEmpty,
+                        Vec::<String>::new(),
+                    ),
+                ));
+            }
+
+            let timer_names = timers
+                .iter()
+                .map(|x| format!("{}", x.name))
+                .collect::<Vec<String>>();
+
+            return Ok(Response::Single(
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::TimerList,
+                    vec![timer_names.join(", ")],
+                ),
+            ));
+        }
+
         if request.message.is_none() {
             return Err(ResponseError::NotEnoughArguments(CommandArgument::Name));
         }
@@ -74,7 +106,6 @@ impl Command for TimerCommand {
             None => return Err(ResponseError::NotEnoughArguments(CommandArgument::Name)),
         };
 
-        let conn = &mut establish_connection();
         let timers = Timer::belonging_to(&request.channel)
             .filter(ti::name.eq(&name_id))
             .load::<Timer>(conn)
