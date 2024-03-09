@@ -74,6 +74,8 @@
   "notify.already_unsub": "{sender.alias_name}: Вы не подписаны на событие \"{0}:{1}\".",
   "notify.subs": "{sender.alias_name}: Ваши подписки: {0}",
   "notify.no_subs": "{sender.alias_name}: Вы не подписаны ни на одно событие.",
+  "notify.list": "{sender.alias_name}: Доступные события для подписки: {0}",
+  "notify.list.empty": "{sender.alias_name}: Нет событий, на которые можно подписаться.",
   "settings.locale": "{sender.alias_name}: Успешно установил язык чата на русский!",
   "settings.prefix": "{sender.alias_name}: Успешно установил префикс чата на \"{0}\"!",
   "emote_count.usage": "{sender.alias_name}: {0} Эмоут {1} был использован {2} раз.",
