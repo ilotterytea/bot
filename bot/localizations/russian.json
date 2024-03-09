@@ -63,6 +63,8 @@
   "cmd.customcommand.info": "{sender.alias_name}: {0} {1} (ID {2}) | Сообщение: {3}",
   "cmd.customcommand.message": "{sender.alias_name}: Сообщение для команды \"{0}\" (ID {1}) было изменено!",
   "cmd.customcommand.new": "{sender.alias_name}: Новая команда под названием \"{0}\" была успешно создана!",
+  "customcommand.list": "{sender.alias_name}: Созданные команды: {0}",
+  "customcommand.list.empty": "{sender.alias_name}: Команды ещё не были созданы в этом чате.",
   "error.customcommand.already_exists": "{sender.alias_name}: Команда с похожим именем уже существует.",
   "event.on": "{sender.alias_name}: Новое событие \"{0}:{1}\" было успешно создано! Сообщение будет отправлено, когда событие произойдет.",
   "event.off": "{sender.alias_name}: Событие \"{0}:{1}\" было успешно удалено.",

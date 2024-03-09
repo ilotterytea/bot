@@ -76,6 +76,8 @@ pub enum LineId {
     CommandCustomCommandInfo,
     CommandCustomCommandMessage,
     CommandCustomCommandNew,
+    CustomcommandList,
+    CustomcommandListEmpty,
 
     EventOn,
     EventOff,
@@ -173,6 +175,8 @@ impl LineId {
             "cmd.customcommand.info" => Some(Self::CommandCustomCommandInfo),
             "cmd.customcommand.message" => Some(Self::CommandCustomCommandMessage),
             "cmd.customcommand.new" => Some(Self::CommandCustomCommandNew),
+            "customcommand.list" => Some(Self::CustomcommandList),
+            "customcommand.list.empty" => Some(Self::CustomcommandListEmpty),
             "error.customcommands.already_exists" => Some(Self::CustomCommandAlreadyExistsError),
             "event.on" => Some(Self::EventOn),
             "event.off" => Some(Self::EventOff),
