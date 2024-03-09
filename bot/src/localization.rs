@@ -1,5 +1,5 @@
 use include_dir::{include_dir, Dir};
-use std::{collections::HashMap, str::from_utf8};
+use std::{collections::HashMap, fmt::Display, str::from_utf8};
 
 use crate::commands::request::Request;
 
@@ -333,7 +333,7 @@ impl Localizator {
         request: Option<&Request>,
     ) -> String {
         for placeholder in placeholders {
-            let string = format!("{{{}}}", placeholder.to_string());
+            let string = format!("{{{}}}", placeholder);
 
             let replacement = match (request, placeholder) {
                 (_, LinePlaceholder::Argument(v)) => {
@@ -407,17 +407,19 @@ impl LinePlaceholder {
             _ => None,
         }
     }
+}
 
-    pub fn to_string(&self) -> String {
+impl Display for LinePlaceholder {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::SenderAliasName => "sender.alias_name".to_string(),
-            Self::SenderAliasId => "sender.alias_id".to_string(),
-            Self::TargetAliasName => "target.alias_name".to_string(),
-            Self::TargetAliasId => "target.alias_id".to_string(),
-            Self::RequestMessage => "request.message".to_string(),
-            Self::RequestSubcommandId => "request.subcommand_id".to_string(),
-            Self::RequestCommand => "request.command".to_string(),
-            Self::Argument(v) => v.to_string(),
+            Self::SenderAliasName => write!(f, "sender.alias_name"),
+            Self::SenderAliasId => write!(f, "sender.alias_id"),
+            Self::TargetAliasName => write!(f, "target.alias_name"),
+            Self::TargetAliasId => write!(f, "target.alias_id"),
+            Self::RequestMessage => write!(f, "request.message"),
+            Self::RequestSubcommandId => write!(f, "request.subcommand_id"),
+            Self::RequestCommand => write!(f, "request.command"),
+            Self::Argument(v) => write!(f, "{}", v),
         }
     }
 }
