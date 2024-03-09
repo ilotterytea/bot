@@ -84,7 +84,7 @@ pub async fn join_channel(body: web::Json<JoinRequest>, request: HttpRequest) ->
                 status_code: 401,
                 message: Some(format!(
                     "The provided authorization key (\"{}\") does not exist or has expired.",
-                    auth_token.as_simple().to_string()
+                    auth_token.as_simple()
                 )),
                 data: None::<Channel>,
             })
@@ -101,7 +101,7 @@ pub async fn join_channel(body: web::Json<JoinRequest>, request: HttpRequest) ->
                 status_code: 401,
                 message: Some(format!(
                     "There is no user with the provided authorization token \"{}\".",
-                    auth_token.as_simple().to_string()
+                    auth_token.as_simple()
                 )),
                 data: None::<Channel>,
             })
