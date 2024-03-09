@@ -39,7 +39,7 @@ impl ResponseError {
                 };
 
                 localizator.formatted_text_by_request(
-                    &request,
+                    request,
                     LineId::MsgHint,
                     vec![docs_url, hint_url_localed],
                 )
@@ -92,14 +92,12 @@ impl ResponseError {
             _ => (127, LineId::ErrorSomethingWentWrong),
         };
 
-        let error_line = localizator.formatted_text_by_request(&request, error_line_id.1, params);
+        let error_line = localizator.formatted_text_by_request(request, error_line_id.1, params);
 
-        let error = localizator.formatted_text_by_request(
-            &request,
+        localizator.formatted_text_by_request(
+            request,
             LineId::MsgError,
             vec![error_line_id.0.to_string(), error_line, docs_line],
-        );
-
-        error
+        )
     }
 }
