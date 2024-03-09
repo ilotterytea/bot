@@ -38,6 +38,9 @@ The `!timer` command gives broadcasters the ability to create timers that sends 
 `!timer call <name>`
 + `<name>` - The name of the timer.
 
+### Get the list of created timers
+`!timer list`
+
 ## Usage
 
 ### Creating a new timer
