@@ -84,7 +84,7 @@ impl Command for CustomCommandsCommand {
             (Some(c), 0, "delete") => {
                 delete(cc::custom_commands.find(&c.id))
                     .execute(conn)
-                    .expect(format!("Failed to delete the custom command ID {}", c.id).as_str());
+                    .unwrap_or_else(|_| panic!("Failed to delete the custom command ID {}", c.id));
 
                 instance_bundle.localizator.formatted_text_by_request(
                     &request,
@@ -96,7 +96,7 @@ impl Command for CustomCommandsCommand {
                 update(cc::custom_commands.find(&c.id))
                     .set(cc::is_enabled.eq(!c.is_enabled))
                     .execute(conn)
-                    .expect(format!("Failed to toggle the custom command ID {}", c.id).as_str());
+                    .unwrap_or_else(|_| panic!("Failed to toggle the custom command ID {}", c.id));
 
                 instance_bundle.localizator.formatted_text_by_request(
                     &request,

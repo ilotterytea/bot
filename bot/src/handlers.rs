@@ -131,7 +131,7 @@ pub async fn handle_custom_commands(
     let channels = ch::channels
         .filter(ch::alias_id.eq(&alias_id))
         .load::<Channel>(conn)
-        .expect(format!("Failed to load channel data with alias ID {}", alias_id).as_str());
+        .unwrap_or_else(|_| panic!("Failed to load channel data with alias ID {}", alias_id));
 
     if let Some(channel) = channels.first() {
         let commands = CustomCommand::belonging_to(&channel)
