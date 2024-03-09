@@ -45,10 +45,9 @@ impl Command for JoinCommand {
 
         let channel_query = ch::channels
             .filter(ch::alias_id.eq(request.sender.alias_id))
-            .load::<Channel>(conn)
-            .expect("Failed to get users");
+            .get_result::<Channel>(conn);
 
-        if !channel_query.is_empty() {
+        if channel_query.is_ok() {
             return Ok(Response::Single(
                 instance_bundle
                     .localizator
