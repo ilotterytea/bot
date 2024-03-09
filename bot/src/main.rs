@@ -48,7 +48,7 @@ mod utils;
 #[tokio::main]
 async fn main() {
     // Activating static variable
-    *START_TIME;
+    let _ = *START_TIME;
     dotenvy::dotenv().expect("Failed to load .env file");
 
     env_logger::init();
