@@ -38,8 +38,8 @@ fn handle_entry(entry: &DirEntry<'_>, data: &mut HashMap<String, String>) {
     if let Some(file) = entry.as_file() {
         if let Some(path) = file.path().to_str() {
             if let Some(contents) = file.contents_utf8() {
-                let path = if path.ends_with(".md") {
-                    path[..path.len() - 3].to_string()
+                let path = if let Some(stripped) = path.strip_suffix(".md") {
+                    stripped.to_string()
                 } else {
                     path.to_string()
                 };
