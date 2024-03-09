@@ -62,7 +62,7 @@ impl Command for TimerCommand {
             return Err(ResponseError::NotEnoughArguments(CommandArgument::Name));
         }
         let message = request.message.clone().unwrap();
-        let mut message_split = message.split(" ").collect::<Vec<&str>>();
+        let mut message_split = message.split(' ').collect::<Vec<&str>>();
 
         // Subcommands that requires one argument only
         let name_id = match message_split.first() {
