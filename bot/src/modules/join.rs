@@ -49,13 +49,11 @@ impl Command for JoinCommand {
 
         if channel_query.is_ok() {
             return Ok(Response::Single(
-                instance_bundle
-                    .localizator
-                    .formatted_text_by_request(
-                        &request,
-                        LineId::CommandJoinResponse,
-                        Vec::<String>::new(),
-                    ),
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::CommandJoinAlreadyJoined,
+                    Vec::<String>::new(),
+                ),
             ));
         }
 
@@ -90,25 +88,21 @@ impl Command for JoinCommand {
             .twitch_irc_client
             .say(
                 request.sender.alias_name.clone(),
-                instance_bundle
-                    .localizator
-                    .formatted_text_by_request(
-                        &request,
-                        LineId::CommandJoinResponseInChat,
-                        Vec::<String>::new(),
-                    ),
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::CommandJoinResponseInChat,
+                    Vec::<String>::new(),
+                ),
             )
             .await
             .expect("Failed to send a message");
 
         Ok(Response::Single(
-            instance_bundle
-                .localizator
-                .formatted_text_by_request(
-                    &request,
-                    LineId::CommandJoinResponse,
-                    Vec::<String>::new(),
-                )
+            instance_bundle.localizator.formatted_text_by_request(
+                &request,
+                LineId::CommandJoinResponse,
+                Vec::<String>::new(),
+            ),
         ))
     }
 }
