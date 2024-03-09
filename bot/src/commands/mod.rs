@@ -90,7 +90,7 @@ impl CommandLoader {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum CommandArgument {
     Subcommand,
     Message,

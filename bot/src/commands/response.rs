@@ -1,15 +1,34 @@
-use std::{env, sync::Arc};
+use std::{env, fmt::Display, sync::Arc};
 
 use crate::localization::{LineId, Localizator};
 
 use super::{request::Request, CommandArgument};
 
+#[derive(Clone, Debug)]
 pub enum Response {
     Single(String),
     Multiple(Vec<String>),
 }
 
-#[derive(Debug)]
+impl Display for Response {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Response::Single(v) => write!(f, "{}", v),
+            Response::Multiple(v) => {
+                write!(
+                    f,
+                    "[{}]",
+                    v.iter()
+                        .map(|x| format!("\"{}\"", x))
+                        .collect::<Vec<String>>()
+                        .join(", ")
+                )
+            }
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 pub enum ResponseError {
     NotEnoughArguments(CommandArgument),
     WrongArgumentType(String, String),
