@@ -86,6 +86,8 @@ pub enum LineId {
     NotifyAlreadyUnsub,
     NotifySubs,
     NotifyNoSubs,
+    NotifyList,
+    NotifyListEmpty,
 
     SettingsPrefix,
     SettingsLocale,
@@ -180,6 +182,8 @@ impl LineId {
             "notify.already_unsub" => Some(Self::NotifyAlreadyUnsub),
             "notify.subs" => Some(Self::NotifySubs),
             "notify.no_subs" => Some(Self::NotifyNoSubs),
+            "notify.list" => Some(Self::NotifyList),
+            "notify.list.empty" => Some(Self::NotifyListEmpty),
             "settings.prefix" => Some(Self::SettingsPrefix),
             "settings.locale" => Some(Self::SettingsLocale),
             "emote_count.usage" => Some(Self::EmoteCountUsage),
