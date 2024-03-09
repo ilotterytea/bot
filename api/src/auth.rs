@@ -298,9 +298,9 @@ pub async fn generate_authentication(
             state.push(STATE_CHAR_POOL[rng.gen::<usize>() % STATE_CHAR_POOL.len()] as char);
         }
 
-        if let Err(_) = ss::session_states
+        if ss::session_states
             .find(&state)
-            .get_result::<SessionState>(conn)
+            .get_result::<SessionState>(conn).is_err()
         {
             break;
         }
