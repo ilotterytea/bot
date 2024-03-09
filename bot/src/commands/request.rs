@@ -158,8 +158,7 @@ impl Request {
             if command_loader
                 .commands
                 .iter()
-                .find(|x| x.get_name().eq(&word))
-                .is_some()
+                .any(|x| x.get_name().eq(&word))
             {
                 word
             } else {
