@@ -69,6 +69,8 @@ pub enum LineId {
     CommandTimerInterval,
     CommandTimerMessage,
     CommandTimerNew,
+    TimerList,
+    TimerListEmpty,
 
     CommandCustomCommandDeleted,
     CommandCustomCommandEnabled,
@@ -169,6 +171,8 @@ impl LineId {
             "cmd.timer.interval" => Some(Self::CommandTimerInterval),
             "cmd.timer.message" => Some(Self::CommandTimerMessage),
             "cmd.timer.new" => Some(Self::CommandTimerNew),
+            "timer.list" => Some(Self::TimerList),
+            "timer.list.empty" => Some(Self::TimerListEmpty),
             "cmd.customcommand.deleted" => Some(Self::CommandCustomCommandDeleted),
             "cmd.customcommand.enabled" => Some(Self::CommandCustomCommandEnabled),
             "cmd.customcommand.disabled" => Some(Self::CommandCustomCommandDisabled),

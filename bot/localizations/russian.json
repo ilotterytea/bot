@@ -56,6 +56,8 @@
   "cmd.timer.interval": "{sender.alias_name}: Интервал для таймера \"{0}\" (ID {1}) был изменен!",
   "cmd.timer.message": "{sender.alias_name}: Сообщение для таймера \"{0}\" (ID {1}) было изменено!",
   "cmd.timer.new": "{sender.alias_name}: Новый таймер под названием \"{0}\" был успешно создан!",
+  "timer.list": "{sender.alias_name}: Созданные таймеры: {0}",
+  "timer.list.empty": "{sender.alias_name}: Таймеры ещё не были созданы в этом чате.",
   "error.timer.already_exists": "{sender.alias_name}: Таймер с похожим именем уже существует.",
   "cmd.customcommand.deleted": "{sender.alias_name}: Команда \"{0}\" (ID {1}) была удалена!",
   "cmd.customcommand.enabled": "{sender.alias_name}: Команда \"{0}\" (ID {1}) теперь включена!",
