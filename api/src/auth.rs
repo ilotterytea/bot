@@ -163,7 +163,7 @@ pub async fn authenticate_success(
                     });
 
                 let scopes: Vec<Option<String>> = if let Some(scopes) = json.scope {
-                    scopes.iter().cloned().map(|x| Some(x)).collect()
+                    scopes.iter().cloned().map(Some).collect()
                 } else {
                     Vec::new()
                 };
