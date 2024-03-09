@@ -1,7 +1,7 @@
 use std::{collections::HashSet, sync::Arc};
 
 use chrono::Utc;
-use diesel::{update, BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{insert_into, update, BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 use twitch_api::{types::UserId, helix::chat::GetChattersRequest};
 use twitch_irc::message::PrivmsgMessage;
 
@@ -12,14 +12,12 @@ use crate::{
 };
 
 use common::{
-    models::{
-        Channel, CustomCommand, Event, EventFlag, EventSubscription, EventType, Timer, User,
-    },
-    schema::{
+    establish_connection, models::{
+        Channel, CustomCommand, Event, EventFlag, EventSubscription, EventType, NewAction, Timer, User
+    }, schema::{
         channels::dsl as ch, custom_commands::dsl as cc,
-        events::dsl as ev, timers::dsl as ti, users::dsl as us,
-    },
-    establish_connection
+        events::dsl as ev, timers::dsl as ti, users::dsl as us, actions::dsl as ac
+    }
 };
 
 pub async fn handle_chat_message(
@@ -34,7 +32,29 @@ pub async fn handle_chat_message(
             .execute_command(&instance_bundle, request.clone())
             .await;
 
-        // TODO: CREATE ACTION LOG LATER
+        insert_into(ac::actions)
+            .values([NewAction {
+                channel_id: request.channel.id,
+                user_id: request.sender.id,
+                command_name: request.command_id.clone(),
+                arguments: match (request.subcommand_id.clone(), request.message.clone()) {
+                    (Some(x), Some(y)) => Some(format!("{} {}", x, y)),
+                    (Some(x), None) | (None, Some(x)) => Some(x.to_string()),
+                    _ => None,
+                },
+                processed_at: Utc::now().naive_utc(),
+                sent_at: message.server_timestamp.naive_utc(),
+                response: match response.clone() {
+                    Ok(v) => v.to_string(),
+                    Err(e) => e.formatted_message(&request, instance_bundle.localizator.clone()),
+                },
+                status: match response {
+                    Ok(_) => common::models::ActionStatus::Ok,
+                    Err(_) => common::models::ActionStatus::Error,
+                },
+            }])
+            .execute(conn)
+            .expect("Failed to create action log");
 
         match response {
             Ok(r) => match r {
