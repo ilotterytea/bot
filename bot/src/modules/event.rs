@@ -24,7 +24,7 @@ use crate::{
 use common::{
     establish_connection,
     models::{Event, EventFlag, EventSubscription, EventType, LevelOfRights, NewEvent, User},
-    schema::{events::dsl as ev, users::dsl as us},
+    schema::{event_subscriptions::dsl as evs, events::dsl as ev, users::dsl as us},
 };
 
 pub struct EventCommand;
@@ -235,6 +235,18 @@ impl Command for EventCommand {
             }
 
             ("off", Some(e)) => {
+                let sub_ids: Vec<i32> = evs::event_subscriptions
+                    .filter(evs::event_id.eq(&e.id))
+                    .select(evs::id)
+                    .get_results::<i32>(conn)
+                    .expect("Failed to get event subscriptions during the event deletion command");
+
+                for sub_id in sub_ids {
+                    delete(evs::event_subscriptions.find(&sub_id))
+                        .execute(conn)
+                        .expect("Failed to delete the event subscription during the event deletion command");
+                }
+
                 delete(ev::events.find(e.id))
                     .execute(conn)
                     .expect("Failed to delete the event");
