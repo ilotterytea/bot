@@ -214,7 +214,7 @@ impl Command for NotifyCommand {
             return Err(ResponseError::NotEnoughArguments(CommandArgument::Target));
         }
         let message = request.message.clone().unwrap();
-        let mut message_split = message.split(" ").collect::<Vec<&str>>();
+        let mut message_split = message.split(' ').collect::<Vec<&str>>();
 
         let (target_name, event_type) = match message_split.first() {
             Some(v) => {
@@ -222,7 +222,7 @@ impl Command for NotifyCommand {
 
                 message_split.remove(0);
 
-                let vec = v.split(":").collect::<Vec<&str>>();
+                let vec = v.split(':').collect::<Vec<&str>>();
 
                 match (vec.first(), vec.get(1)) {
                     (Some(target_name), Some(event_type))
