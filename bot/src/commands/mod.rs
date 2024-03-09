@@ -1,7 +1,6 @@
 use crate::{
     instance_bundle::InstanceBundle,
     localization::LineId,
-    message::ParsedPrivmsgMessage,
     modules::{
         custom_command::CustomCommandsCommand, ecount::EmoteCountCommand,
         esim::EmoteSimilarityCommand, etop::EmoteTopCommand, event::EventCommand,

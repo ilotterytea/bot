@@ -1,7 +1,3 @@
-use std::env;
-
-pub mod diesel;
-
 pub fn format_timestamp(timestamp_in_seconds: u64) -> String {
     let timestamp_as_f64 = timestamp_in_seconds as f64;
     let days = (timestamp_as_f64 / (60.0 * 60.0 * 24.0)).trunc();
