@@ -56,9 +56,11 @@ pub enum LineId {
     CommandSpamResponse,
     CommandHolidayEmpty,
     CommandHolidayResponse,
+
     CommandJoinAlreadyJoined,
     CommandJoinResponse,
     CommandJoinResponseInChat,
+    JoinOtherchatroom,
 
     CommandTimerDeleted,
     CommandTimerEnabled,
@@ -157,6 +159,7 @@ impl LineId {
             "cmd.join.already_joined" => Some(Self::CommandJoinAlreadyJoined),
             "cmd.join.response" => Some(Self::CommandJoinResponse),
             "cmd.join.response_in_chat" => Some(Self::CommandJoinResponseInChat),
+            "join.other_chat_room" => Some(Self::JoinOtherchatroom),
             "cmd.timer.deleted" => Some(Self::CommandTimerDeleted),
             "cmd.timer.enabled" => Some(Self::CommandTimerEnabled),
             "cmd.timer.disabled" => Some(Self::CommandTimerDisabled),
