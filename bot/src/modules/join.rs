@@ -1,5 +1,9 @@
+use std::env;
+
 use async_trait::async_trait;
 use diesel::{insert_into, ExpressionMethods, QueryDsl, RunQueryDsl};
+use log::warn;
+use serde::Serialize;
 
 use crate::{
     commands::{
@@ -19,6 +23,11 @@ use common::{
 };
 
 pub struct JoinCommand;
+
+#[derive(Serialize)]
+struct StatsAPIJoinBody {
+    pub twitch_id: u32,
+}
 
 #[async_trait]
 impl Command for JoinCommand {
@@ -96,6 +105,44 @@ impl Command for JoinCommand {
             )
             .await
             .expect("Failed to send a message");
+
+        if let Ok(stats_hostname) = env::var("STATS_API_HOSTNAME") {
+            let url = format!("{}/api/v1/join", stats_hostname);
+
+            let client = reqwest::Client::new();
+            let mut req = client.post(url).json(&StatsAPIJoinBody {
+                twitch_id: request.sender.alias_id as u32,
+            });
+
+            if let Ok(credentials) = env::var("STATS_API_PASSWORD") {
+                let mut split = credentials.split(':').collect::<Vec<&str>>();
+
+                if !split.is_empty() {
+                    let name = split[0];
+                    split.remove(0);
+
+                    let password = split.join(":");
+
+                    req = req.basic_auth(
+                        name,
+                        if password.is_empty() {
+                            None
+                        } else {
+                            Some(password)
+                        },
+                    );
+                }
+            }
+
+            if let Ok(res) = req.send().await {
+                if res.status() != reqwest::StatusCode::OK {
+                    warn!(
+                        "Failed to channel alias ID {} to join Stats API!",
+                        request.sender.alias_id
+                    );
+                }
+            }
+        }
 
         Ok(Response::Single(
             instance_bundle.localizator.formatted_text_by_request(
