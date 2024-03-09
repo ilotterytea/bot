@@ -56,6 +56,8 @@
   "cmd.timer.interval": "{sender.alias_name}: The interval for \"{0}\" (ID {1}) timer has been changed!",
   "cmd.timer.message": "{sender.alias_name}: The message for \"{0}\" (ID {1}) timer has been changed!",
   "cmd.timer.new": "{sender.alias_name}: A new timer with \"{0}\" name has been successfully created!",
+  "timer.list": "{sender.alias_name}: Created timers: {0}",
+  "timer.list.empty": "{sender.alias_name}: Timers have not yet been created in this chat room.",
   "error.timer.already_exists": "{sender.alias_name}: The timer with the same name has already exists.",
   "cmd.customcommand.deleted": "{sender.alias_name}: The \"{0}\" (ID {1}) custom command has been deleted!",
   "cmd.customcommand.enabled": "{sender.alias_name}: The \"{0}\" (ID {1}) custom command has been enabled!",
