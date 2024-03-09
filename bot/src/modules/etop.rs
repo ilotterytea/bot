@@ -50,14 +50,12 @@ impl Command for EmoteTopCommand {
 
         let origin_name = match message_split.first() {
             Some(v) => {
-                let v = if let Ok(x) = v.to_string().parse::<usize>() {
+                if let Ok(x) = v.to_string().parse::<usize>() {
                     amount = x;
                     request.channel.alias_name.clone()
                 } else {
                     v.to_string()
-                };
-
-                v
+                }
             }
             None => request.channel.alias_name.clone(),
         };
