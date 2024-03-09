@@ -86,7 +86,7 @@ impl Command for TimerCommand {
             (Some(t), 0, "delete") => {
                 delete(ti::timers.find(&t.id))
                     .execute(conn)
-                    .expect(format!("Failed to delete the timer ID {}", t.id.to_string()).as_str());
+                    .expect(format!("Failed to delete the timer ID {}", t.id).as_str());
 
                 instance_bundle.localizator.formatted_text_by_request(
                     &request,
@@ -98,7 +98,7 @@ impl Command for TimerCommand {
                 update(ti::timers.find(&t.id))
                     .set(ti::is_enabled.eq(!t.is_enabled))
                     .execute(conn)
-                    .expect(format!("Failed to toggle the timer ID {}", t.id.to_string()).as_str());
+                    .expect(format!("Failed to toggle the timer ID {}", t.id).as_str());
 
                 instance_bundle.localizator.formatted_text_by_request(
                     &request,
@@ -138,11 +138,7 @@ impl Command for TimerCommand {
                     .set(ti::interval_sec.eq(interval_sec))
                     .execute(conn)
                     .expect(
-                        format!(
-                            "Failed to update the interval for timer ID {}",
-                            t.id.to_string()
-                        )
-                        .as_str(),
+                        format!("Failed to update the interval for timer ID {}", t.id).as_str(),
                     );
 
                 instance_bundle.localizator.formatted_text_by_request(
@@ -158,11 +154,7 @@ impl Command for TimerCommand {
                     .set(ti::messages.eq(vec![message]))
                     .execute(conn)
                     .expect(
-                        format!(
-                            "Failed to update the messages for timer ID {}",
-                            t.id.to_string()
-                        )
-                        .as_str(),
+                        format!("Failed to update the messages for timer ID {}", t.id).as_str(),
                     );
 
                 instance_bundle.localizator.formatted_text_by_request(

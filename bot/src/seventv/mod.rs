@@ -155,7 +155,7 @@ impl SevenTVWebsocketClient {
     }
 
     async fn handle_dispatch(&mut self, body: Dispatch) -> Result<(), eyre::Error> {
-        if body.event_type != "emote_set.update".to_string() {
+        if body.event_type != *"emote_set.update" {
             println!("[7TV EventAPI] Unhandled body type: {}", body.event_type);
             return Ok(());
         }
