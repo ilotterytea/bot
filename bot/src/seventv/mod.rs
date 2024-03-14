@@ -152,6 +152,8 @@ impl SevenTVWebsocketClient {
                     e
                 );
 
+                self.flip_channels().await;
+
                 let mut attempts = 0;
 
                 loop {
