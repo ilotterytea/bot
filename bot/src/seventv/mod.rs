@@ -7,8 +7,9 @@ use common::{
 };
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use futures::SinkExt;
+use log::info;
 use serde_json::Value;
-use std::{collections::HashSet, sync::Arc};
+use std::{collections::HashSet, sync::Arc, time::Duration};
 
 use eyre::Context;
 use reqwest::Url;
@@ -146,7 +147,30 @@ impl SevenTVWebsocketClient {
                     "No reason".to_string()
                 };
 
-                println!("The connection to 7TV EventAPI was refused: {e}");
+                info!(
+                    "The connection to 7TV EventAPI has been disconnected. Reason: {}",
+                    e
+                );
+
+                let mut attempts = 0;
+
+                loop {
+                    if attempts > 2 {
+                        break;
+                    }
+
+                    tokio::time::sleep(Duration::from_secs(60)).await;
+
+                    match connect(self.reconnect_url.clone()).await {
+                        Ok(v) => self.socket = v,
+                        Err(_) => {
+                            attempts += 1;
+                            info!("Failed to reconnect to 7TV EventAPI! {} attempts left.", {
+                                3 - attempts
+                            });
+                        }
+                    }
+                }
             }
             _ => {}
         }
