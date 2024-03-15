@@ -97,6 +97,8 @@ pub enum LineId {
 
     SettingsPrefix,
     SettingsLocale,
+    SettingsFeatureOn,
+    SettingsFeatureOff,
 
     EmoteCountUsage,
     EmoteCountNotFound,
@@ -197,6 +199,8 @@ impl LineId {
             "notify.list.empty" => Some(Self::NotifyListEmpty),
             "settings.prefix" => Some(Self::SettingsPrefix),
             "settings.locale" => Some(Self::SettingsLocale),
+            "settings.feature.on" => Some(Self::SettingsFeatureOn),
+            "settings.feature.off" => Some(Self::SettingsFeatureOff),
             "emote_count.usage" => Some(Self::EmoteCountUsage),
             "emote_count.not_found" => Some(Self::EmoteCountNotFound),
             "emote_top.response" => Some(Self::EmoteTopResponse),
