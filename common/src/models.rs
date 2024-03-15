@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{fmt::Display, str::FromStr};
 
 use crate::schema::*;
 use chrono::NaiveDateTime;
@@ -39,6 +39,29 @@ pub struct NewChannelPreference {
     pub channel_id: i32,
     pub prefix: String,
     pub language: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ChannelFeature {
+    Notify7TVUpdates,
+}
+
+impl FromStr for ChannelFeature {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "notify_7tv_updates" => Ok(Self::Notify7TVUpdates),
+            _ => Err("failed to serialize a str".to_string()),
+        }
+    }
+}
+
+impl Display for ChannelFeature {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            &Self::Notify7TVUpdates => write!(f, "notify_7tv_updates"),
+        }
+    }
 }
 
 #[derive(Serialize, Identifiable, Queryable, Clone)]
