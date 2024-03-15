@@ -4,6 +4,9 @@
 
 The `!set` command gives broadcasters ability to customize the bot as they need it to be more fitted for chat.
 
+## Available features
++ `notify_7tv_updates` - Enable notifications for changes to the channel's 7TV emote set.
+
 ## Syntax
 
 ### Set the bot localization for the chat
@@ -14,6 +17,10 @@ Available languages at the moment: **english**, **russian**.
 ### Set the bot prefix
 `!set prefix <characters>`
 + `<characters>` - Characters to be set as a prefix.
+
+### Enable/disable the bot feature for the chat
+`!set feature <feature>`
++ `<feature>` - [Available features](#available-features)
 
 ## Usage
 
@@ -27,6 +34,10 @@ Available languages at the moment: **english**, **russian**.
 + `!set prefix ~`
 + `!set prefix ?!`
 
+### Enabling/disabling the bot feature
+
++ `!set feature notify_7tv_updates`
+
 ## Responses
 
 ### Setting the bot localization
@@ -39,8 +50,14 @@ Available languages at the moment: **english**, **russian**.
 + `Successfully set the chat prefix to "~"`
 + `Successfully set the chat prefix to "?!"`
 
+### Enabling/disabling the bot feature
+
++ `Successfully enabled the "notify_7tv_updates" feature for this chat!`
++ `Successfully disabled the "notify_7tv_updates" feature for this chat!`
+
 ## Error handling
 
 + [Error 0: Not enough arguments](/help/errors#0)
++ [Error 2: Incorrect argument](/help/errors#2)
 + [Error 12: Not found](/help/error#12)
 + [Error 127: Something went wrong](/help/error#127)
