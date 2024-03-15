@@ -1,5 +1,7 @@
+use std::str::FromStr;
+
 use async_trait::async_trait;
-use diesel::{update, ExpressionMethods, RunQueryDsl};
+use diesel::{update, ExpressionMethods, QueryDsl, RunQueryDsl};
 use eyre::Result;
 
 use crate::{
@@ -13,7 +15,9 @@ use crate::{
 };
 
 use common::{
-    establish_connection, models::LevelOfRights, schema::channel_preferences::dsl as chp,
+    establish_connection,
+    models::{ChannelFeature, LevelOfRights},
+    schema::channel_preferences::dsl as chp,
 };
 
 pub struct SettingsCommand;
@@ -29,7 +33,11 @@ impl Command for SettingsCommand {
     }
 
     fn get_subcommands(&self) -> Vec<String> {
-        vec!["locale".to_string(), "prefix".to_string()]
+        vec![
+            "locale".to_string(),
+            "prefix".to_string(),
+            "feature".to_string(),
+        ]
     }
 
     async fn execute(
@@ -87,6 +95,46 @@ impl Command for SettingsCommand {
                     vec![message],
                 )
             }
+            "feature" => match ChannelFeature::from_str(message.as_str()) {
+                Ok(v) => {
+                    let mut feats: Vec<ChannelFeature> = request
+                        .channel_preference
+                        .features
+                        .iter()
+                        .flatten()
+                        .flat_map(|x| ChannelFeature::from_str(x.as_str()))
+                        .collect();
+
+                    let is_removed = match feats.iter().position(|x| x == &v) {
+                        Some(i) => {
+                            feats.remove(i);
+                            true
+                        }
+                        None => {
+                            feats.push(v);
+                            false
+                        }
+                    };
+
+                    let feats: Vec<String> = feats.iter().map(|x| x.to_string()).collect();
+
+                    update(chp::channel_preferences.find(&request.channel.id))
+                        .set(chp::features.eq(&feats))
+                        .execute(conn)
+                        .expect("Failed to update the channel preference");
+
+                    instance_bundle.localizator.formatted_text_by_request(
+                        &request,
+                        if is_removed {
+                            LineId::SettingsFeatureOff
+                        } else {
+                            LineId::SettingsFeatureOn
+                        },
+                        vec![message],
+                    )
+                }
+                Err(_) => return Err(ResponseError::IncorrectArgument(message)),
+            },
             _ => return Err(ResponseError::SomethingWentWrong),
         };
 
