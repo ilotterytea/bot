@@ -30,6 +30,7 @@ pub struct ChannelPreference {
     pub channel_id: i32,
     pub prefix: String,
     pub language: String,
+    pub features: Vec<Option<String>>,
 }
 
 #[derive(Insertable)]

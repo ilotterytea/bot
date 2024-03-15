@@ -41,6 +41,7 @@ diesel::table! {
         channel_id -> Int4,
         prefix -> Varchar,
         language -> Varchar,
+        features -> Array<Nullable<Text>>,
     }
 }
 
