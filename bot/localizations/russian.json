@@ -83,6 +83,8 @@
   "notify.list.empty": "{sender.alias_name}: Нет событий, на которые можно подписаться.",
   "settings.locale": "{sender.alias_name}: Успешно установил язык чата на русский!",
   "settings.prefix": "{sender.alias_name}: Успешно установил префикс чата на \"{0}\"!",
+  "settings.feature.on": "{sender.alias_name}: Функция \"{0}\" успешно включена для этого чата!",
+  "settings.feature.off": "{sender.alias_name}: Функция \"{0}\" успешно выключена для этого чата!",
   "emote_count.usage": "{sender.alias_name}: {0} Эмоут {1} был использован {2} раз.",
   "emote_count.not_found": "{sender.alias_name}: {0} Эмоут {1} не найден в базе данных.",
   "emote_top.response": "{sender.alias_name}: {0} Топ {2} эмоутов канала {1} ({3}): {4}",

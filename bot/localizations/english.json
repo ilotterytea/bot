@@ -83,6 +83,8 @@
   "notify.list.empty": "{sender.alias_name}: No events to subscribe to.",
   "settings.locale": "{sender.alias_name}: Successfully set the chat language to English!",
   "settings.prefix": "{sender.alias_name}: Successfully set the chat prefix to \"{0}\"!",
+  "settings.feature.on": "{sender.alias_name}: Successfully enabled the \"{0}\" feature for this chat room!",
+  "settings.feature.off": "{sender.alias_name}: Successfully disabled the \"{0}\" feature for this chat room!",
   "emote_count.usage": "{sender.alias_name}: {0} Emote {1} has been used {2} times",
   "emote_count.not_found": "{sender.alias_name}: {0} Emote {1} not found in the database",
   "emote_top.response": "{sender.alias_name}: {0} {1}'s top {2} emotes ({3}): {4}",
