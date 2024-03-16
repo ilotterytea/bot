@@ -3,13 +3,14 @@ pub(super) mod schema;
 
 use common::{
     establish_connection,
+    models::ChannelFeature,
     schema::{channel_preferences::dsl as chp, channels::dsl as ch},
 };
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use futures::SinkExt;
 use log::info;
 use serde_json::Value;
-use std::{collections::HashSet, sync::Arc, time::Duration};
+use std::{collections::HashSet, str::FromStr, sync::Arc, time::Duration};
 
 use eyre::Context;
 use reqwest::Url;
@@ -218,11 +219,21 @@ impl SevenTVWebsocketClient {
                             .get_result::<(i32, String)>(conn)
                             .expect("Failed to get channel");
 
-                        let channel_language = chp::channel_preferences
+                        let (channel_language, channel_features) = chp::channel_preferences
                             .filter(chp::channel_id.eq(&channel.0))
-                            .select(chp::language)
-                            .get_result::<String>(conn)
+                            .select((chp::language, chp::features))
+                            .get_result::<(String, Vec<Option<String>>)>(conn)
                             .expect("Failed to get channel preference");
+
+                        if !channel_features.iter().flatten().any(|x| {
+                            if let Ok(f) = ChannelFeature::from_str(x.as_str()) {
+                                f == ChannelFeature::Notify7TVUpdates
+                            } else {
+                                false
+                            }
+                        }) {
+                            return Ok(());
+                        }
 
                         let mut messages: Vec<String> = Vec::new();
 
