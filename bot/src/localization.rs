@@ -50,6 +50,9 @@ pub enum LineId {
     Provider7TV,
 
     MsgNoMessage,
+
+    MasspingResponse,
+
     CommandPingResponse,
     CommandSpamNoCount,
     CommandSpamInvalidCount,
@@ -157,6 +160,7 @@ impl LineId {
             "emotes.push" => Some(Self::EmotesPushed),
             "msg.no_message" => Some(Self::MsgNoMessage),
             "cmd.ping.response" => Some(Self::CommandPingResponse),
+            "massping.response" => Some(Self::MasspingResponse),
             "cmd.spam.no_count" => Some(Self::CommandSpamNoCount),
             "cmd.spam.invalid_count" => Some(Self::CommandSpamInvalidCount),
             "cmd.spam.response" => Some(Self::CommandSpamResponse),
