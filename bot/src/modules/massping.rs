@@ -9,6 +9,7 @@ use crate::{
         Command,
     },
     instance_bundle::InstanceBundle,
+    localization::LineId,
 };
 
 use common::models::LevelOfRights;
@@ -46,18 +47,18 @@ impl Command for MasspingCommand {
             }
         };
 
-        let message = request.message.unwrap_or_default();
+        let message = request.message.clone().unwrap_or_default();
         let mut lines: Vec<String> = vec!["".to_string()];
         let mut index = 0;
 
+        let line = instance_bundle.localizator.formatted_text_by_request(
+            &request,
+            LineId::MasspingResponse,
+            vec![message.clone(), "".to_string()],
+        );
+
         for chatter in chatters {
-            if format!(
-                "{}@{}, {}",
-                lines.get(index).unwrap(),
-                chatter.user_login,
-                message
-            )
-            .len()
+            if line.len() + format!("{}@{} ", lines.get(index).unwrap(), chatter.user_login).len()
                 >= 500
             {
                 index += 1;
@@ -72,13 +73,19 @@ impl Command for MasspingCommand {
                 None => "".to_string(),
             };
 
-            lines.insert(index, format!("{}@{}, ", line, chatter.user_login));
+            lines.insert(index, format!("{}@{} ", line, chatter.user_login));
         }
 
         Ok(Response::Multiple(
             lines
                 .iter()
-                .map(|x| format!("{}{}", x, message))
+                .map(|x| {
+                    instance_bundle.localizator.formatted_text_by_request(
+                        &request,
+                        LineId::MasspingResponse,
+                        vec![message.clone(), x.clone()],
+                    )
+                })
                 .collect::<Vec<String>>(),
         ))
     }
