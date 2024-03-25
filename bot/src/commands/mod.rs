@@ -4,7 +4,7 @@ use crate::{
     modules::{
         custom_command::CustomCommandsCommand, ecount::EmoteCountCommand,
         esim::EmoteSimilarityCommand, etop::EmoteTopCommand, event::EventCommand,
-        holiday::HolidayCommand, join::JoinCommand, massping::MasspingCommand,
+        help::HelpCommand, holiday::HolidayCommand, join::JoinCommand, massping::MasspingCommand,
         mcsrv::MinecraftServerCommand, notify::NotifyCommand, ping::PingCommand,
         settings::SettingsCommand, spam::SpamCommand, timer::TimerCommand, userid::UserIdCommand,
     },
@@ -70,6 +70,7 @@ impl CommandLoader {
                 Box::new(EmoteSimilarityCommand),
                 Box::new(UserIdCommand),
                 Box::new(MinecraftServerCommand),
+                Box::new(HelpCommand),
             ],
         }
     }
