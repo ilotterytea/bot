@@ -81,14 +81,14 @@ impl Request {
                     .expect("Failed to get preferences after creating them")
             });
 
-        let sender = us::users
+        let mut sender = us::users
             .filter(us::alias_id.eq(message.sender.id.parse::<i32>().unwrap()))
             .first::<User>(conn)
             .unwrap_or_else(|_| {
                 insert_into(us::users)
                     .values(vec![NewUser {
                         alias_id: message.sender.id.parse::<i32>().unwrap(),
-                        alias_name: message.sender.name.clone(),
+                        alias_name: message.sender.login.clone(),
                     }])
                     .execute(conn)
                     .expect("Failed to create a new user");
@@ -100,6 +100,8 @@ impl Request {
             });
 
         if sender.alias_name.ne(&message.sender.login) {
+            sender.alias_name = message.sender.login.clone();
+
             update(us::users.find(sender.id))
                 .set(us::alias_name.eq(&message.sender.login))
                 .execute(conn)
