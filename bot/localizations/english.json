@@ -93,5 +93,7 @@
   "emote_similarity.set_similar": "{sender.alias_name}: {0} {1}'s emote set is {5}% similar to {2}'s emote set ({3} of {4})",
   "emote_similarity.set_not_similar": "{sender.alias_name}: {0} {1}'s emote set is not similar to {3}'s emote set",
   "userid.found": "{sender.alias_name}: {0} {1} ({2}){3}",
-  "userid.chat_ban": "| {0} Banned in chat{1}"
+  "userid.chat_ban": "| {0} Banned in chat{1}",
+  "help.general": "{sender.alias_name}: Help can be found at {0}",
+  "help.command": "{sender.alias_name}: Information about the command \"{0}{1}\": {2}/{3}"
 }

@@ -3,6 +3,7 @@ pub mod ecount;
 pub mod esim;
 pub mod etop;
 pub mod event;
+pub mod help;
 pub mod holiday;
 pub mod join;
 pub mod massping;

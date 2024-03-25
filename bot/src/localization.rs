@@ -114,6 +114,9 @@ pub enum LineId {
     UserIdFound,
     UserIdChatban,
 
+    HelpGeneral,
+    HelpCommand,
+
     EventAlreadyExistsError,
     TimerAlreadyExistsError,
     CustomCommandAlreadyExistsError,
@@ -213,6 +216,8 @@ impl LineId {
             "emote_similarity.set_not_similar" => Some(Self::EmoteSimilaritySetNotSimilar),
             "userid.found" => Some(Self::UserIdFound),
             "userid.chat_ban" => Some(Self::UserIdChatban),
+            "help.general" => Some(Self::HelpGeneral),
+            "help.command" => Some(Self::HelpCommand),
             _ => None,
         }
     }
