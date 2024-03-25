@@ -72,7 +72,7 @@ impl Command for SettingsCommand {
 
                 request.channel_preference.language = message.clone();
 
-                update(chp::channel_preferences)
+                update(chp::channel_preferences.find(&request.channel_preference.id))
                     .set(chp::language.eq(message))
                     .execute(conn)
                     .expect("Failed to update the channel preference");
@@ -84,7 +84,7 @@ impl Command for SettingsCommand {
                 )
             }
             "prefix" => {
-                update(chp::channel_preferences)
+                update(chp::channel_preferences.find(&request.channel_preference.id))
                     .set(chp::prefix.eq(message.clone()))
                     .execute(conn)
                     .expect("Failed to update the channel preference");
@@ -118,7 +118,7 @@ impl Command for SettingsCommand {
 
                     let feats: Vec<String> = feats.iter().map(|x| x.to_string()).collect();
 
-                    update(chp::channel_preferences.find(&request.channel.id))
+                    update(chp::channel_preferences.find(&request.channel_preference.id))
                         .set(chp::features.eq(&feats))
                         .execute(conn)
                         .expect("Failed to update the channel preference");
