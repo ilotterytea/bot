@@ -1,3 +1,5 @@
+use std::env;
+
 use async_trait::async_trait;
 use eyre::Result;
 
@@ -31,13 +33,15 @@ impl Command for SpamCommand {
     ) -> Result<Response, ResponseError> {
         if let Some(msg) = request.message {
             let mut s = msg.split(' ').collect::<Vec<&str>>();
+            let max_count = env::var("MODULE_SPAM_MAXCOUNT").unwrap_or_else(|_| "100".to_string());
+            let max_count = max_count.parse::<u32>().unwrap();
 
             let count = if let Some(c) = s.first() {
                 if let Ok(c) = c.parse::<u32>() {
                     s.remove(0);
 
-                    if c > 100 {
-                        100
+                    if c > max_count {
+                        max_count
                     } else {
                         c
                     }
