@@ -82,8 +82,8 @@ impl Command for JoinCommand {
         insert_into(chp::channel_preferences)
             .values([NewChannelPreference {
                 channel_id: new_channel.id,
-                prefix: DEFAULT_PREFIX.to_string(),
-                language: DEFAULT_LANGUAGE.to_string(),
+                prefix: request.channel_preference.prefix.clone(),
+                language: request.channel_preference.language.clone(),
             }])
             .execute(conn)
             .expect("Failed to insert preferences for a new channel");
