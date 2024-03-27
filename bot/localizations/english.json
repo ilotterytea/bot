@@ -48,7 +48,7 @@
   "cmd.holiday.response": "{sender.alias_name}: Holiday for {0}.{1} ({2}/{3}): {4}",
   "cmd.join.already_joined": "{sender.alias_name}: I'm already joined your chat room!",
   "cmd.join.response": "{sender.alias_name}: Successfully joined your chat room!",
-  "cmd.join.response_in_chat": "Hi {target.alias_name}! I'm in your chat room! Type !help to get some information about the bot.",
+  "cmd.join.response_in_chat": "Hi {sender.alias_name}! Type {0}help to get some information about the bot.",
   "join.other_chat_room": "{sender.alias_name}: ⚠️  The bot cannot join anyone else's chat room but yours due to Twitch API limitations.",
   "cmd.timer.deleted": "{sender.alias_name}: The \"{0}\" (ID {1}) timer has been deleted!",
   "cmd.timer.enabled": "{sender.alias_name}: The \"{0}\" (ID {1}) timer has been enabled!",
