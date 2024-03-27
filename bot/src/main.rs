@@ -19,7 +19,7 @@ use diesel::{
 };
 use eyre::Context;
 use livestream::TwitchLivestreamHelper;
-use log::{error, info};
+use log::{debug, error, info};
 use reqwest::Client;
 use tokio::sync::Mutex;
 use twitch_api::{
@@ -85,7 +85,7 @@ async fn main() {
     }
 
     let localizator = Arc::new(Localizator::new());
-    let command_loader = CommandLoader::new();
+    let command_loader = Arc::new(CommandLoader::new());
     let (mut irc_incoming_messages, irc_client) =
         TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(
             ClientConfig::new_simple(StaticLoginCredentials::new(
@@ -234,17 +234,22 @@ async fn main() {
 
     let irc_thread = tokio::spawn(async move {
         while let Some(irc_message) = irc_incoming_messages.recv().await {
-            match irc_message {
-                ServerMessage::Privmsg(message) => {
-                    println!("received message: {:?}", message);
-                    let instances = instances.clone();
+            debug!("Received IRC message: {:?}", irc_message);
 
-                    handle_chat_message(instances, &command_loader, message).await;
+            let instances = instances.clone();
+            let command_loader = command_loader.clone();
+
+            tokio::spawn(async move {
+                if let ServerMessage::Privmsg(message) = irc_message {
+                    if let Err(e) = tokio::spawn(async move {
+                        handle_chat_message(instances, command_loader, message).await;
+                    })
+                    .await
+                    {
+                        error!("Error occurred on IRC message thread: {:?}", e);
+                    }
                 }
-                _ => {
-                    println!("not handled message: {:?}", irc_message);
-                }
-            }
+            });
         }
     });
 
