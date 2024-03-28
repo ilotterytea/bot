@@ -1,0 +1,10 @@
+[workspace]
+members = ["common", "bot", "api"]
+resolver = "2"
+
+[workspace.package]
+version = "1.0.3"
+authors = ["ilotterytea <ilotterytea@pm.me>"]
+edition = "2021"
+publish = false
+repository = "https://github.com/ilotterytea/bot"
