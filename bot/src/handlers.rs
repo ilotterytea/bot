@@ -2,8 +2,9 @@ use std::{collections::HashSet, sync::Arc};
 
 use chrono::Utc;
 use diesel::{insert_into, update, BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
+use log::info;
 use twitch_api::{types::UserId, helix::chat::GetChattersRequest};
-use twitch_irc::message::PrivmsgMessage;
+use twitch_irc::message::{NoticeMessage, PrivmsgMessage};
 
 use crate::{
     commands::{request::Request, response::Response, CommandLoader},
@@ -286,5 +287,44 @@ pub async fn handle_stream_event(
         })
         .await
         .unwrap();
+    }
+}
+
+pub async fn handle_notice_message(instance_bundle: Arc<InstanceBundle>, message: NoticeMessage) {
+    if let (Some(msg_id), Some(login)) = (message.message_id, message.channel_login) {
+        let conn = &mut establish_connection();
+
+        match msg_id.as_str() {
+            "msg_channel_suspended" | "msg_banned" => {
+                info!(
+                    "#{} will be opted out. Reason: {}.",
+                    login,
+                    if msg_id.eq("msg_banned") {
+                        "The bot has been banned"
+                    } else {
+                        "The channel has been suspended"
+                    }
+                );
+
+                let now = Utc::now().naive_utc();
+
+                update(ch::channels.filter(ch::alias_name.eq(&login)))
+                    .set(ch::opt_outed_at.eq(now))
+                    .execute(conn)
+                    .expect("Failed to update channel after notice message");
+
+                let mut data = instance_bundle.seventv_eventapi_data.lock().await;
+                let user_id = UserId::new(login.clone());
+
+                if let Some(id) = data.iter().find(|x| (*x).eq(&user_id)) {
+                    let id = id.clone();
+                    data.remove(&id);
+                }
+
+                instance_bundle.twitch_irc_client.part(login);
+            }
+            _ => {}
+
+        }
     }
 }

@@ -2,7 +2,7 @@ use std::{collections::HashSet, env, process::exit, sync::Arc, time::Duration};
 
 use crate::{
     commands::CommandLoader,
-    handlers::{handle_chat_message, handle_timers},
+    handlers::*,
     instance_bundle::InstanceBundle,
     localization::Localizator,
     seventv::{api::SevenTVAPIClient, SevenTVWebsocketClient},
@@ -240,14 +240,14 @@ async fn main() {
             let command_loader = command_loader.clone();
 
             tokio::spawn(async move {
-                if let ServerMessage::Privmsg(message) = irc_message {
-                    if let Err(e) = tokio::spawn(async move {
+                match irc_message {
+                    ServerMessage::Privmsg(message) => {
                         handle_chat_message(instances, command_loader, message).await;
-                    })
-                    .await
-                    {
-                        error!("Error occurred on IRC message thread: {:?}", e);
                     }
+                    ServerMessage::Notice(message) => {
+                        handle_notice_message(instances, message).await;
+                    }
+                    _ => {}
                 }
             });
         }
