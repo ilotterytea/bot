@@ -120,6 +120,8 @@ pub enum LineId {
     EventAlreadyExistsError,
     TimerAlreadyExistsError,
     CustomCommandAlreadyExistsError,
+
+    ChattersResponse,
 }
 
 impl LineId {
@@ -218,6 +220,7 @@ impl LineId {
             "userid.chat_ban" => Some(Self::UserIdChatban),
             "help.general" => Some(Self::HelpGeneral),
             "help.command" => Some(Self::HelpCommand),
+            "chatters.response" => Some(Self::ChattersResponse),
             _ => None,
         }
     }

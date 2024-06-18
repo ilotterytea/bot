@@ -95,5 +95,6 @@
   "userid.found": "{sender.alias_name}: {0} {1} ({2}){3}",
   "userid.chat_ban": "| {0} Забанен в чате{1}",
   "help.general": "{sender.alias_name}: Дополнительную информацию можно найти на сайте {0}",
-  "help.command": "{sender.alias_name}: Информация о команде \"{0}{1}\": {2}/{3}"
+  "help.command": "{sender.alias_name}: Информация о команде \"{0}{1}\": {2}/{3}",
+  "chatters.response": "{sender.alias_name}: Список чаттеров: {0}"
 }

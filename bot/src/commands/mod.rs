@@ -2,11 +2,12 @@ use crate::{
     instance_bundle::InstanceBundle,
     localization::LineId,
     modules::{
-        custom_command::CustomCommandsCommand, ecount::EmoteCountCommand,
-        esim::EmoteSimilarityCommand, etop::EmoteTopCommand, event::EventCommand,
-        help::HelpCommand, holiday::HolidayCommand, join::JoinCommand, massping::MasspingCommand,
-        mcsrv::MinecraftServerCommand, notify::NotifyCommand, ping::PingCommand,
-        settings::SettingsCommand, spam::SpamCommand, timer::TimerCommand, userid::UserIdCommand,
+        chatters::ChattersCommand, custom_command::CustomCommandsCommand,
+        ecount::EmoteCountCommand, esim::EmoteSimilarityCommand, etop::EmoteTopCommand,
+        event::EventCommand, help::HelpCommand, holiday::HolidayCommand, join::JoinCommand,
+        massping::MasspingCommand, mcsrv::MinecraftServerCommand, notify::NotifyCommand,
+        ping::PingCommand, settings::SettingsCommand, spam::SpamCommand, timer::TimerCommand,
+        userid::UserIdCommand,
     },
     shared_variables::{
         DEFAULT_COMMAND_DELAY_SEC, DEFAULT_COMMAND_LEVEL_OF_RIGHTS, DEFAULT_COMMAND_OPTIONS,
@@ -71,6 +72,7 @@ impl CommandLoader {
                 Box::new(UserIdCommand),
                 Box::new(MinecraftServerCommand),
                 Box::new(HelpCommand),
+                Box::new(ChattersCommand),
             ],
         }
     }

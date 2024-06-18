@@ -1,3 +1,4 @@
+pub mod chatters;
 pub mod custom_command;
 pub mod ecount;
 pub mod esim;

@@ -20,6 +20,7 @@ pub const HOLIDAY_V1_API_URL: &str = "https://hol.ilotterytea.kz/api/v1";
 pub const SEVENTV_WEBSOCKET_URL: &str = "wss://events.7tv.io/v3";
 pub const IVR_API_V2_URL: &str = "https://api.ivr.fi/v2";
 pub const MCSRV_API_URL: &str = "https://api.mcsrvstat.us/3";
+pub const PASTE_API_URL: &str = "https://paste.ilotterytea.kz";
 
 pub const TIMER_CHECK_DELAY: u64 = 1;
 
