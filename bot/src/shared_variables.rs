@@ -13,7 +13,12 @@ pub const DEFAULT_COMMAND_OPTIONS: Vec<String> = Vec::new();
 pub const DEFAULT_COMMAND_SUBCOMMANDS: Vec<String> = Vec::new();
 pub const DEFAULT_COMMAND_LEVEL_OF_RIGHTS: LevelOfRights = LevelOfRights::User;
 
+#[cfg(debug_assertions)]
 pub const DEFAULT_PREFIX: &str = "~";
+
+#[cfg(not(debug_assertions))]
+pub const DEFAULT_PREFIX: &str = "!";
+
 pub const DEFAULT_LANGUAGE: &str = "english";
 
 pub const HOLIDAY_V1_API_URL: &str = "https://hol.ilotterytea.kz/api/v1";
