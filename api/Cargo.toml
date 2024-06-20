@@ -10,10 +10,12 @@ repository.workspace = true
 
 [dependencies]
 actix-web = "4.4.1"
+actix-web-lab = "0.20.2"
 chrono = { version = "0.4.31", features = ["serde"] }
 common = { path = "../common" }
 diesel = { version = "2.1.4", features = ["postgres", "chrono", "uuid"] }
 dotenvy = "0.15.7"
+handlebars = { version = "5.1.2", features = ["dir_source"] }
 include_dir = "0.7.3"
 rand = "0.8.5"
 reqwest = { version = "0.11.23", features = ["json"] }

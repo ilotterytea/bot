@@ -3,6 +3,7 @@ use std::io::Result;
 
 use actix_web::{web, App, HttpServer};
 use dotenvy::dotenv;
+use handlebars::{DirectorySourceOptions, Handlebars};
 use serde::{Deserialize, Serialize};
 
 mod auth;
@@ -28,33 +29,53 @@ async fn main() -> Result<()> {
 
     let command_docs = web::Data::new(CommandDocInstance::new());
 
-    HttpServer::new(move || {
-        App::new().app_data(command_docs.clone()).service(
-            web::scope("/v1")
-                .service(
-                    web::scope("/docs")
-                        .service(web::resource("").get(get_available_docs))
-                        .service(web::resource("/{name:.*}").get(get_doc)),
-                )
-                .service(web::scope("/authenticate").service(web::resource("").to(authenticate)))
-                .service(
-                    web::scope("/channels")
-                        .service(web::resource("").get(get_channels))
-                        .service(web::resource("/alias_id/{name}").get(get_channels_by_alias_ids))
-                        .service(web::resource("/join").post(join_channel)),
-                )
-                .service(
-                    web::scope("/channel/{id}")
-                        .service(web::resource("").get(get_channel_by_id))
-                        .service(web::resource("/events").get(get_channel_events))
-                        .service(web::resource("/custom-commands").get(get_custom_commands)),
-                )
-                .service(
-                    web::scope("/user")
-                        .service(web::resource("").get(get_user_by_client_token))
-                        .service(web::resource("/settings").get(get_user_settings)),
-                ),
+    let mut handlebars = Handlebars::new();
+    handlebars
+        .register_templates_directory(
+            "./templates",
+            DirectorySourceOptions {
+                tpl_extension: ".html".to_owned(),
+                hidden: false,
+                temporary: false,
+            },
         )
+        .unwrap();
+    let handlebars_ref = web::Data::new(handlebars);
+
+    HttpServer::new(move || {
+        App::new()
+            .app_data(command_docs.clone())
+            .app_data(handlebars_ref.clone())
+            .service(
+                web::scope("/api/v1")
+                    .service(
+                        web::scope("/docs")
+                            .service(web::resource("").get(get_available_docs))
+                            .service(web::resource("/{name:.*}").get(get_doc)),
+                    )
+                    .service(
+                        web::scope("/authenticate").service(web::resource("").to(authenticate)),
+                    )
+                    .service(
+                        web::scope("/channels")
+                            .service(web::resource("").get(get_channels))
+                            .service(
+                                web::resource("/alias_id/{name}").get(get_channels_by_alias_ids),
+                            )
+                            .service(web::resource("/join").post(join_channel)),
+                    )
+                    .service(
+                        web::scope("/channel/{id}")
+                            .service(web::resource("").get(get_channel_by_id))
+                            .service(web::resource("/events").get(get_channel_events))
+                            .service(web::resource("/custom-commands").get(get_custom_commands)),
+                    )
+                    .service(
+                        web::scope("/user")
+                            .service(web::resource("").get(get_user_by_client_token))
+                            .service(web::resource("/settings").get(get_user_settings)),
+                    ),
+            )
     })
     .bind((host, port))?
     .run()
