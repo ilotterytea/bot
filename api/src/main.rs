@@ -4,6 +4,7 @@ use std::io::Result;
 use actix_web::{web, App, HttpServer};
 use dotenvy::dotenv;
 use handlebars::{DirectorySourceOptions, Handlebars};
+use handlebars_routes::{index, load_handlebars_templates};
 use serde::{Deserialize, Serialize};
 
 mod auth;
@@ -11,6 +12,7 @@ mod channels;
 mod commands;
 mod customcommands;
 mod events;
+mod handlebars_routes;
 mod join;
 mod users;
 
@@ -30,22 +32,14 @@ async fn main() -> Result<()> {
     let command_docs = web::Data::new(CommandDocInstance::new());
 
     let mut handlebars = Handlebars::new();
-    handlebars
-        .register_templates_directory(
-            "./templates",
-            DirectorySourceOptions {
-                tpl_extension: ".html".to_owned(),
-                hidden: false,
-                temporary: false,
-            },
-        )
-        .unwrap();
+    load_handlebars_templates(&mut handlebars);
     let handlebars_ref = web::Data::new(handlebars);
 
     HttpServer::new(move || {
         App::new()
             .app_data(command_docs.clone())
             .app_data(handlebars_ref.clone())
+            .service(web::resource("/").get(index))
             .service(
                 web::scope("/api/v1")
                     .service(
