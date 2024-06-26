@@ -1,9 +1,11 @@
-use crate::{auth::*, channels::*, commands::*, customcommands::*, events::*, join::*, users::*};
+use crate::{
+    auth::*, channels::*, commands::*, customcommands::*, events::*, join::*, routes::*, users::*,
+};
 use std::io::Result;
 
 use actix_web::{web, App, HttpServer};
 use dotenvy::dotenv;
-use handlebars::{DirectorySourceOptions, Handlebars};
+use handlebars::Handlebars;
 use handlebars_routes::{index, load_handlebars_templates};
 use serde::{Deserialize, Serialize};
 
@@ -14,6 +16,7 @@ mod customcommands;
 mod events;
 mod handlebars_routes;
 mod join;
+mod routes;
 mod users;
 
 #[derive(Deserialize, Serialize)]
@@ -40,6 +43,7 @@ async fn main() -> Result<()> {
             .app_data(command_docs.clone())
             .app_data(handlebars_ref.clone())
             .service(web::resource("/").get(index))
+            .service(web::resource("/static/{filename:.*}").get(get_static_file))
             .service(
                 web::scope("/api/v1")
                     .service(

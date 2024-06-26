@@ -332,6 +332,7 @@ dependencies = [
  "dotenvy",
  "handlebars",
  "include_dir",
+ "mime_guess",
  "rand",
  "reqwest",
  "serde",
