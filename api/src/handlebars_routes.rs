@@ -58,9 +58,14 @@ async fn get_wiki_page(
         let summary = markdown::to_html(summary);
         let contents = markdown::to_html(contents);
 
+        let contact_name: String = var("WEB_CONTACT_NAME").unwrap_or("someone".into());
+        let contact_url: String = var("WEB_CONTACT_URL").unwrap_or("#".into());
+
         let data = json!({
             "summary": summary,
-            "content": contents
+            "content": contents,
+            "contact_name": contact_name,
+            "contact_url": contact_url
         });
 
         let body = hb.render("wiki_page.html", &data).unwrap();
