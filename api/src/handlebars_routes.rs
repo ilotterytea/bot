@@ -1,9 +1,11 @@
-use actix_web::{web, Responder};
+use actix_web::{web, HttpResponse, Responder};
 use actix_web_lab::respond::Html;
 use handlebars::Handlebars;
 use include_dir::{include_dir, Dir};
 use serde_json::json;
 use std::env::var;
+
+use crate::CommandDocInstance;
 
 const HANDLEBARS_TEMPLATES: Dir = include_dir!("$CARGO_MANIFEST_DIR/templates");
 
@@ -30,4 +32,41 @@ pub async fn index(hb: web::Data<Handlebars<'_>>) -> impl Responder {
     let body = hb.render("index.html", &data).unwrap();
 
     Html(body)
+}
+
+pub async fn wiki_page(
+    wiki: web::Data<CommandDocInstance>,
+    path: web::Path<String>,
+    hb: web::Data<Handlebars<'_>>,
+) -> HttpResponse {
+    get_wiki_page(wiki, path.into_inner(), hb).await
+}
+
+pub async fn default_wiki_page(
+    wiki: web::Data<CommandDocInstance>,
+    hb: web::Data<Handlebars<'_>>,
+) -> HttpResponse {
+    get_wiki_page(wiki, "README".into(), hb).await
+}
+
+async fn get_wiki_page(
+    wiki: web::Data<CommandDocInstance>,
+    path: String,
+    hb: web::Data<Handlebars<'_>>,
+) -> HttpResponse {
+    if let (Some(summary), Some(contents)) = (wiki.data.get("summary"), wiki.data.get(&path)) {
+        let summary = markdown::to_html(summary);
+        let contents = markdown::to_html(contents);
+
+        let data = json!({
+            "summary": summary,
+            "content": contents
+        });
+
+        let body = hb.render("wiki_page.html", &data).unwrap();
+
+        HttpResponse::Ok().body(body)
+    } else {
+        HttpResponse::NotFound().body("Not found")
+    }
 }

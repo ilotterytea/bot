@@ -6,7 +6,7 @@ use std::io::Result;
 use actix_web::{web, App, HttpServer};
 use dotenvy::dotenv;
 use handlebars::Handlebars;
-use handlebars_routes::{index, load_handlebars_templates};
+use handlebars_routes::{default_wiki_page, index, load_handlebars_templates, wiki_page};
 use serde::{Deserialize, Serialize};
 
 mod auth;
@@ -44,6 +44,8 @@ async fn main() -> Result<()> {
             .app_data(handlebars_ref.clone())
             .service(web::resource("/").get(index))
             .service(web::resource("/static/{filename:.*}").get(get_static_file))
+            .service(web::resource("/wiki").get(default_wiki_page))
+            .service(web::resource("/wiki/{name:.*}").get(wiki_page))
             .service(
                 web::scope("/api/v1")
                     .service(
