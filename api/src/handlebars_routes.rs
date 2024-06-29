@@ -23,10 +23,13 @@ pub fn load_handlebars_templates(hb: &mut Handlebars<'_>) {
 pub async fn index(hb: web::Data<Handlebars<'_>>) -> impl Responder {
     let contact_name: String = var("WEB_CONTACT_NAME").unwrap_or("someone".into());
     let contact_url: String = var("WEB_CONTACT_URL").unwrap_or("#".into());
+    let bot_title =
+        var("WEB_BOT_TITLE").unwrap_or(var("BOT_USERNAME").unwrap_or("Some Twitch Bot".into()));
 
     let data = json!({
         "contact_name": contact_name,
-        "contact_url": contact_url
+        "contact_url": contact_url,
+        "bot_title": bot_title
     });
 
     let body = hb.render("index.html", &data).unwrap();
@@ -60,12 +63,16 @@ async fn get_wiki_page(
 
         let contact_name: String = var("WEB_CONTACT_NAME").unwrap_or("someone".into());
         let contact_url: String = var("WEB_CONTACT_URL").unwrap_or("#".into());
+        let bot_title =
+            var("WEB_BOT_TITLE").unwrap_or(var("BOT_USERNAME").unwrap_or("Some Twitch Bot".into()));
 
         let data = json!({
             "summary": summary,
             "content": contents,
             "contact_name": contact_name,
-            "contact_url": contact_url
+            "contact_url": contact_url,
+            "bot_title": bot_title,
+            "wiki_title": path
         });
 
         let body = hb.render("wiki_page.html", &data).unwrap();
