@@ -23,10 +23,3 @@ or you can look at the articles under the "Commands" heading on the side bar.
 + **Personalization**\
 Customize the bot to suit your style.
 [Add your unique commands](/wiki/channel/custom-commands) and [customize features](/wiki/channel/settings) as you see fit.
-
-## Updates
-
-The bot is **under active development**.
-Keep an eye on [Git](https://git.ilotterytea.kz/tea/bot) for updates.
-If you have any questions or would like to suggest a new feature, [feel free to contact us](/contact).
-
