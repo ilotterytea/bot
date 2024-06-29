@@ -25,6 +25,7 @@
 
 + [Mass ping](/wiki/mod/mass-ping)
 + [Spam](/wiki/mod/spam)
++ [Chatter list](/wiki/mod/chatters)
 
 ## User management
 
