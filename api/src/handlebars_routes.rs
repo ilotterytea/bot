@@ -6,6 +6,12 @@ use include_dir::{include_dir, Dir};
 use serde::Serialize;
 use serde_json::json;
 use std::env::var;
+use twitch_api::{
+    helix::users::{GetUsersRequest, User},
+    twitch_oauth2::UserToken,
+    types::UserIdRef,
+    HelixClient,
+};
 
 use common::{
     establish_connection,
@@ -100,7 +106,12 @@ struct EventsForChannelHandlebars {
     pub subscribers: usize,
 }
 
-pub async fn get_channel(id: web::Path<String>, hb: web::Data<Handlebars<'_>>) -> HttpResponse {
+pub async fn get_channel(
+    id: web::Path<String>,
+    hb: web::Data<Handlebars<'_>>,
+    hc: web::Data<HelixClient<'static, reqwest::Client>>,
+    ut: web::Data<UserToken>,
+) -> HttpResponse {
     let conn = &mut establish_connection();
 
     let (id, username, tid) = match ch::channels
@@ -112,6 +123,16 @@ pub async fn get_channel(id: web::Path<String>, hb: web::Data<Handlebars<'_>>) -
         Ok(x) => x,
         Err(_) => return HttpResponse::NotFound().body("Wrong id or username"),
     };
+
+    let tid = tid.to_string();
+    let request = GetUsersRequest::ids(vec![UserIdRef::from_str(tid.as_str())]);
+    let channel = hc.req_get(request, &**ut).await.unwrap().data;
+
+    if channel.is_empty() {
+        return HttpResponse::NotFound().body("ID not exists in Twitch database");
+    }
+
+    let channel: &User = channel.first().unwrap();
 
     let mut events_hb = Vec::<EventsForChannelHandlebars>::new();
     let events: Vec<Event> = ev::events
@@ -152,9 +173,9 @@ pub async fn get_channel(id: web::Path<String>, hb: web::Data<Handlebars<'_>>) -
     }
 
     let data = json!({
-        "pfp": "",
+        "pfp": channel.profile_image_url,
         "username": username,
-        "description": "x",
+        "description": channel.description,
         "events": events_hb
     });
 
