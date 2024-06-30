@@ -1,9 +1,17 @@
 use actix_web::{web, HttpResponse, Responder};
 use actix_web_lab::respond::Html;
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use handlebars::Handlebars;
 use include_dir::{include_dir, Dir};
+use serde::Serialize;
 use serde_json::json;
 use std::env::var;
+
+use common::{
+    establish_connection,
+    models::Event,
+    schema::{channels::dsl as ch, event_subscriptions::dsl as evs, events::dsl as ev},
+};
 
 use crate::CommandDocInstance;
 
@@ -81,4 +89,76 @@ async fn get_wiki_page(
     } else {
         HttpResponse::NotFound().body("Not found")
     }
+}
+
+#[derive(Serialize)]
+struct EventsForChannelHandlebars {
+    pub name: String,
+    pub event_type: String,
+    pub message: String,
+    pub flags: String,
+    pub subscribers: usize,
+}
+
+pub async fn get_channel(id: web::Path<String>, hb: web::Data<Handlebars<'_>>) -> HttpResponse {
+    let conn = &mut establish_connection();
+
+    let (id, username, tid) = match ch::channels
+        .filter(ch::alias_name.eq(&*id))
+        .or_filter(ch::alias_id.eq((&*id).parse::<i32>().unwrap_or(-1)))
+        .select((ch::id, ch::alias_name, ch::alias_id))
+        .get_result::<(i32, String, i32)>(conn)
+    {
+        Ok(x) => x,
+        Err(_) => return HttpResponse::NotFound().body("Wrong id or username"),
+    };
+
+    let mut events_hb = Vec::<EventsForChannelHandlebars>::new();
+    let events: Vec<Event> = ev::events
+        .filter(ev::channel_id.eq(&id))
+        .get_results::<Event>(conn)
+        .unwrap_or(Vec::new());
+
+    for event in events {
+        let name = match (event.target_alias_id, event.custom_alias_id) {
+            (Some(x), None) => x.to_string(),
+            (None, Some(x)) => x,
+            _ => continue,
+        };
+
+        let subscribers = evs::event_subscriptions
+            .filter(evs::event_id.eq(&event.id))
+            .select(evs::event_id)
+            .get_results::<i32>(conn)
+            .unwrap_or(Vec::new())
+            .len();
+
+        events_hb.push(EventsForChannelHandlebars {
+            name,
+            event_type: event.event_type.to_string(),
+            flags: if event.flags.is_empty() {
+                "-".into()
+            } else {
+                event
+                    .flags
+                    .iter()
+                    .map(|x| x.to_string())
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            },
+            message: event.message,
+            subscribers,
+        })
+    }
+
+    let data = json!({
+        "pfp": "",
+        "username": username,
+        "description": "x",
+        "events": events_hb
+    });
+
+    let page = hb.render("channel.html", &data).unwrap();
+
+    HttpResponse::Ok().body(page)
 }

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div class="min-h-screen w-full flex items-center flex-col">
+      <div class="lg:w-1/2 w-full flex items-center flex-col">
+        <div class="w-full flex flex-col space-y-4">
+          <!-- Profile info -->
+          <div class="w-full bg-gray-200 flex flex-row p-4">
+            <img src="{{ pfp }}" width="128" height="128" alt="no image">
+            <div class="ml-4 flex-grow flex flex-col">
+              <h1 class="text-4xl font-semibold">About {{ username }}</h1>
+              <p>{{ description }}</p>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div>
+            <!-- Tabs -->
+            <div class="w-full flex flex-row space-x-2">
+              <button class="bg-gray-200 hover:bg-gray-300 border border-gray-300 hover:border-gray-400 py-1 px-4" onclick="open_tab(event, 'events')">Events</button>
+            </div>
+
+            <!-- Events -->
+            <div id="events" class="w-full">
+              <table class="w-full border border-gray-300">
+                <tr class="text-left border border-gray-300">
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Message</th>
+                  <th>Flags</th>
+                  <th>Subscribers</th>
+                </tr>
+                {{ #each events }}
+                <tr>
+                  <td>{{ name }}</td>
+                  <td>{{ event_type }}</td>
+                  <td>{{ message }}</td>
+                  <td>{{ flags }}</td>
+                  <td>{{ subscribers }}</td>
+                </tr>
+                {{ /each }}
+              </table>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

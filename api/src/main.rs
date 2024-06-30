@@ -71,6 +71,7 @@ async fn main() -> Result<()> {
             .service(web::resource("/static/{filename:.*}").get(get_static_file))
             .service(web::resource("/wiki").get(default_wiki_page))
             .service(web::resource("/wiki/{name:.*}").get(wiki_page))
+            .service(web::resource("/channel/{name}").get(crate::handlebars_routes::get_channel))
             .service(
                 web::scope("/api/v1")
                     .service(
