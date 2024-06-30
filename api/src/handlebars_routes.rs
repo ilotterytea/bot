@@ -5,7 +5,7 @@ use handlebars::Handlebars;
 use include_dir::{include_dir, Dir};
 use serde::Serialize;
 use serde_json::json;
-use std::env::var;
+use std::{collections::HashMap, env::var};
 use twitch_api::{
     helix::users::{GetUsersRequest, User},
     twitch_oauth2::UserToken,
@@ -140,9 +140,40 @@ pub async fn get_channel(
         .get_results::<Event>(conn)
         .unwrap_or(Vec::new());
 
+    // Caching usernames
+    let mut user_map: HashMap<i32, String> = HashMap::new();
+    let user_ids_str: Vec<String> = events
+        .iter()
+        .filter(|x| x.target_alias_id.is_some())
+        .map(|x| {
+            let id = x.target_alias_id.unwrap();
+            id.to_string()
+        })
+        .collect();
+    let user_ids: Vec<&UserIdRef> = user_ids_str
+        .iter()
+        .map(|x| UserIdRef::from_str(x.as_str()))
+        .collect();
+
+    let request = GetUsersRequest::ids(user_ids);
+    let channels = hc.req_get(request, &**ut).await.unwrap().data;
+
+    for channel in channels {
+        user_map.insert(
+            channel.id.take().parse::<i32>().unwrap(),
+            channel.login.take(),
+        );
+    }
+
     for event in events {
         let name = match (event.target_alias_id, event.custom_alias_id) {
-            (Some(x), None) => x.to_string(),
+            (Some(x), None) => {
+                if let Some(x) = user_map.get(&x) {
+                    x.clone()
+                } else {
+                    x.to_string()
+                }
+            }
             (None, Some(x)) => x,
             _ => continue,
         };
