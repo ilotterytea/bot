@@ -1,13 +1,18 @@
 use crate::{
     auth::*, channels::*, commands::*, customcommands::*, events::*, join::*, routes::*, users::*,
 };
-use std::io::Result;
+use std::{env, io::Result};
 
 use actix_web::{web, App, HttpServer};
 use dotenvy::dotenv;
 use handlebars::Handlebars;
 use handlebars_routes::{default_wiki_page, index, load_handlebars_templates, wiki_page};
 use serde::{Deserialize, Serialize};
+use twitch_api::{
+    client::ClientDefault,
+    twitch_oauth2::{AccessToken, UserToken},
+    HelixClient,
+};
 
 mod auth;
 mod channels;
@@ -38,10 +43,30 @@ async fn main() -> Result<()> {
     load_handlebars_templates(&mut handlebars);
     let handlebars_ref = web::Data::new(handlebars);
 
+    let reqwest_client =
+        reqwest::Client::default_client_with_name(Some("ilotterytea/bot".parse().unwrap()))
+            .unwrap();
+
+    let helix_token = web::Data::new(
+        match UserToken::from_token(
+            &reqwest_client,
+            AccessToken::from(env::var("BOT_PASSWORD").expect("BOT_PASSWORD must be set")),
+        )
+        .await
+        {
+            Ok(token) => token,
+            Err(e) => panic!("Failed to construct user token: {}", e),
+        },
+    );
+
+    let helix_client = web::Data::new(HelixClient::with_client(reqwest_client));
+
     HttpServer::new(move || {
         App::new()
             .app_data(command_docs.clone())
             .app_data(handlebars_ref.clone())
+            .app_data(helix_token.clone())
+            .app_data(helix_client.clone())
             .service(web::resource("/").get(index))
             .service(web::resource("/static/{filename:.*}").get(get_static_file))
             .service(web::resource("/wiki").get(default_wiki_page))
