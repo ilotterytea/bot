@@ -213,6 +213,15 @@ impl FromStr for EventFlag {
     }
 }
 
+impl ToString for EventFlag {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Massping => "massping",
+        }
+        .to_string()
+    }
+}
+
 #[derive(Serialize, Queryable, Identifiable, Associations)]
 #[diesel(belongs_to(Channel, foreign_key = channel_id))]
 pub struct Event {
