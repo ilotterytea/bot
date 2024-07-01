@@ -5,4 +5,21 @@
 
   <a href="/" class="transition-colors hover:text-green-600">home</a>
   <a href="/wiki" class="transition-colors hover:text-green-600">wiki</a>
+
+  <div class="flex-grow flex flex-row-reverse">
+    <form action="/search" class="flex flex-row">
+      <input
+        type="text"
+        name="query"
+        placeholder="Search..."
+        class="p-1 border border-gray-300 focus:outline-none focus:border-green-800"
+      />
+      <button
+        type="submit"
+        class="px-2 bg-green-300 hover:bg-green-400 border border-green-800"
+      >
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+    </form>
+  </div>
 </div>
