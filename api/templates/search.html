@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+  <head>
+    <title>
+      Found {{ results_count }} results by {{ query }} - {{ bot_title }}
+    </title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css" />
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <div class="min-h-screen w-full flex items-center flex-col">
+      <div class="lg:w-1/2 w-full flex-grow flex items-center flex-col">
+        <div class="w-full flex-grow flex flex-col space-y-4">
+          {{> header.html }} {{ #if results_found }}
+          <!-- Results -->
+          <div class="w-full flex flex-col space-y-4">
+            <h1 class="text-2xl text-green-800 font-semibold">
+              Found {{ results_count }} results for '{{ query }}' query
+            </h1>
+
+            {{ #if channels_found }}
+            <!-- Channels -->
+            <div class="w-full flex flex-col">
+              <h2 class="text-lg">Channels ({{ channels_count }})</h2>
+              <div class="w-full flex flex-col">
+                {{ #each channels }}
+                <a
+                  href="/channel/{{ id }}"
+                  class="w-full flex bg-white hover:bg-green-100 border-b border-gray-300"
+                >
+                  <div class="w-full p-1 flex flex-row items-center">
+                    <img
+                      src="{{ image_url }}"
+                      width="32"
+                      height="32"
+                      alt=""
+                      class="mr-4"
+                    />
+                    <p class="flex-grow">{{ username }}</p>
+                  </div>
+                </a>
+                {{ /each }}
+              </div>
+            </div>
+            {{ /if }}
+          </div>
+          {{ /if }} {{ #unless results_found }}
+          <!-- Results not found -->
+          <div>
+            <h1 class="text-red-600 text-2xl font-semibold">
+              Nothing found for '{{ query }}' query...
+            </h1>
+          </div>
+          {{ /unless }}
+        </div>
+      </div>
+
+      {{> footer.html }}
+    </div>
+  </body>
+</html>

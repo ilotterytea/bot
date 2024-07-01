@@ -4,7 +4,7 @@ use chrono::Utc;
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use handlebars::Handlebars;
 use include_dir::{include_dir, Dir};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::{collections::HashMap, env::var};
 use twitch_api::{
@@ -276,4 +276,98 @@ pub async fn get_channel(
     let page = hb.render("channel.html", &data).unwrap();
 
     HttpResponse::Ok().body(page)
+}
+
+#[derive(Deserialize)]
+pub struct SearchQuery {
+    pub query: String,
+}
+
+#[derive(Serialize)]
+struct ChannelForSearchHandlebars {
+    pub id: String,
+    pub image_url: String,
+    pub username: String,
+}
+
+pub async fn search(
+    query: web::Query<SearchQuery>,
+    hb: web::Data<Handlebars<'_>>,
+    hc: web::Data<HelixClient<'static, reqwest::Client>>,
+    ut: web::Data<UserToken>,
+) -> HttpResponse {
+    let conn = &mut establish_connection();
+
+    let is_number = query.query.chars().all(char::is_numeric);
+    let number_id = if is_number {
+        query.query.parse::<i32>().unwrap()
+    } else {
+        -1
+    };
+
+    let channels: Vec<Channel> = ch::channels
+        .get_results::<Channel>(conn)
+        .unwrap_or(Vec::new());
+
+    let channels: Vec<Channel> = channels
+        .iter()
+        .cloned()
+        .filter(|x| {
+            if is_number && number_id >= 0 {
+                x.alias_id.eq(&number_id)
+            } else {
+                x.alias_name.eq(&query.query)
+            }
+        })
+        .collect();
+
+    let channel_ids_str: Vec<String> = channels.iter().map(|x| x.alias_id.to_string()).collect();
+    let channel_ids: Vec<&UserIdRef> = channel_ids_str
+        .iter()
+        .map(|x| UserIdRef::from_str(x.as_str()))
+        .collect();
+
+    let request = GetUsersRequest::ids(channel_ids.as_slice());
+    let channels: Vec<ChannelForSearchHandlebars> = if !channels.is_empty() {
+        hc.req_get(request, &**ut)
+            .await
+            .unwrap()
+            .data
+            .iter()
+            .map(|x| ChannelForSearchHandlebars {
+                username: x.login.clone().take(),
+                image_url: x
+                    .profile_image_url
+                    .clone()
+                    .unwrap_or("/static/pfp.png".into()),
+                id: x.id.clone().take(),
+            })
+            .collect()
+    } else {
+        Vec::new()
+    };
+
+    let results_count = channels.len();
+
+    let contact_name: String = var("WEB_CONTACT_NAME").unwrap_or("someone".into());
+    let contact_url: String = var("WEB_CONTACT_URL").unwrap_or("#".into());
+    let bot_title =
+        var("WEB_BOT_TITLE").unwrap_or(var("BOT_USERNAME").unwrap_or("Some Twitch Bot".into()));
+
+    let data = json!({
+        "query": query.query,
+        "results_found": results_count != 0,
+        "results_count": results_count,
+        "channels_found": channels.len() != 0,
+        "channels_count": channels.len(),
+        "channels": channels,
+        "contact_name": contact_name,
+        "contact_url": contact_url,
+        "bot_title": bot_title,
+    });
+    let body = hb.render("search.html", &data).unwrap();
+
+    HttpResponse::Ok()
+        .content_type(mime_guess::mime::TEXT_HTML)
+        .body(body)
 }
