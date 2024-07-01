@@ -52,4 +52,35 @@
       </div>
     </div>
   </body>
+  <script>
+    function open_tab(e, name) {
+      let active =
+        " bg-gradient-to-t from-green-300 hover:from-green-200 to-green-200 hover:to-green-300";
+      let inactive = " bg-gray-200 hover:bg-gray-300";
+
+      // hide all tab contents
+      let tabContents = document.getElementsByClassName("tabContent");
+      for (let i = 0; i < tabContents.length; i++) {
+        tabContents[i].style.display = "none";
+      }
+
+      // remove active tabs
+      let tabLinks = document.getElementsByClassName("tabLink");
+
+      for (let i = 0; i < tabLinks.length; i++) {
+        let str = tabLinks[i].className;
+
+        if (!str.includes(inactive) && !str.includes(active)) {
+          tabLinks[i].className += inactive;
+        }
+
+        tabLinks[i].className = tabLinks[i].className.replace(active, inactive);
+      }
+
+      // show the current tab
+      document.getElementById(name).style.display = "block";
+      e.currentTarget.className += active;
+    }
+    document.getElementById("defaultTab").click();
+  </script>
 </html>
