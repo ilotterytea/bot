@@ -1,13 +1,17 @@
 <!doctype html>
 <html>
   <head>
+    <title>{{ username }} - {{ bot_title }}</title>
     <link rel="stylesheet" type="text/css" href="/static/style.css" />
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
     <meta charset="utf-8" />
   </head>
   <body>
     <div class="min-h-screen w-full flex items-center flex-col">
-      <div class="lg:w-1/2 w-full flex items-center flex-col">
-        <div class="w-full flex flex-col space-y-4">
+      <div class="lg:w-1/2 w-full flex-grow flex items-center flex-col">
+        <div class="w-full flex-grow flex flex-col space-y-4">
+          {{> header.html }}
+
           <!-- Profile info -->
           <div class="w-full bg-gray-200 flex flex-row p-4">
             <img src="{{ pfp }}" width="128" height="128" alt="no image" />
@@ -116,6 +120,8 @@
           </div>
         </div>
       </div>
+
+      {{> footer.html }}
     </div>
   </body>
   <script>

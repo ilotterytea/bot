@@ -256,13 +256,20 @@ pub async fn get_channel(
         })
         .collect();
 
+    let contact_name: String = var("WEB_CONTACT_NAME").unwrap_or("someone".into());
+    let contact_url: String = var("WEB_CONTACT_URL").unwrap_or("#".into());
+    let bot_title =
+        var("WEB_BOT_TITLE").unwrap_or(var("BOT_USERNAME").unwrap_or("Some Twitch Bot".into()));
     let data = json!({
         "pfp": channel.profile_image_url,
         "username": username,
         "description": channel.description,
         "events": events_hb,
         "commands": commands,
-        "timers": timers
+        "timers": timers,
+        "contact_name": contact_name,
+        "contact_url": contact_url,
+        "bot_title": bot_title,
     });
 
     let page = hb.render("channel.html", &data).unwrap();
