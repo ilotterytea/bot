@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="/static/style.css">
-    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="/static/style.css" />
+    <meta charset="utf-8" />
   </head>
   <body>
     <div class="min-h-screen w-full flex items-center flex-col">
@@ -10,7 +10,7 @@
         <div class="w-full flex flex-col space-y-4">
           <!-- Profile info -->
           <div class="w-full bg-gray-200 flex flex-row p-4">
-            <img src="{{ pfp }}" width="128" height="128" alt="no image">
+            <img src="{{ pfp }}" width="128" height="128" alt="no image" />
             <div class="ml-4 flex-grow flex flex-col">
               <h1 class="text-4xl font-semibold">About {{ username }}</h1>
               <p>{{ description }}</p>
@@ -20,14 +20,28 @@
           <!-- Content -->
           <div>
             <!-- Tabs -->
-            <div class="w-full flex flex-row space-x-2">
-              <button class="bg-gray-200 hover:bg-gray-300 border border-gray-300 hover:border-gray-400 py-1 px-4" onclick="open_tab(event, 'events')">Events</button>
+            <div
+              class="w-full flex flex-row space-x-2 border-b border-gray-300"
+            >
+              <button
+                class="tabLink border border-gray-300 hover:border-gray-400 py-1 px-4"
+                onclick="open_tab(event, 'events')"
+                id="defaultTab"
+              >
+                Events
+              </button>
+              <button
+                class="tabLink border border-gray-300 hover:border-gray-400 py-1 px-4"
+                onclick="open_tab(event, 'commands')"
+              >
+                Custom commands
+              </button>
             </div>
 
             <!-- Events -->
-            <div id="events" class="w-full">
-              <table class="w-full border border-gray-300">
-                <tr class="text-left border border-gray-300">
+            <div id="events" class="tabContent w-full">
+              <table class="w-full">
+                <tr class="text-left border-b border-gray-300">
                   <th>Name</th>
                   <th>Type</th>
                   <th>Message</th>
@@ -35,7 +49,7 @@
                   <th>Subscribers</th>
                 </tr>
                 {{ #each events }}
-                <tr>
+                <tr class="border-b border-gray-300">
                   <td>{{ name }}</td>
                   <td>{{ event_type }}</td>
                   <td>{{ message }}</td>
@@ -45,9 +59,29 @@
                 {{ /each }}
               </table>
             </div>
+
+            <!-- Custom commands -->
+            <div id="commands" class="tabContent w-full">
+              <table class="w-full">
+                <tr class="text-left border-b border-gray-300">
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Messages</th>
+                </tr>
+                {{ #each commands }}
+                <tr class="border-b border-gray-300">
+                  <td>{{ @index }}</td>
+                  <td>{{ name }}</td>
+                  <td>
+                    {{ #each messages }}
+                    <p>{{ this }}</p>
+                    {{ /each }}
+                  </td>
+                </tr>
+                {{ /each }}
+              </table>
+            </div>
           </div>
-
-
         </div>
       </div>
     </div>

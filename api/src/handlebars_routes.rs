@@ -16,7 +16,10 @@ use twitch_api::{
 use common::{
     establish_connection,
     models::Event,
-    schema::{channels::dsl as ch, event_subscriptions::dsl as evs, events::dsl as ev},
+    schema::{
+        channels::dsl as ch, custom_commands::dsl as cc, event_subscriptions::dsl as evs,
+        events::dsl as ev,
+    },
 };
 
 use crate::CommandDocInstance;
@@ -108,6 +111,12 @@ struct EventsForChannelHandlebars {
     pub message: String,
     pub flags: String,
     pub subscribers: usize,
+}
+
+#[derive(Serialize)]
+struct CustomCommandForChannelHandlebars {
+    pub name: String,
+    pub messages: Vec<String>,
 }
 
 pub async fn get_channel(
@@ -207,11 +216,26 @@ pub async fn get_channel(
         })
     }
 
+    let commands: Vec<(String, Vec<String>)> = cc::custom_commands
+        .filter(cc::channel_id.eq(&id))
+        .select((cc::name, cc::messages))
+        .get_results::<(String, Vec<String>)>(conn)
+        .unwrap_or(Vec::new());
+
+    let commands: Vec<CustomCommandForChannelHandlebars> = commands
+        .iter()
+        .map(|(x, y)| CustomCommandForChannelHandlebars {
+            name: x.clone(),
+            messages: y.clone(),
+        })
+        .collect();
+
     let data = json!({
         "pfp": channel.profile_image_url,
         "username": username,
         "description": channel.description,
-        "events": events_hb
+        "events": events_hb,
+        "commands": commands
     });
 
     let page = hb.render("channel.html", &data).unwrap();
