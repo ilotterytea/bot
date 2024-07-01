@@ -1,5 +1,6 @@
 use actix_web::{web, HttpResponse, Responder};
 use actix_web_lab::respond::Html;
+use chrono::Utc;
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use handlebars::Handlebars;
 use include_dir::{include_dir, Dir};
@@ -14,11 +15,11 @@ use twitch_api::{
 };
 
 use common::{
-    establish_connection,
-    models::Event,
+    establish_connection, format_timestamp,
+    models::{Event, Timer},
     schema::{
         channels::dsl as ch, custom_commands::dsl as cc, event_subscriptions::dsl as evs,
-        events::dsl as ev,
+        events::dsl as ev, timers::dsl as ti,
     },
 };
 
@@ -117,6 +118,14 @@ struct EventsForChannelHandlebars {
 struct CustomCommandForChannelHandlebars {
     pub name: String,
     pub messages: Vec<String>,
+}
+
+#[derive(Serialize)]
+struct TimerForChannelHandlebars {
+    pub name: String,
+    pub messages: Vec<String>,
+    pub last_executed: String,
+    pub interval: String,
 }
 
 pub async fn get_channel(
@@ -230,12 +239,30 @@ pub async fn get_channel(
         })
         .collect();
 
+    let timers: Vec<Timer> = ti::timers
+        .filter(ti::channel_id.eq(&id))
+        .get_results::<Timer>(conn)
+        .unwrap_or(Vec::new());
+    let now = Utc::now().naive_utc();
+    let timers: Vec<TimerForChannelHandlebars> = timers
+        .iter()
+        .map(|x| TimerForChannelHandlebars {
+            name: x.name.clone(),
+            messages: x.messages.clone(),
+            last_executed: format_timestamp(
+                (now.timestamp() - x.last_executed_at.timestamp()) as u64,
+            ),
+            interval: format_timestamp(x.interval_sec as u64),
+        })
+        .collect();
+
     let data = json!({
         "pfp": channel.profile_image_url,
         "username": username,
         "description": channel.description,
         "events": events_hb,
-        "commands": commands
+        "commands": commands,
+        "timers": timers
     });
 
     let page = hb.render("channel.html", &data).unwrap();

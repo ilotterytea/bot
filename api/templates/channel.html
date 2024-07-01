@@ -36,6 +36,12 @@
               >
                 Custom commands
               </button>
+              <button
+                class="tabLink border border-gray-300 hover:border-gray-400 py-1 px-4"
+                onclick="open_tab(event, 'timers')"
+              >
+                Timers
+              </button>
             </div>
 
             <!-- Events -->
@@ -77,6 +83,32 @@
                     <p>{{ this }}</p>
                     {{ /each }}
                   </td>
+                </tr>
+                {{ /each }}
+              </table>
+            </div>
+
+            <!-- Timers -->
+            <div id="timers" class="tabContent w-full">
+              <table class="w-full">
+                <tr class="text-left border-b border-gray-300">
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Messages</th>
+                  <th>Interval</th>
+                  <th>Last executed</th>
+                </tr>
+                {{ #each timers }}
+                <tr class="border-b border-gray-300">
+                  <td>{{ @index }}</td>
+                  <td>{{ name }}</td>
+                  <td>
+                    {{ #each messages }}
+                    <p>{{ this }}</p>
+                    {{ /each }}
+                  </td>
+                  <td>{{ interval }}</td>
+                  <td>{{ last_executed }} ago</td>
                 </tr>
                 {{ /each }}
               </table>
