@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use common::format_timestamp;
 use eyre::Result;
 use psutil::process::processes;
 
@@ -11,7 +12,6 @@ use crate::{
     instance_bundle::InstanceBundle,
     localization::LineId,
     shared_variables::{COMPILE_TIMESTAMP, COMPILE_VERSION, START_TIME},
-    utils::format_timestamp,
 };
 
 pub struct PingCommand;
