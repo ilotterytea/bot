@@ -16,7 +16,7 @@ use twitch_api::{
 
 use common::{
     establish_connection, format_timestamp,
-    models::{Event, Timer},
+    models::{Channel, Event, Timer},
     schema::{
         channels::dsl as ch, custom_commands::dsl as cc, event_subscriptions::dsl as evs,
         events::dsl as ev, timers::dsl as ti,
@@ -136,17 +136,16 @@ pub async fn get_channel(
 ) -> HttpResponse {
     let conn = &mut establish_connection();
 
-    let (id, username, tid) = match ch::channels
+    let internal_channel: Channel = match ch::channels
         .filter(ch::alias_name.eq(&*id))
         .or_filter(ch::alias_id.eq((&*id).parse::<i32>().unwrap_or(-1)))
-        .select((ch::id, ch::alias_name, ch::alias_id))
-        .get_result::<(i32, String, i32)>(conn)
+        .get_result::<Channel>(conn)
     {
         Ok(x) => x,
         Err(_) => return HttpResponse::NotFound().body("Wrong id or username"),
     };
 
-    let tid = tid.to_string();
+    let tid = internal_channel.alias_id.to_string();
     let request = GetUsersRequest::ids(vec![UserIdRef::from_str(tid.as_str())]);
     let channel = hc.req_get(request, &**ut).await.unwrap().data;
 
@@ -158,7 +157,7 @@ pub async fn get_channel(
 
     let mut events_hb = Vec::<EventsForChannelHandlebars>::new();
     let events: Vec<Event> = ev::events
-        .filter(ev::channel_id.eq(&id))
+        .filter(ev::channel_id.eq(&internal_channel.id))
         .get_results::<Event>(conn)
         .unwrap_or(Vec::new());
 
@@ -226,7 +225,7 @@ pub async fn get_channel(
     }
 
     let commands: Vec<(String, Vec<String>)> = cc::custom_commands
-        .filter(cc::channel_id.eq(&id))
+        .filter(cc::channel_id.eq(&internal_channel.id))
         .select((cc::name, cc::messages))
         .get_results::<(String, Vec<String>)>(conn)
         .unwrap_or(Vec::new());
@@ -240,7 +239,7 @@ pub async fn get_channel(
         .collect();
 
     let timers: Vec<Timer> = ti::timers
-        .filter(ti::channel_id.eq(&id))
+        .filter(ti::channel_id.eq(&internal_channel.id))
         .get_results::<Timer>(conn)
         .unwrap_or(Vec::new());
     let now = Utc::now().naive_utc();
@@ -262,7 +261,7 @@ pub async fn get_channel(
         var("WEB_BOT_TITLE").unwrap_or(var("BOT_USERNAME").unwrap_or("Some Twitch Bot".into()));
     let data = json!({
         "pfp": channel.profile_image_url,
-        "username": username,
+        "username": internal_channel.alias_name,
         "description": channel.description,
         "events": events_hb,
         "commands": commands,
@@ -270,6 +269,8 @@ pub async fn get_channel(
         "contact_name": contact_name,
         "contact_url": contact_url,
         "bot_title": bot_title,
+        "joined": format_timestamp((Utc::now().naive_utc().timestamp() - internal_channel.joined_at.timestamp()) as u64),
+        "opted_out": internal_channel.opt_outed_at.is_some()
     });
 
     let page = hb.render("channel.html", &data).unwrap();

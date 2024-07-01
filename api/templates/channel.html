@@ -13,11 +13,32 @@
           {{> header.html }}
 
           <!-- Profile info -->
-          <div class="w-full bg-gray-200 flex flex-row p-4">
-            <img src="{{ pfp }}" width="128" height="128" alt="no image" />
+          <div
+            class="w-full bg-gray-200 border border-gray-300 flex flex-row p-4"
+          >
+            <img
+              src="{{ pfp }}"
+              width="128"
+              height="128"
+              alt="no image"
+              class="border border-gray-500"
+            />
             <div class="ml-4 flex-grow flex flex-col">
               <h1 class="text-4xl font-semibold">About {{ username }}</h1>
               <p>{{ description }}</p>
+            </div>
+            <div class="flex flex-col space-y-2">
+              <p>
+                <i class="fa-solid fa-star text-green-800"></i>
+                Joined {{ joined }} ago
+              </p>
+              {{ #if opted_out }}
+              <p
+                class="w-full bg-red-300 border border-red-500 flex justify-around items-center"
+              >
+                <i class="fa-solid fa-xmark"></i> Opted out!
+              </p>
+              {{ /if }}
             </div>
           </div>
 
