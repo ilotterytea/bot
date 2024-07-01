@@ -7,7 +7,7 @@ The `!holiday` command allows you to get information about today's and upcoming 
 ## Syntax
 
 `!holiday <date>`
-+ `<date>` (Optional) - The date on which you want to get a random holiday. \
++ `<date>` (Optional) - The date on which you want to get a random holiday.
 If it's not specified, today's date will be used.
 
 ## Usage
@@ -29,6 +29,6 @@ If it's not specified, today's date will be used.
 
 ## Error handling
 
-+ [Error 3: Incorrect argument](/help/errors#3)
-+ [Error 20: External API error](/help/errors#20)
-+ [Error 127: Something went wrong](/help/errors#127)
++ [Error 3: Incorrect argument](/wiki/error-codes#3)
++ [Error 20: External API error](/wiki/error-codes#20)
++ [Error 127: Something went wrong](/wiki/error-codes#127)

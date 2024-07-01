@@ -27,5 +27,5 @@ To use the command, you must specify the name of the emote after the command.
 
 ## Error handling
 
-+ [Error 0: Not enough arguments](/help/errors#0)
-+ [Error 20: External API error](/help/errors#20)
++ [Error 0: Not enough arguments](/wiki/error-codes#0)
++ [Error 20: External API error](/wiki/error-codes#20)

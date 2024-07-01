@@ -11,15 +11,19 @@ Just use the commands to have a fun and interactive chat experience!
 
 ## How to get started
 
-+ **Install the bot**\
+### **Install the bot**
+
 You can use an instance already running (like [@teabot](https://twitch.tv/teabot))
 and install it in your chat by sending the command [!join](/wiki/join) in its chat,
 or you can self-host it using [these instructions](https://git.ilotterytea.kz/tea/bot/src/branch/master/README.md).
 
-+ **Basic Commands**\
+### **Basic Commands**
+
 Learn the list of basic commands to quickly start using the bot.
 For example, `!help` for a list of available commands,
 or you can look at the articles under the "Commands" heading on the side bar.
-+ **Personalization**\
+
+### **Personalization**
+
 Customize the bot to suit your style.
 [Add your unique commands](/wiki/channel/custom-commands) and [customize features](/wiki/channel/settings) as you see fit.

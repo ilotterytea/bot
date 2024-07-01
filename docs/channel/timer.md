@@ -80,10 +80,8 @@ The `!timer` command gives broadcasters the ability to create timers that sends 
 + `The interval for "sub_ads" (ID ...) timer has been changed!`
 
 ### Toggling the timer
-+ If the timer was enabled \
-`The "sub_ads" (ID ...) timer has been disabled!` 
-+ If the timer was disabled \
-`The "sub_ads" (ID ...) timer has been enabled!`
++ If the timer was enabled: `The "sub_ads" (ID ...) timer has been disabled!` 
++ If the timer was disabled: `The "sub_ads" (ID ...) timer has been enabled!`
 
 ### Checking the information about the timer
 + `✅ sub_ads (ID ...) | Interval: 120s | Message: Buy a Twitch sub and be like all of us`
@@ -93,8 +91,8 @@ The `!timer` command gives broadcasters the ability to create timers that sends 
 
 ## Error handling
 
-+ [Error 0: Not enough arguments](/help/errors#0)
-+ [Error 2: Incorrect argument](/help/errors#2)
-+ [Error 11: Namesake creation](/help/errors#11)
-+ [Error 12: Not found](/help/errors#12)
-+ [Error 127: Something went wrong](/help/errors#127)
++ [Error 0: Not enough arguments](/wiki/error-codes#0)
++ [Error 2: Incorrect argument](/wiki/error-codes#2)
++ [Error 11: Namesake creation](/wiki/error-codes#11)
++ [Error 12: Not found](/wiki/error-codes#12)
++ [Error 127: Something went wrong](/wiki/error-codes#127)

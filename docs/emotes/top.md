@@ -8,11 +8,11 @@ This is a useful tool for those who want to keep track of the popularity and fre
 ## Syntax
 
 `!etop <desc/asc> <channel name> <amount>`
-+ `<desc/asc>` (optional) - Parameter to control sorting of emotes. \
++ `<desc/asc>` (optional) - Parameter to control sorting of emotes.
 The default setting is **desc** *(descending)*.
-+ `<channel name>` (optional) - Parameter to specify a specific channel. \
++ `<channel name>` (optional) - Parameter to specify a specific channel.
 By default, the name of the channel from which the command was sent is used.
-+ `<amount>` (optional) - Parameter to set the number of emotes in the result list. \
++ `<amount>` (optional) - Parameter to set the number of emotes in the result list.
 The default setting is 10, the maximum value is 50.
 
 ## Usage
@@ -35,6 +35,6 @@ The default setting is 10, the maximum value is 50.
 
 ## Error handling
 
-+ [Error 12: Not found](/help/errors#12)
-+ [Error 20: External API error](/help/errors#20)
-+ [Error 127: Something went wrong](/help/errors#127)
++ [Error 12: Not found](/wiki/error-codes#12)
++ [Error 20: External API error](/wiki/error-codes#20)
++ [Error 127: Something went wrong](/wiki/error-codes#127)

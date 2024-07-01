@@ -14,5 +14,5 @@ After collecting the list of chatters, the bot returns a link to the paste from
 + `Chatter list: https://paste.ilotterytea.kz/igymn`
 
 ## Error handling
-+ [Error 3: Insufficient rights](/help/errors#3)
-+ [Error 20: External API error](/help/errors#20)
++ [Error 3: Insufficient rights](/wiki/error-codes#3)
++ [Error 20: External API error](/wiki/error-codes#20)

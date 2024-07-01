@@ -31,22 +31,16 @@ The `!notify` command gives users the ability to manage event subscriptions.
 ## Responses
 
 ### Subscribing to the event
-+ If you're not a subscriber \
-`You have successfully subscribed to the "forsen:live" event!`
-+ If you're already a subscriber \
-`You're already a subscriber to the "forsen:live" event.`
++ If you're not a subscriber: `You have successfully subscribed to the "forsen:live" event!`
++ If you're already a subscriber: `You're already a subscriber to the "forsen:live" event.`
 
 ### Unsubscribing from the event
-+ If you're not a subscriber \
-`You're not subscribed to the "forsen:live" event.`
-+ If you're a subscriber \
-`You have successfully unsubscribed from the "forsen:live" event!`
++ If you're not a subscriber: `You're not subscribed to the "forsen:live" event.`
++ If you're a subscriber: `You have successfully unsubscribed from the "forsen:live" event!`
 
 ### Getting event subscriptions
-+ If you're subscribed to at least one event \
-`Your subscriptions: forsen:live, xqc:offline, nymn:title, ...`
-+ Otherwise, \
-`You're not subscribed to any events.`
++ If you're subscribed to at least one event: `Your subscriptions: forsen:live, xqc:offline, nymn:title, ...`
++ Otherwise: `You're not subscribed to any events.`
 
 ## Important notes
 
@@ -55,7 +49,7 @@ the event type will automatically be considered ***custom***.
 
 ## Error handling
 
-+ [Error 0: Not enough arguments](/help/errors#0)
-+ [Error 2: Incorrect argument](/help/errors#2)
-+ [Error 12: Not found](/help/errors#12)
-+ [Error 127: Something went wrong](/help/errors#127)
++ [Error 0: Not enough arguments](/wiki/error-codes#0)
++ [Error 2: Incorrect argument](/wiki/error-codes#2)
++ [Error 12: Not found](/wiki/error-codes#12)
++ [Error 127: Something went wrong](/wiki/error-codes#127)

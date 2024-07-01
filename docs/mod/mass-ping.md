@@ -21,4 +21,4 @@ This feature allows you to quickly and efficiently draw the attention of a large
 + `@chatter1, @chatter2, @chatter3, ...,`
 
 ## Error handling
-+ [Error 3: Insufficient rights](/help/errors#3)
++ [Error 3: Insufficient rights](/wiki/error-codes#3)

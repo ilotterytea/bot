@@ -11,8 +11,7 @@ The `!set` command gives broadcasters ability to customize the bot as they need 
 
 ### Set the bot localization for the chat
 `!set locale <lang>`
-+ `<lang>` - Language name in English and lowercase. \
-Available languages at the moment: **english**, **russian**.
++ `<lang>` - Language name in English and lowercase. Available languages at the moment: **english**, **russian**.
 
 ### Set the bot prefix
 `!set prefix <characters>`
@@ -57,7 +56,7 @@ Available languages at the moment: **english**, **russian**.
 
 ## Error handling
 
-+ [Error 0: Not enough arguments](/help/errors#0)
-+ [Error 2: Incorrect argument](/help/errors#2)
-+ [Error 12: Not found](/help/error#12)
-+ [Error 127: Something went wrong](/help/error#127)
++ [Error 0: Not enough arguments](/wiki/error-codes#0)
++ [Error 2: Incorrect argument](/wiki/error-codes#2)
++ [Error 12: Not found](/wiki/error-codes#12)
++ [Error 127: Something went wrong](/wiki/error-codes#127)

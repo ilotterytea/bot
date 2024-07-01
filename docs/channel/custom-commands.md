@@ -8,8 +8,8 @@ The `!cmd` command gives broadcasters the ability to create their own chat comma
 
 ### Create a new custom command
 `!cmd new <name> <message...>`
-+ `<name>` - The name for new custom command. It should be unique for your chat. \
-A prefix must be specified if you want a prefixed command, e.g. `!sub`, `!server`.
++ `<name>` - The name for new custom command. It should be unique for your chat.
+**A prefix must be specified if you want a prefixed command, e.g. `!sub`, `!server`.**
 + `<message>` - Text that will be sent when the custom command is invoked.
 
 ### Delete the custom command
@@ -61,18 +61,15 @@ A prefix must be specified if you want a prefixed command, e.g. `!sub`, `!server
 + `The message for "!sub" (ID ...) custom command has been changed!`
 
 ### Toggling the custom command
-+ If the command was enabled \
-`The "!sub" (ID ...) custom command has been disabled!`
-
-+ If the command was disabled \
-`The "!sub" (ID ...) custom command has been enabled!`
++ If the command was enabled: `The "!sub" (ID ...) custom command has been disabled!`
++ If the command was disabled: `The "!sub" (ID ...) custom command has been enabled!`
 
 ### Checking the information about the custom command
 + `✅ !sub (ID ...) | Message: Buy a Prime sub at this link and become like the rest of us 😎`
 
 ## Error handling
 
-+ [Error 0: Not enough arguments](/help/errors#0)
-+ [Error 11: Namesake creation](/help/errors#11)
-+ [Error 12: Not found](/help/errors#12)
-+ [Error 127: Something went wrong](/help/errors#127)
++ [Error 0: Not enough arguments](/wiki/error-codes#0)
++ [Error 11: Namesake creation](/wiki/error-codes#11)
++ [Error 12: Not found](/wiki/error-codes#12)
++ [Error 127: Something went wrong](/wiki/error-codes#127)

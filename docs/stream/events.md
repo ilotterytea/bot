@@ -22,7 +22,10 @@ The `!event` command gives broadcasters the ability to manage events for streams
 + `<type>` - [Event type](#event-types).
 + `<message>` - The message that will be sent with the event.
 
-> Events with types *category* and *title* use *\{0\}* and *\{1\}* placeholders for old and new values respectively. This means that the bot can show changes if you set them (e.g. *forsen changed the title from **\{0\}** to **\{1\}*** will replace with *forsen changed the title from **Just Chatting** to **PUBG***).
+> Events with types *category* and *title* use *{0}* and *{1}* placeholders for old and new values respectively.
+This means that the bot can show changes if you set them
+(e.g. forsen changed the title from **{0}** to **{1}** will replace with
+forsen changed the title from **Just Chatting** to **PUBG**).
 
 ### Delete the event
 `!event off <name>:<type>`
@@ -81,9 +84,9 @@ the event type will automatically be considered ***custom***.
 
 ## Error handling
 
-+ [Error 0: Not enough arguments](/help/errors#0)
-+ [Error 2: Incorrect argument](/help/errors#2)
-+ [Error 3: Insufficient rights](/help/errors#3)
-+ [Error 11: Namesake creation](/help/errors#11)
-+ [Error 12: Not found](/help/errors#12)
-+ [Error 127: Something went wrong](/help/errors#127)
++ [Error 0: Not enough arguments](/wiki/error-codes#0)
++ [Error 2: Incorrect argument](/wiki/error-codes#2)
++ [Error 3: Insufficient rights](/wiki/error-codes#3)
++ [Error 11: Namesake creation](/wiki/error-codes#11)
++ [Error 12: Not found](/wiki/error-codes#12)
++ [Error 127: Something went wrong](/wiki/error-codes#127)

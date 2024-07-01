@@ -9,7 +9,7 @@ This is a useful tool for analyzing the similarity of emotes in different chat r
 
 `!esim <origin channel> <target channel>`
 + `<target channel>` - parameter representing the target channel to be compared.
-+ `<origin channel>` (optional) - parameter representing the origin channel to be compared. \
++ `<origin channel>` (optional) - parameter representing the origin channel to be compared.
 If not specified, the channel from which the command was sent is used.
 
 ## Usage
@@ -23,5 +23,5 @@ If not specified, the channel from which the command was sent is used.
 
 ## Error handling
 
-+ [Error 0: Not enough arguments](/help/errors#0)
-+ [Error 12: Not found](/help/errors#12)
++ [Error 0: Not enough arguments](/wiki/error-codes#0)
++ [Error 12: Not found](/wiki/error-codes#12)
