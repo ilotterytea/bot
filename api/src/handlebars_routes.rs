@@ -91,9 +91,13 @@ async fn get_wiki_page(
 
         let body = hb.render("wiki_page.html", &data).unwrap();
 
-        HttpResponse::Ok().body(body)
+        HttpResponse::Ok()
+            .content_type(mime_guess::mime::TEXT_HTML)
+            .body(body)
     } else {
-        HttpResponse::NotFound().body("Not found")
+        HttpResponse::NotFound()
+            .content_type(mime_guess::mime::TEXT_HTML)
+            .body("Not found")
     }
 }
 
