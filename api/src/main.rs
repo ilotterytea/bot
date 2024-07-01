@@ -73,6 +73,7 @@ async fn main() -> Result<()> {
             .service(web::resource("/wiki/{name:.*}").get(wiki_page))
             .service(web::resource("/channel/{name}").get(crate::handlebars_routes::get_channel))
             .service(web::resource("/search").get(crate::handlebars_routes::search))
+            .service(web::resource("/catalog").get(crate::handlebars_routes::channel_catalog))
             .service(
                 web::scope("/api/v1")
                     .service(
