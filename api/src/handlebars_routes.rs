@@ -1,6 +1,6 @@
 use actix_web::{web, HttpResponse, Responder};
 use actix_web_lab::respond::Html;
-use chrono::Utc;
+use chrono::{NaiveDateTime, Utc};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use handlebars::Handlebars;
 use include_dir::{include_dir, Dir};
@@ -377,6 +377,7 @@ struct ChannelForChannelCatalogHandlebars {
     pub id: String,
     pub username: String,
     pub image_url: String,
+    pub opted_out: bool,
 }
 
 pub async fn channel_catalog(
@@ -385,13 +386,12 @@ pub async fn channel_catalog(
     ut: web::Data<UserToken>,
 ) -> HttpResponse {
     let conn = &mut establish_connection();
-    let channels: Vec<i32> = ch::channels
-        .filter(ch::opt_outed_at.is_null())
-        .select(ch::alias_id)
-        .get_results::<i32>(conn)
+    let channels: Vec<(i32, Option<NaiveDateTime>)> = ch::channels
+        .select((ch::alias_id, ch::opt_outed_at))
+        .get_results::<(i32, Option<NaiveDateTime>)>(conn)
         .unwrap_or(Vec::new());
 
-    let channel_ids_str: Vec<String> = channels.iter().map(|x| x.to_string()).collect();
+    let channel_ids_str: Vec<String> = channels.iter().map(|(x, _)| x.to_string()).collect();
     let channel_ids: Vec<&UserIdRef> = channel_ids_str
         .iter()
         .map(|x| UserIdRef::from_str(x.as_str()))
@@ -404,18 +404,24 @@ pub async fn channel_catalog(
             .unwrap()
             .data
             .iter()
-            .map(|x| ChannelForChannelCatalogHandlebars {
-                username: x.login.clone().take(),
-                image_url: x
-                    .profile_image_url
-                    .clone()
-                    .unwrap_or("/static/pfp.png".into()),
-                id: x.id.clone().take(),
+            .map(|x| {
+                let id = x.id.clone().take().parse::<i32>().unwrap();
+                ChannelForChannelCatalogHandlebars {
+                    username: x.login.clone().take(),
+                    image_url: x
+                        .profile_image_url
+                        .clone()
+                        .unwrap_or("/static/pfp.png".into()),
+                    id: x.id.clone().take(),
+                    opted_out: channels.iter().any(|(y, z)| y.eq(&id) && z.is_some()),
+                }
             })
             .collect()
     } else {
         Vec::new()
     };
+
+    channels.sort_by_key(|x| x.opted_out);
 
     if let Ok(name) = var("BOT_USERNAME") {
         channels = channels
@@ -431,7 +437,7 @@ pub async fn channel_catalog(
         var("WEB_BOT_TITLE").unwrap_or(var("BOT_USERNAME").unwrap_or("Some Twitch Bot".into()));
 
     let data = json!({
-        "joined_channels_count": channels.len(),
+        "joined_channels_count": channels.iter().filter(|x| !x.opted_out).collect::<Vec<&ChannelForChannelCatalogHandlebars>>().len(),
         "channels": channels,
         "contact_name": contact_name,
         "contact_url": contact_url,
