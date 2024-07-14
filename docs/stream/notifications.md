@@ -1,4 +1,4 @@
-# Stream notifications
+# Notifications
 
 The `!notify` command gives users the ability to manage event subscriptions.
 

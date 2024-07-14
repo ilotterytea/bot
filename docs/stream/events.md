@@ -1,14 +1,20 @@
-# Stream events
+# Events
 
 > This command is for broadcaster only
 
-The `!event` command gives broadcasters the ability to manage events for streams.
+The `!event` command gives broadcasters the ability to manage events for streams and more.
+
+> Events with types *category*, *message* and *title* use placeholders ({0}, {1}...) for values.
+This means that the bot can show changes if you set them
+(e.g. forsen changed the title from **{0}** to **{1}** will replace with
+forsen changed the title from **Just Chatting** to **PUBG**).
 
 ## Event types
 + live
 + offline
-+ title
-+ category
++ title `({0} - previous title, {1} - new title)`
++ category `({0} - previous game, {1} - new game)`
++ message `({0} - sender name, {1} - channel name, {2} - message)`
 + custom
 
 ## Event flags
@@ -21,11 +27,6 @@ The `!event` command gives broadcasters the ability to manage events for streams
 + `<name>` - Twitch username or event name *(custom type only)*.
 + `<type>` - [Event type](#event-types).
 + `<message>` - The message that will be sent with the event.
-
-> Events with types *category* and *title* use *{0}* and *{1}* placeholders for old and new values respectively.
-This means that the bot can show changes if you set them
-(e.g. forsen changed the title from **{0}** to **{1}** will replace with
-forsen changed the title from **Just Chatting** to **PUBG**).
 
 ### Delete the event
 `!event off <name>:<type>`

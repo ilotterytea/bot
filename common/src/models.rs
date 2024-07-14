@@ -166,6 +166,7 @@ pub enum EventType {
     Offline,
     Title,
     Category,
+    Message,
     Custom,
 }
 
@@ -177,6 +178,7 @@ impl FromStr for EventType {
             "offline" => Ok(Self::Offline),
             "title" => Ok(Self::Title),
             "category" => Ok(Self::Category),
+            "message" => Ok(Self::Message),
             _ => Ok(Self::Custom),
         }
     }
@@ -189,6 +191,7 @@ impl ToString for EventType {
             Self::Offline => "offline",
             Self::Title => "title",
             Self::Category => "category",
+            Self::Message => "message",
             Self::Custom => "custom",
         };
 

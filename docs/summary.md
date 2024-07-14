@@ -10,10 +10,10 @@
 + [Timers](/wiki/channel/timer)
 + [Settings](/wiki/channel/settings)
 
-## Stream features
+## Events and notifications
 
-+ [Stream events](/wiki/stream/events)
-+ [Stream notifications](/wiki/stream/notifications)
++ [Events](/wiki/stream/events)
++ [Notifications](/wiki/stream/notifications)
 
 ## Emote management
 

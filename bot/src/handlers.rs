@@ -3,7 +3,7 @@ use std::{collections::HashSet, sync::Arc};
 use chrono::Utc;
 use diesel::{insert_into, update, BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 use log::info;
-use twitch_api::{types::UserId, helix::chat::GetChattersRequest};
+use twitch_api::{helix::chat::GetChattersRequest, types::UserId};
 use twitch_irc::message::{NoticeMessage, PrivmsgMessage};
 
 use crate::{
@@ -16,8 +16,7 @@ use common::{
     establish_connection, models::{
         Channel, CustomCommand, Event, EventFlag, EventSubscription, EventType, NewAction, Timer, User
     }, schema::{
-        channels::dsl as ch, custom_commands::dsl as cc,
-        events::dsl as ev, timers::dsl as ti, users::dsl as us, actions::dsl as ac
+        actions::dsl as ac, channels::dsl as ch, custom_commands::dsl as cc, events::dsl as ev, timers::dsl as ti, users::dsl as us
     }
 };
 
@@ -27,6 +26,7 @@ pub async fn handle_chat_message(
     message: PrivmsgMessage,
 ) {
     let conn = &mut establish_connection();
+    handle_stalk_message_events(conn, instance_bundle.clone(), message.clone()).await;
 
     if let Some(request) = Request::try_from(&message, &command_loader, conn) {
         let response = command_loader
@@ -326,5 +326,111 @@ pub async fn handle_notice_message(instance_bundle: Arc<InstanceBundle>, message
             _ => {}
 
         }
+    }
+}
+
+async fn handle_stalk_message_events(conn: &mut PgConnection, instance_bundle: Arc<InstanceBundle>, message: PrivmsgMessage) {
+    let id = message.sender.id.parse::<i32>().unwrap();
+    let events: Vec<Event> = ev::events.filter(ev::target_alias_id.eq(&id))
+        .filter(ev::event_type.eq(&EventType::Message))
+        .get_results::<Event>(conn)
+        .unwrap_or(Vec::new());
+
+    for event in events {
+        tokio::spawn({
+            let message = message.clone();
+            let instance_bundle = instance_bundle.clone();
+            let channel = match ch::channels.find(event.channel_id).first::<Channel>(conn) {
+                Ok(v) => v,
+                Err(e) => {
+                    log::error!("Failed to get channel for event ID {}: {}", event.id, e);
+                    return;
+                }
+            };
+
+            let subs = match EventSubscription::belonging_to(&event).load::<EventSubscription>(conn)
+            {
+                Ok(v) => v,
+                Err(e) => {
+                    log::error!("Failed to get subscriptions for event ID {}: {}", event.id, e);
+                    return;
+                }
+            };
+
+            let users = match us::users.load::<User>(conn) {
+                Ok(v) => v,
+                Err(e) => {
+                    log::error!("Failed to get users for event ID {}: {}", event.id, e);
+                    return;
+                }
+            };
+
+            let users = users
+                .iter()
+                .filter(|x| subs.iter().any(|y| y.user_id == x.id))
+                .map(|x| format!("@{}", x.alias_name))
+                .collect::<Vec<String>>();
+
+            let mut subs: HashSet<String> = HashSet::new();
+
+            subs.extend(users);
+
+            async move {
+                if event.flags.contains(&EventFlag::Massping) {
+                    let broadcaster_id = channel.alias_id.to_string();
+                    let moderator_id = instance_bundle.twitch_api_token.user_id.clone().take();
+
+                    let chatters = match instance_bundle.twitch_api_client.req_get(GetChattersRequest::new(broadcaster_id.as_str(), moderator_id.as_str()), &*instance_bundle.twitch_api_token).await {
+                        Ok(v) => v,
+                        Err(e) => {
+                            log::error!("Failed to get chatters for event ID {}: {}", event.id, e);
+                            return;
+                        }
+                    };
+
+                    let chatters = chatters.data.iter().map(|x| format!("@{}", x.user_login)).collect::<HashSet<String>>();
+
+                    subs.extend(chatters);
+                }
+
+                let placeholders = instance_bundle.localizator.parse_placeholders(&event.message);
+                let line = instance_bundle.localizator.replace_placeholders(event.message, placeholders, vec![
+                    message.sender.login.clone(),
+                    message.channel_login.clone(),
+                    message.message_text.clone()
+                ], None);
+
+                if subs.is_empty() {
+                    instance_bundle
+                        .twitch_irc_client
+                        .say(channel.alias_name.clone(), format!("💬 {}", line))
+                        .await
+                        .expect("Failed to send a message");
+                    return;
+                }
+
+                let formatted_subs = split_and_wrap_lines(
+                    subs.into_iter()
+                        .collect::<Vec<String>>()
+                        .join(", ")
+                        .as_str(),
+                    ", ",
+                    300 - line.len(),
+                );
+
+                for formatted_sub in formatted_subs {
+                    instance_bundle
+                        .twitch_irc_client
+                        .say(
+                            channel.alias_name.clone(),
+                            format!("💬  {} · {}", line, formatted_sub),
+                        )
+                        .await
+                        .expect("Failed to send a message");
+                }
+            }
+        })
+        .await
+        .unwrap();
     }
 }
