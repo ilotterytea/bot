@@ -4,6 +4,10 @@ use async_trait::async_trait;
 use diesel::{insert_into, ExpressionMethods, QueryDsl, RunQueryDsl};
 use log::warn;
 use serde::Serialize;
+use twitch_api::{
+    helix::users::GetUsersRequest,
+    types::{NicknameRef, UserIdRef},
+};
 
 use crate::{
     commands::{
@@ -13,7 +17,6 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    shared_variables::{DEFAULT_LANGUAGE, DEFAULT_PREFIX},
 };
 
 use common::{
@@ -40,20 +43,47 @@ impl Command for JoinCommand {
         instance_bundle: &InstanceBundle,
         request: Request,
     ) -> Result<Response, ResponseError> {
-        if request.message.is_some() {
-            return Ok(Response::Single(
-                instance_bundle.localizator.formatted_text_by_request(
-                    &request,
-                    LineId::JoinOtherchatroom,
-                    Vec::<String>::new(),
+        let superuser_alias_id = env::var("BOT_OWNER_ID");
+
+        let (alias_id, alias_name): (i32, String) = if request.message.is_some()
+            && superuser_alias_id.is_ok()
+            && superuser_alias_id
+                .unwrap()
+                .eq(&request.sender.alias_id.to_string())
+        {
+            let msg = request.message.clone().unwrap();
+
+            let ids: &[&UserIdRef] = &[msg.as_str().into()];
+            let logins: &[&NicknameRef] = &[NicknameRef::from_str(msg.as_str())];
+
+            let req = if msg.parse::<u32>().is_ok() {
+                GetUsersRequest::ids(ids)
+            } else {
+                GetUsersRequest::logins(logins)
+            };
+
+            let users = instance_bundle
+                .twitch_api_client
+                .req_get(req, &*instance_bundle.twitch_api_token)
+                .await
+                .expect("Failed to get users")
+                .data;
+
+            match users.first() {
+                Some(user) => (
+                    user.id.clone().take().parse::<i32>().unwrap(),
+                    user.login.clone().take(),
                 ),
-            ));
-        }
+                None => return Err(ResponseError::NotFound(msg)),
+            }
+        } else {
+            (request.sender.alias_id, request.sender.alias_name.clone())
+        };
 
         let conn = &mut establish_connection();
 
         let channel_query = ch::channels
-            .filter(ch::alias_id.eq(request.sender.alias_id))
+            .filter(ch::alias_id.eq(&alias_id))
             .get_result::<Channel>(conn);
 
         if channel_query.is_ok() {
@@ -68,14 +98,14 @@ impl Command for JoinCommand {
 
         insert_into(ch::channels)
             .values([NewChannel {
-                alias_id: request.sender.alias_id,
-                alias_name: request.sender.alias_name.clone(),
+                alias_id,
+                alias_name: alias_name.clone(),
             }])
             .execute(conn)
             .expect("Failed to insert a new channel");
 
         let new_channel = ch::channels
-            .filter(ch::alias_id.eq(request.sender.alias_id))
+            .filter(ch::alias_id.eq(&alias_id))
             .first::<Channel>(conn)
             .expect("Failed to get users");
 
@@ -90,13 +120,13 @@ impl Command for JoinCommand {
 
         instance_bundle
             .twitch_irc_client
-            .join(request.sender.alias_name.clone())
+            .join(alias_name.clone())
             .expect("Failed to join chat room");
 
         instance_bundle
             .twitch_irc_client
             .say(
-                request.sender.alias_name.clone(),
+                alias_name.clone(),
                 instance_bundle.localizator.formatted_text_by_request(
                     &request,
                     LineId::CommandJoinResponseInChat,
@@ -111,7 +141,7 @@ impl Command for JoinCommand {
 
             let client = reqwest::Client::new();
             let mut req = client.post(url).json(&StatsAPIJoinBody {
-                twitch_id: request.sender.alias_id as u32,
+                twitch_id: alias_id as u32,
             });
 
             if let Ok(credentials) = env::var("STATS_API_PASSWORD") {
@@ -136,10 +166,7 @@ impl Command for JoinCommand {
 
             if let Ok(res) = req.send().await {
                 if res.status() != reqwest::StatusCode::OK {
-                    warn!(
-                        "Failed to channel alias ID {} to join Stats API!",
-                        request.sender.alias_id
-                    );
+                    warn!("Failed to channel alias ID {} to join Stats API!", alias_id);
                 }
             }
         }
