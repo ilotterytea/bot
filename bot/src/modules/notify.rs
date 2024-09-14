@@ -243,7 +243,7 @@ impl Command for NotifyCommand {
             _ => -1,
         };
 
-        if target_id == -1 && event_type != EventType::Custom {
+        if target_id == -1 && event_type != EventType::Custom && event_type != EventType::Github {
             return Err(ResponseError::NotFound(target_name));
         }
 
@@ -253,7 +253,7 @@ impl Command for NotifyCommand {
             .expect("Failed to load events");
 
         let event = events.iter().find(|x| {
-            if x.event_type == EventType::Custom {
+            if x.event_type == EventType::Custom || x.event_type == EventType::Github {
                 x.custom_alias_id.as_ref().unwrap().eq(&target_name)
             } else {
                 x.target_alias_id.as_ref().unwrap().eq(&target_id)
