@@ -3,7 +3,7 @@ members = ["common", "bot", "api"]
 resolver = "2"
 
 [workspace.package]
-version = "1.1.1"
+version = "1.1.2"
 authors = ["ilotterytea <me@ilotterytea.kz>"]
 edition = "2021"
 publish = false
