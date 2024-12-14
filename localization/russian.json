@@ -1,0 +1,52 @@
+{
+  "msg.owner": "Свяжитесь с @%s",
+
+  "argument.subcommand": "Подкоманда",
+  "argument.message": "Сообщение",
+  "argument.interval": "Интервал",
+  "argument.name": "Название",
+  "argument.target": "Цель",
+  "argument.value": "Значение",
+  "argument.amount": "Количество",
+
+  "error.template": "{sender.alias_name}: 🚨 %s",
+  "error.not_enough_arguments": "Недостаточно аргументов (%s)",
+  "error.incorrect_argument": "Некорректный аргумент (%s)",
+  "error.incompatible_name": "Несовместимое имя (%s)",
+  "error.namesake_creation": "Занятое имя (%s)",
+  "error.not_found": "Не найдено (%s)",
+  "error.something_went_wrong": "Что-то пошло не так",
+  "error.external_api_error": "Ошибка стороннего API (%s%s)",
+  "error.insufficient_rights": "Недостаточно прав",
+  "error.illegal_command": "Команда недоступна",
+
+  "ping.response": "{sender.alias_name}: funnywhitecat Понг! %s Время сессии: %s · ОЗУ: %sМБ",
+
+  "event.on": "{sender.alias_name}: Событие \"%s\" успешно создано!",
+  "event.off": "{sender.alias_name}: Событие \"%s\" удалено!",
+  
+  "notify.sub": "{sender.alias_name}: Вы успешно подписались на событие \"%s\"!",
+  "notify.unsub": "{sender.alias_name}: Вы отписались от события \"%s\"!",
+
+  "join.response": "{sender.alias_name}: Успешно зашёл в ваш чат!",
+  "join.response_in_chat": "Привет! Я - %s и я буду обслуживать этот чат. Напишите {default.prefix}help, чтобы узнать о командах!",
+  "join.already_in": "{sender.alias_name}: Уже в вашем чат!",
+  "join.rejoined": "{sender.alias_name}: Перезашёл в ваш чат!",
+  "join.from_other_chat": "{sender.alias_name}: Чтобы бот мог зайти в ваш чат, нужно написать {default.prefix}join непосредственно в чате %s",
+  "join.not_allowed": "{sender.alias_name}: Бот не может заходить в чужие чаты!%s",
+
+  "custom_command.new": "{sender.alias_name}: Новая команда \"%s\" была успешно создана!",
+  "custom_command.delete": "{sender.alias_name}: Команда \"%s\" была удалена!",
+
+  "timer.new": "{sender.alias_name}: Новый таймер \"%s\" был успешно создан!",
+  "timer.delete": "{sender.alias_name}: Таймер \"%s\" был удален!",
+
+  "help.response": "{sender.alias_name}: Справочник по командам бота: %s",
+
+  "chatters.response": "{sender.alias_name}: Список чаттеров: %s",
+  
+  "set.locale": "{sender.alias_name}: Теперь бот говорит по-русски в этом чате!",
+  "set.prefix": "{sender.alias_name}: Префикс бота был установлен как \"%s\"",
+  "set.feature.disabled": "{sender.alias_name}: Функция \"%s\" была выключена в этом чате!",
+  "set.feature.enabled": "{sender.alias_name}: Функция \"%s\" была включена в этом чате!"
+}
