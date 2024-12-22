@@ -93,7 +93,7 @@ namespace bot::services {
     pqxx::result rows = work.exec_params(
         "SELECT channels.alias_name, channel_preferences.locale FROM channels "
         "INNER JOIN channel_preferences "
-        "ON channel_preferences.channel_id = channels.id AND 2 = "
+        "ON channel_preferences.channel_id = channels.id AND 0 = "
         "ANY(channel_preferences.features) AND channels.opted_out_at IS NULL "
         "AND channels.alias_id = $1",
         alias_id);
@@ -158,7 +158,7 @@ namespace bot::services {
 
     pqxx::result rows = work.exec(
         "SELECT channels.alias_id FROM channels INNER JOIN channel_preferences "
-        "ON channel_preferences.channel_id = channels.id AND 2 = "
+        "ON channel_preferences.channel_id = channels.id AND 0 = "
         "ANY(channel_preferences.features) AND channels.opted_out_at IS NULL");
 
     work.commit();

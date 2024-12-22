@@ -47,7 +47,12 @@ namespace bot::schemas {
       std::optional<std::chrono::system_clock::time_point> opted_out_at;
   };
 
-  enum ChannelFeature { MARKOV_RESPONSES, RANDOM_MARKOV_RESPONSES };
+  enum ChannelFeature {
+    NOTIFY_7TV_UPDATES,
+    MARKOV_RESPONSES = 10,
+    RANDOM_MARKOV_RESPONSES
+  };
+
   std::optional<ChannelFeature> string_to_channel_feature(
       const std::string &value);
 
