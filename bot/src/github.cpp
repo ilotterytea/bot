@@ -173,6 +173,18 @@ namespace bot {
             work.exec("SELECT * FROM channels WHERE id = " +
                       std::to_string(event[1].as<int>()))[0]);
 
+        schemas::ChannelPreferences preference(
+            work.exec("SELECT * FROM channel_preferences WHERE channel_id = " +
+                      std::to_string(channel.get_id()))[0]);
+
+        if (std::any_of(preference.get_features().begin(),
+                        preference.get_features().end(),
+                        [](const schemas::ChannelFeature &feature) {
+                          return feature == schemas::ChannelFeature::QUIET_MODE;
+                        })) {
+          continue;
+        }
+
         pqxx::result subscriber_ids = work.exec(
             "SELECT user_id FROM event_subscriptions WHERE event_id = " +
             std::to_string(event[0].as<int>()));

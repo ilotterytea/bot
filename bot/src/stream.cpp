@@ -12,6 +12,7 @@
 #include "api/twitch/schemas/stream.hpp"
 #include "config.hpp"
 #include "logger.hpp"
+#include "schemas/channel.hpp"
 #include "schemas/stream.hpp"
 #include "utils/string.hpp"
 
@@ -96,11 +97,24 @@ namespace bot::stream {
 
     for (const auto &event : events) {
       pqxx::row channel = work.exec1(
-          "SELECT alias_id, alias_name, opted_out_at FROM channels WHERE id "
+          "SELECT alias_id, alias_name, opted_out_at, id FROM channels WHERE "
+          "id "
           "= " +
           std::to_string(event[1].as<int>()));
 
       if (!channel[2].is_null()) {
+        continue;
+      }
+
+      schemas::ChannelPreferences preference(
+          work.exec("SELECT * FROM channel_preferences WHERE channel_id = " +
+                    std::to_string(channel[3].as<int>()))[0]);
+
+      if (std::any_of(preference.get_features().begin(),
+                      preference.get_features().end(),
+                      [](const schemas::ChannelFeature &feature) {
+                        return feature == schemas::ChannelFeature::QUIET_MODE;
+                      })) {
         continue;
       }
 

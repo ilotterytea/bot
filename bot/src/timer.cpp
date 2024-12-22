@@ -7,6 +7,7 @@
 
 #include "config.hpp"
 #include "irc/client.hpp"
+#include "schemas/channel.hpp"
 #include "utils/chrono.hpp"
 
 namespace bot {
@@ -39,8 +40,21 @@ namespace bot {
 
         if (difference.count() > interval_sec) {
           pqxx::result channels = work->exec(
-              "SELECT alias_name, opted_out_at FROM channels WHERE id = " +
+              "SELECT alias_name, opted_out_at, id FROM channels WHERE id = " +
               std::to_string(channel_id));
+
+          schemas::ChannelPreferences preference(work->exec(
+              "SELECT * FROM channel_preferences WHERE channel_id = " +
+              std::to_string(channels[0][2].as<int>()))[0]);
+
+          if (std::any_of(preference.get_features().begin(),
+                          preference.get_features().end(),
+                          [](const schemas::ChannelFeature &feature) {
+                            return feature ==
+                                   schemas::ChannelFeature::QUIET_MODE;
+                          })) {
+            continue;
+          }
 
           if (!channels.empty() && channels[0][1].is_null()) {
             std::string alias_name = channels[0][0].as<std::string>();

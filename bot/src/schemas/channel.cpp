@@ -9,6 +9,8 @@ namespace bot::schemas {
       return RANDOM_MARKOV_RESPONSES;
     } else if (value == "notify_7tv_updates") {
       return NOTIFY_7TV_UPDATES;
+    } else if (value == "quiet_mode") {
+      return QUIET_MODE;
     } else {
       return std::nullopt;
     }

@@ -50,7 +50,8 @@ namespace bot::schemas {
   enum ChannelFeature {
     NOTIFY_7TV_UPDATES,
     MARKOV_RESPONSES = 10,
-    RANDOM_MARKOV_RESPONSES
+    RANDOM_MARKOV_RESPONSES,
+    QUIET_MODE = 20
   };
 
   std::optional<ChannelFeature> string_to_channel_feature(

@@ -43,11 +43,6 @@ namespace bot::command {
 
     schemas::Channel channel(query[0]);
 
-    if (channel.get_opted_out_at().has_value()) {
-      delete work;
-      return std::nullopt;
-    }
-
     query = work->exec("SELECT * FROM channel_preferences WHERE channel_id = " +
                        std::to_string(channel.get_id()));
 
@@ -147,19 +142,28 @@ namespace bot::command {
 
       user_rights.set_level(level);
     }
-    
-    // Checking if the user has sent a command
-    std::string command_id = parts[0];
-    
-    const std::string &prefix = channel_preferences.get_prefix();
 
-    if (command_id.substr(0, prefix.length()) != prefix) {
-      delete work;
+    delete work;
+
+    if (channel.get_opted_out_at().has_value() ||
+        std::any_of(channel_preferences.get_features().begin(),
+                    channel_preferences.get_features().end(),
+                    [](const schemas::ChannelFeature &feature) {
+                      return feature == schemas::ChannelFeature::QUIET_MODE;
+                    })) {
       return std::nullopt;
     }
 
-    command_id =
-        command_id.substr(prefix.length(), command_id.length());
+    // Checking if the user has sent a command
+    std::string command_id = parts[0];
+
+    const std::string &prefix = channel_preferences.get_prefix();
+
+    if (command_id.substr(0, prefix.length()) != prefix) {
+      return std::nullopt;
+    }
+
+    command_id = command_id.substr(prefix.length(), command_id.length());
 
     auto cmd = std::find_if(
         command_loader.get_commands().begin(),
@@ -167,13 +171,10 @@ namespace bot::command {
         [&](const auto &command) { return command->get_name() == command_id; });
 
     if (cmd == command_loader.get_commands().end()) {
-      delete work;
       return std::nullopt;
     }
 
     parts.erase(parts.begin());
-
-    delete work;
 
     if (parts.empty()) {
       Request req{command_id,  std::nullopt, std::nullopt,

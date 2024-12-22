@@ -81,6 +81,14 @@ namespace bot::handlers {
 
       schemas::ChannelPreferences preference(channel_preferences[0]);
 
+      if (std::any_of(preference.get_features().begin(),
+                      preference.get_features().end(),
+                      [](const schemas::ChannelFeature &feature) {
+                        return feature == schemas::ChannelFeature::QUIET_MODE;
+                      })) {
+        return;
+      }
+
       pqxx::result cmds =
           work.exec("SELECT message FROM custom_commands WHERE name = '" +
                     message.message + "' AND channel_id = '" +
