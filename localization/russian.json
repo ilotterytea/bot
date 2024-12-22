@@ -48,5 +48,9 @@
   "set.locale": "{sender.alias_name}: Теперь бот говорит по-русски в этом чате!",
   "set.prefix": "{sender.alias_name}: Префикс бота был установлен как \"%s\"",
   "set.feature.disabled": "{sender.alias_name}: Функция \"%s\" была выключена в этом чате!",
-  "set.feature.enabled": "{sender.alias_name}: Функция \"%s\" была включена в этом чате!"
+  "set.feature.enabled": "{sender.alias_name}: Функция \"%s\" была включена в этом чате!",
+
+  "emote.pushed": "(%s) %s добавил эмоут %s",
+  "emote.pulled": "(%s) %s удалил эмоут %s",
+  "emote.updated": "(%s) %s переименовал эмоут %s на %s"
 }

@@ -14,6 +14,7 @@
 #include "irc/message.hpp"
 #include "localization/localization.hpp"
 #include "logger.hpp"
+#include "services/seventv.hpp"
 #include "stream.hpp"
 #include "timer.hpp"
 
@@ -118,11 +119,15 @@ int main(int argc, char *argv[]) {
 
   client.run();
 
+  bot::services::SevenTVClient seventv_client(client, localization, cfg);
+
   std::vector<std::thread> threads;
   threads.push_back(std::thread(bot::create_timer_thread, &client, &cfg));
   threads.push_back(std::thread(&bot::stream::StreamListenerClient::run,
                                 &stream_listener_client));
   threads.push_back(std::thread(&bot::GithubListener::run, &github_listener));
+  threads.push_back(
+      std::thread(&bot::services::SevenTVClient::run, &seventv_client));
 
   for (auto &thread : threads) {
     thread.join();

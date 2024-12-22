@@ -55,7 +55,11 @@ namespace bot {
       SetLocale,
       SetPrefix,
       SetFeatureDisabled,
-      SetFeatureEnabled
+      SetFeatureEnabled,
+
+      EmotePushed,
+      EmotePulled,
+      EmoteUpdated
     };
 
     std::optional<LineId> string_to_line_id(const std::string &str);

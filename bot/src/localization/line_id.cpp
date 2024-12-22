@@ -106,6 +106,14 @@ namespace bot {
         return LineId::SetFeatureEnabled;
       }
 
+      else if (str == "emote.pushed") {
+        return LineId::EmotePushed;
+      } else if (str == "emote.pulled") {
+        return LineId::EmotePulled;
+      } else if (str == "emote.updated") {
+        return LineId::EmoteUpdated;
+      }
+
       else {
         return std::nullopt;
       }

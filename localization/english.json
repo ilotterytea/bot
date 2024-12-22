@@ -48,5 +48,9 @@
   "set.locale": "{sender.alias_name}: The bot now speaks English in this chat!",
   "set.prefix": "{sender.alias_name}: The bot prefix is now \"%s\" in this chat!",
   "set.feature.disabled": "{sender.alias_name}: The feature \"%s\" has been disabled for this chat!",
-  "set.feature.enabled": "{sender.alias_name}: The feature \"%s\" has been enabled for this chat!"
+  "set.feature.enabled": "{sender.alias_name}: The feature \"%s\" has been enabled for this chat!",
+
+  "emote.pushed": "(%s) %s added %s emote",
+  "emote.pulled": "(%s) %s removed %s emote",
+  "emote.updated": "(%s) %s changed the emote name from %s to %s"
 }
