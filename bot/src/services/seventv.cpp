@@ -101,6 +101,8 @@ namespace bot::services {
     work.commit();
     conn.close();
 
+    if (rows.empty()) return;
+
     const pqxx::row &row = rows[0];
     const std::string &alias_name = row[0].as<std::string>(),
                       &locale = row[1].as<std::string>(), prefix = "7TV";
