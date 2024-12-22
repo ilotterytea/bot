@@ -26,6 +26,6 @@ int main(int argc, char *argv[]) {
     return botweb::get_wiki_page(path, cfg);
   });
 
-  app.multithreaded().port(18083).run();
+  app.multithreaded().port(18080).run();
   return 0;
 }
