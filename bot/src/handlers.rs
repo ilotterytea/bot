@@ -28,7 +28,7 @@ pub async fn handle_chat_message(
     let conn = &mut establish_connection();
     handle_stalk_message_events(conn, instance_bundle.clone(), message.clone()).await;
 
-    if let Some(request) = Request::try_from(&message, &command_loader, conn) {
+    if let Some(request) = Request::try_from(&instance_bundle.configuration.commands, &message, &command_loader, conn) {
         let response = command_loader
             .execute_command(&instance_bundle, request.clone())
             .await;
@@ -47,7 +47,7 @@ pub async fn handle_chat_message(
                 sent_at: message.server_timestamp.naive_utc(),
                 response: match response.clone() {
                     Ok(v) => v.to_string(),
-                    Err(e) => e.formatted_message(&request, instance_bundle.localizator.clone()),
+                    Err(e) => e.formatted_message(&request, instance_bundle.configuration.third_party.docs_url.clone(), instance_bundle.localizator.clone()),
                 },
                 status: match response {
                     Ok(_) => common::models::ActionStatus::Ok,
@@ -77,7 +77,7 @@ pub async fn handle_chat_message(
                 }
             },
             Err(e) => {
-                let response = e.formatted_message(&request, instance_bundle.localizator.clone());
+                let response = e.formatted_message(&request, instance_bundle.configuration.third_party.docs_url.clone(), instance_bundle.localizator.clone());
 
                 instance_bundle.twitch_irc_client.say(message.channel_login.clone(), response).await.expect("Failed to send message");
             }

@@ -1,10 +1,10 @@
 use crate::{
     auth::*, channels::*, commands::*, customcommands::*, events::*, join::*, routes::*, users::*,
 };
-use std::{env, io::Result};
+use std::io::Result;
 
 use actix_web::{web, App, HttpServer};
-use dotenvy::dotenv;
+use common::config::Configuration;
 use handlebars::Handlebars;
 use handlebars_routes::{default_wiki_page, index, load_handlebars_templates, wiki_page};
 use serde::{Deserialize, Serialize};
@@ -33,8 +33,9 @@ pub struct Response<T> {
 
 #[actix_web::main]
 async fn main() -> Result<()> {
-    dotenv().expect("Failed to load .env file");
-    let (host, port) = ("0.0.0.0", 8085);
+    let config = Configuration::load();
+
+    let (host, port) = ("0.0.0.0", config.web.port);
     println!("Running the API server at {}:{}", host, port);
 
     let command_docs = web::Data::new(CommandDocInstance::new());
@@ -50,7 +51,7 @@ async fn main() -> Result<()> {
     let helix_token = web::Data::new(
         match UserToken::from_token(
             &reqwest_client,
-            AccessToken::from(env::var("BOT_PASSWORD").expect("BOT_PASSWORD must be set")),
+            AccessToken::from(config.bot.password.clone()),
         )
         .await
         {
@@ -61,12 +62,15 @@ async fn main() -> Result<()> {
 
     let helix_client = web::Data::new(HelixClient::with_client(reqwest_client));
 
+    let config = web::Data::new(config);
+
     HttpServer::new(move || {
         App::new()
             .app_data(command_docs.clone())
             .app_data(handlebars_ref.clone())
             .app_data(helix_token.clone())
             .app_data(helix_client.clone())
+            .app_data(config.clone())
             .service(web::resource("/").get(index))
             .service(web::resource("/static/{filename:.*}").get(get_static_file))
             .service(web::resource("/wiki").get(default_wiki_page))

@@ -1,5 +1,3 @@
-use std::env;
-
 use async_trait::async_trait;
 use eyre::Result;
 
@@ -26,10 +24,7 @@ impl Command for HelpCommand {
         instance_bundle: &InstanceBundle,
         request: Request,
     ) -> Result<Response, ResponseError> {
-        let url = match env::var("BOT_DOCS_BASE_URL") {
-            Ok(v) => v,
-            Err(_) => return Err(ResponseError::SomethingWentWrong),
-        };
+        let url = instance_bundle.configuration.third_party.docs_url.clone();
 
         if let Some(command_id) = request.message.clone() {
             if let Some(command_line_id) = LineId::from_string(format!("hint.url.{}", command_id)) {

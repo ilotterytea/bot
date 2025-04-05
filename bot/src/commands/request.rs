@@ -1,4 +1,4 @@
-use std::env;
+use std::sync::Arc;
 
 use chrono::{NaiveDateTime, Utc};
 use diesel::{
@@ -7,9 +7,8 @@ use diesel::{
 use substring::Substring;
 use twitch_irc::message::PrivmsgMessage;
 
-use crate::shared_variables::{DEFAULT_LANGUAGE, DEFAULT_PREFIX};
-
 use common::{
+    config::{CommandsConfiguration, Configuration},
     models::{
         Channel, ChannelPreference, LevelOfRights, NewChannel, NewChannelPreference, NewRight,
         NewUser, Right, User,
@@ -36,6 +35,7 @@ pub struct Request {
 
 impl Request {
     pub fn try_from(
+        config: &CommandsConfiguration,
         message: &PrivmsgMessage,
         command_loader: &CommandLoader,
         conn: &mut PgConnection,
@@ -64,14 +64,8 @@ impl Request {
                 insert_into(chp::channel_preferences)
                     .values(vec![NewChannelPreference {
                         channel_id: channel.id,
-                        prefix: match env::var("BOT_DEFAULT_PREFIX") {
-                            Ok(v) => v,
-                            Err(_) => DEFAULT_PREFIX.to_string(),
-                        },
-                        language: match env::var("BOT_DEFAULT_LANGUAGE") {
-                            Ok(v) => v,
-                            Err(_) => DEFAULT_LANGUAGE.to_string(),
-                        },
+                        prefix: config.default_prefix.clone(),
+                        language: config.default_language.clone(),
                     }])
                     .execute(conn)
                     .expect("Failed to create preferences for channel");

@@ -1,4 +1,4 @@
-use std::{collections::HashSet, env, process::exit, sync::Arc, time::Duration};
+use std::{collections::HashSet, process::exit, sync::Arc, time::Duration};
 
 use crate::{
     commands::CommandLoader,
@@ -10,6 +10,7 @@ use crate::{
 };
 
 use common::{
+    config::Configuration,
     establish_connection,
     models::NewChannel,
     schema::{channels::dsl as ch, events::dsl as ev},
@@ -48,29 +49,14 @@ mod utils;
 async fn main() {
     // Activating static variable
     let _ = *START_TIME;
-    dotenvy::dotenv().expect("Failed to load .env file");
+
+    let config = Configuration::load();
 
     env_logger::init();
 
     info!("Starting Twitch bot...");
 
-    let database_url = if let Ok(v) = env::var("DATABASE_URL") {
-        v
-    } else {
-        let x = format!(
-            "postgres://{}:{}@{}/{}",
-            env::var("POSTGRES_USER").expect("POSTGRES_USER must be set"),
-            env::var("POSTGRES_PASSWORD").expect("POSTGRES_PASSWORD must be set"),
-            env::var("POSTGRES_HOSTNAME").expect("POSTGRES_HOSTNAME must be set"),
-            env::var("POSTGRES_DB").expect("POSTGRES_DB must be set"),
-        );
-
-        env::set_var("DATABASE_URL", x.clone());
-
-        x
-    };
-
-    match PgConnection::establish(database_url.as_str()) {
+    match PgConnection::establish(&config.database.url) {
         Ok(v) => {
             info!("PostgreSQL connection looks good!");
             drop(v);
@@ -78,7 +64,7 @@ async fn main() {
         Err(_) => {
             error!(
                 "Failed to connect to PostgreSQL database on {}",
-                database_url
+                config.database.url
             );
             exit(1);
         }
@@ -89,8 +75,8 @@ async fn main() {
     let (mut irc_incoming_messages, irc_client) =
         TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(
             ClientConfig::new_simple(StaticLoginCredentials::new(
-                env::var("BOT_USERNAME").expect("BOT_USERNAME must be set"),
-                Some(env::var("BOT_PASSWORD").expect("BOT_PASSWORD must be set")),
+                config.bot.username.clone(),
+                Some(config.bot.password.clone()),
             )),
         );
 
@@ -108,7 +94,7 @@ async fn main() {
     let helix_token = Arc::new(
         match UserToken::from_token(
             &reqwest_client,
-            AccessToken::from(env::var("BOT_PASSWORD").expect("BOT_PASSWORD must be set")),
+            AccessToken::from(config.bot.password.clone()),
         )
         .await
         {
@@ -198,11 +184,14 @@ async fn main() {
 
     let seventv_api = Arc::new(SevenTVAPIClient::new(Client::new()));
 
+    let config = Arc::new(config);
+
     let instances = Arc::new(InstanceBundle {
         twitch_irc_client: irc_client.clone(),
         twitch_api_token: helix_token.clone(),
         twitch_api_client: helix_client.clone(),
         localizator: localizator.clone(),
+        configuration: config.clone(),
         twitch_livestream_websocket_data: livestream_data.clone(),
         seventv_api_client: seventv_api.clone(),
         seventv_eventapi_data: seventv_data.clone(),

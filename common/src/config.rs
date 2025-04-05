@@ -8,7 +8,17 @@ pub struct DatabaseConfiguration {
 
 #[derive(Deserialize, Serialize)]
 #[serde(default)]
+pub struct WebConfiguration {
+    pub port: u16,
+    pub contact_name: String,
+    pub contact_url: String,
+    pub bot_title: String,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(default)]
 pub struct BotConfiguration {
+    pub username: String,
     pub password: String,
     pub client_id: Option<String>,
     pub client_secret: Option<String>,
@@ -42,6 +52,7 @@ pub struct ThirdPartyConfiguration {
 #[serde(default)]
 pub struct Configuration {
     pub database: DatabaseConfiguration,
+    pub web: WebConfiguration,
     pub bot: BotConfiguration,
     pub commands: CommandsConfiguration,
     pub third_party: ThirdPartyConfiguration,
@@ -62,6 +73,7 @@ impl Default for Configuration {
     fn default() -> Self {
         Self {
             database: DatabaseConfiguration::default(),
+            web: WebConfiguration::default(),
             bot: BotConfiguration::default(),
             commands: CommandsConfiguration::default(),
             third_party: ThirdPartyConfiguration::default(),
@@ -77,9 +89,21 @@ impl Default for DatabaseConfiguration {
     }
 }
 
+impl Default for WebConfiguration {
+    fn default() -> Self {
+        Self {
+            port: 8080,
+            contact_name: "someone".into(),
+            contact_url: "#".into(),
+            bot_title: "ilotterytea's twitch bot".into(),
+        }
+    }
+}
+
 impl Default for BotConfiguration {
     fn default() -> Self {
         Self {
+            username: "".into(),
             password: "".into(),
             client_id: None,
             client_secret: None,

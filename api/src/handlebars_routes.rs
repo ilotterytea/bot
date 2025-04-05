@@ -6,7 +6,7 @@ use handlebars::Handlebars;
 use include_dir::{include_dir, Dir};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use std::{collections::HashMap, env::var};
+use std::collections::HashMap;
 use twitch_api::{
     helix::users::{GetUsersRequest, User},
     twitch_oauth2::UserToken,
@@ -15,6 +15,7 @@ use twitch_api::{
 };
 
 use common::{
+    config::Configuration,
     establish_connection, format_timestamp,
     models::{Channel, Event, Timer},
     schema::{
@@ -38,16 +39,14 @@ pub fn load_handlebars_templates(hb: &mut Handlebars<'_>) {
     }
 }
 
-pub async fn index(hb: web::Data<Handlebars<'_>>) -> impl Responder {
-    let contact_name: String = var("WEB_CONTACT_NAME").unwrap_or("someone".into());
-    let contact_url: String = var("WEB_CONTACT_URL").unwrap_or("#".into());
-    let bot_title =
-        var("WEB_BOT_TITLE").unwrap_or(var("BOT_USERNAME").unwrap_or("Some Twitch Bot".into()));
-
+pub async fn index(
+    config: web::Data<Configuration>,
+    hb: web::Data<Handlebars<'_>>,
+) -> impl Responder {
     let data = json!({
-        "contact_name": contact_name,
-        "contact_url": contact_url,
-        "bot_title": bot_title
+        "contact_name": &config.web.contact_name,
+        "contact_url": &config.web.contact_url,
+        "bot_title": &config.web.bot_title
     });
 
     let body = hb.render("index.html", &data).unwrap();
@@ -56,21 +55,24 @@ pub async fn index(hb: web::Data<Handlebars<'_>>) -> impl Responder {
 }
 
 pub async fn wiki_page(
+    config: web::Data<Configuration>,
     wiki: web::Data<CommandDocInstance>,
     path: web::Path<String>,
     hb: web::Data<Handlebars<'_>>,
 ) -> HttpResponse {
-    get_wiki_page(wiki, path.into_inner(), hb).await
+    get_wiki_page(config, wiki, path.into_inner(), hb).await
 }
 
 pub async fn default_wiki_page(
+    config: web::Data<Configuration>,
     wiki: web::Data<CommandDocInstance>,
     hb: web::Data<Handlebars<'_>>,
 ) -> HttpResponse {
-    get_wiki_page(wiki, "README".into(), hb).await
+    get_wiki_page(config, wiki, "README".into(), hb).await
 }
 
 async fn get_wiki_page(
+    config: web::Data<Configuration>,
     wiki: web::Data<CommandDocInstance>,
     path: String,
     hb: web::Data<Handlebars<'_>>,
@@ -79,17 +81,12 @@ async fn get_wiki_page(
         let summary = markdown::to_html(summary);
         let contents = markdown::to_html(contents);
 
-        let contact_name: String = var("WEB_CONTACT_NAME").unwrap_or("someone".into());
-        let contact_url: String = var("WEB_CONTACT_URL").unwrap_or("#".into());
-        let bot_title =
-            var("WEB_BOT_TITLE").unwrap_or(var("BOT_USERNAME").unwrap_or("Some Twitch Bot".into()));
-
         let data = json!({
             "summary": summary,
             "content": contents,
-            "contact_name": contact_name,
-            "contact_url": contact_url,
-            "bot_title": bot_title,
+            "contact_name": &config.web.contact_name,
+            "contact_url": &config.web.contact_url,
+            "bot_title": &config.web.bot_title,
             "wiki_title": path
         });
 
@@ -129,6 +126,7 @@ struct TimerForChannelHandlebars {
 }
 
 pub async fn get_channel(
+    config: web::Data<Configuration>,
     id: web::Path<String>,
     hb: web::Data<Handlebars<'_>>,
     hc: web::Data<HelixClient<'static, reqwest::Client>>,
@@ -255,10 +253,6 @@ pub async fn get_channel(
         })
         .collect();
 
-    let contact_name: String = var("WEB_CONTACT_NAME").unwrap_or("someone".into());
-    let contact_url: String = var("WEB_CONTACT_URL").unwrap_or("#".into());
-    let bot_title =
-        var("WEB_BOT_TITLE").unwrap_or(var("BOT_USERNAME").unwrap_or("Some Twitch Bot".into()));
     let data = json!({
         "pfp": channel.profile_image_url,
         "username": internal_channel.alias_name,
@@ -266,9 +260,9 @@ pub async fn get_channel(
         "events": events_hb,
         "commands": commands,
         "timers": timers,
-        "contact_name": contact_name,
-        "contact_url": contact_url,
-        "bot_title": bot_title,
+        "contact_name": &config.web.contact_name,
+        "contact_url": &config.web.contact_url,
+        "bot_title": &config.web.bot_title,
         "joined": format_timestamp((Utc::now().naive_utc().timestamp() - internal_channel.joined_at.timestamp()) as u64),
         "opted_out": internal_channel.opt_outed_at.is_some()
     });
@@ -291,6 +285,7 @@ struct ChannelForSearchHandlebars {
 }
 
 pub async fn search(
+    config: web::Data<Configuration>,
     query: web::Query<SearchQuery>,
     hb: web::Data<Handlebars<'_>>,
     hc: web::Data<HelixClient<'static, reqwest::Client>>,
@@ -349,11 +344,6 @@ pub async fn search(
 
     let results_count = channels.len();
 
-    let contact_name: String = var("WEB_CONTACT_NAME").unwrap_or("someone".into());
-    let contact_url: String = var("WEB_CONTACT_URL").unwrap_or("#".into());
-    let bot_title =
-        var("WEB_BOT_TITLE").unwrap_or(var("BOT_USERNAME").unwrap_or("Some Twitch Bot".into()));
-
     let data = json!({
         "query": query.query,
         "results_found": results_count != 0,
@@ -361,9 +351,9 @@ pub async fn search(
         "channels_found": channels.len() != 0,
         "channels_count": channels.len(),
         "channels": channels,
-        "contact_name": contact_name,
-        "contact_url": contact_url,
-        "bot_title": bot_title,
+        "contact_name": &config.web.contact_name,
+        "contact_url": &config.web.contact_url,
+        "bot_title": &config.web.bot_title
     });
     let body = hb.render("search.html", &data).unwrap();
 
@@ -381,6 +371,7 @@ struct ChannelForChannelCatalogHandlebars {
 }
 
 pub async fn channel_catalog(
+    config: web::Data<Configuration>,
     hb: web::Data<Handlebars<'_>>,
     hc: web::Data<HelixClient<'static, reqwest::Client>>,
     ut: web::Data<UserToken>,
@@ -423,25 +414,17 @@ pub async fn channel_catalog(
 
     channels.sort_by_key(|x| x.opted_out);
 
-    if let Ok(name) = var("BOT_USERNAME") {
-        channels = channels
-            .iter()
-            .cloned()
-            .filter(|x| x.username.ne(&name))
-            .collect();
-    }
-
-    let contact_name: String = var("WEB_CONTACT_NAME").unwrap_or("someone".into());
-    let contact_url: String = var("WEB_CONTACT_URL").unwrap_or("#".into());
-    let bot_title =
-        var("WEB_BOT_TITLE").unwrap_or(var("BOT_USERNAME").unwrap_or("Some Twitch Bot".into()));
+    channels = channels
+        .into_iter()
+        .filter(|x| x.username.eq(&config.bot.username))
+        .collect();
 
     let data = json!({
         "joined_channels_count": channels.iter().filter(|x| !x.opted_out).collect::<Vec<&ChannelForChannelCatalogHandlebars>>().len(),
         "channels": channels,
-        "contact_name": contact_name,
-        "contact_url": contact_url,
-        "bot_title": bot_title,
+        "contact_name": &config.web.contact_name,
+        "contact_url": &config.web.contact_url,
+        "bot_title": &config.web.bot_title
     });
     let body = hb.render("channel_catalog.html", &data).unwrap();
 

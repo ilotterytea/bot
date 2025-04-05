@@ -1,7 +1,6 @@
-use std::env;
-
 use actix_web::{web, HttpResponse};
 use chrono::{Duration, NaiveDateTime, Utc};
+use common::config::Configuration;
 use common::establish_connection;
 use common::models::{NewSessionState, Session};
 use common::{
@@ -49,12 +48,13 @@ pub struct AuthenticationFail {
 }
 
 pub async fn authenticate(
+    config: web::Data<Configuration>,
     success: Option<web::Query<AuthenticationSuccess>>,
     fail: Option<web::Query<AuthenticationFail>>,
     request: Option<web::Json<AuthenticationRequest>>,
 ) -> HttpResponse {
     if let Some(success) = success {
-        return authenticate_success(success).await;
+        return authenticate_success(config, success).await;
     }
 
     if let Some(fail) = fail {
@@ -62,7 +62,7 @@ pub async fn authenticate(
     }
 
     if let Some(request) = request {
-        return generate_authentication(request).await;
+        return generate_authentication(config, request).await;
     }
 
     HttpResponse::BadRequest().json(Response {
@@ -81,17 +81,15 @@ pub struct TwitchAccessTokenResponse {
 }
 
 pub async fn authenticate_success(
+    config: web::Data<Configuration>,
     query: web::Query<AuthenticationSuccess>,
 ) -> HttpResponse {
-    let (client_id, client_secret, redirect_uri) = match (env::var("BOT_CLIENT_ID"), env::var("BOT_CLIENT_SECRET"), env::var("BOT_REDIRECT_URI")){
-        (Ok(x), Ok(y), Ok(z)) => (x, y, z),
-        _ => {
-            return HttpResponse::InternalServerError().json(Response {
-                status_code: 500,
-                message: Some("Secrets for Twitch API are not set on this instance".into()),
-                data: None::<AuthenticationResponse>,
-            });
-        }
+    let (Some(client_id), Some(client_secret), Some(redirect_uri)) = (&config.bot.client_id, &config.bot.client_secret, &config.bot.redirect_uri) else {
+        return HttpResponse::InternalServerError().json(Response {
+            status_code: 500,
+            message: Some("Secrets for Twitch API are not set on this instance".into()),
+            data: None::<AuthenticationResponse>,
+        });
     };
 
     let conn = &mut establish_connection();
@@ -122,10 +120,10 @@ pub async fn authenticate_success(
     let client = reqwest::Client::new();
     let form = vec![
         ("client_id", client_id.clone()),
-        ("client_secret", client_secret),
+        ("client_secret", client_secret.clone()),
         ("code", query.code.clone()),
-        ("grant_type", "authorization_code".into()),
-        ("redirect_uri", redirect_uri),
+        ("grant_type", "authorization_code".to_string()),
+        ("redirect_uri", redirect_uri.clone()),
     ];
 
     match client
@@ -198,7 +196,7 @@ pub async fn authenticate_success(
                     data: Some(AuthenticationResponse {
                         twitch: TwitchTokenResponsePart {
                             token: json.access_token,
-                            client_id,
+                            client_id: client_id.clone(),
                             expires_at: s.expires_at,
                         },
                         internal: InternalUserResponsePart {
@@ -273,17 +271,15 @@ pub struct AuthenticationRequestRes {
 }
 
 pub async fn generate_authentication(
+    config: web::Data<Configuration>,
     req: web::Json<AuthenticationRequest>,
 ) -> HttpResponse {
-    let (client_id, redirect_uri) = match (env::var("BOT_CLIENT_ID"), env::var("BOT_REDIRECT_URI")) {
-        (Ok(x), Ok(y)) => (x, y),
-        _ => {
-            return HttpResponse::InternalServerError().json(Response {
-                status_code: 500,
-                message: Some("Secrets for Twitch API are not set on this instance".into()),
-                data: None::<AuthenticationRequestRes>,
-            });
-        }
+    let (Some(client_id), Some(redirect_uri)) = (&config.bot.client_id, &config.bot.redirect_uri) else {
+        return HttpResponse::InternalServerError().json(Response {
+            status_code: 500,
+            message: Some("Secrets for Twitch API are not set on this instance".into()),
+            data: None::<AuthenticationRequestRes>,
+        });
     };
 
     let conn = &mut establish_connection();

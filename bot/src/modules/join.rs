@@ -1,5 +1,3 @@
-use std::env;
-
 use async_trait::async_trait;
 use diesel::{insert_into, ExpressionMethods, QueryDsl, RunQueryDsl};
 use log::warn;
@@ -43,13 +41,13 @@ impl Command for JoinCommand {
         instance_bundle: &InstanceBundle,
         request: Request,
     ) -> Result<Response, ResponseError> {
-        let superuser_alias_id = env::var("BOT_OWNER_ID");
+        let superuser_alias_id = instance_bundle.configuration.bot.owner_twitch_id;
 
         let (alias_id, alias_name): (i32, String) = if request.message.is_some()
-            && superuser_alias_id.is_ok()
+            && superuser_alias_id.is_some()
             && superuser_alias_id
                 .unwrap()
-                .eq(&request.sender.alias_id.to_string())
+                .eq(&(request.sender.alias_id as u32))
         {
             let msg = request.message.clone().unwrap();
 
@@ -136,7 +134,7 @@ impl Command for JoinCommand {
             .await
             .expect("Failed to send a message");
 
-        if let Ok(stats_hostname) = env::var("STATS_API_HOSTNAME") {
+        if let Some(stats_hostname) = &instance_bundle.configuration.third_party.stats_api_url {
             let url = format!("{}/api/v1/join", stats_hostname);
 
             let client = reqwest::Client::new();
@@ -144,7 +142,8 @@ impl Command for JoinCommand {
                 twitch_id: alias_id as u32,
             });
 
-            if let Ok(credentials) = env::var("STATS_API_PASSWORD") {
+            if let Some(credentials) = &instance_bundle.configuration.third_party.stats_api_password
+            {
                 let mut split = credentials.split(':').collect::<Vec<&str>>();
 
                 if !split.is_empty() {

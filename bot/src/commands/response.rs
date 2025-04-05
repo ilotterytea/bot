@@ -1,4 +1,4 @@
-use std::{env, fmt::Display, sync::Arc};
+use std::{fmt::Display, sync::Arc};
 
 use crate::localization::{LineId, Localizator};
 
@@ -45,26 +45,26 @@ pub enum ResponseError {
 }
 
 impl ResponseError {
-    pub fn formatted_message(&self, request: &Request, localizator: Arc<Localizator>) -> String {
-        let docs_line = match env::var("BOT_DOCS_BASE_URL") {
-            Ok(docs_url) => {
-                let hint_url = format!("hint.url.{}", request.command_id);
-                let hint_url_localed = if let Some(line_id) = LineId::from_string(hint_url) {
-                    localizator
-                        .get_literal_text(request.channel_preference.language.as_str(), line_id)
-                        .unwrap_or_default()
-                } else {
-                    "".to_string()
-                };
-
-                localizator.formatted_text_by_request(
-                    request,
-                    LineId::MsgHint,
-                    vec![docs_url, hint_url_localed],
-                )
-            }
-            Err(_) => "".to_string(),
+    pub fn formatted_message(
+        &self,
+        request: &Request,
+        docs_url: String,
+        localizator: Arc<Localizator>,
+    ) -> String {
+        let hint_url = format!("hint.url.{}", request.command_id);
+        let hint_url_localed = if let Some(line_id) = LineId::from_string(hint_url) {
+            localizator
+                .get_literal_text(request.channel_preference.language.as_str(), line_id)
+                .unwrap_or_default()
+        } else {
+            "".to_string()
         };
+
+        let docs_line = localizator.formatted_text_by_request(
+            request,
+            LineId::MsgHint,
+            vec![docs_url, hint_url_localed],
+        );
 
         let mut params: Vec<String> = Vec::new();
 
