@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use chrono::{NaiveDateTime, Utc};
 use diesel::{
     insert_into, update, BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl,
@@ -8,7 +6,7 @@ use substring::Substring;
 use twitch_irc::message::PrivmsgMessage;
 
 use common::{
-    config::{CommandsConfiguration, Configuration},
+    config::CommandsConfiguration,
     models::{
         Channel, ChannelPreference, LevelOfRights, NewChannel, NewChannelPreference, NewRight,
         NewUser, Right, User,
@@ -154,9 +152,10 @@ impl Request {
         let command_id = if let Some(word) = message_split.first() {
             let word = word.to_string();
             if command_loader
-                .commands
+                .rust_commands
                 .iter()
                 .any(|x| x.get_name().eq(&word))
+                || command_loader.lua_commands.iter().any(|x| x.name.eq(&word))
             {
                 word
             } else {
@@ -166,13 +165,34 @@ impl Request {
             return None;
         };
 
-        let command = command_loader
-            .commands
-            .iter()
-            .find(|x| x.get_name().eq(&command_id))
-            .unwrap();
+        let command_rights: LevelOfRights;
+        let command_delay: i32;
+        let command_subcommands: Vec<String>;
 
-        if command.required_rights() > rights.level {
+        match (
+            command_loader
+                .rust_commands
+                .iter()
+                .find(|x| x.get_name().eq(&command_id)),
+            command_loader
+                .lua_commands
+                .iter()
+                .find(|x| x.name.eq(&command_id)),
+        ) {
+            (Some(c), _) => {
+                command_rights = c.required_rights().clone();
+                command_delay = c.get_delay_sec();
+                command_subcommands = c.get_subcommands().clone();
+            }
+            (_, Some(c)) => {
+                command_rights = c.minimal_rights.clone();
+                command_delay = c.delay_sec as i32;
+                command_subcommands = c.subcommands.clone();
+            }
+            _ => return None,
+        }
+
+        if command_rights > rights.level {
             return None;
         }
 
@@ -188,7 +208,7 @@ impl Request {
             let la_timestamp: i64 = last_action_timestamp.timestamp();
             let now_timestamp: i64 = Utc::now().naive_utc().timestamp();
 
-            if now_timestamp - la_timestamp < command.get_delay_sec() as i64 {
+            if now_timestamp - la_timestamp < command_delay as i64 {
                 return None;
             }
         }
@@ -198,7 +218,7 @@ impl Request {
         let subcommand_id = if let Some(v) = message_split.first() {
             let v = v.to_string();
 
-            if command.get_subcommands().contains(&v) {
+            if command_subcommands.contains(&v) {
                 message_split.remove(0);
                 Some(v)
             } else {

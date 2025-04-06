@@ -71,7 +71,7 @@ async fn main() {
     }
 
     let localizator = Arc::new(Localizator::new());
-    let command_loader = Arc::new(CommandLoader::new());
+
     let (mut irc_incoming_messages, irc_client) =
         TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(
             ClientConfig::new_simple(StaticLoginCredentials::new(
@@ -196,6 +196,10 @@ async fn main() {
         seventv_api_client: seventv_api.clone(),
         seventv_eventapi_data: seventv_data.clone(),
     });
+
+    let mut command_loader = CommandLoader::new(instances.clone());
+    command_loader.load().await.expect("Error loading commands");
+    let command_loader = Arc::new(command_loader);
 
     let timer_thread = tokio::spawn({
         let instances = instances.clone();

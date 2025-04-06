@@ -42,6 +42,10 @@ pub enum ResponseError {
 
     ExternalAPIError(u32, Option<String>),
     InsufficientRights,
+
+    NotRegisteredCommand(String),
+    LuaExecutionError(mlua::Error),
+    LuaUnsupportedResponseType(String),
 }
 
 impl ResponseError {

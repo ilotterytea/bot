@@ -274,6 +274,19 @@ pub enum LevelOfRights {
     Broadcaster,
 }
 
+impl LevelOfRights {
+    pub fn from_str(s: &str) -> Self {
+        match s {
+            "suspended" => Self::Suspended,
+            "subscriber" => Self::Subscriber,
+            "vip" => Self::Vip,
+            "moderator" => Self::Moderator,
+            "broadcaster" => Self::Broadcaster,
+            _ => Self::User,
+        }
+    }
+}
+
 #[derive(Serialize, Queryable, Identifiable, Associations, Clone)]
 #[diesel(belongs_to(User, foreign_key = user_id))]
 #[diesel(belongs_to(Channel, foreign_key = channel_id))]
