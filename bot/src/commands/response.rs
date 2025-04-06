@@ -46,6 +46,7 @@ pub enum ResponseError {
     NotRegisteredCommand(String),
     LuaExecutionError(mlua::Error),
     LuaUnsupportedResponseType(String),
+    LuaExceededWaitingTime(u64),
 }
 
 impl ResponseError {
@@ -111,6 +112,22 @@ impl ResponseError {
                 params.push(code.to_string());
                 params.push(reason.clone().unwrap_or_default());
                 (20, LineId::ErrorExternalAPIError)
+            }
+            Self::NotRegisteredCommand(name) => {
+                params.push(name.clone());
+                (30, LineId::ErrorNotRegisteredCommand)
+            }
+            Self::LuaExecutionError(error) => {
+                params.push(error.to_string());
+                (31, LineId::ErrorLuaExecutionError)
+            }
+            Self::LuaUnsupportedResponseType(typename) => {
+                params.push(typename.to_string());
+                (32, LineId::ErrorLuaUnsupportedResponseType)
+            }
+            Self::LuaExceededWaitingTime(time) => {
+                params.push(time.to_string());
+                (33, LineId::ErrorLuaExceededWaitingTime)
             }
             _ => (127, LineId::ErrorSomethingWentWrong),
         };
