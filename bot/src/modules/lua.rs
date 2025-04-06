@@ -2,6 +2,7 @@ use std::{sync::mpsc, time::Duration};
 
 use async_trait::async_trait;
 use mlua::{Lua, Value};
+use reqwest::{Client, StatusCode};
 use substring::Substring;
 
 use crate::{
@@ -82,5 +83,56 @@ impl Command for LuaExecutionCommand {
         };
 
         run_lua_script(code.clone(), instance_bundle)
+    }
+}
+
+pub struct LuaImportCommand;
+
+#[async_trait]
+impl Command for LuaImportCommand {
+    fn get_name(&self) -> String {
+        "luaimport".to_string()
+    }
+
+    async fn execute(
+        &self,
+        instance_bundle: &InstanceBundle,
+        request: Request,
+    ) -> Result<Response, ResponseError> {
+        let Some(paste_id) = &request.message else {
+            return Err(ResponseError::NotEnoughArguments(CommandArgument::Value));
+        };
+
+        let parts = paste_id.split(':').collect::<Vec<&str>>();
+
+        if parts.len() != 2 {
+            return Err(ResponseError::IncorrectArgument(paste_id.clone()));
+        }
+
+        let provider = parts[0];
+        let id = parts[1];
+
+        let url = match provider {
+            "pastebin" => format!("https://pastebin.com/raw/{}", id),
+            _ => return Err(ResponseError::IncorrectArgument(provider.to_string())),
+        };
+
+        let client = Client::new();
+        let response = client
+            .get(url)
+            .send()
+            .await
+            .expect("Error sending HTTP request");
+
+        if response.status() != StatusCode::OK {
+            return Err(ResponseError::ExternalAPIError(
+                response.status().as_u16() as u32,
+                None,
+            ));
+        }
+
+        let body = response.text().await.expect("Error reading HTTP text");
+
+        run_lua_script(body, instance_bundle)
     }
 }
