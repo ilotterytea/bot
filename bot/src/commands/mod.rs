@@ -116,7 +116,6 @@ impl CommandLoader {
 
     pub async fn load(&mut self) -> mlua::Result<()> {
         log::info!("Loading Lua API...");
-        setup_lua_compiler(&self.lua)?;
         register_lua_functions(&self.lua, &self.instance_bundle)?;
 
         log::info!("Loading Lua commands...");
@@ -149,9 +148,7 @@ impl CommandLoader {
             ));
         };
 
-        self.lua
-            .sandbox(true)
-            .expect("Failed to enable sandbox mode");
+        setup_lua_compiler(&self.lua).expect("Error setting up Lua compiler");
 
         match command
             .handle
@@ -186,6 +183,8 @@ impl CommandLoader {
 
             if let Some(file) = entry.as_file() {
                 if let Some(contents) = file.contents_utf8() {
+                    setup_lua_compiler(&self.lua).expect("Error setting up Lua compiler");
+
                     let table = self.lua.load(contents).eval::<Table>()?;
 
                     let command = LuaCommand {
