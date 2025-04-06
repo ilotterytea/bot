@@ -88,7 +88,7 @@
   "settings.feature.off": "{sender.alias_name}: Successfully disabled the \"{0}\" feature for this chat room!",
   "emote_count.usage": "{sender.alias_name}: {0} Emote {1} has been used {2} times",
   "emote_count.not_found": "{sender.alias_name}: {0} Emote {1} not found in the database",
-  "emote_top.response": "{sender.alias_name}: {0} {1}'s top {2} emotes ({3}): {4}",
+  "emote_top.response": "{sender.alias_name}: {0}'s top {1} of {2} emotes: {3}",
   "emote_top.no_emotes": "{sender.alias_name}: {0} No emotes have been used in {1}'s chat.",
   "emote_similarity.set_similar": "{sender.alias_name}: {0} {1}'s emote set is {5}% similar to {2}'s emote set ({3} of {4})",
   "emote_similarity.set_not_similar": "{sender.alias_name}: {0} {1}'s emote set is not similar to {3}'s emote set",

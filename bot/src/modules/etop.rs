@@ -1,9 +1,6 @@
-use std::env;
-
 use async_trait::async_trait;
 use eyre::Result;
-use log::error;
-use twitch_api::types::NicknameRef;
+use reqwest::{Client, StatusCode};
 
 use crate::{
     commands::{
@@ -13,7 +10,6 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    models::stats::{ChannelEmote, ChannelEmoteUsage, Response as StatsResponse},
 };
 
 pub struct EmoteTopCommand;
@@ -24,263 +20,123 @@ impl Command for EmoteTopCommand {
         "etop".to_string()
     }
 
-    fn get_subcommands(&self) -> Vec<String> {
-        vec!["desc".to_string(), "asc".to_string()]
-    }
-
     async fn execute(
         &self,
         instance_bundle: &InstanceBundle,
         request: Request,
     ) -> Result<Response, ResponseError> {
-        if env::var("STATS_API_HOSTNAME").is_err() {
-            error!("Tried to run the !etop command, but STATS_API_HOSTNAME is not set in the .env file");
+        let Some(hostname) = &instance_bundle.configuration.third_party.stats_api_url else {
             return Err(ResponseError::SomethingWentWrong);
-        }
-
-        let subcommand_id = match request.subcommand_id.clone() {
-            Some(v) => v,
-            None => "desc".to_string(),
         };
 
-        let message = request.message.clone().unwrap_or_default();
-        let message_split = message.split_ascii_whitespace().collect::<Vec<&str>>();
+        // --- PARSING USER INPUT ---
+        let providers = ["ttv", "bttv", "ffz", "7tv", "all"];
 
-        let mut amount: usize = 10;
+        let (provider_name, target): (String, String);
 
-        let origin_name = match message_split.first() {
-            Some(v) => {
-                if let Ok(x) = v.to_string().parse::<usize>() {
-                    amount = x;
-                    request.channel.alias_name.clone()
+        if let Some(message) = &request.message {
+            let parts = message.split(' ').collect::<Vec<&str>>();
+
+            if parts.len() > 1 {
+                let first_word = parts[0];
+                let second_word = parts[1];
+
+                if providers.contains(&first_word) {
+                    provider_name = first_word.to_string();
                 } else {
-                    v.to_string()
-                }
-            }
-            None => request.channel.alias_name.clone(),
-        };
-
-        if let Some(v) = message_split.get(1) {
-            if let Ok(x) = v.to_string().parse::<usize>() {
-                amount = x;
-            }
-        }
-
-        if let Ok(Some(user)) = instance_bundle
-            .twitch_api_client
-            .get_user_from_login(
-                NicknameRef::from_str(origin_name.as_str()),
-                &*instance_bundle.twitch_api_token,
-            )
-            .await
-        {
-            let channel_id = user.id.take();
-
-            if let Some(response) = self.fetch_channel_emotes(channel_id.clone()).await {
-                if response.status_code != 200 {
-                    return Err(ResponseError::ExternalAPIError(
-                        response.status_code,
-                        response.message,
-                    ));
+                    provider_name = "all".into();
                 }
 
-                let emotes = response.data.unwrap_or_default();
+                if second_word.eq("me") {
+                    target = "me".into();
+                } else {
+                    target = "channel".into();
+                }
+            } else {
+                let first_word = parts[0];
 
-                if let Some(response) = self.fetch_channel_emote_usages(channel_id).await {
-                    if response.status_code != 200 {
-                        return Err(ResponseError::ExternalAPIError(
-                            response.status_code,
-                            response.message,
-                        ));
-                    }
+                if providers.contains(&first_word) {
+                    provider_name = first_word.to_string();
+                } else {
+                    provider_name = "all".into();
+                }
 
-                    let emote_usages = response.data.unwrap_or_default();
-
-                    let mut usages: Vec<(String, i32)> = Vec::new();
-
-                    for usage in emote_usages {
-                        if let Some(emote) = emotes.iter().find(|x| x.emote_id.eq(&usage.emote_id))
-                        {
-                            if let Some(u_emote) = usages.iter_mut().find(|x| x.0.eq(&emote.name)) {
-                                if u_emote.1 < usage.usage_count {
-                                    u_emote.1 = usage.usage_count;
-                                }
-
-                                continue;
-                            }
-
-                            usages.push((emote.name.clone(), usage.usage_count));
-                        }
-                    }
-
-                    usages.sort_by(|a, b| {
-                        if subcommand_id.eq("asc") {
-                            a.1.cmp(&b.1)
-                        } else {
-                            b.1.cmp(&a.1)
-                        }
-                    });
-
-                    if amount > 50 {
-                        amount = 50;
-                    }
-
-                    if amount > usages.len() {
-                        amount = usages.len()
-                    }
-
-                    usages.drain(amount..);
-
-                    let mut message_parts: Vec<String> = Vec::new();
-
-                    for usage in usages {
-                        message_parts.push(format!("{} ({})", usage.0, usage.1));
-                    }
-
-                    if message_parts.is_empty() {
-                        return Ok(Response::Single(
-                            instance_bundle.localizator.formatted_text_by_request(
-                                &request,
-                                LineId::EmoteTopNoEmotes,
-                                vec![
-                                    instance_bundle
-                                        .localizator
-                                        .get_literal_text(
-                                            request.channel_preference.language.as_str(),
-                                            LineId::Provider7TV,
-                                        )
-                                        .unwrap(),
-                                    origin_name,
-                                ],
-                            ),
-                        ));
-                    }
-
-                    return Ok(Response::Single(
-                        instance_bundle.localizator.formatted_text_by_request(
-                            &request,
-                            LineId::EmoteTopResponse,
-                            vec![
-                                instance_bundle
-                                    .localizator
-                                    .get_literal_text(
-                                        request.channel_preference.language.as_str(),
-                                        LineId::Provider7TV,
-                                    )
-                                    .unwrap(),
-                                origin_name,
-                                amount.to_string(),
-                                instance_bundle
-                                    .localizator
-                                    .get_literal_text(
-                                        request.channel_preference.language.as_str(),
-                                        if subcommand_id.eq("asc") {
-                                            LineId::MiscAscending
-                                        } else {
-                                            LineId::MiscDescending
-                                        },
-                                    )
-                                    .unwrap(),
-                                message_parts.join(", "),
-                            ],
-                        ),
-                    ));
+                if first_word.eq("me") {
+                    target = "me".into();
+                } else {
+                    target = "channel".into();
                 }
             }
         } else {
-            return Err(ResponseError::NotFound(origin_name));
+            provider_name = "all".into();
+            target = "channel".into();
         }
 
-        Err(ResponseError::SomethingWentWrong)
-    }
-}
+        let provider_url_name = if provider_name.eq("all") {
+            "".into()
+        } else {
+            format!("/{}", provider_name)
+        };
 
-impl EmoteTopCommand {
-    async fn fetch_channel_emotes(
-        &self,
-        channel_id: String,
-    ) -> Option<StatsResponse<Vec<ChannelEmote>>> {
-        let url = format!(
-            "{}/api/v1/channel/twitch/{}/emotes",
-            env::var("STATS_API_HOSTNAME")
-                .expect("STATS_API_HOSTNAME must be set for !etop command"),
-            channel_id
-        );
+        let (target_url_name, target_name) = if target.eq("channel") {
+            ("".into(), request.channel.alias_name.clone())
+        } else {
+            (
+                format!("/{}", request.sender.alias_id),
+                request.sender.alias_name.clone(),
+            )
+        };
 
-        let client = reqwest::Client::default();
-        let mut request = client.get(url);
+        // --- SENDING REQUEST ---
+        let client = Client::new();
 
-        if let Ok(credentials) = env::var("STATS_API_PASSWORD") {
-            let mut split = credentials.split(':').collect::<Vec<&str>>();
+        let response = client
+            .get(format!(
+                "{}/api/emotes{}/channel/{}{}",
+                hostname, provider_url_name, request.channel.alias_id, target_url_name
+            ))
+            .send()
+            .await
+            .expect("Error sending HTTP request");
 
-            if !split.is_empty() {
-                let name = split[0];
-                split.remove(0);
+        if response.status() != StatusCode::OK {
+            return Err(ResponseError::NotFound(target_name));
+        }
 
-                let password = split.join(":");
+        // --- PARSING RESPONSE ---
+        let json: serde_json::Value = response
+            .json()
+            .await
+            .expect("Error serializing HTTP response");
 
-                request = request.basic_auth(
-                    name,
-                    if password.is_empty() {
-                        None
-                    } else {
-                        Some(password)
-                    },
-                );
+        let data: &Vec<serde_json::Value> = json.get("data").unwrap().as_array().unwrap();
+
+        let mut emote_count = 0;
+        let mut emote_usages: Vec<String> = Vec::new();
+
+        for emote in data {
+            if emote_count >= 5 {
+                break;
             }
+
+            let code = emote.get("code").unwrap().as_str().unwrap();
+            let usage = emote.get("usage").unwrap().as_i64().unwrap();
+
+            emote_usages.push(format!("{} ({})", code, usage));
+            emote_count += 1;
         }
 
-        if let Ok(response) = request.send().await {
-            if let Ok(data) = response.json::<StatsResponse<Vec<ChannelEmote>>>().await {
-                return Some(data);
-            }
-        }
-
-        None
-    }
-    async fn fetch_channel_emote_usages(
-        &self,
-        channel_id: String,
-    ) -> Option<StatsResponse<Vec<ChannelEmoteUsage>>> {
-        let url = format!(
-            "{}/api/v1/channel/twitch/{}/emotes/usage",
-            env::var("STATS_API_HOSTNAME")
-                .expect("STATS_API_HOSTNAME must be set for !etop command"),
-            channel_id
-        );
-
-        let client = reqwest::Client::default();
-        let mut request = client.get(url);
-
-        if let Ok(credentials) = env::var("STATS_API_PASSWORD") {
-            let mut split = credentials.split(':').collect::<Vec<&str>>();
-
-            if !split.is_empty() {
-                let name = split[0];
-                split.remove(0);
-
-                let password = split.join(":");
-
-                request = request.basic_auth(
-                    name,
-                    if password.is_empty() {
-                        None
-                    } else {
-                        Some(password)
-                    },
-                );
-            }
-        }
-
-        if let Ok(response) = request.send().await {
-            if let Ok(data) = response
-                .json::<StatsResponse<Vec<ChannelEmoteUsage>>>()
-                .await
-            {
-                return Some(data);
-            }
-        }
-
-        None
+        return Ok(Response::Single(
+            instance_bundle.localizator.formatted_text_by_request(
+                &request,
+                LineId::EmoteTopResponse,
+                vec![
+                    target_name,
+                    emote_count.to_string(),
+                    provider_name.to_uppercase(),
+                    emote_usages.join(", "),
+                ],
+            ),
+        ));
     }
 }

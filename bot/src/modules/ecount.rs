@@ -1,8 +1,6 @@
-use std::env;
-
 use async_trait::async_trait;
 use eyre::Result;
-use log::error;
+use reqwest::{Client, StatusCode};
 
 use crate::{
     commands::{
@@ -12,7 +10,6 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    models::stats::{ChannelEmote, ChannelEmoteUsage, Response as StatsResponse},
 };
 
 pub struct EmoteCountCommand;
@@ -28,169 +25,56 @@ impl Command for EmoteCountCommand {
         instance_bundle: &InstanceBundle,
         request: Request,
     ) -> Result<Response, ResponseError> {
-        if env::var("STATS_API_HOSTNAME").is_err() {
-            error!("Tried to run the !ecount command, but STATS_API_HOSTNAME is not set in the .env file");
+        let Some(hostname) = &instance_bundle.configuration.third_party.stats_api_url else {
             return Err(ResponseError::SomethingWentWrong);
+        };
+
+        let Some(emote_name) = &request.message else {
+            return Err(ResponseError::NotEnoughArguments(CommandArgument::Value));
+        };
+
+        let client = Client::new();
+
+        let response = client
+            .get(format!(
+                "{}/api/emotes/channel/{}",
+                hostname, request.channel.alias_id
+            ))
+            .send()
+            .await
+            .expect("Error sending HTTP request");
+
+        if response.status() != StatusCode::OK {
+            return Err(ResponseError::NotFound(request.channel.alias_name));
         }
 
-        if let Some(message) = request.message.clone() {
-            let channel_id = request.channel.alias_id.to_string();
-            if let Some(response) = self.fetch_channel_emotes(channel_id.clone()).await {
-                if response.status_code != 200 {
-                    return Err(ResponseError::ExternalAPIError(
-                        response.status_code,
-                        response.message,
-                    ));
-                }
+        let json: serde_json::Value = response
+            .json()
+            .await
+            .expect("Error serializing HTTP response");
 
-                let emotes = response.data.unwrap_or_default();
+        let data: &Vec<serde_json::Value> = json.get("data").unwrap().as_array().unwrap();
 
-                if let Some(response) = self.fetch_channel_emote_usages(channel_id).await {
-                    if response.status_code != 200 {
-                        return Err(ResponseError::ExternalAPIError(
-                            response.status_code,
-                            response.message,
-                        ));
-                    }
+        for emote in data {
+            let code = emote.get("code").unwrap().as_str().unwrap();
 
-                    let emote_usages = response.data.unwrap_or_default();
-
-                    if let Some(emote) = emotes.iter().find(|x| x.name.eq(&message)) {
-                        let usage =
-                            match emote_usages.iter().find(|x| x.emote_id.eq(&emote.emote_id)) {
-                                Some(usage) => usage.usage_count,
-                                None => 0,
-                            };
-
-                        return Ok(Response::Single(
-                            instance_bundle.localizator.formatted_text_by_request(
-                                &request,
-                                LineId::EmoteCountUsage,
-                                vec![
-                                    instance_bundle
-                                        .localizator
-                                        .get_literal_text(
-                                            request.channel_preference.language.as_str(),
-                                            LineId::Provider7TV,
-                                        )
-                                        .unwrap(),
-                                    emote.name.clone(),
-                                    usage.to_string(),
-                                ],
-                            ),
-                        ));
-                    }
-
-                    return Ok(Response::Single(
-                        instance_bundle.localizator.formatted_text_by_request(
-                            &request,
-                            LineId::EmoteCountNotFound,
-                            vec![
-                                instance_bundle
-                                    .localizator
-                                    .get_literal_text(
-                                        request.channel_preference.language.as_str(),
-                                        LineId::Provider7TV,
-                                    )
-                                    .unwrap(),
-                                message,
-                            ],
-                        ),
-                    ));
-                }
+            if code.ne(emote_name) {
+                continue;
             }
+
+            let usage = emote.get("usage").unwrap().as_i64().unwrap();
+            let provider_name = emote.get("provider_name").unwrap().as_str().unwrap();
+            let provider_name = provider_name.to_uppercase();
+
+            return Ok(Response::Single(
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    LineId::EmoteCountUsage,
+                    vec![provider_name, code.to_string(), usage.to_string()],
+                ),
+            ));
         }
 
-        Err(ResponseError::NotEnoughArguments(CommandArgument::Target))
-    }
-}
-
-impl EmoteCountCommand {
-    async fn fetch_channel_emotes(
-        &self,
-        channel_id: String,
-    ) -> Option<StatsResponse<Vec<ChannelEmote>>> {
-        let url = format!(
-            "{}/api/v1/channel/twitch/{}/emotes",
-            env::var("STATS_API_HOSTNAME")
-                .expect("STATS_API_HOSTNAME must be set for !ecount command"),
-            channel_id
-        );
-
-        let client = reqwest::Client::default();
-        let mut request = client.get(url);
-
-        if let Ok(credentials) = env::var("STATS_API_PASSWORD") {
-            let mut split = credentials.split(':').collect::<Vec<&str>>();
-
-            if !split.is_empty() {
-                let name = split[0];
-                split.remove(0);
-
-                let password = split.join(":");
-
-                request = request.basic_auth(
-                    name,
-                    if password.is_empty() {
-                        None
-                    } else {
-                        Some(password)
-                    },
-                );
-            }
-        }
-
-        if let Ok(response) = request.send().await {
-            if let Ok(data) = response.json::<StatsResponse<Vec<ChannelEmote>>>().await {
-                return Some(data);
-            }
-        }
-
-        None
-    }
-    async fn fetch_channel_emote_usages(
-        &self,
-        channel_id: String,
-    ) -> Option<StatsResponse<Vec<ChannelEmoteUsage>>> {
-        let url = format!(
-            "{}/api/v1/channel/twitch/{}/emotes/usage",
-            env::var("STATS_API_HOSTNAME")
-                .expect("STATS_API_HOSTNAME must be set for !ecount command"),
-            channel_id
-        );
-
-        let client = reqwest::Client::default();
-        let mut request = client.get(url);
-
-        if let Ok(credentials) = env::var("STATS_API_PASSWORD") {
-            let mut split = credentials.split(':').collect::<Vec<&str>>();
-
-            if !split.is_empty() {
-                let name = split[0];
-                split.remove(0);
-
-                let password = split.join(":");
-
-                request = request.basic_auth(
-                    name,
-                    if password.is_empty() {
-                        None
-                    } else {
-                        Some(password)
-                    },
-                );
-            }
-        }
-
-        if let Ok(response) = request.send().await {
-            if let Ok(data) = response
-                .json::<StatsResponse<Vec<ChannelEmoteUsage>>>()
-                .await
-            {
-                return Some(data);
-            }
-        }
-
-        None
+        Err(ResponseError::NotFound(emote_name.clone()))
     }
 }

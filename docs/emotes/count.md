@@ -1,7 +1,5 @@
 # Check the usage of emote
 
-> The only supported emote provider is **7TV**
-
 The `!ecount` command is designed to track the number of times an emote has been used in a chat.
 This feature allows users to find out how many times a certain emote has been used in messages.
 To use the command, you must specify the name of the emote after the command.
@@ -14,10 +12,16 @@ To use the command, you must specify the name of the emote after the command.
 ## Usage
 
 + `!ecount forsenHoppedIn`
++ `!ecount DankPoke`
++ `!ecount Okayeg`
++ `!ecount :)`
 
 ## Responses
 
-+ `forsenHoppedIn has been used 1337 times`
++ `BTTV Emote forsenHoppedIn has been used 1337 times`
++ `7TV Emote DankPoke has been used 33 times`
++ `FFZ Emote Okayeg has been used 37 times`
++ `TTV Emote :) has been used 13 times`
 
 ## Important notes
 
@@ -28,4 +32,4 @@ To use the command, you must specify the name of the emote after the command.
 ## Error handling
 
 + [Error 0: Not enough arguments](/wiki/error-codes#0)
-+ [Error 20: External API error](/wiki/error-codes#20)
++ [Error 12: Not found](/wiki/error-codes#12)

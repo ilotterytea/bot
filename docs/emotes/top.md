@@ -1,31 +1,28 @@
 # Emote usage leaderboard
 
-> The only supported emote provider is **7TV**
-
 The `!etop` command provides the ability to find out the top emotes by usage in a specified chat room.
 This is a useful tool for those who want to keep track of the popularity and frequency of use of specific emotes in the community.
 
 ## Syntax
 
-`!etop <desc/asc> <channel name> <amount>`
-+ `<desc/asc>` (optional) - Parameter to control sorting of emotes.
-The default setting is **desc** *(descending)*.
-+ `<channel name>` (optional) - Parameter to specify a specific channel.
-By default, the name of the channel from which the command was sent is used.
-+ `<amount>` (optional) - Parameter to set the number of emotes in the result list.
-The default setting is 10, the maximum value is 50.
+`!etop <ttv/bttv/ffz/7tv/all> <channel/me>`
++ `<ttv/bttv/ffz/7tv>` (optional) - Parameter to sort emotes by their providers.
+The default setting is **all**.
++ `<channel/me>` (optional) - Parameter to show channel's top emotes or your's.
+the default setting is **channel**.
 
 ## Usage
 
-+ `!etop` - Shows the top 10 emotes in descending order in the current channel.
-+ `!etop asc` - Shows the top 10 emotes in ascending order in the current channel.
-+ `!etop forsen` - Shows the top 10 emotes in descending order in forsen's channel.
-+ `!etop asc forsen 10` - Shows the top 20 emotes in ascending order in forsen's channel.
-+ `!etop asc 20` - Shows the top 20 emotes in ascending order in the current channel.
++ `!etop` - Shows the top 5 of all emotes in the current channel.
++ `!etop bttv` - Shows the top 5 of BTTV emotes in the current channel.
++ `!etop me` - Shows your top 5 of all emotes.
++ `!etop bttv me` - Shows your top 5 of BTTV emotes.
 
 ## Responses
-+ `forsen's top 10 emotes (descending): forsenHoppedIn (750), FailFors (600), forsenGravity (599), ...`
-+ `forsen's top 10 emotes (ascending): forsenMushroom (1), forsenDank (5), forsenPirate (60), ...`
++ `forsen's top 5 of all emotes: TriHard (1210), sadE (1011), EZY (1000)...`
++ `forsen's top 5 of BTTV emotes: forsenHoppedIn (750), FailFors (600), forsenGravity (599), ...`
++ `ilotterytea's top 5 of all emotes: BAND (121), sadE (80), LULW (79), ...`
++ `ilotterytea's top 5 of Twitch emotes: RlyTho (50), DatSheffy (35), TriHard (31), ...`
 
 ## Important notes
 
@@ -36,5 +33,4 @@ The default setting is 10, the maximum value is 50.
 ## Error handling
 
 + [Error 12: Not found](/wiki/error-codes#12)
-+ [Error 20: External API error](/wiki/error-codes#20)
 + [Error 127: Something went wrong](/wiki/error-codes#127)
