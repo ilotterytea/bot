@@ -7,9 +7,9 @@ use crate::{
         chatters::ChattersCommand, custom_command::CustomCommandsCommand,
         ecount::EmoteCountCommand, esim::EmoteSimilarityCommand, etop::EmoteTopCommand,
         event::EventCommand, help::HelpCommand, holiday::HolidayCommand, join::JoinCommand,
-        massping::MasspingCommand, mcsrv::MinecraftServerCommand, notify::NotifyCommand,
-        ping::PingCommand, settings::SettingsCommand, spam::SpamCommand, timer::TimerCommand,
-        userid::UserIdCommand,
+        lua::LuaExecutionCommand, massping::MasspingCommand, mcsrv::MinecraftServerCommand,
+        notify::NotifyCommand, ping::PingCommand, settings::SettingsCommand, spam::SpamCommand,
+        timer::TimerCommand, userid::UserIdCommand,
     },
     shared_variables::{
         DEFAULT_COMMAND_DELAY_SEC, DEFAULT_COMMAND_LEVEL_OF_RIGHTS, DEFAULT_COMMAND_OPTIONS,
@@ -20,7 +20,8 @@ use async_trait::async_trait;
 use common::models::LevelOfRights;
 use eyre::Result;
 use include_dir::Dir;
-use mlua::{Function, Lua, Table, Value};
+use mlua::{Function, Lua, Table, Value, VmState};
+use tokio::time::Instant;
 
 use self::{
     request::Request,
@@ -92,6 +93,7 @@ impl CommandLoader {
                 Box::new(MinecraftServerCommand),
                 Box::new(HelpCommand),
                 Box::new(ChattersCommand),
+                Box::new(LuaExecutionCommand),
             ],
             lua_commands: Vec::new(),
             lua: Lua::new(),
@@ -101,7 +103,8 @@ impl CommandLoader {
 
     pub async fn load(&mut self) -> mlua::Result<()> {
         log::info!("Loading Lua API...");
-        self.load_api()?;
+        setup_lua_compiler(&self.lua)?;
+        register_lua_functions(&self.lua, &self.instance_bundle)?;
 
         log::info!("Loading Lua commands...");
         self.load_directory(&MODULE_DIRECTORY)?;
@@ -151,10 +154,6 @@ impl CommandLoader {
             },
             Err(e) => Err(ResponseError::LuaExecutionError(e)),
         }
-    }
-
-    fn load_api(&self) -> mlua::Result<()> {
-        Ok(())
     }
 
     fn load_directory(&mut self, dir: &Dir<'_>) -> mlua::Result<()> {
@@ -219,4 +218,28 @@ impl CommandArgument {
             Self::Amount => LineId::ArgumentAmount,
         }
     }
+}
+
+pub fn register_lua_functions(lua: &Lua, instance_bundle: &InstanceBundle) -> mlua::Result<()> {
+    // --- LUA FUNCTIONS ---
+    let print = lua.create_function(|_, ()| Ok(()))?;
+    lua.globals().set("print", print)?;
+
+    Ok(())
+}
+
+pub fn setup_lua_compiler(lua: &Lua) -> mlua::Result<()> {
+    lua.sandbox(true)?;
+    lua.set_memory_limit(1024 * 512)?;
+
+    let now = Instant::now();
+
+    lua.set_interrupt(move |_| {
+        if now.elapsed().as_millis() >= 600 {
+            return Ok(VmState::Yield);
+        }
+        Ok(VmState::Continue)
+    });
+
+    Ok(())
 }

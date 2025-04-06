@@ -7,6 +7,7 @@ pub mod event;
 pub mod help;
 pub mod holiday;
 pub mod join;
+pub mod lua;
 pub mod massping;
 pub mod mcsrv;
 pub mod notify;
