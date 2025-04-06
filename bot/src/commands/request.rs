@@ -2,6 +2,7 @@ use chrono::{NaiveDateTime, Utc};
 use diesel::{
     insert_into, update, BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl,
 };
+use mlua::{Lua, Table};
 use substring::Substring;
 use twitch_irc::message::PrivmsgMessage;
 
@@ -236,6 +237,144 @@ impl Request {
             } else {
                 Some(message_split.join(" "))
             },
+            sender,
+            channel,
+            channel_preference,
+            rights,
+        })
+    }
+
+    pub fn as_lua_table(&self, lua: &Lua) -> mlua::Result<Table> {
+        let table = lua.create_table()?;
+
+        // metadata
+        table.set("command_id", self.command_id.clone())?;
+        table.set("subcommand_id", self.subcommand_id.clone())?;
+        table.set("message", self.message.clone())?;
+
+        // sender
+        let sender_table = lua.create_table()?;
+        sender_table.set("id", self.sender.id)?;
+        sender_table.set("alias_id", self.sender.alias_id)?;
+        sender_table.set("alias_name", self.sender.alias_name.clone())?;
+        sender_table.set("joined_at", self.sender.joined_at.timestamp_millis())?;
+        sender_table.set(
+            "opted_out_at",
+            if let Some(datetime) = &self.sender.opt_outed_at {
+                Some(datetime.timestamp_millis())
+            } else {
+                None
+            },
+        )?;
+        table.set("sender", sender_table)?;
+
+        // channel
+        let channel_table = lua.create_table()?;
+        channel_table.set("id", self.channel.id)?;
+        channel_table.set("alias_id", self.channel.alias_id)?;
+        channel_table.set("alias_name", self.channel.alias_name.clone())?;
+        channel_table.set("joined_at", self.channel.joined_at.timestamp_millis())?;
+        channel_table.set(
+            "opted_out_at",
+            if let Some(datetime) = &self.channel.opt_outed_at {
+                Some(datetime.timestamp_millis())
+            } else {
+                None
+            },
+        )?;
+        table.set("channel", channel_table)?;
+
+        // channel preference
+        let channel_preference_table = lua.create_table()?;
+        channel_preference_table.set("id", self.channel_preference.id)?;
+        channel_preference_table.set("channel_id", self.channel_preference.channel_id)?;
+        channel_preference_table.set("prefix", self.channel_preference.prefix.clone())?;
+        channel_preference_table.set("language", self.channel_preference.language.clone())?;
+        channel_preference_table.set("features", self.channel_preference.features.clone())?;
+        table.set("channel_preference", channel_preference_table)?;
+
+        // rights
+        let rights_table = lua.create_table()?;
+        rights_table.set("id", self.rights.id)?;
+        rights_table.set("user_id", self.rights.user_id)?;
+        rights_table.set("channel_id", self.rights.channel_id)?;
+        rights_table.set("level", self.rights.level.to_string())?;
+        rights_table.set("is_fixed", self.rights.is_fixed)?;
+        table.set("rights", rights_table)?;
+
+        Ok(table)
+    }
+
+    pub fn from_lua_table(table: Table) -> mlua::Result<Self> {
+        // metadata
+        let command_id: String = table.get("command_id")?;
+        let subcommand_id: Option<String> = table.get("subcommand_id")?;
+        let message: Option<String> = table.get("message")?;
+
+        // sender
+        let sender: Table = table.get("sender")?;
+        let sender = User {
+            id: sender.get("id")?,
+            alias_id: sender.get("alias_id")?,
+            alias_name: sender.get("alias_name")?,
+            joined_at: NaiveDateTime::from_timestamp_millis(sender.get("joined_at")?)
+                .expect("Error parsing NaiveDateTime"),
+            opt_outed_at: if let Ok(timestamp) = sender.get::<i64>("opted_out_at") {
+                Some(
+                    NaiveDateTime::from_timestamp_millis(timestamp)
+                        .expect("Error parsing NaiveDateTime"),
+                )
+            } else {
+                None
+            },
+        };
+
+        // channel
+        let channel: Table = table.get("channel")?;
+        let channel = Channel {
+            id: channel.get("id")?,
+            alias_id: channel.get("alias_id")?,
+            alias_name: channel.get("alias_name")?,
+            joined_at: NaiveDateTime::from_timestamp_millis(channel.get("joined_at")?)
+                .expect("Error parsing NaiveDateTime"),
+            opt_outed_at: if let Ok(timestamp) = channel.get::<i64>("opted_out_at") {
+                Some(
+                    NaiveDateTime::from_timestamp_millis(timestamp)
+                        .expect("Error parsing NaiveDateTime"),
+                )
+            } else {
+                None
+            },
+        };
+
+        // channel preference
+        let channel_preference: Table = table.get("channel_preference")?;
+        let channel_preference = ChannelPreference {
+            id: channel_preference.get("id")?,
+            channel_id: channel_preference.get("channel_id")?,
+            prefix: channel_preference.get("prefix")?,
+            language: channel_preference.get("language")?,
+            features: channel_preference
+                .get::<Table>("features")?
+                .sequence_values::<String>()
+                .map(|x| x.ok())
+                .collect::<Vec<Option<String>>>(),
+        };
+
+        // rights
+        let rights: Table = table.get("rights")?;
+        let rights = Right {
+            id: rights.get("id")?,
+            user_id: rights.get("user_id")?,
+            channel_id: rights.get("channel_id")?,
+            level: LevelOfRights::from_str(&rights.get::<String>("level")?),
+            is_fixed: rights.get("is_fixed")?,
+        };
+
+        Ok(Request {
+            command_id,
+            subcommand_id,
+            message,
             sender,
             channel,
             channel_preference,

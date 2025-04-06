@@ -153,7 +153,15 @@ impl CommandLoader {
             .sandbox(true)
             .expect("Failed to enable sandbox mode");
 
-        match command.handle.call_async::<Value>(()).await {
+        match command
+            .handle
+            .call_async::<Value>(
+                request
+                    .as_lua_table(&self.lua)
+                    .expect("Error converting Request to Table"),
+            )
+            .await
+        {
             Ok(v) => match v {
                 Value::String(v) => Ok(Response::Single(v.to_string_lossy())),
                 Value::Table(t) => Ok(Response::Multiple(

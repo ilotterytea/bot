@@ -4,7 +4,7 @@ return {
     options = {},
     subcommands = {},
     minimal_rights = "user",
-    handle = function()
-        return "hello, chat!"
+    handle = function(request)
+        return "hello, " .. request.sender.alias_name .. "!"
     end
 }

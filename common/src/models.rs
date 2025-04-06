@@ -287,6 +287,19 @@ impl LevelOfRights {
     }
 }
 
+impl Display for LevelOfRights {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Suspended => write!(f, "suspended"),
+            Self::Subscriber => write!(f, "subscriber"),
+            Self::User => write!(f, "user"),
+            Self::Vip => write!(f, "vip"),
+            Self::Moderator => write!(f, "moderator"),
+            Self::Broadcaster => write!(f, "broadcaster"),
+        }
+    }
+}
+
 #[derive(Serialize, Queryable, Identifiable, Associations, Clone)]
 #[diesel(belongs_to(User, foreign_key = user_id))]
 #[diesel(belongs_to(Channel, foreign_key = channel_id))]
