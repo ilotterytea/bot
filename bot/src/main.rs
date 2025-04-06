@@ -54,6 +54,8 @@ async fn main() {
 
     env_logger::init();
 
+    std::env::set_var("DATABASE_URL", config.database.url.clone());
+
     info!("Starting Twitch bot...");
 
     match PgConnection::establish(&config.database.url) {
