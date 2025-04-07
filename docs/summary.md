@@ -37,4 +37,6 @@
 + [Get today's holidays](/wiki/misc/holiday)
 + [Ping](/wiki/misc/ping)
 
+# [Lua coding](/wiki/lua)
+
 # [Error codes](/wiki/error-codes)
