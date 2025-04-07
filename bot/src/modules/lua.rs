@@ -153,6 +153,7 @@ impl Command for LuaImportCommand {
 
         let url = match provider {
             "pastebin" => format!("https://pastebin.com/raw/{}", id),
+            "pastea" => format!("https://paste.ilotterytea.kz/{}?raw", id),
             _ => return Err(ResponseError::IncorrectArgument(provider.to_string())),
         };
 

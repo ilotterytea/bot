@@ -24,7 +24,7 @@ Have fun!
 
 `!luaimport <provider>:<id>`
 
-+ `<provider>` - A paste-like service. Available services: **pastebin (Pastebin)**.
++ `<provider>` - A paste-like service. Available services: **pastebin (Pastebin)**, **pastea [(Rustpastes)](https://paste.ilotterytea.kz)**.
 + `<id>` - An ID of the paste.
 
 ### Usage
