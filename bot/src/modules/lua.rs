@@ -18,8 +18,8 @@ use crate::{
 fn beautify_str(s: String) -> String {
     let mut s = format!("🌑 {}", s);
 
-    if s.len() > 103 {
-        s = s.substring(0, 100).to_string();
+    if s.len() > 200 {
+        s = s.substring(0, 197).to_string();
         s.push_str("...");
     }
 

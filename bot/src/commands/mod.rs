@@ -250,7 +250,7 @@ pub fn register_lua_functions(lua: &Lua, instance_bundle: &InstanceBundle) -> ml
 
 pub fn setup_lua_compiler(lua: &Lua) -> mlua::Result<()> {
     lua.sandbox(true)?;
-    lua.set_memory_limit(1024 * 512)?;
+    lua.set_memory_limit(1024 * 1024 * 2)?;
 
     let now = Instant::now();
 
