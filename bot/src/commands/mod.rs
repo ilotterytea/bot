@@ -263,3 +263,68 @@ pub fn setup_lua_compiler(lua: &Lua) -> mlua::Result<()> {
 
     Ok(())
 }
+
+pub fn register_lua_storage_functions(
+    lua: &Lua,
+    paste_id: String,
+    user_id: i32,
+) -> mlua::Result<()> {
+    use common::{
+        models::{LuaStorage, NewLuaStorage},
+        schema::lua_storage::dsl as luas,
+    };
+    use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+
+    let storage_get = lua.create_function({
+        let paste_id = paste_id.clone();
+        let user_id = user_id.clone();
+        move |_, ()| {
+            let conn = &mut establish_connection();
+            let storage: LuaStorage = luas::lua_storage
+                .filter(luas::user_id.eq(&user_id))
+                .filter(luas::lua_id.eq(&paste_id))
+                .get_result(conn)
+                .unwrap_or_else(|_| {
+                    diesel::insert_into(luas::lua_storage)
+                        .values(NewLuaStorage {
+                            user_id: user_id.clone(),
+                            lua_id: paste_id.clone(),
+                        })
+                        .get_result::<LuaStorage>(conn)
+                        .expect("Error creating new Lua storage")
+                });
+
+            Ok(storage.value)
+        }
+    })?;
+    lua.globals().set("storage_get", storage_get)?;
+
+    let storage_put = lua.create_function({
+        let paste_id = paste_id.clone();
+        let user_id = user_id.clone();
+        move |_, value: String| {
+            let conn = &mut establish_connection();
+            let storage: LuaStorage = luas::lua_storage
+                .filter(luas::user_id.eq(&user_id))
+                .filter(luas::lua_id.eq(&paste_id))
+                .get_result(conn)
+                .unwrap_or_else(|_| {
+                    diesel::insert_into(luas::lua_storage)
+                        .values(NewLuaStorage {
+                            user_id: user_id.clone(),
+                            lua_id: paste_id.clone(),
+                        })
+                        .get_result::<LuaStorage>(conn)
+                        .expect("Error creating new Lua storage")
+                });
+
+            Ok(diesel::update(luas::lua_storage.find(&storage.id))
+                .set(luas::value.eq(value))
+                .execute(conn)
+                .is_ok())
+        }
+    })?;
+    lua.globals().set("storage_put", storage_put)?;
+
+    Ok(())
+}

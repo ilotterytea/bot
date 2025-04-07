@@ -364,3 +364,18 @@ pub struct UserToken {
 pub struct NewUserToken {
     pub user_id: i32,
 }
+
+#[derive(Queryable)]
+pub struct LuaStorage {
+    pub id: i32,
+    pub user_id: i32,
+    pub lua_id: String,
+    pub value: String,
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = lua_storage)]
+pub struct NewLuaStorage {
+    pub user_id: i32,
+    pub lua_id: String,
+}
