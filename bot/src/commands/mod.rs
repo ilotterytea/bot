@@ -29,10 +29,11 @@ use crate::{
     },
 };
 use async_trait::async_trait;
-use common::models::LevelOfRights;
+use chrono::Utc;
+use common::{establish_connection, format_timestamp, models::LevelOfRights};
 use eyre::Result;
 use include_dir::Dir;
-use mlua::{Function, Lua, Table, Value, VmState};
+use mlua::{Function, Lua, LuaSerdeExt, Table, Value, VmState};
 use tokio::time::Instant;
 
 use self::{
@@ -241,9 +242,34 @@ impl CommandArgument {
 }
 
 pub fn register_lua_functions(lua: &Lua, instance_bundle: &InstanceBundle) -> mlua::Result<()> {
+    // --- BOT FUNCTIONS ---
+    let l10n_formatted_text_request = lua.create_function({
+        let localizator = instance_bundle.localizator.clone();
+        move |_, (request, line_id, parameters): (Table, String, Table)| {
+            let request = Request::from_lua_table(request)?;
+            let Some(line_id) = LineId::from_string(line_id.clone()) else {
+                return Err(mlua::Error::RuntimeError(format!(
+                    "Unknown line ID: {}",
+                    line_id
+                )));
+            };
+            let parameters = parameters
+                .sequence_values()
+                .flatten()
+                .collect::<Vec<String>>();
+
+            Ok(localizator.formatted_text_by_request(&request, line_id, parameters))
+        }
+    })?;
+    lua.globals()
+        .set("l10n_formatted_text_request", l10n_formatted_text_request)?;
+
     // --- LUA FUNCTIONS ---
     let print = lua.create_function(|_, ()| Ok(()))?;
     lua.globals().set("print", print)?;
+
+    register_lua_json_functions(lua)?;
+    register_lua_time_functions(lua)?;
 
     Ok(())
 }
@@ -325,6 +351,54 @@ pub fn register_lua_storage_functions(
         }
     })?;
     lua.globals().set("storage_put", storage_put)?;
+
+    Ok(())
+}
+
+pub fn register_lua_json_functions(lua: &Lua) -> mlua::Result<()> {
+    let json_parse = lua.create_function({
+        let lua = lua.clone();
+        move |_, value: String| {
+            let Ok(json_value) = serde_json::from_str::<serde_json::Value>(&value) else {
+                return Err(mlua::Error::RuntimeError(
+                    "Error converting string to JSON".into(),
+                ));
+            };
+
+            let lua_value = lua.to_value(&json_value)?;
+
+            Ok(lua_value)
+        }
+    })?;
+    lua.globals().set("json_parse", json_parse)?;
+
+    let json_stringify = lua.create_function({
+        let lua = lua.clone();
+        move |_, value: Value| {
+            let json: serde_json::Value = lua.from_value(value)?;
+
+            let Ok(string) = serde_json::to_string(&json) else {
+                return Err(mlua::Error::RuntimeError(
+                    "Error converting Lua value to Stringified JSON".into(),
+                ));
+            };
+
+            Ok(string)
+        }
+    })?;
+    lua.globals().set("json_stringify", json_stringify)?;
+
+    Ok(())
+}
+
+pub fn register_lua_time_functions(lua: &Lua) -> mlua::Result<()> {
+    let time_current = lua.create_function(|_, ()| Ok(Utc::now().timestamp_millis()))?;
+    lua.globals().set("time_current", time_current)?;
+
+    let time_humanize = lua.create_function(|_, timestamp_in_seconds: u64| {
+        Ok(format_timestamp(timestamp_in_seconds))
+    })?;
+    lua.globals().set("time_humanize", time_humanize)?;
 
     Ok(())
 }
