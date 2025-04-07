@@ -3,6 +3,7 @@ use std::{collections::HashSet, sync::Arc};
 use chrono::Utc;
 use diesel::{insert_into, update, BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 use log::info;
+use substring::Substring;
 use twitch_api::{helix::chat::GetChattersRequest, types::UserId};
 use twitch_irc::message::{NoticeMessage, PrivmsgMessage};
 
@@ -29,62 +30,10 @@ pub async fn handle_chat_message(
     handle_stalk_message_events(conn, instance_bundle.clone(), message.clone()).await;
 
     if let Some(request) = Request::try_from(&instance_bundle.configuration.commands, &message, &command_loader, conn) {
-        let response = command_loader
-            .execute_command(&instance_bundle, request.clone())
-            .await;
-
-        insert_into(ac::actions)
-            .values([NewAction {
-                channel_id: request.channel.id,
-                user_id: request.sender.id,
-                command_name: request.command_id.clone(),
-                arguments: match (request.subcommand_id.clone(), request.message.clone()) {
-                    (Some(x), Some(y)) => Some(format!("{} {}", x, y)),
-                    (Some(x), None) | (None, Some(x)) => Some(x.to_string()),
-                    _ => None,
-                },
-                processed_at: Utc::now().naive_utc(),
-                sent_at: message.server_timestamp.naive_utc(),
-                response: match response.clone() {
-                    Ok(v) => v.to_string(),
-                    Err(e) => e.formatted_message(&request, instance_bundle.configuration.third_party.docs_url.clone(), instance_bundle.localizator.clone()),
-                },
-                status: match response {
-                    Ok(_) => common::models::ActionStatus::Ok,
-                    Err(_) => common::models::ActionStatus::Error,
-                },
-            }])
-            .execute(conn)
-            .expect("Failed to create action log");
-
-        match response {
-            Ok(r) => match r {
-                Response::Single(line) => {
-                    instance_bundle
-                        .twitch_irc_client
-                        .say(message.channel_login.clone(), line)
-                        .await
-                        .expect("Failed to send message");
-                }
-                Response::Multiple(lines) => {
-                    for line in lines {
-                        instance_bundle
-                            .twitch_irc_client
-                            .say(message.channel_login.clone(), line)
-                            .await
-                            .expect("Failed to send message");
-                    }
-                }
-            },
-            Err(e) => {
-                let response = e.formatted_message(&request, instance_bundle.configuration.third_party.docs_url.clone(), instance_bundle.localizator.clone());
-
-                instance_bundle.twitch_irc_client.say(message.channel_login.clone(), response).await.expect("Failed to send message");
-            }
-        }
+        execute_command(&command_loader, &instance_bundle, &message, request.clone()).await;
     }
 
-    handle_custom_commands(conn, &instance_bundle, &message).await;
+    handle_custom_commands(conn, &instance_bundle, &message, &command_loader).await;
 }
 
 pub async fn handle_timers(instance_bundle: &InstanceBundle) {
@@ -139,6 +88,7 @@ pub async fn handle_custom_commands(
     conn: &mut PgConnection,
     instance_bundle: &InstanceBundle,
     message: &PrivmsgMessage,
+    command_loader: &CommandLoader
 ) {
     let message_text = message.message_text.clone();
 
@@ -156,6 +106,22 @@ pub async fn handle_custom_commands(
 
         if let Some(command) = commands.iter().find(|x| x.name.eq(&message_text)) {
             for line in &command.messages {
+                let mut line = line.clone();
+
+                if line.starts_with("\\!") {
+                    line = line.substring(1, line.len()).to_string();
+                } else if line.starts_with("!") {
+                    let mut message = message.clone();
+                    message.message_text = line.clone();
+
+                    let Some(request) = Request::try_from(&instance_bundle.configuration.commands, &message, command_loader, conn) else {
+                        continue;
+                    };
+
+                    execute_command(&command_loader, &instance_bundle, &message, request).await;
+                    continue;
+                }
+
                 instance_bundle
                     .twitch_irc_client
                     .say(message.channel_login.clone(), line.clone())
@@ -433,4 +399,62 @@ async fn handle_stalk_message_events(conn: &mut PgConnection, instance_bundle: A
         .await
         .unwrap();
     }
+}
+
+async fn execute_command(command_loader: &CommandLoader, instance_bundle: &InstanceBundle, message: &PrivmsgMessage, request: Request) {
+    let conn = &mut establish_connection();
+
+    let response = command_loader
+            .execute_command(&instance_bundle, request.clone())
+            .await;
+
+        insert_into(ac::actions)
+            .values([NewAction {
+                channel_id: request.channel.id,
+                user_id: request.sender.id,
+                command_name: request.command_id.clone(),
+                arguments: match (request.subcommand_id.clone(), request.message.clone()) {
+                    (Some(x), Some(y)) => Some(format!("{} {}", x, y)),
+                    (Some(x), None) | (None, Some(x)) => Some(x.to_string()),
+                    _ => None,
+                },
+                processed_at: Utc::now().naive_utc(),
+                sent_at: message.server_timestamp.naive_utc(),
+                response: match response.clone() {
+                    Ok(v) => v.to_string(),
+                    Err(e) => e.formatted_message(&request, instance_bundle.configuration.third_party.docs_url.clone(), instance_bundle.localizator.clone()),
+                },
+                status: match response {
+                    Ok(_) => common::models::ActionStatus::Ok,
+                    Err(_) => common::models::ActionStatus::Error,
+                },
+            }])
+            .execute(conn)
+            .expect("Failed to create action log");
+
+        match response {
+            Ok(r) => match r {
+                Response::Single(line) => {
+                    instance_bundle
+                        .twitch_irc_client
+                        .say(message.channel_login.clone(), line)
+                        .await
+                        .expect("Failed to send message");
+                }
+                Response::Multiple(lines) => {
+                    for line in lines {
+                        instance_bundle
+                            .twitch_irc_client
+                            .say(message.channel_login.clone(), line)
+                            .await
+                            .expect("Failed to send message");
+                    }
+                }
+            },
+            Err(e) => {
+                let response = e.formatted_message(&request, instance_bundle.configuration.third_party.docs_url.clone(), instance_bundle.localizator.clone());
+
+                instance_bundle.twitch_irc_client.say(message.channel_login.clone(), response).await.expect("Failed to send message");
+            }
+        }
 }

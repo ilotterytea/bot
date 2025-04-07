@@ -10,7 +10,7 @@ The `!cmd` command gives broadcasters the ability to create their own chat comma
 `!cmd new <name> <message...>`
 + `<name>` - The name for new custom command. It should be unique for your chat.
 **A prefix must be specified if you want a prefixed command, e.g. `!sub`, `!server`.**
-+ `<message>` - Text that will be sent when the custom command is invoked.
++ `<message>` - Text that will be sent when the custom command is invoked. By the way, you can run a command within a command by writing a command request as you would normally write **(but with the prefix "!")**. See [Usage](#usage) for more details.
 
 ### Delete the custom command
 `!cmd delete <name>`
@@ -36,6 +36,7 @@ The `!cmd` command gives broadcasters the ability to create their own chat comma
 
 ### Creating a new custom command
 + `!cmd new !sub Buy a Twitch sub at this link and become like the rest of us 😎`
++ `!cmd new !forsen !spam 5 forsen` - This will create the `!forsen` command, which will invoke the `!spam 5 forsen` command on demand.
 
 ### Deleting the custom command
 + `!cmd delete !sub`
