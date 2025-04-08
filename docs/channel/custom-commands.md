@@ -29,6 +29,10 @@ The `!cmd` command gives broadcasters the ability to create their own chat comma
 `!cmd info <name>`
 + `<name>` - Name of custom command
 
+### Make a custom command available in all chats *(requires owner rights)*
+`!cmd global <name>`
++ `<name>` - Name of custom command
+
 ### Get the list of created custom commands
 `!cmd list`
 
