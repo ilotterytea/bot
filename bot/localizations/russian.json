@@ -72,6 +72,8 @@
   "cmd.customcommand.new": "{sender.alias_name}: Новая команда под названием \"{0}\" была успешно создана!",
   "customcommand.list": "{sender.alias_name}: Созданные команды: {0}",
   "customcommand.list.empty": "{sender.alias_name}: Команды ещё не были созданы в этом чате.",
+  "customcommand.global.on": "{sender.alias_name}: Команда \"{0}\" теперь доступна везде!",
+  "customcommand.global.off": "{sender.alias_name}: Команда \"{0}\" теперь доступна только тут!",
   "error.customcommand.already_exists": "{sender.alias_name}: Команда с похожим именем уже существует.",
   "event.on": "{sender.alias_name}: Новое событие \"{0}:{1}\" было успешно создано! Сообщение будет отправлено, когда событие произойдет.",
   "event.off": "{sender.alias_name}: Событие \"{0}:{1}\" было успешно удалено.",

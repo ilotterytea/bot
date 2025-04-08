@@ -39,6 +39,7 @@ impl Command for CustomCommandsCommand {
             "message".to_string(),
             "toggle".to_string(),
             "info".to_string(),
+            "global".to_string(),
             "list".to_string(),
         ]
     }
@@ -153,6 +154,30 @@ impl Command for CustomCommandsCommand {
                     c.messages.first().unwrap().to_owned(),
                 ],
             ),
+            (Some(c), 0, "global") => {
+                let Some(owner_id) = &instance_bundle.configuration.bot.owner_twitch_id else {
+                    return Err(ResponseError::SomethingWentWrong);
+                };
+
+                if owner_id.ne(&(request.sender.alias_id as u32)) {
+                    return Err(ResponseError::InsufficientRights);
+                }
+
+                update(cc::custom_commands.find(&c.id))
+                    .set(cc::is_global.eq(!c.is_global))
+                    .execute(conn)
+                    .expect("Error setting global value");
+
+                instance_bundle.localizator.formatted_text_by_request(
+                    &request,
+                    if c.is_global {
+                        LineId::CustomcommandGlobalOff
+                    } else {
+                        LineId::CustomcommandGlobalOn
+                    },
+                    vec![c.name.clone()],
+                )
+            }
             (Some(c), _, "message") if !message_split.is_empty() => {
                 let message = message_split.join(" ");
                 update(cc::custom_commands.find(&c.id))

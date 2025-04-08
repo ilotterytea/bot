@@ -149,6 +149,7 @@ pub struct CustomCommand {
     pub is_enabled: bool,
     pub created_at: NaiveDateTime,
     pub last_executed_at: Option<NaiveDateTime>,
+    pub is_global: bool,
 }
 
 #[derive(Insertable)]

@@ -1,7 +1,7 @@
 use std::{collections::HashSet, sync::Arc};
 
 use chrono::Utc;
-use diesel::{insert_into, update, BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{insert_into, update, BelongingToDsl, BoolExpressionMethods, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 use log::info;
 use substring::Substring;
 use twitch_api::{helix::chat::GetChattersRequest, types::UserId};
@@ -91,6 +91,13 @@ pub async fn handle_custom_commands(
     command_loader: &CommandLoader
 ) {
     let message_text = message.message_text.clone();
+    let parts = message_text.split(' ').collect::<Vec<&str>>();
+
+    if parts.is_empty() {
+        return;
+    }
+
+    let command_id = parts[0];
 
     let alias_id = message.channel_id.parse::<i32>().unwrap();
     let channels = ch::channels
@@ -99,16 +106,19 @@ pub async fn handle_custom_commands(
         .unwrap_or_else(|_| panic!("Failed to load channel data with alias ID {}", alias_id));
 
     if let Some(channel) = channels.first() {
-        let commands = CustomCommand::belonging_to(&channel)
+        let Ok(command) = cc::custom_commands
+            .filter(cc::name.eq(command_id))
             .filter(cc::is_enabled.eq(true))
-            .load::<CustomCommand>(conn)
-            .expect("Failed to load custom commands");
+            .filter(cc::channel_id.eq(&channel.id).or(cc::is_global.eq(true)))
+            .get_result::<CustomCommand>(conn)
+        else {
+            return;
+        };
+        
+        for line in &command.messages {
+            let mut line = line.clone();
 
-        if let Some(command) = commands.iter().find(|x| x.name.eq(&message_text)) {
-            for line in &command.messages {
-                let mut line = line.clone();
-
-                if line.starts_with("\\!") {
+            if line.starts_with("\\!") {
                     line = line.substring(1, line.len()).to_string();
                 } else if line.starts_with("!") {
                     let mut message = message.clone();
@@ -127,7 +137,6 @@ pub async fn handle_custom_commands(
                     .say(message.channel_login.clone(), line.clone())
                     .await
                     .expect("Failed to send a message");
-            }
         }
     }
 }

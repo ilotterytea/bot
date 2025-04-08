@@ -64,6 +64,7 @@ diesel::table! {
         is_enabled -> Bool,
         created_at -> Timestamp,
         last_executed_at -> Nullable<Timestamp>,
+        is_global -> Bool,
     }
 }
 

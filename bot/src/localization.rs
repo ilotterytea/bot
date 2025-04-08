@@ -87,6 +87,8 @@ pub enum LineId {
     CommandCustomCommandNew,
     CustomcommandList,
     CustomcommandListEmpty,
+    CustomcommandGlobalOn,
+    CustomcommandGlobalOff,
 
     EventOn,
     EventOff,
@@ -200,6 +202,8 @@ impl LineId {
             "cmd.customcommand.new" => Some(Self::CommandCustomCommandNew),
             "customcommand.list" => Some(Self::CustomcommandList),
             "customcommand.list.empty" => Some(Self::CustomcommandListEmpty),
+            "customcommand.global.on" => Some(Self::CustomcommandGlobalOn),
+            "customcommand.global.off" => Some(Self::CustomcommandGlobalOff),
             "error.customcommands.already_exists" => Some(Self::CustomCommandAlreadyExistsError),
             "event.on" => Some(Self::EventOn),
             "event.off" => Some(Self::EventOff),
