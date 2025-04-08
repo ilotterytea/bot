@@ -8,67 +8,64 @@ A utility and entertainment multi-chat Twitch bot.
 + Sending messages in intervals *(like timers)*
 + PostgreSQL database support
 + Ping all chatters with a message *(massping)*
-+ [Counting emote usage](#enabling-emote-usage-counting-optional)
++ Running user-created Lua scripts
++ Counting emote usage. [More...](#more-about-emote-usage-counting)
+
+## Prerequisites
+
++ Rust compiler
++ PostgreSQL
++ Diesel CLI `(cargo install diesel_cli --no-default-features -F postgres)`
 
 ## Installation guide
 
-### Clone the git repository
+1. Install all prerequisites.
+2. Clone the repository from the desired source and open it in the terminal.
+3. [Create a configuration file *(rustpilled_bot.toml)*](#rustpilled_bottoml-example-with-all-available-parameters)
+4. Applying database migration: `diesel migration run --database-url "postgres://user:pass@host/name"`
 
-```bash
-git clone https://git.ilotterytea.kz/tea/bot.git
-cd bot
-```
+5. Run the bot
 
-### Create the configuration file
++ Twitch bot: `cargo run --release --package bot`
++ API: `cargo run --release --package api`
 
-```env
-POSTGRES_USER=db_user
-POSTGRES_DB=db_name
-POSTGRES_PASSWORD=db_password
-POSTGRES_HOSTNAME=db
+### rustpilled_bot.toml example with all available variables
 
-BOT_USERNAME=YYYYYY
-BOT_PASSWORD=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+```toml
+[database]
+url = "postgres://user:pass@host/name"
+
+[bot]
+username = "YYYYYY"
+password = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+owner_twitch_id = 123456789 # optional, can be used by some commands to access superuser subcommands.
+client_id = "ABCDEF" # optional, used by web auth.
+client_secret = "FEDCBA"  # optional, used by web auth.
+redirect_uri = "ACEBDF"  # optional, used by web auth.
+
+[web]
+port = 8080 # optional
+contact_name = "forsen" # optional
+contact_url = "https://twitch.tv/forsen" # optional
+bot_title = "forsen's twitch bot" # optional
+
+[commands]
+default_prefix = "!" # optional
+default_language = "english" # optional
+
+[commands.spam]
+max_count = 50 # optional, maximum number of lines that !spam can send at a time
+
+[third_party]
+docs_url = "https://forsen.tv/wiki" # optional, this is base url for command reference
+stats_api_url = "https://stats.forsen.tv" # optional
+stats_api_password = "TZULQS" # optional, required if you want to join your channels there.
+pastea_api_url = "https://paste.forsen.tv" # optional
+pastea_api_password = "ASDASD" # optional, can be used by !chatters to post authorized pastes, otherwise they will be “posted by anonymous”.
 ```
 
 > You must generate an OAuth2 password from [TwitchTokenGenerator with special scopes](https://twitchtokengenerator.com/quick/riIPG7o2Fd) for bot, because this password is used not only for chat communication, but also for commands that use Twitch API endpoints that can only be accessed with special permissions *(for example, !massping requires moderator:read:chatters)*.
 
-> If you are going to use Docker, then **POSTGRES_HOSTNAME** must be equal to **db** *(POSTGRES_HOSTNAME=db)*
+### More about emote usage counting
 
-> If you are going to run it yourself *(via cargo run)*, **POSTGRES_HOSTNAME** must equal **localhost or IP address if the server is not local**
-*(e.g. POSTGRES_HOSTNAME=localhost)*.
-
-### Startup
-
-1. Via Docker Compose
-
-```bash
-docker-compose up
-```
-
-> The installation will take up about 10-11 gigabytes of space.
-
-2. Manually
-
-+ Twitch bot: `cargo run --release --package bot`
-+ API: `cargo run --release --package api`
-+ Web: `cd web && npm run build && npm start`
-
-### Enabling emote usage counting (optional)
-1. Clone the git repository of [ilotterytea/stats](https://git.ilotterytea.kz/tea/stats)
-
-```bash
-git clone https://git.ilotterytea.kz/tea/stats.git
-cd stats
-```
-
-2. Follow the installation steps in [the ilotterytea/stats's README file](https://git.ilotterytea.kz/tea/stats/src/branch/master/README.md)
-
-3. Add these fields to the bot's configuration
-
-```env
-STATS_API_HOSTNAME=XXXXXX
-STATS_API_PASSWORD=AAAAAA:BBBBBB
-```
-
-> `STATS_API_PASSWORD` is optional unless you set reverse proxy authentication for the `/join` and `/part` endpoints mentioned in [the stats's README file](https://git.ilotterytea.kz/tea/stats/src/branch/master/README.md).
+You can use [standard instance of "ilotterytea/stats"](https://stats.ilotterytea.kz), but you will only be able to get statistics from channels that [teabot] has joined. If you want to join your own channels, you need to [deploy your own instance of "ilotterytea/stats"](https://github.com/ilotterytea/stats) and set the `stats_api_url` and `stats_api_password` variables in the `rustpilled_bot.toml` file.
