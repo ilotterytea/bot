@@ -13,7 +13,6 @@ use crate::{
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    shared_variables::PASTE_API_URL,
 };
 
 pub struct ChattersCommand;
@@ -47,6 +46,11 @@ impl Command for ChattersCommand {
 
         let mut body = String::new();
 
+        body.push_str(&format!(
+            "total chatters: {}\n-------------------\n\n",
+            chatters.len()
+        ));
+
         for c in chatters {
             body.push_str(c.user_login.take().as_str());
             body.push('\n');
@@ -64,23 +68,35 @@ impl Command for ChattersCommand {
             .text("paste", body)
             .text("title", title);
 
-        let paste_request = reqwest::Client::new()
-            .post(format!("{}/paste", PASTE_API_URL))
-            .multipart(multipart)
+        let mut paste_request = reqwest::Client::new()
+            .post(format!(
+                "{}/api/paste/upload",
+                &instance_bundle.configuration.third_party.pastea_api_url
+            ))
+            .multipart(multipart);
+
+        if let Some(password) = &instance_bundle
+            .configuration
+            .third_party
+            .pastea_api_password
+        {
+            paste_request =
+                paste_request.header("Authorization", format!("Rustpastes {}", password));
+        }
+
+        let response = paste_request
             .send()
             .await
             .expect("Failed to send a request to paste service");
 
-        println!("{}", paste_request.status());
-
-        if paste_request.status() != StatusCode::CREATED {
+        if response.status() != StatusCode::CREATED {
             return Err(ResponseError::ExternalAPIError(
-                paste_request.status().as_u16() as u32,
+                response.status().as_u16() as u32,
                 None,
             ));
         }
 
-        let response: Value = paste_request.json::<Value>().await.unwrap();
+        let response: Value = response.json::<Value>().await.unwrap();
 
         Ok(Response::Single(
             instance_bundle.localizator.formatted_text_by_request(
@@ -88,7 +104,7 @@ impl Command for ChattersCommand {
                 LineId::ChattersResponse,
                 vec![format!(
                     "{}/{}",
-                    PASTE_API_URL,
+                    &instance_bundle.configuration.third_party.pastea_api_url,
                     response["data"]["id"].as_str().unwrap()
                 )],
             ),
