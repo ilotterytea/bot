@@ -1,8 +1,7 @@
 use std::str::FromStr;
 
 use async_trait::async_trait;
-use diesel::{delete, insert_into, BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl};
-use eyre::Result;
+use diesel::{BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl, delete, insert_into};
 use twitch_api::{
     helix::users::GetUsersRequest,
     types::{NicknameRef, UserId, UserIdRef},
@@ -10,9 +9,9 @@ use twitch_api::{
 
 use crate::{
     commands::{
+        Command, CommandArgument,
         request::Request,
         response::{Response, ResponseError},
-        Command, CommandArgument,
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
@@ -51,7 +50,7 @@ impl Command for NotifyCommand {
             None => {
                 return Err(ResponseError::NotEnoughArguments(
                     CommandArgument::Subcommand,
-                ))
+                ));
             }
         };
 
@@ -321,7 +320,7 @@ impl Command for NotifyCommand {
                     "{}:{}",
                     target_name,
                     event_type.to_string()
-                )))
+                )));
             }
 
             _ => return Err(ResponseError::SomethingWentWrong),

@@ -1,11 +1,10 @@
 use async_trait::async_trait;
-use eyre::Result;
 
 use crate::{
     commands::{
+        Command, CommandArgument,
         request::Request,
         response::{Response, ResponseError},
-        Command, CommandArgument,
     },
     instance_bundle::InstanceBundle,
     localization::LineId,

@@ -51,7 +51,7 @@ pub async fn handle_timers(instance_bundle: &InstanceBundle) {
             .expect("Failed to get timers for channel ID ");
 
         for timer in timers {
-            if current_timestamp.timestamp() - timer.last_executed_at.timestamp()
+            if current_timestamp.and_utc().timestamp() - timer.last_executed_at.and_utc().timestamp()
                 < timer.interval_sec
             {
                 continue;
@@ -128,7 +128,7 @@ pub async fn handle_custom_commands(
                         continue;
                     };
 
-                    execute_command(&command_loader, &instance_bundle, &message, request).await;
+                    execute_command(command_loader, instance_bundle, &message, request).await;
                     continue;
                 }
 
@@ -414,7 +414,7 @@ async fn execute_command(command_loader: &CommandLoader, instance_bundle: &Insta
     let conn = &mut establish_connection();
 
     let response = command_loader
-            .execute_command(&instance_bundle, request.clone())
+            .execute_command(instance_bundle, request.clone())
             .await;
 
         insert_into(ac::actions)

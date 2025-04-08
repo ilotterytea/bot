@@ -50,7 +50,7 @@ pub struct ThirdPartyConfiguration {
     pub pastea_api_password: Option<String>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Default)]
 #[serde(default)]
 pub struct Configuration {
     pub database: DatabaseConfiguration,
@@ -68,18 +68,6 @@ impl Configuration {
         };
 
         toml::from_str(&contents).expect("Error loading rustpilled_bot.toml configuration")
-    }
-}
-
-impl Default for Configuration {
-    fn default() -> Self {
-        Self {
-            database: DatabaseConfiguration::default(),
-            web: WebConfiguration::default(),
-            bot: BotConfiguration::default(),
-            commands: CommandsConfiguration::default(),
-            third_party: ThirdPartyConfiguration::default(),
-        }
     }
 }
 

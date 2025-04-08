@@ -124,7 +124,6 @@ pub enum LineId {
     HelpCommand,
 
     EventAlreadyExistsError,
-    TimerAlreadyExistsError,
     CustomCommandAlreadyExistsError,
 
     ChattersResponse,
@@ -275,18 +274,6 @@ impl Localizator {
         }
 
         None
-    }
-
-    pub fn get_formatted_text<P>(
-        &self,
-        locale_id: &str,
-        line_id: LineId,
-        parameters: Vec<P>,
-    ) -> Option<String>
-    where
-        P: ToString,
-    {
-        Some(self.format_text_internal(locale_id, line_id, parameters, None))
     }
 
     pub fn formatted_text_by_request<P>(

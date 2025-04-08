@@ -31,7 +31,6 @@ use crate::{
 use async_trait::async_trait;
 use chrono::Utc;
 use common::{establish_connection, format_timestamp, models::LevelOfRights};
-use eyre::Result;
 use include_dir::Dir;
 use mlua::{Function, Lua, LuaSerdeExt, Table, Value, VmState};
 use tokio::time::Instant;
@@ -303,7 +302,6 @@ pub fn register_lua_storage_functions(
 
     let storage_get = lua.create_function({
         let paste_id = paste_id.clone();
-        let user_id = user_id.clone();
         move |_, ()| {
             let conn = &mut establish_connection();
             let storage: LuaStorage = luas::lua_storage
@@ -313,7 +311,7 @@ pub fn register_lua_storage_functions(
                 .unwrap_or_else(|_| {
                     diesel::insert_into(luas::lua_storage)
                         .values(NewLuaStorage {
-                            user_id: user_id.clone(),
+                            user_id,
                             lua_id: paste_id.clone(),
                         })
                         .get_result::<LuaStorage>(conn)
@@ -327,7 +325,6 @@ pub fn register_lua_storage_functions(
 
     let storage_put = lua.create_function({
         let paste_id = paste_id.clone();
-        let user_id = user_id.clone();
         move |_, value: String| {
             let conn = &mut establish_connection();
             let storage: LuaStorage = luas::lua_storage
@@ -337,7 +334,7 @@ pub fn register_lua_storage_functions(
                 .unwrap_or_else(|_| {
                     diesel::insert_into(luas::lua_storage)
                         .values(NewLuaStorage {
-                            user_id: user_id.clone(),
+                            user_id,
                             lua_id: paste_id.clone(),
                         })
                         .get_result::<LuaStorage>(conn)

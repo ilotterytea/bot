@@ -206,8 +206,8 @@ impl Request {
             .first::<NaiveDateTime>(conn);
 
         if let Ok(last_action_timestamp) = last_action_timestamp {
-            let la_timestamp: i64 = last_action_timestamp.timestamp();
-            let now_timestamp: i64 = Utc::now().naive_utc().timestamp();
+            let la_timestamp: i64 = last_action_timestamp.and_utc().timestamp();
+            let now_timestamp: i64 = Utc::now().naive_utc().and_utc().timestamp();
 
             if now_timestamp - la_timestamp < command_delay as i64 {
                 return None;
@@ -257,15 +257,8 @@ impl Request {
         sender_table.set("id", self.sender.id)?;
         sender_table.set("alias_id", self.sender.alias_id)?;
         sender_table.set("alias_name", self.sender.alias_name.clone())?;
-        sender_table.set("joined_at", self.sender.joined_at.timestamp_millis())?;
-        sender_table.set(
-            "opted_out_at",
-            if let Some(datetime) = &self.sender.opt_outed_at {
-                Some(datetime.timestamp_millis())
-            } else {
-                None
-            },
-        )?;
+        sender_table.set("joined_at", self.sender.joined_at.and_utc().timestamp_millis())?;
+        sender_table.set("opted_out_at",self.sender.opt_outed_at.as_ref().map(|dt| dt.and_utc().timestamp_millis()))?;
         table.set("sender", sender_table)?;
 
         // channel
@@ -273,15 +266,8 @@ impl Request {
         channel_table.set("id", self.channel.id)?;
         channel_table.set("alias_id", self.channel.alias_id)?;
         channel_table.set("alias_name", self.channel.alias_name.clone())?;
-        channel_table.set("joined_at", self.channel.joined_at.timestamp_millis())?;
-        channel_table.set(
-            "opted_out_at",
-            if let Some(datetime) = &self.channel.opt_outed_at {
-                Some(datetime.timestamp_millis())
-            } else {
-                None
-            },
-        )?;
+        channel_table.set("joined_at", self.channel.joined_at.and_utc().timestamp_millis())?;
+        channel_table.set("opted_out_at", self.channel.opt_outed_at.as_ref().map(|dt| dt.and_utc().timestamp_millis()))?;
         table.set("channel", channel_table)?;
 
         // channel preference

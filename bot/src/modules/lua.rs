@@ -7,10 +7,10 @@ use substring::Substring;
 
 use crate::{
     commands::{
-        register_lua_functions, register_lua_storage_functions,
+        Command, CommandArgument, register_lua_functions, register_lua_storage_functions,
         request::Request,
         response::{Response, ResponseError},
-        setup_lua_compiler, Command, CommandArgument,
+        setup_lua_compiler,
     },
     instance_bundle::InstanceBundle,
 };
@@ -55,7 +55,7 @@ fn run_lua_script(lua: Lua, request: &Request, script: String) -> Result<Respons
             },
             Err(e) => Err(ResponseError::LuaExecutionError(e)),
         },
-        Err(_) => return Err(ResponseError::LuaExceededWaitingTime(time)),
+        Err(_) => Err(ResponseError::LuaExceededWaitingTime(time)),
     }
 }
 
@@ -92,7 +92,7 @@ fn run_lua_function(
             },
             Err(e) => Err(ResponseError::LuaExecutionError(e)),
         },
-        Err(_) => return Err(ResponseError::LuaExceededWaitingTime(time)),
+        Err(_) => Err(ResponseError::LuaExceededWaitingTime(time)),
     }
 }
 
@@ -116,7 +116,7 @@ impl Command for LuaExecutionCommand {
         let lua = Lua::new();
 
         if setup_lua_compiler(&lua).is_err()
-            || register_lua_functions(&lua, &instance_bundle).is_err()
+            || register_lua_functions(&lua, instance_bundle).is_err()
         {
             return Err(ResponseError::SomethingWentWrong);
         }
@@ -178,7 +178,7 @@ impl Command for LuaImportCommand {
         let lua = Lua::new();
 
         if setup_lua_compiler(&lua).is_err()
-            || register_lua_functions(&lua, &instance_bundle).is_err()
+            || register_lua_functions(&lua, instance_bundle).is_err()
             || register_lua_storage_functions(&lua, paste_id, request.sender.id).is_err()
         {
             return Err(ResponseError::SomethingWentWrong);

@@ -287,11 +287,11 @@ pub async fn generate_authentication(
     const STATE_CHAR_POOL: &[u8] = b"ABCDEFabcdef0123456789";
 
     let mut state = String::with_capacity(STATE_LENGTH);
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
 
     loop {
         for _ in 0..STATE_LENGTH {
-            state.push(STATE_CHAR_POOL[rng.gen::<usize>() % STATE_CHAR_POOL.len()] as char);
+            state.push(STATE_CHAR_POOL[rng.random_range(0..STATE_CHAR_POOL.len())] as char);
         }
 
         if ss::session_states

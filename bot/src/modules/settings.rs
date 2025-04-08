@@ -1,14 +1,13 @@
 use std::str::FromStr;
 
 use async_trait::async_trait;
-use diesel::{update, ExpressionMethods, QueryDsl, RunQueryDsl};
-use eyre::Result;
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, update};
 
 use crate::{
     commands::{
+        Command, CommandArgument,
         request::Request,
         response::{Response, ResponseError},
-        Command, CommandArgument,
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
@@ -50,7 +49,7 @@ impl Command for SettingsCommand {
             None => {
                 return Err(ResponseError::NotEnoughArguments(
                     CommandArgument::Subcommand,
-                ))
+                ));
             }
         };
 

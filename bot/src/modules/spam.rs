@@ -1,11 +1,10 @@
 use async_trait::async_trait;
-use eyre::Result;
 
 use crate::{
     commands::{
+        Command, CommandArgument,
         request::Request,
         response::{Response, ResponseError},
-        Command, CommandArgument,
     },
     instance_bundle::InstanceBundle,
 };
@@ -37,11 +36,7 @@ impl Command for SpamCommand {
                 if let Ok(c) = c.parse::<u32>() {
                     s.remove(0);
 
-                    if c > max_count {
-                        max_count
-                    } else {
-                        c
-                    }
+                    if c > max_count { max_count } else { c }
                 } else {
                     10
                 }

@@ -71,7 +71,7 @@ impl TwitchLivestreamHelper {
                         let timestamp_now = Utc::now().naive_utc();
 
                         let difference_millis =
-                            timestamp_now.timestamp_millis() - stream_timestamp.timestamp_millis();
+                            timestamp_now.and_utc().timestamp_millis() - stream_timestamp.and_utc().timestamp_millis();
 
                         if difference_millis > 2 * 60 * 1000 {
                             continue;

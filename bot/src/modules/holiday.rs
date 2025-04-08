@@ -1,15 +1,14 @@
 use async_trait::async_trait;
 use chrono::{Datelike, Duration, Utc};
-use eyre::Result;
-use rand::seq::SliceRandom;
+use rand::Rng;
 use reqwest::StatusCode;
 use substring::Substring;
 
 use crate::{
     commands::{
+        Command,
         request::Request,
         response::{Response, ResponseError},
-        Command,
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
@@ -78,30 +77,20 @@ impl Command for HolidayCommand {
             ),
             Ok(response) => match response.json::<Vec<String>>().await {
                 Ok(value) => {
-                    let mut rng = rand::thread_rng();
-                    let holiday = value.choose(&mut rng);
+                    let mut rng = rand::rng();
+                    let holiday = &value[rng.random_range(0..value.len())];
 
                     Ok(Response::Single(
                         instance_bundle.localizator.formatted_text_by_request(
                             &request,
-                            if holiday.is_none() {
-                                LineId::CommandHolidayEmpty
-                            } else {
-                                LineId::CommandHolidayResponse
-                            },
-                            if let Some(holiday) = holiday {
-                                let position = value.iter().position(|x| x.eq(holiday)).unwrap();
-
-                                vec![
+                            LineId::CommandHolidayResponse,
+                            vec![
                                     day.to_string(),
                                     month.to_string(),
-                                    position.to_string(),
+                                    value.iter().position(|x| x.eq(holiday)).unwrap().to_string(),
                                     value.len().to_string(),
                                     holiday.clone(),
                                 ]
-                            } else {
-                                vec![day.to_string(), month.to_string()]
-                            },
                         ),
                     ))
                 }

@@ -1,17 +1,15 @@
 use async_trait::async_trait;
 use common::format_timestamp;
-use eyre::Result;
-use psutil::process::processes;
 
 use crate::{
     commands::{
+        Command,
         request::Request,
         response::{Response, ResponseError},
-        Command,
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
-    shared_variables::{COMPILE_TIMESTAMP, COMPILE_VERSION, START_TIME},
+    shared_variables::{COMPILE_TIMESTAMP, COMPILE_VERSION},
 };
 
 pub struct PingCommand;
@@ -28,8 +26,15 @@ impl Command for PingCommand {
         request: Request,
     ) -> Result<Response, ResponseError> {
         // Getting uptime
-        let uptime = START_TIME.elapsed().as_secs();
+        let uptime = std::env::var("BOT_START_TIMESTAMP")
+            .expect("BOT_START_TIMESTAMP must be set for uptime calculations")
+            .parse::<i64>()
+            .unwrap();
 
+        let uptime = chrono::Utc::now().naive_utc().and_utc().timestamp() - uptime;
+
+        // TODO: psutil is not supported with the latest dependencies.
+        /*
         // Getting process information
         let processes = processes().expect("Failed to get system processes");
 
@@ -51,7 +56,8 @@ impl Command for PingCommand {
             ((used_memory / 1024.0) / 1024.0).round()
         } else {
             -1.0
-        };
+        }; */
+        let used_memory_mb = 0.0;
 
         let compile_timestamp = chrono::Utc::now().timestamp() - COMPILE_TIMESTAMP as i64;
         let compile_timestamp = format_timestamp(compile_timestamp as u64);
@@ -62,7 +68,7 @@ impl Command for PingCommand {
                 LineId::CommandPingResponse,
                 vec![
                     COMPILE_VERSION.to_string(),
-                    format_timestamp(uptime),
+                    format_timestamp(uptime as u64),
                     if used_memory_mb > -1.0 {
                         used_memory_mb.to_string()
                     } else {

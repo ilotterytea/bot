@@ -5,8 +5,8 @@ use crate::{
     handlers::*,
     instance_bundle::InstanceBundle,
     localization::Localizator,
-    seventv::{api::SevenTVAPIClient, SevenTVWebsocketClient},
-    shared_variables::{START_TIME, TIMER_CHECK_DELAY},
+    //seventv::{SevenTVWebsocketClient, api::SevenTVAPIClient},
+    shared_variables::TIMER_CHECK_DELAY,
 };
 
 use common::{
@@ -16,22 +16,21 @@ use common::{
     schema::{channels::dsl as ch, events::dsl as ev},
 };
 use diesel::{
-    insert_into, update, Connection, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl,
+    Connection, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl, insert_into, update,
 };
-use eyre::Context;
 use livestream::TwitchLivestreamHelper;
 use log::{debug, error, info};
 use reqwest::Client;
 use tokio::sync::Mutex;
 use twitch_api::{
+    HelixClient,
     client::ClientDefault,
     twitch_oauth2::{AccessToken, UserToken},
     types::{UserId, UserIdRef},
-    HelixClient,
 };
 use twitch_irc::{
-    login::StaticLoginCredentials, message::ServerMessage, ClientConfig, SecureTCPTransport,
-    TwitchIRCClient,
+    ClientConfig, SecureTCPTransport, TwitchIRCClient, login::StaticLoginCredentials,
+    message::ServerMessage,
 };
 
 mod commands;
@@ -41,20 +40,23 @@ mod livestream;
 mod localization;
 mod models;
 mod modules;
-mod seventv;
+//mod seventv;
 mod shared_variables;
 mod utils;
 
 #[tokio::main]
 async fn main() {
-    // Activating static variable
-    let _ = *START_TIME;
-
     let config = Configuration::load();
 
     env_logger::init();
 
-    std::env::set_var("DATABASE_URL", config.database.url.clone());
+    unsafe {
+        std::env::set_var("DATABASE_URL", config.database.url.clone());
+        std::env::set_var(
+            "BOT_START_TIMESTAMP",
+            chrono::Utc::now().naive_utc().and_utc().timestamp().to_string(),
+        );
+    }
 
     info!("Starting Twitch bot...");
 
@@ -84,14 +86,8 @@ async fn main() {
 
     let irc_client = Arc::new(irc_client);
 
-    let reqwest_client = Client::default_client_with_name(Some(
-        "ilotterytea/bot"
-            .parse()
-            .wrap_err_with(|| "when creating header name")
-            .unwrap(),
-    ))
-    .wrap_err_with(|| "when creating client")
-    .unwrap();
+    let reqwest_client =
+        Client::default_client_with_name(Some("ilotterytea/bot".parse().unwrap())).unwrap();
 
     let helix_token = Arc::new(
         match UserToken::from_token(
@@ -184,8 +180,6 @@ async fn main() {
             .collect::<HashSet<UserId>>()
     }));
 
-    let seventv_api = Arc::new(SevenTVAPIClient::new(Client::new()));
-
     let config = Arc::new(config);
 
     let instances = Arc::new(InstanceBundle {
@@ -195,7 +189,6 @@ async fn main() {
         localizator: localizator.clone(),
         configuration: config.clone(),
         twitch_livestream_websocket_data: livestream_data.clone(),
-        seventv_api_client: seventv_api.clone(),
         seventv_eventapi_data: seventv_data.clone(),
     });
 
@@ -219,14 +212,6 @@ async fn main() {
         livestream_helper.run().await;
     });
 
-    let mut seventv_client = SevenTVWebsocketClient::new(instances.clone())
-        .await
-        .unwrap();
-
-    let seventv_thread = tokio::spawn(async move {
-        seventv_client.run().await.unwrap();
-    });
-
     let irc_thread = tokio::spawn(async move {
         while let Some(irc_message) = irc_incoming_messages.recv().await {
             debug!("Received IRC message: {:?}", irc_message);
@@ -248,5 +233,5 @@ async fn main() {
         }
     });
 
-    let _ = tokio::join!(irc_thread, timer_thread, livestream_thread, seventv_thread);
+    let _ = tokio::join!(irc_thread, timer_thread, livestream_thread);
 }

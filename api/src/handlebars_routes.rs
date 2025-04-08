@@ -1,5 +1,4 @@
 use actix_web::{web, HttpResponse, Responder};
-use actix_web_lab::respond::Html;
 use chrono::{NaiveDateTime, Utc};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use handlebars::Handlebars;
@@ -51,7 +50,7 @@ pub async fn index(
 
     let body = hb.render("index.html", &data).unwrap();
 
-    Html(body)
+    web::Html::new(body)
 }
 
 pub async fn wiki_page(
@@ -247,7 +246,7 @@ pub async fn get_channel(
             name: x.name.clone(),
             messages: x.messages.clone(),
             last_executed: format_timestamp(
-                (now.timestamp() - x.last_executed_at.timestamp()) as u64,
+                (now.and_utc().timestamp() - x.last_executed_at.and_utc().timestamp()) as u64,
             ),
             interval: format_timestamp(x.interval_sec as u64),
         })
@@ -263,7 +262,7 @@ pub async fn get_channel(
         "contact_name": &config.web.contact_name,
         "contact_url": &config.web.contact_url,
         "bot_title": &config.web.bot_title,
-        "joined": format_timestamp((Utc::now().naive_utc().timestamp() - internal_channel.joined_at.timestamp()) as u64),
+        "joined": format_timestamp((Utc::now().naive_utc().and_utc().timestamp() - internal_channel.joined_at.and_utc().timestamp()) as u64),
         "opted_out": internal_channel.opt_outed_at.is_some()
     });
 
@@ -306,14 +305,13 @@ pub async fn search(
 
     let channels: Vec<Channel> = channels
         .iter()
-        .cloned()
-        .filter(|x| {
+        .filter(|&x| {
             if is_number && number_id >= 0 {
                 x.alias_id.eq(&number_id)
             } else {
                 x.alias_name.eq(&query.query)
             }
-        })
+        }).cloned()
         .collect();
 
     let channel_ids_str: Vec<String> = channels.iter().map(|x| x.alias_id.to_string()).collect();
@@ -348,7 +346,7 @@ pub async fn search(
         "query": query.query,
         "results_found": results_count != 0,
         "results_count": results_count,
-        "channels_found": channels.len() != 0,
+        "channels_found": !channels.is_empty(),
         "channels_count": channels.len(),
         "channels": channels,
         "contact_name": &config.web.contact_name,
@@ -413,11 +411,7 @@ pub async fn channel_catalog(
     };
 
     channels.sort_by_key(|x| x.opted_out);
-
-    channels = channels
-        .into_iter()
-        .filter(|x| x.username.eq(&config.bot.username))
-        .collect();
+    channels.retain(|x| x.username.eq(&config.bot.username));
 
     let data = json!({
         "joined_channels_count": channels.iter().filter(|x| !x.opted_out).collect::<Vec<&ChannelForChannelCatalogHandlebars>>().len(),

@@ -2,9 +2,8 @@ use std::{collections::HashSet, str::FromStr};
 
 use async_trait::async_trait;
 use diesel::{
-    delete, insert_into, update, BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl,
+    BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl, delete, insert_into, update,
 };
-use eyre::Result;
 use twitch_api::{
     helix::chat::GetChattersRequest,
     types::{NicknameRef, UserId},
@@ -12,9 +11,9 @@ use twitch_api::{
 
 use crate::{
     commands::{
+        Command, CommandArgument,
         request::Request,
         response::{Response, ResponseError},
-        Command, CommandArgument,
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
@@ -58,7 +57,7 @@ impl Command for EventCommand {
             None => {
                 return Err(ResponseError::NotEnoughArguments(
                     CommandArgument::Subcommand,
-                ))
+                ));
             }
         };
 

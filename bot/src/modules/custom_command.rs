@@ -1,14 +1,13 @@
 use async_trait::async_trait;
 use diesel::{
-    delete, insert_into, update, BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl,
+    BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl, delete, insert_into, update,
 };
-use eyre::Result;
 
 use crate::{
     commands::{
+        Command, CommandArgument,
         request::Request,
         response::{Response, ResponseError},
-        Command, CommandArgument,
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
@@ -54,7 +53,7 @@ impl Command for CustomCommandsCommand {
             None => {
                 return Err(ResponseError::NotEnoughArguments(
                     CommandArgument::Subcommand,
-                ))
+                ));
             }
         };
 
@@ -77,7 +76,7 @@ impl Command for CustomCommandsCommand {
 
             let cmd_names = cmds
                 .iter()
-                .map(|x| format!("{}", x.name))
+                .map(|x| x.name.to_string())
                 .collect::<Vec<String>>();
 
             return Ok(Response::Single(
@@ -217,11 +216,11 @@ impl Command for CustomCommandsCommand {
             }
 
             (None, 0, _) if subcommand_id.ne("new") => {
-                return Err(ResponseError::NotFound(name_id))
+                return Err(ResponseError::NotFound(name_id));
             }
 
             (None, 0, "new") => {
-                return Err(ResponseError::NotEnoughArguments(CommandArgument::Message))
+                return Err(ResponseError::NotEnoughArguments(CommandArgument::Message));
             }
 
             (Some(_), _, "new") => return Err(ResponseError::NamesakeCreation(name_id)),

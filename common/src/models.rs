@@ -1,4 +1,7 @@
-use std::{fmt::Display, str::FromStr};
+use std::{
+    fmt::{Display, Error},
+    str::FromStr,
+};
 
 use crate::schema::*;
 use chrono::NaiveDateTime;
@@ -172,7 +175,7 @@ pub enum EventType {
 }
 
 impl FromStr for EventType {
-    type Err = eyre::Report;
+    type Err = Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "live" => Ok(Self::Live),

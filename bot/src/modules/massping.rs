@@ -1,12 +1,11 @@
 use async_trait::async_trait;
-use eyre::Result;
 use twitch_api::helix::chat::GetChattersRequest;
 
 use crate::{
     commands::{
+        Command,
         request::Request,
         response::{Response, ResponseError},
-        Command,
     },
     instance_bundle::InstanceBundle,
     localization::LineId,

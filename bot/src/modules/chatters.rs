@@ -1,15 +1,14 @@
 use async_trait::async_trait;
 use chrono::Utc;
-use eyre::Result;
 use reqwest::StatusCode;
 use serde_json::Value;
 use twitch_api::helix::chat::GetChattersRequest;
 
 use crate::{
     commands::{
+        Command,
         request::Request,
         response::{Response, ResponseError},
-        Command,
     },
     instance_bundle::InstanceBundle,
     localization::LineId,

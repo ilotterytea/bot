@@ -9,19 +9,17 @@ repository.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-actix-web = "4.4.1"
-actix-web-lab = "0.20.2"
-chrono = { version = "0.4.31", features = ["serde"] }
+actix-web = "4.10.2"
+chrono = { version = "0.4.40", features = ["serde"] }
 common = { path = "../common" }
-diesel = { version = "2.1.4", features = ["postgres", "chrono", "uuid"] }
-dotenvy = "0.15.7"
-handlebars = { version = "5.1.2", features = ["dir_source"] }
-include_dir = "0.7.3"
+diesel = { version = "2.2.9", features = ["postgres", "chrono", "uuid"] }
+handlebars = { version = "6.3.2", features = ["dir_source"] }
+include_dir = "0.7.4"
 markdown = "0.3.0"
-mime_guess = "2.0.4"
-rand = "0.8.5"
-reqwest = { version = "0.11.23", features = ["json"] }
-serde = { version = "1.0.194", features = ["derive"] }
-serde_json = "1.0.110"
-twitch_api = { version = "0.7.0-rc.7", features = ["twitch_oauth2", "reqwest", "helix"] }
-uuid = "1.7.0"
+mime_guess = "2.0.5"
+rand = "0.9.0"
+reqwest = { version = "0.12.15", features = ["json"] }
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+twitch_api = { version = "0.7.2", features = ["twitch_oauth2", "reqwest", "helix"] }
+uuid = "1.16.0"
