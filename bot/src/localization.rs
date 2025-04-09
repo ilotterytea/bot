@@ -1,4 +1,4 @@
-use include_dir::{include_dir, Dir};
+use include_dir::{Dir, include_dir};
 use std::{collections::HashMap, fmt::Display, str::from_utf8};
 
 use crate::commands::request::Request;
@@ -283,7 +283,7 @@ impl Localizator {
         parameters: Vec<P>,
     ) -> String
     where
-        P: ToString,
+        P: Display,
     {
         self.format_text_internal(
             request.channel_preference.language.as_str(),
@@ -291,6 +291,13 @@ impl Localizator {
             parameters,
             Some(request),
         )
+    }
+
+    pub fn formatted_text<P>(&self, locale_id: &str, line_id: LineId, parameters: Vec<P>) -> String
+    where
+        P: Display,
+    {
+        self.format_text_internal(locale_id, line_id, parameters, None)
     }
 
     fn format_text_internal<P>(
@@ -301,7 +308,7 @@ impl Localizator {
         request: Option<&Request>,
     ) -> String
     where
-        P: ToString,
+        P: Display,
     {
         if let Some(line) = self.get_literal_text(locale_id, line_id.clone()) {
             let placeholders = self.parse_placeholders(&line);
