@@ -1,25 +1,27 @@
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{HttpResponse, Responder, web};
 use chrono::{NaiveDateTime, Utc};
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::{
+    ExpressionMethods, JoinOnDsl, PgArrayExpressionMethods, QueryDsl, RunQueryDsl, dsl::not,
+};
 use handlebars::Handlebars;
-use include_dir::{include_dir, Dir};
+use include_dir::{Dir, include_dir};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::HashMap;
 use twitch_api::{
+    HelixClient,
     helix::users::{GetUsersRequest, User},
     twitch_oauth2::UserToken,
     types::UserIdRef,
-    HelixClient,
 };
 
 use common::{
     config::Configuration,
     establish_connection, format_timestamp,
-    models::{Channel, Event, Timer},
+    models::{Channel, ChannelFeature, Event, Timer},
     schema::{
-        channels::dsl as ch, custom_commands::dsl as cc, event_subscriptions::dsl as evs,
-        events::dsl as ev, timers::dsl as ti,
+        channel_preferences::dsl as chp, channels::dsl as ch, custom_commands::dsl as cc,
+        event_subscriptions::dsl as evs, events::dsl as ev, timers::dsl as ti,
     },
 };
 
@@ -311,7 +313,8 @@ pub async fn search(
             } else {
                 x.alias_name.eq(&query.query)
             }
-        }).cloned()
+        })
+        .cloned()
         .collect();
 
     let channel_ids_str: Vec<String> = channels.iter().map(|x| x.alias_id.to_string()).collect();
@@ -376,6 +379,10 @@ pub async fn channel_catalog(
 ) -> HttpResponse {
     let conn = &mut establish_connection();
     let channels: Vec<(i32, Option<NaiveDateTime>)> = ch::channels
+        .inner_join(chp::channel_preferences.on(chp::channel_id.eq(ch::id)))
+        .filter(not(
+            chp::features.contains(vec![ChannelFeature::SilentMode.to_string()])
+        ))
         .select((ch::alias_id, ch::opt_outed_at))
         .get_results::<(i32, Option<NaiveDateTime>)>(conn)
         .unwrap_or(Vec::new());
@@ -411,7 +418,7 @@ pub async fn channel_catalog(
     };
 
     channels.sort_by_key(|x| x.opted_out);
-    channels.retain(|x| x.username.eq(&config.bot.username));
+    channels.retain(|x| x.username.ne(&config.bot.username));
 
     let data = json!({
         "joined_channels_count": channels.iter().filter(|x| !x.opted_out).collect::<Vec<&ChannelForChannelCatalogHandlebars>>().len(),
