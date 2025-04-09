@@ -3,15 +3,15 @@ use crate::{
 };
 use std::io::Result;
 
-use actix_web::{web, App, HttpServer};
+use actix_web::{App, HttpServer, web};
 use common::config::Configuration;
 use handlebars::Handlebars;
 use handlebars_routes::{default_wiki_page, index, load_handlebars_templates, wiki_page};
 use serde::{Deserialize, Serialize};
 use twitch_api::{
+    HelixClient,
     client::ClientDefault,
     twitch_oauth2::{AccessToken, UserToken},
-    HelixClient,
 };
 
 mod auth;
@@ -34,6 +34,10 @@ pub struct Response<T> {
 #[actix_web::main]
 async fn main() -> Result<()> {
     let config = Configuration::load();
+
+    unsafe {
+        std::env::set_var("DATABASE_URL", config.database.url.clone());
+    }
 
     let (host, port) = ("0.0.0.0", config.web.port);
     println!("Running the API server at {}:{}", host, port);
