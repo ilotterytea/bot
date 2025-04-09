@@ -1,6 +1,6 @@
 use chrono::{NaiveDateTime, Utc};
 use diesel::{
-    insert_into, update, BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl,
+    BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl, insert_into, update,
 };
 use mlua::{Lua, Table};
 use substring::Substring;
@@ -9,8 +9,8 @@ use twitch_irc::message::PrivmsgMessage;
 use common::{
     config::CommandsConfiguration,
     models::{
-        Channel, ChannelPreference, LevelOfRights, NewChannel, NewChannelPreference, NewRight,
-        NewUser, Right, User,
+        Channel, ChannelFeature, ChannelPreference, LevelOfRights, NewChannel,
+        NewChannelPreference, NewRight, NewUser, Right, User,
     },
     schema::{
         actions::dsl as ac, channel_preferences::dsl as chp, channels::dsl as ch,
@@ -140,7 +140,13 @@ impl Request {
 
         let prefix = channel_preference.prefix.as_str();
 
-        if !message.message_text.starts_with(prefix) {
+        if !message.message_text.starts_with(prefix)
+            || channel_preference
+                .features
+                .iter()
+                .flatten()
+                .any(|x| x.eq(&ChannelFeature::SilentMode.to_string()))
+        {
             return None;
         }
 
@@ -257,8 +263,17 @@ impl Request {
         sender_table.set("id", self.sender.id)?;
         sender_table.set("alias_id", self.sender.alias_id)?;
         sender_table.set("alias_name", self.sender.alias_name.clone())?;
-        sender_table.set("joined_at", self.sender.joined_at.and_utc().timestamp_millis())?;
-        sender_table.set("opted_out_at",self.sender.opt_outed_at.as_ref().map(|dt| dt.and_utc().timestamp_millis()))?;
+        sender_table.set(
+            "joined_at",
+            self.sender.joined_at.and_utc().timestamp_millis(),
+        )?;
+        sender_table.set(
+            "opted_out_at",
+            self.sender
+                .opt_outed_at
+                .as_ref()
+                .map(|dt| dt.and_utc().timestamp_millis()),
+        )?;
         table.set("sender", sender_table)?;
 
         // channel
@@ -266,8 +281,17 @@ impl Request {
         channel_table.set("id", self.channel.id)?;
         channel_table.set("alias_id", self.channel.alias_id)?;
         channel_table.set("alias_name", self.channel.alias_name.clone())?;
-        channel_table.set("joined_at", self.channel.joined_at.and_utc().timestamp_millis())?;
-        channel_table.set("opted_out_at", self.channel.opt_outed_at.as_ref().map(|dt| dt.and_utc().timestamp_millis()))?;
+        channel_table.set(
+            "joined_at",
+            self.channel.joined_at.and_utc().timestamp_millis(),
+        )?;
+        channel_table.set(
+            "opted_out_at",
+            self.channel
+                .opt_outed_at
+                .as_ref()
+                .map(|dt| dt.and_utc().timestamp_millis()),
+        )?;
         table.set("channel", channel_table)?;
 
         // channel preference

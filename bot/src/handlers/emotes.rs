@@ -87,6 +87,15 @@ async fn get_internal_data(
         .get_result::<ChannelPreference>(conn)
         .ok()?;
 
+    if channel_preference
+        .features
+        .iter()
+        .flatten()
+        .any(|x| x.eq(&ChannelFeature::SilentMode.to_string()))
+    {
+        return None;
+    }
+
     let is_enabled = channel_preference
         .features
         .iter()

@@ -6,6 +6,7 @@ The `!set` command gives broadcasters ability to customize the bot as they need 
 
 ## Available features
 + `notify_7tv_updates` - Enable notifications for changes to the channel's 7TV emote set.
++ `silent_mode` - Makes it so that a bot can no longer talk in chat.
 
 ## Syntax
 
@@ -19,7 +20,7 @@ The `!set` command gives broadcasters ability to customize the bot as they need 
 
 ### Enable/disable the bot feature for the chat
 `!set feature <feature>`
-+ `<feature>` - [Available features](#available-features)
++ `<feature>` - [Available features](#available_features)
 
 ## Usage
 

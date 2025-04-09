@@ -47,6 +47,16 @@ pub async fn handle_timers(instance_bundle: &InstanceBundle) {
         .expect("Failed to get channels");
 
     for channel in channels {
+        if let Ok(features) = chp::channel_preferences
+            .filter(chp::channel_id.eq(&channel.id))
+            .select(chp::features)
+            .get_result::<Vec<Option<String>>>(conn)
+        {
+            if features.iter().flatten().any(|x| x.eq(&ChannelFeature::SilentMode.to_string())) {
+                continue;
+            }
+        }
+
         let timers = Timer::belonging_to(&channel)
             .filter(ti::is_enabled.eq(true))
             .load::<Timer>(conn)
@@ -102,44 +112,54 @@ pub async fn handle_custom_commands(
     let command_id = parts[0];
 
     let alias_id = message.channel_id.parse::<i32>().unwrap();
-    let channels = ch::channels
+    let Ok(channel) = ch::channels
         .filter(ch::alias_id.eq(&alias_id))
-        .load::<Channel>(conn)
-        .unwrap_or_else(|_| panic!("Failed to load channel data with alias ID {}", alias_id));
+        .get_result::<Channel>(conn)
+    else {
+        return;
+    };
 
-    if let Some(channel) = channels.first() {
-        let Ok(command) = cc::custom_commands
-            .filter(cc::name.eq(command_id))
-            .filter(cc::is_enabled.eq(true))
-            .filter(cc::channel_id.eq(&channel.id).or(cc::is_global.eq(true)))
-            .get_result::<CustomCommand>(conn)
-        else {
+    if let Ok(features) = chp::channel_preferences
+        .filter(chp::channel_id.eq(&channel.id))
+        .select(chp::features)
+        .get_result::<Vec<Option<String>>>(conn)
+    {
+        if features.iter().flatten().any(|x| x.eq(&ChannelFeature::SilentMode.to_string())) {
             return;
-        };
-        
-        for line in &command.messages {
-            let mut line = line.clone();
-
-            if line.starts_with("\\!") {
-                    line = line.substring(1, line.len()).to_string();
-                } else if line.starts_with("!") {
-                    let mut message = message.clone();
-                    message.message_text = line.clone();
-
-                    let Some(request) = Request::try_from(&instance_bundle.configuration.commands, &message, command_loader, conn) else {
-                        continue;
-                    };
-
-                    execute_command(command_loader, instance_bundle, &message, request).await;
-                    continue;
-                }
-
-                instance_bundle
-                    .twitch_irc_client
-                    .say(message.channel_login.clone(), line.clone())
-                    .await
-                    .expect("Failed to send a message");
         }
+    }
+
+    let Ok(command) = cc::custom_commands
+        .filter(cc::name.eq(command_id))
+        .filter(cc::is_enabled.eq(true))
+        .filter(cc::channel_id.eq(&channel.id).or(cc::is_global.eq(true)))
+        .get_result::<CustomCommand>(conn)
+    else {
+        return;
+    };
+        
+    for line in &command.messages {
+        let mut line = line.clone();
+
+        if line.starts_with("\\!") {
+            line = line.substring(1, line.len()).to_string();
+        } else if line.starts_with("!") {
+            let mut message = message.clone();
+            message.message_text = line.clone();
+
+            let Some(request) = Request::try_from(&instance_bundle.configuration.commands, &message, command_loader, conn) else {
+                continue;
+            };
+
+            execute_command(command_loader, instance_bundle, &message, request).await;
+            continue;
+        }
+
+        instance_bundle
+            .twitch_irc_client
+            .say(message.channel_login.clone(), line.clone())
+            .await
+            .expect("Failed to send a message");
     }
 }
 
@@ -176,6 +196,17 @@ pub async fn handle_stream_event(
                     continue;
                 }
             };
+
+            if let Ok(features) = chp::channel_preferences
+                .filter(chp::channel_id.eq(&channel.id))
+                .select(chp::features)
+                .get_result::<Vec<Option<String>>>(conn)
+            {
+                if features.iter().flatten().any(|x| x.eq(&ChannelFeature::SilentMode.to_string())) {
+                    continue;
+                }
+            }
+
             let subs = match EventSubscription::belonging_to(&event).load::<EventSubscription>(conn)
             {
                 Ok(v) => v,
@@ -326,6 +357,15 @@ async fn handle_stalk_message_events(conn: &mut PgConnection, instance_bundle: A
                     return;
                 }
             };
+            if let Ok(features) = chp::channel_preferences
+                .filter(chp::channel_id.eq(&channel.id))
+                .select(chp::features)
+                .get_result::<Vec<Option<String>>>(conn)
+            {
+                if features.iter().flatten().any(|x| x.eq(&ChannelFeature::SilentMode.to_string())) {
+                    return;
+                }
+            }
 
             let subs = match EventSubscription::belonging_to(&event).load::<EventSubscription>(conn)
             {
