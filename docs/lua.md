@@ -64,11 +64,21 @@ Have fun!
 
 + `storage_get() -> String` - Get user's storage cell. Returns an empty string if it was just created.
 + `storage_put(string) -> Bool` - Put string to user's storage cell. Returns true if it was successful.
++ `storage_channel_get() -> String` - Get channel's storage cell. Returns an empty string if it was just created.
++ `storage_channel_put(string) -> Bool` - Put string to channel's storage cell. Returns true if it was successful.
 
 ### JSON
 
 + `json_parse(string) -> Table` - Convert stringified JSON to valid Lua value.
 + `json_stringify(Any) -> String` - Convert Lua value to stringified JSON
+
+### Bot
+
++ `bot_get_compiler_version() -> String` - Get Rust compiler version.
++ `bot_get_uptime() -> Integer` - Get bot uptime in milliseconds.
++ `bot_get_memory_usage() -> Integer` - Get current memory usage in bytes.
++ `bot_get_compile_time() -> Integer` - Get compilation timestamp in seconds.
++ `bot_get_version() -> String` - Get bot version.
 
 ## List of structs
 

@@ -93,7 +93,16 @@ diesel::table! {
 }
 
 diesel::table! {
-    lua_storage (id) {
+    lua_channel_storage (id) {
+        id -> Int4,
+        channel_id -> Int4,
+        lua_id -> Text,
+        value -> Text,
+    }
+}
+
+diesel::table! {
+    lua_user_storage (id) {
         id -> Int4,
         user_id -> Int4,
         lua_id -> Text,
@@ -169,7 +178,8 @@ diesel::joinable!(custom_commands -> channels (channel_id));
 diesel::joinable!(event_subscriptions -> events (event_id));
 diesel::joinable!(event_subscriptions -> users (user_id));
 diesel::joinable!(events -> channels (channel_id));
-diesel::joinable!(lua_storage -> users (user_id));
+diesel::joinable!(lua_channel_storage -> channels (channel_id));
+diesel::joinable!(lua_user_storage -> users (user_id));
 diesel::joinable!(rights -> channels (channel_id));
 diesel::joinable!(rights -> users (user_id));
 diesel::joinable!(sessions -> users (user_id));
@@ -183,7 +193,8 @@ diesel::allow_tables_to_appear_in_same_query!(
     custom_commands,
     event_subscriptions,
     events,
-    lua_storage,
+    lua_channel_storage,
+    lua_user_storage,
     rights,
     session_states,
     sessions,

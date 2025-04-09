@@ -7,10 +7,9 @@ use substring::Substring;
 
 use crate::{
     commands::{
-        Command, CommandArgument, register_lua_functions, register_lua_storage_functions,
+        Command, CommandArgument, lua,
         request::Request,
         response::{Response, ResponseError},
-        setup_lua_compiler,
     },
     instance_bundle::InstanceBundle,
 };
@@ -115,8 +114,8 @@ impl Command for LuaExecutionCommand {
 
         let lua = Lua::new();
 
-        if setup_lua_compiler(&lua).is_err()
-            || register_lua_functions(&lua, instance_bundle).is_err()
+        if lua::setup_lua_compiler(&lua).is_err()
+            || lua::register_lua_functions(&lua, instance_bundle).is_err()
         {
             return Err(ResponseError::SomethingWentWrong);
         }
@@ -177,9 +176,15 @@ impl Command for LuaImportCommand {
 
         let lua = Lua::new();
 
-        if setup_lua_compiler(&lua).is_err()
-            || register_lua_functions(&lua, instance_bundle).is_err()
-            || register_lua_storage_functions(&lua, paste_id, request.sender.id).is_err()
+        if lua::setup_lua_compiler(&lua).is_err()
+            || lua::register_lua_functions(&lua, instance_bundle).is_err()
+            || lua::register_lua_storage_functions(
+                &lua,
+                paste_id,
+                request.sender.id,
+                request.channel.id,
+            )
+            .is_err()
         {
             return Err(ResponseError::SomethingWentWrong);
         }
