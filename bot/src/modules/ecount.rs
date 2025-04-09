@@ -24,9 +24,7 @@ impl Command for EmoteCountCommand {
         instance_bundle: &InstanceBundle,
         request: Request,
     ) -> Result<Response, ResponseError> {
-        let Some(hostname) = &instance_bundle.configuration.third_party.stats_api_url else {
-            return Err(ResponseError::SomethingWentWrong);
-        };
+        let hostname = &instance_bundle.configuration.third_party.stats_api_url;
 
         let Some(emote_name) = &request.message else {
             return Err(ResponseError::NotEnoughArguments(CommandArgument::Value));

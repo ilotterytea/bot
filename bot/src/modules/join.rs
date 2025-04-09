@@ -1,6 +1,6 @@
 use async_trait::async_trait;
-use diesel::{insert_into, ExpressionMethods, QueryDsl, RunQueryDsl};
-use log::warn;
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, insert_into};
+use reqwest::{Client, multipart::Form};
 use serde::Serialize;
 use twitch_api::{
     helix::users::GetUsersRequest,
@@ -9,9 +9,9 @@ use twitch_api::{
 
 use crate::{
     commands::{
+        Command,
         request::Request,
         response::{Response, ResponseError},
-        Command,
     },
     instance_bundle::InstanceBundle,
     localization::LineId,
@@ -134,40 +134,19 @@ impl Command for JoinCommand {
             .await
             .expect("Failed to send a message");
 
-        if let Some(stats_hostname) = &instance_bundle.configuration.third_party.stats_api_url {
-            let url = format!("{}/api/v1/join", stats_hostname);
-
-            let client = reqwest::Client::new();
-            let mut req = client.post(url).json(&StatsAPIJoinBody {
-                twitch_id: alias_id as u32,
-            });
-
-            if let Some(credentials) = &instance_bundle.configuration.third_party.stats_api_password
-            {
-                let mut split = credentials.split(':').collect::<Vec<&str>>();
-
-                if !split.is_empty() {
-                    let name = split[0];
-                    split.remove(0);
-
-                    let password = split.join(":");
-
-                    req = req.basic_auth(
-                        name,
-                        if password.is_empty() {
-                            None
-                        } else {
-                            Some(password)
-                        },
-                    );
-                }
-            }
-
-            if let Ok(res) = req.send().await {
-                if res.status() != reqwest::StatusCode::OK {
-                    warn!("Failed to channel alias ID {} to join Stats API!", alias_id);
-                }
-            }
+        // Joining channel to stats
+        if let Some(stats_password) = &instance_bundle.configuration.third_party.stats_api_password
+        {
+            let client = Client::new();
+            let _ = client
+                .post(format!(
+                    "{}/api/users/join",
+                    &instance_bundle.configuration.third_party.stats_api_url
+                ))
+                .header("Authorization", format!("Statea {}", stats_password))
+                .multipart(Form::new().text("username", request.channel.alias_name.clone()))
+                .send()
+                .await;
         }
 
         Ok(Response::Single(

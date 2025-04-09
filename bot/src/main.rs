@@ -17,7 +17,7 @@ use diesel::{
 };
 use livestream::TwitchLivestreamHelper;
 use log::{debug, error, info};
-use reqwest::Client;
+use reqwest::{Client, multipart::Form};
 use tokio::sync::Mutex;
 use twitch_api::{
     HelixClient,
@@ -156,6 +156,20 @@ async fn main() {
                     .expect("Failed to update channel name");
 
                 channel.alias_name = login.clone();
+            }
+
+            // Adding channel to stats
+            if let Some(stats_password) = &config.third_party.stats_api_password {
+                let client = Client::new();
+                let _ = client
+                    .post(format!(
+                        "{}/api/users/join",
+                        &config.third_party.stats_api_url
+                    ))
+                    .header("Authorization", format!("Statea {}", stats_password))
+                    .multipart(Form::new().text("username", channel.alias_name.clone()))
+                    .send()
+                    .await;
             }
 
             // Subscribing the channel to 7TV events

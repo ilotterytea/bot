@@ -44,7 +44,7 @@ pub struct CommandsSpamConfiguration {
 #[serde(default)]
 pub struct ThirdPartyConfiguration {
     pub docs_url: String,
-    pub stats_api_url: Option<String>,
+    pub stats_api_url: String,
     pub stats_api_password: Option<String>,
     pub pastea_api_url: String,
     pub pastea_api_password: Option<String>,
@@ -123,7 +123,7 @@ impl Default for ThirdPartyConfiguration {
     fn default() -> Self {
         Self {
             docs_url: "https://bot.ilotterytea.kz/wiki".into(),
-            stats_api_url: None,
+            stats_api_url: "https://stats.ilotterytea.kz".into(),
             stats_api_password: None,
             pastea_api_url: "https://paste.ilotterytea.kz".into(),
             pastea_api_password: None,

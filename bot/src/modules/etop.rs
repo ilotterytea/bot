@@ -24,9 +24,7 @@ impl Command for EmoteTopCommand {
         instance_bundle: &InstanceBundle,
         request: Request,
     ) -> Result<Response, ResponseError> {
-        let Some(hostname) = &instance_bundle.configuration.third_party.stats_api_url else {
-            return Err(ResponseError::SomethingWentWrong);
-        };
+        let hostname = &instance_bundle.configuration.third_party.stats_api_url;
 
         // --- PARSING USER INPUT ---
         let providers = ["ttv", "bttv", "ffz", "7tv", "all"];

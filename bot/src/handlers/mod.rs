@@ -3,6 +3,7 @@ use std::{collections::HashSet, sync::Arc};
 use chrono::Utc;
 use diesel::{insert_into, update, BelongingToDsl, BoolExpressionMethods, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 use log::info;
+use reqwest::{multipart::Form, Client};
 use substring::Substring;
 use twitch_api::{helix::chat::GetChattersRequest, types::UserId};
 use twitch_irc::message::{NoticeMessage, PrivmsgMessage};
@@ -324,6 +325,20 @@ pub async fn handle_notice_message(instance_bundle: Arc<InstanceBundle>, message
                     .set(ch::opt_outed_at.eq(now))
                     .execute(conn)
                     .expect("Failed to update channel after notice message");
+
+                // Parting from channel to stats
+                if let Some(stats_password) = &instance_bundle.configuration.third_party.stats_api_password {
+                    let client = Client::new();
+                    let _ = client
+                        .post(format!(
+                            "{}/api/users/part",
+                            &instance_bundle.configuration.third_party.stats_api_url
+                        ))
+                        .header("Authorization", format!("Statea {}", stats_password))
+                        .multipart(Form::new().text("username", channel.alias_name.clone()))
+                        .send()
+                        .await;
+                }
 
                 if let Ok(features) = chp::channel_preferences.filter(chp::channel_id.eq(&channel.id)).select(chp::features).get_result::<Vec<Option<String>>>(conn) {
                     if features.iter().flatten().any(|x| x.eq(&ChannelFeature::Notify7TVUpdates.to_string())) {
