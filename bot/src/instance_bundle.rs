@@ -3,8 +3,9 @@ use std::{collections::HashSet, sync::Arc};
 use common::config::Configuration;
 use reqwest::Client;
 use tokio::sync::Mutex;
-use twitch_api::{twitch_oauth2::UserToken, types::UserId, HelixClient};
-use twitch_irc::{login::StaticLoginCredentials, SecureTCPTransport, TwitchIRCClient};
+use twitch_api::{HelixClient, twitch_oauth2::UserToken, types::UserId};
+use twitch_emotes::seventv::{SevenTVAPIClient, SevenTVWSClient};
+use twitch_irc::{SecureTCPTransport, TwitchIRCClient, login::StaticLoginCredentials};
 
 use crate::localization::Localizator;
 
@@ -16,6 +17,6 @@ pub struct InstanceBundle {
     pub configuration: Arc<Configuration>,
 
     pub twitch_livestream_websocket_data: Arc<Mutex<HashSet<UserId>>>,
-
-    pub seventv_eventapi_data: Arc<Mutex<HashSet<UserId>>>,
+    pub stv_client: Arc<Mutex<SevenTVWSClient>>,
+    pub stv_api_client: Arc<SevenTVAPIClient>,
 }

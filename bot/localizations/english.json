@@ -39,7 +39,7 @@
   "misc.ascending": "ascending",
   "misc.descending": "descending",
   "provider.7tv": "(7TV)",
-  "emotes.update": "{0} {1} updated the emote name from {2} to {3}",
+  "emotes.update": "{0} {1} updated the emote name from {3} to {2}",
   "emotes.push": "{0} {1} added the {2} emote",
   "emotes.pull": "{0} {1} removed the {2} emote",
   "msg.no_message": "{sender.alias_name}: No message specified for command",

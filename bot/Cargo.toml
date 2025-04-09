@@ -21,7 +21,12 @@ serde_json = "1.0.140"
 substring = "1.4.5"
 tokio = { version = "1.44.2", features = ["full"] }
 twitch-irc = "5.0.1"
-twitch_api = { version = "0.7.2", features = ["twitch_oauth2", "helix", "reqwest", "eventsub"] }
+twitch_api = { version = "0.7.2", features = [
+    "twitch_oauth2",
+    "helix",
+    "reqwest",
+    "eventsub",
+] }
 version_check = "0.9.5"
 log = "0.4.27"
 uuid = "1.16.0"
@@ -30,3 +35,4 @@ mlua = { version = "0.10.3", features = ["async", "luau", "send", "serialize"] }
 reqwest = { version = "0.12.15", features = ["json", "multipart"] }
 rand = "0.9.0"
 env_logger = "0.11.8"
+twitch_emotes = { git = "https://seed.ilotterytea.kz/z3DgFeoRrTjJYaP8rHQV8vetV88L1.git" }

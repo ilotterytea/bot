@@ -39,7 +39,7 @@
   "misc.ascending": "по возрастанию",
   "misc.descending": "по убыванию",
   "provider.7tv": "(7TV)",
-  "emotes.update": "{0} {1} переименовал эмоут {2} на {3}",
+  "emotes.update": "{0} {1} переименовал эмоут {3} на {2}",
   "emotes.push": "{0} {1} добавил эмоут {2}",
   "emotes.pull": "{0} {1} удалил эмоут {2}",
   "msg.no_message": "{sender.alias_name}: Сообщение для команды не указано",

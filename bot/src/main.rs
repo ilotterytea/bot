@@ -1,22 +1,19 @@
 use std::{collections::HashSet, process::exit, sync::Arc, time::Duration};
 
 use crate::{
-    commands::CommandLoader,
-    handlers::*,
-    instance_bundle::InstanceBundle,
-    localization::Localizator,
-    //seventv::{SevenTVWebsocketClient, api::SevenTVAPIClient},
-    shared_variables::TIMER_CHECK_DELAY,
+    commands::CommandLoader, handlers::*, instance_bundle::InstanceBundle,
+    localization::Localizator, shared_variables::TIMER_CHECK_DELAY,
 };
 
 use common::{
     config::Configuration,
     establish_connection,
-    models::NewChannel,
+    models::{ChannelFeature, ChannelPreference, NewChannel},
     schema::{channels::dsl as ch, events::dsl as ev},
 };
 use diesel::{
-    Connection, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl, insert_into, update,
+    BelongingToDsl, Connection, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl,
+    insert_into, update,
 };
 use livestream::TwitchLivestreamHelper;
 use log::{debug, error, info};
@@ -27,6 +24,10 @@ use twitch_api::{
     client::ClientDefault,
     twitch_oauth2::{AccessToken, UserToken},
     types::{UserId, UserIdRef},
+};
+use twitch_emotes::{
+    emotes::RetrieveEmoteWS,
+    seventv::{SevenTVAPIClient, SevenTVWSClient},
 };
 use twitch_irc::{
     ClientConfig, SecureTCPTransport, TwitchIRCClient, login::StaticLoginCredentials,
@@ -54,7 +55,11 @@ async fn main() {
         std::env::set_var("DATABASE_URL", config.database.url.clone());
         std::env::set_var(
             "BOT_START_TIMESTAMP",
-            chrono::Utc::now().naive_utc().and_utc().timestamp().to_string(),
+            chrono::Utc::now()
+                .naive_utc()
+                .and_utc()
+                .timestamp()
+                .to_string(),
         );
     }
 
@@ -103,6 +108,11 @@ async fn main() {
 
     let helix_client = Arc::new(HelixClient::with_client(reqwest_client));
 
+    let stv_api_client = SevenTVAPIClient::new();
+    let (mut stv_messages, mut stv_client) = SevenTVWSClient::new()
+        .await
+        .expect("Error creating a 7TV Instance");
+
     let conn = &mut establish_connection();
 
     let mut channels: Vec<common::models::Channel> = ch::channels
@@ -143,6 +153,25 @@ async fn main() {
                 channel.alias_name = login.clone();
             }
 
+            // Subscribing the channel to 7TV events
+            if let Ok(features) = ChannelPreference::belonging_to(&channel)
+                .select(common::schema::channel_preferences::dsl::features)
+                .get_result::<Vec<Option<String>>>(conn)
+            {
+                if features
+                    .iter()
+                    .flatten()
+                    .any(|x| x.eq(&ChannelFeature::Notify7TVUpdates.to_string()))
+                {
+                    if let Some(stv_user) = stv_api_client
+                        .get_user_by_twitch_id(channel.alias_id as usize)
+                        .await
+                    {
+                        stv_client.subscribe_emote_set(stv_user.emote_set_id.clone());
+                    }
+                }
+            }
+
             irc_client.join(login).expect("Failed to join a channel");
 
             info!(
@@ -156,6 +185,23 @@ async fn main() {
             );
         }
     }
+
+    let stv_api_client = Arc::new(stv_api_client);
+    let stv_client = Arc::new(Mutex::new(stv_client));
+
+    let stv_thread = tokio::spawn({
+        let stv_client = stv_client.clone();
+        async move {
+            loop {
+                let mut stv_client = stv_client.lock().await;
+                stv_client
+                    .process(&mut stv_messages)
+                    .await
+                    .expect("Error processing 7TV messages");
+            }
+        }
+    });
+
     let livestream_data = Arc::new(Mutex::new({
         let ids = ev::events
             .filter(ev::target_alias_id.is_not_null())
@@ -168,18 +214,6 @@ async fn main() {
             .collect::<HashSet<UserId>>()
     }));
 
-    let seventv_data = Arc::new(Mutex::new({
-        let ids = ch::channels
-            .filter(ch::opt_outed_at.is_null())
-            .select(ch::alias_id)
-            .load::<i32>(conn)
-            .expect("Failed to get channels");
-
-        ids.iter()
-            .map(|x| UserId::new(x.to_string()))
-            .collect::<HashSet<UserId>>()
-    }));
-
     let config = Arc::new(config);
 
     let instances = Arc::new(InstanceBundle {
@@ -189,8 +223,25 @@ async fn main() {
         localizator: localizator.clone(),
         configuration: config.clone(),
         twitch_livestream_websocket_data: livestream_data.clone(),
-        seventv_eventapi_data: seventv_data.clone(),
+        stv_client: stv_client.clone(),
+        stv_api_client: stv_api_client.clone(),
     });
+
+    // Setting up 7TV WS client handlers
+    let mut stv_client = stv_client.lock().await;
+    stv_client.on_emote_create(handlers::emotes::handle_seventv_emote_event(
+        instances.clone(),
+        localization::LineId::EmotesPushed,
+    ));
+    stv_client.on_emote_delete(handlers::emotes::handle_seventv_emote_event(
+        instances.clone(),
+        localization::LineId::EmotesPulled,
+    ));
+    stv_client.on_emote_update(handlers::emotes::handle_seventv_emote_event(
+        instances.clone(),
+        localization::LineId::EmotesUpdated,
+    ));
+    drop(stv_client);
 
     let mut command_loader = CommandLoader::new(instances.clone());
     command_loader.load().await.expect("Error loading commands");
@@ -233,5 +284,5 @@ async fn main() {
         }
     });
 
-    let _ = tokio::join!(irc_thread, timer_thread, livestream_thread);
+    let _ = tokio::join!(irc_thread, timer_thread, livestream_thread, stv_thread);
 }

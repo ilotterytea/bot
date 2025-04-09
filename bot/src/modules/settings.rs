@@ -110,10 +110,28 @@ impl Command for SettingsCommand {
                             true
                         }
                         None => {
-                            feats.push(v);
+                            feats.push(v.clone());
                             false
                         }
                     };
+
+                    if v.eq(&ChannelFeature::Notify7TVUpdates) {
+                        let mut stv_client = instance_bundle.stv_client.lock().await;
+
+                        let Some(user) = instance_bundle
+                            .stv_api_client
+                            .get_user_by_twitch_id(request.channel.alias_id as usize)
+                            .await
+                        else {
+                            return Err(ResponseError::NotFound(request.channel.alias_name));
+                        };
+
+                        if is_removed {
+                            stv_client.unsubscribe_emote_set(user.emote_set_id);
+                        } else {
+                            stv_client.subscribe_emote_set(user.emote_set_id);
+                        }
+                    }
 
                     let feats: Vec<String> = feats.iter().map(|x| x.to_string()).collect();
 

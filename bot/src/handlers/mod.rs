@@ -15,11 +15,13 @@ use crate::{
 
 use common::{
     establish_connection, models::{
-        Channel, CustomCommand, Event, EventFlag, EventSubscription, EventType, NewAction, Timer, User
+        Channel, ChannelFeature, CustomCommand, Event, EventFlag, EventSubscription, EventType, NewAction, Timer, User
     }, schema::{
-        actions::dsl as ac, channels::dsl as ch, custom_commands::dsl as cc, events::dsl as ev, timers::dsl as ti, users::dsl as us
+        actions::dsl as ac, channel_preferences::dsl as chp, channels::dsl as ch, custom_commands::dsl as cc, events::dsl as ev, timers::dsl as ti, users::dsl as us
     }
 };
+
+pub mod emotes;
 
 pub async fn handle_chat_message(
     instance_bundle: Arc<InstanceBundle>,
@@ -281,22 +283,24 @@ pub async fn handle_notice_message(instance_bundle: Arc<InstanceBundle>, message
                     }
                 );
 
+                instance_bundle.twitch_irc_client.part(login.clone());
+
                 let now = Utc::now().naive_utc();
 
-                update(ch::channels.filter(ch::alias_name.eq(&login)))
+                let channel =  ch::channels.filter(ch::alias_name.eq(&login)).get_result::<Channel>(conn).expect("Error fetching channel");
+
+                update(ch::channels.find(&channel.id))
                     .set(ch::opt_outed_at.eq(now))
                     .execute(conn)
                     .expect("Failed to update channel after notice message");
 
-                let mut data = instance_bundle.seventv_eventapi_data.lock().await;
-                let user_id = UserId::new(login.clone());
-
-                if let Some(id) = data.iter().find(|x| (*x).eq(&user_id)) {
-                    let id = id.clone();
-                    data.remove(&id);
+                if let Ok(features) = chp::channel_preferences.filter(chp::channel_id.eq(&channel.id)).select(chp::features).get_result::<Vec<Option<String>>>(conn) {
+                    if features.iter().flatten().any(|x| x.eq(&ChannelFeature::Notify7TVUpdates.to_string())) {
+                        let Some(stv_user) = instance_bundle.stv_api_client.get_user_by_twitch_id(channel.alias_id as usize).await else {return;};
+                        let mut stv_client = instance_bundle.stv_client.lock().await;
+                        stv_client.unsubscribe_emote_set(stv_user.emote_set_id);
+                    }
                 }
-
-                instance_bundle.twitch_irc_client.part(login);
             }
             _ => {}
 
