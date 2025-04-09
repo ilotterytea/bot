@@ -26,6 +26,7 @@ use twitch_api::{
     types::{UserId, UserIdRef},
 };
 use twitch_emotes::{
+    betterttv::BetterTTVWSClient,
     emotes::RetrieveEmoteWS,
     seventv::{SevenTVAPIClient, SevenTVWSClient},
 };
@@ -113,6 +114,10 @@ async fn main() {
         .await
         .expect("Error creating a 7TV Instance");
 
+    let (mut bttv_messages, mut bttv_client) = BetterTTVWSClient::new()
+        .await
+        .expect("Error creating a BTTV instance");
+
     let conn = &mut establish_connection();
 
     let mut channels: Vec<common::models::Channel> = ch::channels
@@ -158,17 +163,19 @@ async fn main() {
                 .select(common::schema::channel_preferences::dsl::features)
                 .get_result::<Vec<Option<String>>>(conn)
             {
-                if features
-                    .iter()
-                    .flatten()
-                    .any(|x| x.eq(&ChannelFeature::Notify7TVUpdates.to_string()))
-                {
+                let features: Vec<String> = features.into_iter().flatten().collect();
+
+                if features.contains(&ChannelFeature::Notify7TVUpdates.to_string()) {
                     if let Some(stv_user) = stv_api_client
                         .get_user_by_twitch_id(channel.alias_id as usize)
                         .await
                     {
                         stv_client.subscribe_emote_set(stv_user.emote_set_id.clone());
                     }
+                }
+
+                if features.contains(&ChannelFeature::NotifyBTTVUpdates.to_string()) {
+                    bttv_client.join_channel(channel.alias_id as usize);
                 }
             }
 
@@ -202,6 +209,21 @@ async fn main() {
         }
     });
 
+    let bttv_client = Arc::new(Mutex::new(bttv_client));
+
+    let bttv_thread = tokio::spawn({
+        let bttv_client = bttv_client.clone();
+        async move {
+            loop {
+                let mut bttv_client = bttv_client.lock().await;
+                bttv_client
+                    .process(&mut bttv_messages)
+                    .await
+                    .expect("Error processing BTTV messages");
+            }
+        }
+    });
+
     let livestream_data = Arc::new(Mutex::new({
         let ids = ev::events
             .filter(ev::target_alias_id.is_not_null())
@@ -225,6 +247,7 @@ async fn main() {
         twitch_livestream_websocket_data: livestream_data.clone(),
         stv_client: stv_client.clone(),
         stv_api_client: stv_api_client.clone(),
+        bttv_client: bttv_client.clone(),
     });
 
     // Setting up 7TV WS client handlers
@@ -242,6 +265,22 @@ async fn main() {
         localization::LineId::EmotesUpdated,
     ));
     drop(stv_client);
+
+    // Setting up BTTV WS client handlers
+    let mut bttv_client = bttv_client.lock().await;
+    bttv_client.on_emote_create(handlers::emotes::handle_betterttv_emote_event(
+        instances.clone(),
+        localization::LineId::EmotesPushed,
+    ));
+    bttv_client.on_emote_delete(handlers::emotes::handle_betterttv_emote_event(
+        instances.clone(),
+        localization::LineId::EmotesPulled,
+    ));
+    bttv_client.on_emote_update(handlers::emotes::handle_betterttv_emote_event(
+        instances.clone(),
+        localization::LineId::EmotesUpdated,
+    ));
+    drop(bttv_client);
 
     let mut command_loader = CommandLoader::new(instances.clone());
     command_loader.load().await.expect("Error loading commands");
@@ -284,5 +323,11 @@ async fn main() {
         }
     });
 
-    let _ = tokio::join!(irc_thread, timer_thread, livestream_thread, stv_thread);
+    let _ = tokio::join!(
+        irc_thread,
+        timer_thread,
+        livestream_thread,
+        stv_thread,
+        bttv_thread
+    );
 }

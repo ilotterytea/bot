@@ -131,6 +131,14 @@ impl Command for SettingsCommand {
                         } else {
                             stv_client.subscribe_emote_set(user.emote_set_id);
                         }
+                    } else if v.eq(&ChannelFeature::NotifyBTTVUpdates) {
+                        let mut bttv_client = instance_bundle.bttv_client.lock().await;
+
+                        if is_removed {
+                            bttv_client.part_channel(request.channel.alias_id as usize);
+                        } else {
+                            bttv_client.join_channel(request.channel.alias_id as usize);
+                        }
                     }
 
                     let feats: Vec<String> = feats.iter().map(|x| x.to_string()).collect();

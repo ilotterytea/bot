@@ -6,6 +6,7 @@ The `!set` command gives broadcasters ability to customize the bot as they need 
 
 ## Available features
 + `notify_7tv_updates` - Enable notifications for changes to the channel's 7TV emote set.
++ `notify_bttv_updates` - Notify about BetterTTV updates on the channel.
 + `silent_mode` - Makes it so that a bot can no longer talk in chat.
 
 ## Syntax

@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use diesel::{BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl};
+use substring::Substring;
 use twitch_emotes::emotes::Emote;
 
 use crate::{instance_bundle::InstanceBundle, localization::LineId};
@@ -9,6 +10,66 @@ use common::{
     models::{Channel, ChannelFeature, ChannelPreference},
     schema::channels::dsl as ch,
 };
+
+pub fn handle_betterttv_emote_event(
+    instance_bundle: Arc<InstanceBundle>,
+    line_id: LineId,
+) -> impl Fn(String, Option<String>, Emote) {
+    let instances = instance_bundle.clone();
+
+    move |channel_id, _, emote| {
+        tokio::spawn({
+            let instances = instances.clone();
+            let channel_id = channel_id
+                .substring("twitch:".len(), channel_id.len())
+                .parse::<usize>()
+                .expect("Error converting str to usize");
+            let line_id = line_id.clone();
+
+            async move {
+                let conn = &mut establish_connection();
+                let Ok(channel) = ch::channels
+                    .filter(ch::alias_id.eq(channel_id as i32))
+                    .get_result::<Channel>(conn)
+                else {
+                    return;
+                };
+
+                let Ok(channel_preference) =
+                    ChannelPreference::belonging_to(&channel).get_result::<ChannelPreference>(conn)
+                else {
+                    return;
+                };
+
+                if channel_preference
+                    .features
+                    .iter()
+                    .flatten()
+                    .any(|x| x.eq(&ChannelFeature::SilentMode.to_string()))
+                {
+                    return;
+                }
+
+                instances
+                    .twitch_irc_client
+                    .say(
+                        channel.alias_name,
+                        instances.localizator.formatted_text(
+                            &channel_preference.language,
+                            line_id,
+                            if let Some(original_code) = &emote.original_code {
+                                vec!["(BTTV)", "-", &emote.code, original_code]
+                            } else {
+                                vec!["(BTTV)", "-", &emote.code]
+                            },
+                        ),
+                    )
+                    .await
+                    .expect("Error sending message");
+            }
+        });
+    }
+}
 
 pub fn handle_seventv_emote_event(
     instance_bundle: Arc<InstanceBundle>,
@@ -21,9 +82,12 @@ pub fn handle_seventv_emote_event(
             let instances = instances.clone();
             let line_id = line_id.clone();
             async move {
-                let Some((channel, channel_preference, can_post)) =
-                    get_internal_data(&instances, &emote_set_id, ChannelFeature::Notify7TVUpdates)
-                        .await
+                let Some((channel, channel_preference, can_post)) = get_internal_data_with_seventv(
+                    &instances,
+                    &emote_set_id,
+                    ChannelFeature::Notify7TVUpdates,
+                )
+                .await
                 else {
                     return;
                 };
@@ -65,7 +129,7 @@ pub fn handle_seventv_emote_event(
     }
 }
 
-async fn get_internal_data(
+async fn get_internal_data_with_seventv(
     instances: &InstanceBundle,
     emote_set_id: &str,
     feature: ChannelFeature,
