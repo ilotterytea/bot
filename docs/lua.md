@@ -72,9 +72,14 @@ Have fun!
 + `json_parse(string) -> Table` - Convert stringified JSON to valid Lua value.
 + `json_stringify(Any) -> String` - Convert Lua value to stringified JSON
 
+### String
+
++ `str_split(value: String, separator: String) -> String[]` - Split a string by the delimiter.
+
 ### Bot
 
-+ `err(error_id: String, arguments: Table) -> Error` - Generate an error struct.
++ `err(error_id: String, arguments: Table) -> Error` - Generate an [error](#error).
++ `bot_config() -> BotConfiguration` - Get [bot configuration](#bot_configuration).
 + `bot_get_compiler_version() -> String` - Get Rust compiler version.
 + `bot_get_uptime() -> Integer` - Get bot uptime in milliseconds.
 + `bot_get_memory_usage() -> Integer` - Get current memory usage in bytes.
@@ -128,5 +133,27 @@ Error {
     type: String,
     name: String,
     arguments: String[]
+}
+```
+
+### Bot configuration
+
+```
+BotConfiguration {
+    bot: {
+        owner_twitch_id: Integer | nil
+    },
+    commands: {
+        default_prefix: String,
+        default_language: String
+        spam: {
+            max_count: Integer
+        }
+    },
+    third_party: {
+        docs_url: String,
+        stats_api_url: String,
+        pastea_api_url: String
+    }
 }
 ```

@@ -1,7 +1,7 @@
-use std::time::Instant;
+use std::{sync::Arc, time::Instant};
 
 use chrono::Utc;
-use common::{establish_connection, format_timestamp};
+use common::{config::Configuration, establish_connection, format_timestamp};
 use mlua::{Lua, LuaSerdeExt, Table, Value, VmState};
 
 use crate::{instance_bundle::InstanceBundle, localization::LineId};
@@ -57,8 +57,9 @@ pub fn register_lua_functions(lua: &Lua, instance_bundle: &InstanceBundle) -> ml
     lua.globals().set("print", print)?;
 
     register_lua_json_functions(lua)?;
+    register_lua_str_functions(lua)?;
     register_lua_time_functions(lua)?;
-    register_lua_bot_functions(lua)?;
+    register_lua_bot_functions(lua, instance_bundle.configuration.clone())?;
 
     Ok(())
 }
@@ -230,6 +231,18 @@ pub fn register_lua_json_functions(lua: &Lua) -> mlua::Result<()> {
     Ok(())
 }
 
+pub fn register_lua_str_functions(lua: &Lua) -> mlua::Result<()> {
+    let str_split = lua.create_function(|_, (value, delimiter): (String, String)| {
+        Ok(value
+            .split(&delimiter)
+            .map(|x| x.to_string())
+            .collect::<Vec<String>>())
+    })?;
+    lua.globals().set("str_split", str_split)?;
+
+    Ok(())
+}
+
 pub fn register_lua_time_functions(lua: &Lua) -> mlua::Result<()> {
     let time_current = lua.create_function(|_, ()| Ok(Utc::now().timestamp_millis()))?;
     lua.globals().set("time_current", time_current)?;
@@ -242,7 +255,10 @@ pub fn register_lua_time_functions(lua: &Lua) -> mlua::Result<()> {
     Ok(())
 }
 
-pub fn register_lua_bot_functions(lua: &Lua) -> mlua::Result<()> {
+pub fn register_lua_bot_functions(
+    lua: &Lua,
+    configuration: Arc<Configuration>,
+) -> mlua::Result<()> {
     let bot_get_compiler_version =
         lua.create_function(|_, ()| Ok(compile_time::rustc_version_str!()))?;
     lua.globals()
@@ -268,6 +284,49 @@ pub fn register_lua_bot_functions(lua: &Lua) -> mlua::Result<()> {
 
     let bot_get_version = lua.create_function(|_, ()| Ok(env!("CARGO_PKG_VERSION")))?;
     lua.globals().set("bot_get_version", bot_get_version)?;
+
+    let bot_config = lua.create_function({
+        let lua = lua.clone();
+        let configuration = configuration.clone();
+        move |_, ()| {
+            let table = lua.create_table()?;
+
+            let bot_table = lua.create_table()?;
+            bot_table.set("owner_twitch_id", configuration.bot.owner_twitch_id)?;
+            table.set("bot", bot_table)?;
+
+            let commands_table = lua.create_table()?;
+            commands_table.set(
+                "default_prefix",
+                configuration.commands.default_prefix.clone(),
+            )?;
+            commands_table.set(
+                "default_language",
+                configuration.commands.default_language.clone(),
+            )?;
+            commands_table.set("spam", {
+                let spam_table = lua.create_table()?;
+                spam_table.set("max_count", configuration.commands.spam.max_count)?;
+                spam_table
+            })?;
+            table.set("commands", commands_table)?;
+
+            let third_party_table = lua.create_table()?;
+            third_party_table.set("docs_url", configuration.third_party.docs_url.clone())?;
+            third_party_table.set(
+                "stats_api_url",
+                configuration.third_party.stats_api_url.clone(),
+            )?;
+            third_party_table.set(
+                "pastea_api_url",
+                configuration.third_party.pastea_api_url.clone(),
+            )?;
+            table.set("third_party", third_party_table)?;
+
+            Ok(table)
+        }
+    })?;
+    lua.globals().set("bot_config", bot_config)?;
 
     Ok(())
 }
