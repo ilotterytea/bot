@@ -48,6 +48,13 @@ fn run_lua_script(lua: Lua, request: &Request, script: String) -> Result<Respons
                 Value::Number(n) => Ok(Response::Single(beautify_str(n.to_string()))),
                 Value::Nil => Ok(Response::Single(beautify_str("nil".to_string()))),
                 Value::Function(f) => run_lua_function(lua, request, f),
+                Value::Table(t) => {
+                    if let Some(err) = ResponseError::from_lua_table(&t) {
+                        Err(err)
+                    } else {
+                        Err(ResponseError::LuaUnsupportedResponseType("Table".into()))
+                    }
+                }
                 _ => Err(ResponseError::LuaUnsupportedResponseType(
                     v.type_name().to_string(),
                 )),
@@ -85,6 +92,13 @@ fn run_lua_function(
                 Value::Boolean(b) => Ok(Response::Single(beautify_str(b.to_string()))),
                 Value::Number(n) => Ok(Response::Single(beautify_str(n.to_string()))),
                 Value::Nil => Ok(Response::Single(beautify_str("nil".to_string()))),
+                Value::Table(t) => {
+                    if let Some(err) = ResponseError::from_lua_table(&t) {
+                        Err(err)
+                    } else {
+                        Err(ResponseError::LuaUnsupportedResponseType("Table".into()))
+                    }
+                }
                 _ => Err(ResponseError::LuaUnsupportedResponseType(
                     v.type_name().to_string(),
                 )),

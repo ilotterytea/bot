@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{error::Error, fmt::Display, str::FromStr, sync::Arc};
 
 use crate::{
     instance_bundle::InstanceBundle,
@@ -160,11 +160,17 @@ impl CommandLoader {
         {
             Ok(v) => match v {
                 Value::String(v) => Ok(Response::Single(v.to_string_lossy())),
-                Value::Table(t) => Ok(Response::Multiple(
+                Value::Table(t) => {
+                    if let Some(error) = ResponseError::from_lua_table(&t) {
+                        return Err(error);
+                    }
+
+                    Ok(Response::Multiple(
                     t.sequence_values::<String>()
                         .collect::<mlua::Result<_>>()
                         .expect("Error collecting table"),
-                )),
+                    ))
+                }
                 _ => Err(ResponseError::LuaUnsupportedResponseType(
                     v.type_name().to_string(),
                 )),
@@ -236,5 +242,39 @@ impl CommandArgument {
             Self::Value => LineId::ArgumentValue,
             Self::Amount => LineId::ArgumentAmount,
         }
+    }
+}
+
+impl FromStr for CommandArgument {
+    type Err = Box<dyn Error>;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "subcommand" => Ok(Self::Subcommand),
+            "message" => Ok(Self::Message),
+            "interval" => Ok(Self::Interval),
+            "name" => Ok(Self::Name),
+            "target" => Ok(Self::Target),
+            "value" => Ok(Self::Amount),
+            _ => Err(format!("Failed to parse CommandArgument from {}", s).into()),
+        }
+    }
+}
+
+impl Display for CommandArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match &self {
+                Self::Subcommand => "subcommand",
+                Self::Message => "message",
+                Self::Interval => "interval",
+                Self::Name => "name",
+                Self::Target => "target",
+                Self::Value => "value",
+                Self::Amount => "amount",
+            }
+        )
     }
 }

@@ -74,6 +74,7 @@ Have fun!
 
 ### Bot
 
++ `err(error_id: String, arguments: Table) -> Error` - Generate an error struct.
 + `bot_get_compiler_version() -> String` - Get Rust compiler version.
 + `bot_get_uptime() -> Integer` - Get bot uptime in milliseconds.
 + `bot_get_memory_usage() -> Integer` - Get current memory usage in bytes.
@@ -117,5 +118,15 @@ Request {
         level: String,
         is_fixed: Bool
     }
+}
+```
+
+### Error
+
+```
+Error {
+    type: String,
+    name: String,
+    arguments: String[]
 }
 ```

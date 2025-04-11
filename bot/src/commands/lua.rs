@@ -6,7 +6,7 @@ use mlua::{Lua, LuaSerdeExt, Table, Value, VmState};
 
 use crate::{instance_bundle::InstanceBundle, localization::LineId};
 
-use super::request::Request;
+use super::{request::Request, response::ResponseError};
 
 pub fn register_lua_functions(lua: &Lua, instance_bundle: &InstanceBundle) -> mlua::Result<()> {
     // --- BOT FUNCTIONS ---
@@ -30,6 +30,27 @@ pub fn register_lua_functions(lua: &Lua, instance_bundle: &InstanceBundle) -> ml
     })?;
     lua.globals()
         .set("l10n_formatted_text_request", l10n_formatted_text_request)?;
+
+    let err = lua.create_function({
+        let lua = lua.clone();
+        move |_, (name, arguments): (String, Table)| {
+            let args = arguments
+                .sequence_values()
+                .flatten()
+                .collect::<Vec<String>>();
+
+            let Some(error) = ResponseError::from_str_and_args(&name, &args) else {
+                return Err(mlua::Error::RuntimeError(format!(
+                    "Failed to parse ResponseError from {} and args -> {}",
+                    name,
+                    args.join(", ")
+                )));
+            };
+
+            error.to_lua_table(&lua)
+        }
+    })?;
+    lua.globals().set("err", err)?;
 
     // --- LUA FUNCTIONS ---
     let print = lua.create_function(|_, ()| Ok(()))?;
