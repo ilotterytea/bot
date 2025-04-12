@@ -5,6 +5,7 @@ use diesel::{insert_into, update, BelongingToDsl, BoolExpressionMethods, Express
 use log::info;
 use reqwest::{multipart::Form, Client};
 use substring::Substring;
+use tokio::sync::Mutex;
 use twitch_api::{helix::chat::GetChattersRequest, types::UserId};
 use twitch_irc::message::{NoticeMessage, PrivmsgMessage};
 
@@ -26,11 +27,13 @@ pub mod emotes;
 
 pub async fn handle_chat_message(
     instance_bundle: Arc<InstanceBundle>,
-    command_loader: Arc<CommandLoader>,
+    command_loader: Arc<Mutex<CommandLoader>>,
     message: PrivmsgMessage,
 ) {
     let conn = &mut establish_connection();
     handle_stalk_message_events(conn, instance_bundle.clone(), message.clone()).await;
+
+    let command_loader = command_loader.lock().await;
 
     if let Some(request) = Request::try_from(&instance_bundle.configuration.commands, &message, &command_loader, conn) {
         execute_command(&command_loader, &instance_bundle, &message, request.clone()).await;

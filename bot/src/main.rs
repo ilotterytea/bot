@@ -298,7 +298,10 @@ async fn main() {
 
     let mut command_loader = CommandLoader::new(instances.clone());
     command_loader.load().await.expect("Error loading commands");
-    let command_loader = Arc::new(command_loader);
+    let command_loader = Arc::new(Mutex::new(command_loader));
+
+    #[cfg(debug_assertions)]
+    CommandLoader::enable_hot_reloading(command_loader.clone());
 
     let timer_thread = tokio::spawn({
         let instances = instances.clone();

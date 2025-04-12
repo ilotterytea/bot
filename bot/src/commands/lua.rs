@@ -53,8 +53,11 @@ pub fn register_lua_functions(lua: &Lua, instance_bundle: &InstanceBundle) -> ml
     lua.globals().set("err", err)?;
 
     // --- LUA FUNCTIONS ---
-    let print = lua.create_function(|_, ()| Ok(()))?;
-    lua.globals().set("print", print)?;
+    #[cfg(not(debug_assertions))]
+    {
+        let print = lua.create_function(|_, ()| Ok(()))?;
+        lua.globals().set("print", print)?;
+    }
 
     register_lua_json_functions(lua)?;
     register_lua_str_functions(lua)?;

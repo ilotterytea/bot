@@ -38,10 +38,13 @@ use self::{
     response::{Response, ResponseError},
 };
 
+use tokio::sync::Mutex;
+
 pub mod lua;
 pub mod request;
 pub mod response;
 
+const MODULE_DIRECTORY_PATH: &str = "./modules";
 const MODULE_DIRECTORY: Dir<'_> = include_dir::include_dir!("./modules");
 
 #[async_trait]
@@ -118,7 +121,12 @@ impl CommandLoader {
         lua::register_lua_functions(&self.lua, &self.instance_bundle)?;
 
         log::info!("Loading Lua commands...");
+
+        #[cfg(not(debug_assertions))]
         self.load_directory(&MODULE_DIRECTORY)?;
+
+        #[cfg(debug_assertions)]
+        self.load_directory(MODULE_DIRECTORY_PATH)?;
 
         log::info!("Finished!");
         Ok(())
@@ -179,6 +187,7 @@ impl CommandLoader {
         }
     }
 
+    #[cfg(not(debug_assertions))]
     fn load_directory(&mut self, dir: &Dir<'_>) -> mlua::Result<()> {
         for entry in dir.entries() {
             if let Some(dir) = entry.as_dir() {
@@ -189,9 +198,36 @@ impl CommandLoader {
             if let Some(file) = entry.as_file() {
                 if let Some(contents) = file.contents_utf8() {
                     lua::setup_lua_compiler(&self.lua).expect("Error setting up Lua compiler");
-
                     let table = self.lua.load(contents).eval::<Table>()?;
+                    self.load_lua_command(&table)?;
+                }
+            }
+        }
 
+        Ok(())
+    }
+
+    #[cfg(debug_assertions)]
+    fn load_directory(&mut self, dir: &str) -> mlua::Result<()> {
+        for entry in std::fs::read_dir(dir)? {
+            let entry = entry?;
+            let path = entry.path();
+
+            if path.is_dir() {
+                self.load_directory(path.to_str().unwrap())?;
+                continue;
+            }
+
+            let contents = std::fs::read_to_string(path)?;
+            lua::setup_lua_compiler(&self.lua).expect("Error setting up Lua compiler");
+            let table = self.lua.load(contents).eval::<Table>()?;
+            self.load_lua_command(&table)?;
+        }
+
+        Ok(())
+    }
+
+    fn load_lua_command(&mut self, table: &Table) -> mlua::Result<()> {
                     let command = LuaCommand {
                         name: table.get("name")?,
                         delay_sec: table
@@ -212,11 +248,80 @@ impl CommandLoader {
                     log::info!("Successfully loaded \"{}\" command!", &command.name);
 
                     self.lua_commands.push(command);
-                }
-            }
-        }
 
         Ok(())
+    }
+
+    #[cfg(debug_assertions)]
+    pub fn enable_hot_reloading(loader: Arc<Mutex<Self>>) {
+        use notify::{Config, RecommendedWatcher, Watcher};
+        use std::{
+            collections::HashMap,
+            path::{Path, PathBuf},
+            sync::mpsc::channel,
+            time::{Duration, Instant},
+        };
+
+        tokio::spawn({
+            let loader = loader.clone();
+            async move {
+                log::info!("Listening for changes in Lua modules...");
+
+                let (tx, rx) = channel();
+                let mut watcher = RecommendedWatcher::new(
+                    tx,
+                    Config::default()
+                        .with_poll_interval(Duration::from_secs(2))
+                        .with_compare_contents(true),
+                )
+                .expect("Error creating file watcher");
+
+                watcher
+                    .watch(
+                        Path::new(MODULE_DIRECTORY_PATH),
+                        notify::RecursiveMode::Recursive,
+                    )
+                    .expect("Error watching files");
+
+                let mut last_files: HashMap<PathBuf, Instant> = HashMap::new();
+
+                for res in rx {
+                    let Ok(event) = res else {
+                        continue;
+                    };
+
+                    if event.kind.is_modify() || event.kind.is_create() || event.kind.is_remove() {
+                        let now = Instant::now();
+                        let mut reload = false;
+
+                        for path in event.paths {
+                            reload = match last_files.get(&path) {
+                                Some(n) => now.duration_since(*n) > Duration::from_millis(200),
+                                None => true,
+                            };
+
+                            last_files.insert(path, now.clone());
+
+                            if reload {
+                                break;
+                            }
+                        }
+
+                        if reload {
+                            log::info!("Reloading Lua commands...");
+
+                            let mut loader = loader.lock().await;
+                            loader.lua_commands.clear();
+
+                            match loader.load_directory(MODULE_DIRECTORY_PATH) {
+                                Ok(_) => log::info!("Reloaded!"),
+                                Err(e) => log::error!("Error reloading Lua commands: {}", e),
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 }
 

@@ -36,3 +36,4 @@ reqwest = { version = "0.12.15", features = ["json", "multipart"] }
 rand = "0.9.0"
 env_logger = "0.11.8"
 twitch_emotes = { git = "https://seed.ilotterytea.kz/z3DgFeoRrTjJYaP8rHQV8vetV88L1.git" }
+notify = "8.0.0"
