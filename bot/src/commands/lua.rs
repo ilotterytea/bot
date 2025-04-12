@@ -1,4 +1,7 @@
-use std::{sync::Arc, time::Instant};
+use std::{
+    sync::Arc,
+    time::{Duration, Instant},
+};
 
 use chrono::Utc;
 use common::{config::Configuration, establish_connection, format_timestamp};
@@ -62,6 +65,7 @@ pub fn register_lua_functions(lua: &Lua, instance_bundle: &InstanceBundle) -> ml
     register_lua_json_functions(lua)?;
     register_lua_str_functions(lua)?;
     register_lua_time_functions(lua)?;
+    register_lua_net_functions(lua)?;
     register_lua_bot_functions(lua, instance_bundle.configuration.clone())?;
 
     Ok(())
@@ -330,6 +334,103 @@ pub fn register_lua_bot_functions(
         }
     })?;
     lua.globals().set("bot_config", bot_config)?;
+
+    Ok(())
+}
+
+pub fn register_lua_net_functions(lua: &Lua) -> mlua::Result<()> {
+    let net_http_get = lua.create_async_function({
+        async |l, (url, headers): (String, Option<Table>)| {
+            let client = reqwest::Client::new();
+            let mut request = client.get(&url);
+
+            if let Some(headers) = headers {
+                let pairs = headers.pairs::<String, String>();
+
+                for (k, v) in pairs.flatten() {
+                    request = request.header(k, v);
+                }
+            }
+
+            request = request
+                .header(
+                    "User-Agent",
+                    format!("bot.ilotterytea.kz/{}", env!("CARGO_PKG_VERSION")),
+                )
+                .timeout(Duration::from_secs(5));
+
+            let response = match request.send().await {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(mlua::Error::RuntimeError(format!(
+                        "Failed to send a HTTP GET request: {}",
+                        e
+                    )));
+                }
+            };
+
+            let response_table = l.create_table()?;
+
+            response_table.set("code", response.status().as_u16())?;
+            response_table.set(
+                "data",
+                match response.text().await {
+                    Ok(t) => Some(t),
+                    Err(_) => None,
+                },
+            )?;
+
+            Ok(response_table)
+        }
+    })?;
+    lua.globals().set("net_http_get", net_http_get)?;
+
+    let net_http_post = lua.create_async_function({
+        async |l, (url, data, headers): (String, String, Option<Table>)| {
+            let client = reqwest::Client::new();
+            let mut request = client.post(&url);
+
+            if let Some(headers) = headers {
+                let pairs = headers.pairs::<String, String>();
+
+                for (k, v) in pairs.flatten() {
+                    request = request.header(k, v);
+                }
+            }
+
+            request = request
+                .header(
+                    "User-Agent",
+                    format!("bot.ilotterytea.kz/{}", env!("CARGO_PKG_VERSION")),
+                )
+                .timeout(Duration::from_secs(5))
+                .body(data);
+
+            let response = match request.send().await {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(mlua::Error::RuntimeError(format!(
+                        "Failed to send a HTTP POST request: {}",
+                        e
+                    )));
+                }
+            };
+
+            let response_table = l.create_table()?;
+
+            response_table.set("code", response.status().as_u16())?;
+            response_table.set(
+                "data",
+                match response.text().await {
+                    Ok(t) => Some(t),
+                    Err(_) => None,
+                },
+            )?;
+
+            Ok(response_table)
+        }
+    })?;
+    lua.globals().set("net_http_post", net_http_post)?;
 
     Ok(())
 }

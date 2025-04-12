@@ -67,6 +67,12 @@ Have fun!
 + `storage_channel_get() -> String` - Get channel's storage cell. Returns an empty string if it was just created.
 + `storage_channel_put(string) -> Bool` - Put string to channel's storage cell. Returns true if it was successful.
 
+### Network
+
++ `net_http_get(url: String, headers: {String: String} | Nil) -> NetworkResponse` - Send an HTTP GET request to specific URL with optional headers *("String to String" HashMap)*.
+
++ `net_http_post(url: String, data: String, headers: {String: String} | Nil) -> NetworkResponse` - Send an HTTP POST request with data to specific URL with optional headers *("String to String" HashMap)*.
+
 ### JSON
 
 + `json_parse(string) -> Table` - Convert stringified JSON to valid Lua value.
@@ -155,5 +161,14 @@ BotConfiguration {
         stats_api_url: String,
         pastea_api_url: String
     }
+}
+```
+
+### Network response
+
+```
+NetworkResponse {
+    code: Integer,
+    data: String
 }
 ```
